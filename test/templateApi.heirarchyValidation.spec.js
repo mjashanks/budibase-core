@@ -1,0 +1,120 @@
+import {validateAll} from "../src/templateApi/validate";
+import createNodes from "../src/templateApi/createNodes";
+import {some} from "lodash";
+import {getNewField, addField} from "../src/templateApi/fields";
+import {getNewRecordValidationRule, commonRecordValidationRules,
+    addRecordValidationRule} from "../src/templateApi/recordValidationRules";
+
+const createValidHeirarchy = () => {
+    const root = createNodes.getNewRootLevel();
+    const mainGroup = createNodes.getNewGroupTemplate(root);
+    mainGroup.name = "main"
+
+    const customerCollection = createNodes.getNewCollectionTemplate(mainGroup);
+    customerCollection.name = "customers";
+
+    const customerRecord = createNodes.getNewRecordTemplate(customerCollection);
+    customerRecord.name = "customer";
+    const surnameField = getNewField("string");
+    surnameField.name = "surname";
+    surnameField.label = "surname";
+    addField(customerRecord, surnameField);
+    addRecordValidationRule(customerRecord)
+            (commonRecordValidationRules.fieldNotEmpty("surname"));
+
+    const customersDefaultView = customerCollection.views[0];
+
+    return {
+        root, mainGroup, customerCollection, 
+        customerRecord, customersDefaultView
+    }
+};
+
+describe("heirarchy validation", () => {
+
+    const expectInvalidField = (validationResult, fieldName, expectedNode) => {
+        expect(validationResult.length).toBe(1);
+        expect(some(validationResult, r => r.field === fieldName && r.node === expectedNode)).toBe(true);
+    }
+
+    it("should return no errors when heirarchy is valid", () => {
+        const heirarchy = createValidHeirarchy();
+        const validationResult = validateAll(heirarchy.root);
+        expect(validationResult).toEqual([]);
+    });
+
+    it("should return an error on name field, when name not set, on all nodes types", () => {
+        let heirarchy = createValidHeirarchy();
+        heirarchy.mainGroup.name = "";
+        let validationResult = validateAll(heirarchy.root);
+        const expectInvalidName = (node) => expectInvalidField(validationResult, "name", node);
+
+        expectInvalidName(heirarchy.mainGroup);
+        
+        heirarchy = createValidHeirarchy();
+        heirarchy.customerCollection.name = "";
+        validationResult = validateAll(heirarchy.root);
+        expectInvalidName(heirarchy.customerCollection);
+
+        heirarchy = createValidHeirarchy();
+        heirarchy.customerRecord.name = "";
+        validationResult = validateAll(heirarchy.root);
+        expectInvalidName(heirarchy.customerRecord); 
+    });
+
+    it("record > should return an error on fields member if empty", () => {
+        const heirarchy = createValidHeirarchy();
+        heirarchy.customerRecord.fields = [];
+        const validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "fields", heirarchy.customerRecord); 
+    });
+
+    it("record > should return an error on unrecognised type", () => {
+        const heirarchy = createValidHeirarchy();
+        heirarchy.customerRecord.type = "notatype";
+        const validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "type", heirarchy.customerRecord); 
+    });
+
+    it("record > should return an error when validation rules do not have correct members", () => {
+        let heirarchy = createValidHeirarchy();
+        delete heirarchy.customerRecord.validationRules[0].expressionWhenValid;
+        let validationResult  = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "validationRules", heirarchy.customerRecord); 
+
+        heirarchy = createValidHeirarchy();
+        delete heirarchy.customerRecord.validationRules[0].messageWhenInvalid;
+        validationResult  = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "validationRules", heirarchy.customerRecord); 
+
+    });
+
+    it("collection > should return error when no children", () => {
+        const heirarchy = createValidHeirarchy();
+        heirarchy.customerCollection.children = [];
+        const validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "children", heirarchy.customerCollection);
+    });
+
+    it("view > should return error when index has no map", () => {
+        const heirarchy = createValidHeirarchy();
+        heirarchy.customersDefaultView.index.map = "";
+        const validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "index", heirarchy.customersDefaultView);
+    });
+
+    it("view > should return error when index map function does not compile", () => {
+        const heirarchy = createValidHeirarchy();
+        heirarchy.customersDefaultView.index.map = "invalid js!!";
+        const validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "index", heirarchy.customersDefaultView);
+    });
+
+    it("view > should return error when index filter function does not compile", () => {
+        const heirarchy = createValidHeirarchy();
+        heirarchy.customersDefaultView.index.filter = "invalid js!!";
+        const validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "index", heirarchy.customersDefaultView);
+    });
+
+});

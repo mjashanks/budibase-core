@@ -1,0 +1,66 @@
+{
+  "name": "budibase-core",
+  "version": "0.0.1",
+  "description": "core javascript library for budibase",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "budibase"
+  ],
+  "author": "Michael Shanks",
+  "license": "AGPL-3.0",
+  "jest": {
+    "globals": {
+      "GLOBALS": {
+        "client": "web"
+      }
+    },
+    "testURL": "http://jest-breaks-if-this-does-not-exist",
+    "moduleNameMapper": {
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/internals/mocks/fileMock.js",
+      "\\.(css|less|sass|scss)$": "identity-obj-proxy"
+    },
+    "moduleFileExtensions": [
+      "js"
+    ],
+    "moduleDirectories": [
+      "node_modules",
+      "app/node_modules"
+    ],
+    "transform": {
+      "^.+\\.js$": "babel-jest"
+    },
+    "transformIgnorePatterns": [
+      "/node_modules/(?!svelte).+\\.js$"
+    ]
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-jest": "^23.6.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
+    "babel-preset-env": "^1.6.1",
+    "cross-env": "^5.1.4",
+    "jest": "^22.4.3",
+    "regenerator-runtime": "^0.11.1",
+    "rimraf": "^2.6.2"
+  },
+  "dependencies": {
+    "@azure/storage-blob": "^10.1.0-preview",
+    "@nx-js/compiler-util": "^2.0.0",
+    "date-fns": "^1.29.0",
+    "lodash": "^4.17.11",
+    "papaparse": "^4.3.7",
+    "shortid": "^2.2.8"
+  },
+  "devEngines": {
+    "node": ">=7.x",
+    "npm": ">=4.x",
+    "yarn": ">=0.21.3"
+  }
+}
