@@ -9,15 +9,6 @@ import {getNewRecordValidationRule, commonRecordValidationRules,
 
 const api = datastore => ({
     
-    ensureDefaults : (note, defaultFields) => {
-        if(!defaultFields) return;
-        each(Object.keys(defaultFields), key => {
-            if(typeof note[key] === "undefined") {
-                note[key] = defaultFields[key].defaultValue();
-            }
-        });
-    },
-
     getApplicationHeirarchy : async () => 
         (await datastore.exists(applicationHeirarchy))
         ? constructHeirarchy(
