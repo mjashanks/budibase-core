@@ -6,9 +6,7 @@ describe("Load & Save App Heirarchy", () => {
     const saveThreeLevelHeirarchy = async () => {
         const {templateApi} = await getApis();
         const root = templateApi.getNewRootLevel();
-        const group = templateApi.getNewGroupTemplate(root);
-        group.Name = "main";
-        const collection = templateApi.getNewCollectionTemplate(group);
+        const collection = templateApi.getNewCollectionTemplate(root);
         collection.name = "customers"
         const record = templateApi.getNewRecordTemplate(collection);
         record.name = "customer";

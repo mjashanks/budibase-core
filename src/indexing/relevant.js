@@ -1,10 +1,10 @@
 import {joinKey, splitKey, 
-    isNothing, switchCase} from "../common";
+    isNothing, $} from "../common";
 import {orderBy, constant} from "lodash";
 import {reduce, find, 
-    reverse, each} from "lodash/fp";
+        filter, each, map} from "lodash/fp";
 import {getFlattenedHierarchy, isView, 
-        isGroup, isCollection} from "../templateApi/heirarchy";
+        isCollection} from "../templateApi/heirarchy";
 
 export const getRelevantIndexes = (appHeirarchy, key) => {
 
@@ -42,34 +42,17 @@ export const getRelevantIndexes = (appHeirarchy, key) => {
         }, {lastPath:"", nodesAndPaths:[]})
         (pathParts).nodesAndPaths;
     
-    const traverseHeirarchyForGlobalViews = () => {
-        // returns views who only have Group parents in heirarchy
+    const getGlobalViews = () => 
+        // returns views that are direct children of root
         // and therefor apply globally
-        const allParentsAreGroups = 
-            switchCase(
-                [n => isNothing(n.parent()), 
-                constant(true)],
-                
-                [n => !isGroup(n.parent()), 
-                constant(false)],
-                
-                [n => isGroup(n.parent()), 
-                n => allParentsAreGroups(n.parent())]
-            );
-                    
-        return reduce((views, currentNode) => {
-            if(isView(currentNode)
-               && allParentsAreGroups(currentNode)) {
-                views.push(
-                    makeViewNodeAndPath(currentNode, currentNode.nodeKey()));
-            }
-            return views;
-        }, [])
-        (reverse(flatHeirarchy)); //shortest path first
-    };
+        $(appHeirarchy.children, [
+            filter(isView),
+            map(c => makeViewNodeAndPath(c, c.nodeKey()))
+        ]);
+    
 
     return ({
-        globalViews: traverseHeirarchyForGlobalViews(),
+        globalViews: getGlobalViews(),
         collections: traverseHeirarchyCollectionViewIndexesInPath()
     });
 };

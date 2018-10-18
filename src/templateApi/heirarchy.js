@@ -101,13 +101,11 @@ export const isAncestor = decendant => ancestor =>
     
 export const isRecord = node => isSomething(node) && node.type === "record";
 export const isCollection = node => isSomething(node) && node.type === "collection";
-export const isGroup = node => isSomething(node) && node.type === "group";
 export const isView = node => isSomething(node) && node.type === "view";
 export const isRoot = node => isSomething(node) && node.isRoot();
 export const isDecendantOfARecord = hasMatchingAncestor(isRecord)
 export const isGlobalView = node => 
-    isView(node) 
-    && hasNoMatchingAncestors(n => !isGroup(n))(node); 
+    isView(node) && isRoot(node.parent()); 
 export const isTopLevelCollection = node => 
     isCollection(node)
     && !isDecendantOfARecord(node);

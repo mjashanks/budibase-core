@@ -7,10 +7,8 @@ import {getNewRecordValidationRule, commonRecordValidationRules,
 
 const createValidHeirarchy = () => {
     const root = createNodes.getNewRootLevel();
-    const mainGroup = createNodes.getNewGroupTemplate(root);
-    mainGroup.name = "main"
 
-    const customerCollection = createNodes.getNewCollectionTemplate(mainGroup);
+    const customerCollection = createNodes.getNewCollectionTemplate(root);
     customerCollection.name = "customers";
 
     const customerRecord = createNodes.getNewRecordTemplate(customerCollection);
@@ -25,7 +23,7 @@ const createValidHeirarchy = () => {
     const customersDefaultView = customerCollection.views[0];
 
     return {
-        root, mainGroup, customerCollection, 
+        root, customerCollection, 
         customerRecord, customersDefaultView
     }
 };
@@ -45,15 +43,11 @@ describe("heirarchy validation", () => {
 
     it("should return an error on name field, when name not set, on all nodes types", () => {
         let heirarchy = createValidHeirarchy();
-        heirarchy.mainGroup.name = "";
-        let validationResult = validateAll(heirarchy.root);
         const expectInvalidName = (node) => expectInvalidField(validationResult, "name", node);
-
-        expectInvalidName(heirarchy.mainGroup);
         
         heirarchy = createValidHeirarchy();
         heirarchy.customerCollection.name = "";
-        validationResult = validateAll(heirarchy.root);
+        let validationResult = validateAll(heirarchy.root);
         expectInvalidName(heirarchy.customerCollection);
 
         heirarchy = createValidHeirarchy();

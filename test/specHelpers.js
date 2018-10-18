@@ -5,7 +5,7 @@ import memory from "../src/datastores/memory";
 import {setupDatastore} from "../src/datastores";
 import {configFolder, fieldDefinitions, 
     templateDefinitions} from "../src/common";
-import { getNewViewTemplate, getNewGroupTemplate } from "../src/templateApi/createNodes";
+import { getNewViewTemplate } from "../src/templateApi/createNodes";
 
 
 const exp = module.exports;
@@ -125,16 +125,12 @@ export const withViews = (heirarchy, templateApi) => {
     customerInvoicesView.index.map = "return record;";
     customerInvoicesView.index.filter = "record.type() === 'invoice'";
 
-    const dashboardsGroup = getNewGroupTemplate(root);
-    dashboardsGroup.name = "dashboards";
-
-    const outstandingInvoicesView = getNewViewTemplate(dashboardsGroup);
+    const outstandingInvoicesView = getNewViewTemplate(root);
     outstandingInvoicesView.name = "Outstanding Invoices";
     outstandingInvoicesView.index.filter = "record.type() === 'invoice' && record.paidAmount < record.totalIncVat";
     outstandingInvoicesView.index.map = "return record;";
 
     heirarchy.outstandingInvoicesView = outstandingInvoicesView;
-    heirarchy.dashboardsGroup = dashboardsGroup;
     heirarchy.deceasedCustomersView = deceasedCustomersView;
     heirarchy.customerInvoicesView = customerInvoicesView;
 }

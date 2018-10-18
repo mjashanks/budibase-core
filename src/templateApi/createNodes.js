@@ -2,12 +2,12 @@ import {switchCase, defaultCase, joinKey,
     $, isNothing, isSomething} from "../common";
 import {each, constant} from "lodash";
 import {isCollection, isView, isRoot
-    , isRecord, isGroup} from "./heirarchy";
+    , isRecord} from "./heirarchy";
 
 export const createNodeErrors = {
     viewCannotBeParent : "View template cannot be a parent",
     allNonRootNodesMustHaveParent: "Only the root node may have no parent",
-    viewParentMustBeCollectionOrGroup: "A view may only have a group or collection as a parent"
+    viewParentMustBeCollectionOrRoot: "A view may only have a collection or root as a parent"
 };
 
 const pathRegxMaker = (node) => () => 
@@ -41,8 +41,8 @@ const validate = parent => node => {
     if(isView(node) 
         && isSomething(parent) 
         && !isCollection(parent)
-        && !isGroup(parent)) {
-        throw new Error(createNodeErrors.viewParentMustBeCollectionOrGroup);
+        && !isRoot(parent)) {
+        throw new Error(createNodeErrors.viewParentMustBeCollectionOrRoot);
     }
 
     if(isNothing(parent) && !isRoot(node))
@@ -57,8 +57,8 @@ const construct = (parent) => (node) => {
     node.pathRegx = pathRegxMaker(node);    
     node.parent = constant(parent);
     node.isRoot = () => isNothing(parent) 
-                        && isGroup(node) 
                         && node.name === "root"
+                        && node.type === "root"
     return node;
 };
 
@@ -99,7 +99,7 @@ export const constructHeirarchy = (node, parent) => {
 export const getNewRootLevel = () => 
     construct()({
         name:"root",
-        type:"group",
+        type:"root",
         children:[],
         pathMaps:[]
     });
@@ -139,14 +139,7 @@ export const getNewViewTemplate = parent =>
             filter:"" }
     });
 
-export const getNewGroupTemplate = parent => 
-    constructNode(parent, {
-        name:"",
-        type:"group",
-        children:[]
-    });
-
 export default {
-    getNewRootLevel, getNewRecordTemplate, getNewGroupTemplate, 
+    getNewRootLevel, getNewRecordTemplate,  
     getNewViewTemplate, getNewCollectionTemplate, createNodeErrors,
     constructHeirarchy};

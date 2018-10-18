@@ -11,8 +11,8 @@ import {$, isSomething, switchCase
         ,anyTrue, isNonEmptyArray
         , isNonEmptyString, defaultCase
         , executesWithoutException} from "../common";
-import {isCollection, isRecord, 
-        isView, isGroup, getFlattenedHierarchy} from "./heirarchy";
+import {isCollection, isRecord, isRoot, 
+        isView, getFlattenedHierarchy} from "./heirarchy";
 import {reduce, union, constant, 
         map, flatten, every} from "lodash/fp";
 import {has} from "lodash";
@@ -29,7 +29,7 @@ const commonRules = [
     makerule("name", "node name is not set", 
          node => stringNotEmpty(node.name)),
     makerule("type", "node type not recognised",
-        anyTrue(isRecord, isCollection, isGroup, isView ))
+        anyTrue(isRecord, isCollection, isRoot, isView ))
 ];
 
 const recordRules = [
@@ -57,7 +57,6 @@ const viewRules = [
         node => !isNonEmptyString(node.index.filter)
                 ||  executesWithoutException(() => compileFilter(node.index)))
 ];
-const groupRules = [];
 
 const ruleSet = (...sets) => 
     constant(union(...sets));
@@ -73,7 +72,6 @@ const getRuleSet =
         [isCollection, ruleSet(commonRules, collectionRules)],
         [isRecord, ruleSet(commonRules, recordRules)],
         [isView, ruleSet(commonRules, viewRules)],
-        [isGroup, ruleSet(commonRules, groupRules)],
         [defaultCase, ruleSet(commonRules, [])]
     );
 

@@ -1,7 +1,7 @@
 import {applicationHeirarchy} from "../common";
 import {each} from "lodash";
-import {getNewCollectionTemplate, getNewGroupTemplate,
-        getNewRootLevel, getNewRecordTemplate, getNewViewTemplate,
+import {getNewCollectionTemplate, getNewRootLevel, 
+        getNewRecordTemplate, getNewViewTemplate,
         createNodeErrors, constructHeirarchy} from "./createNodes";
 import {getNewField, validateField, addField, fieldErrors} from "./fields";
 import {getNewRecordValidationRule, commonRecordValidationRules,
@@ -33,7 +33,7 @@ const api = datastore => ({
     },
 
     getNewRootLevel, getNewCollectionTemplate, getNewViewTemplate,
-    getNewViewTemplate, getNewGroupTemplate, getNewRecordTemplate,
+    getNewViewTemplate, getNewRecordTemplate,
     getNewField, validateField, addField, fieldErrors,
     getNewRecordValidationRule, commonRecordValidationRules, 
     addRecordValidationRule,
