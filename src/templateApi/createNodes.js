@@ -110,10 +110,6 @@ export const getNewRecordTemplate = parent =>
         type: "record",
         fields:[], 
         children:[],  
-        mainView:{
-            name:"",options:{}
-        },
-        ui:[],
         validationRules:[],
         collectionChildId: isSomething(parent) 
                            && isCollection(parent)
@@ -125,7 +121,6 @@ export const getNewCollectionTemplate = parent => {
     const collection = constructNode(parent, {
         name:"",
         type:"collection",
-        ui: {name:"", options:{}},
         views: [],
         children:[],
         allidsShardFactor: isRecord(parent) ? 1 : 64
@@ -141,8 +136,7 @@ export const getNewViewTemplate = parent =>
         type:"view",
         index:{
             map:"return {...record};", 
-            filter:"" },
-        ui: {name:"", options:{}}
+            filter:"" }
     });
 
 export const getNewGroupTemplate = parent => 

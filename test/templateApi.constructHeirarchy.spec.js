@@ -24,10 +24,7 @@ describe("heirarchy node creation", () => {
         record.name = "child";
         expect(record.type).toBe("record");
         expect(record.children).toEqual([]);
-        expect(record.ui).toEqual([]);
         expect(record.validationRules).toEqual([]);
-        expect(record.mainView.name).toBeDefined();
-        expect(record.mainView.options).toBeDefined();
         expect(record.parent()).toBe(root);
     });
 
@@ -73,8 +70,6 @@ describe("heirarchy node creation", () => {
         const collection = templateApi.getNewCollectionTemplate(root);
         collection.name = "customers";
         expect(collection.type).toBe("collection");
-        expect(collection.ui.name).toBeDefined();
-        expect(collection.ui.options).toBeDefined();
         expect(collection.parent()).toBe(root);
         expect(collection.pathRegx()).toBe("/customers")
     });
@@ -87,7 +82,6 @@ describe("heirarchy node creation", () => {
         expect(collection.views.length).toBe(1);
         expect(collection.views[0].name).toBe("default");
         expect(collection.views[0].index).toBeDefined();
-        expect(collection.views[0].ui).toBeDefined();
     });
 
     it("> getNewCollectionTemplate > should add itself to group's children", async () => {
@@ -116,8 +110,6 @@ describe("heirarchy node creation", () => {
         expect(view.index).toBeDefined();
         expect(view.index.map).toBeDefined();
         expect(view.index.filter).toBeDefined();
-        expect(view.ui.name).toBeDefined();
-        expect(view.ui.options).toBeDefined();
         expect(view.children).toBeUndefined();
         view.name = "naughty-customers";
         expect(view.pathRegx()).toBe("/naughty-customers");
