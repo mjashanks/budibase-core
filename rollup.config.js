@@ -6,11 +6,19 @@ module.exports = {
     output: [
         {
             file: 'dist/budibase-core.cjs.js',
-            format: 'cjs'
+            format: 'cjs',
+            sourcemap: 'inline'
         },
         {
             file: 'dist/budibase-core.esm.js',
-            format: 'esm'
+            format: 'esm',
+            sourcemap: 'inline'
+        },
+        {
+            file: 'dist/budibase-core.umd.js',
+            format: 'umd',
+            name: "budibase-core",
+            sourcemap: 'inline'
         },
     ]
   };

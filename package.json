@@ -2,13 +2,14 @@
   "name": "budibase-core",
   "version": "0.0.1",
   "description": "core javascript library for budibase",
-  "main": "index.js",
+  "main": "/dist/budibase-core.umd.js",
+  "module": "dist/budibase-core.esm.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
     "test": "jest",
-    "build": "rollup"
+    "build": "rollup -c rollup.config.js"
   },
   "keywords": [
     "budibase"
