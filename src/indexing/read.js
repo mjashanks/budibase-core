@@ -13,7 +13,7 @@ export const readIndex = async(datastore, indexedDataKey) => {
 export const getIndexedDataKey_fromViewKey = viewKey => 
     `${viewKey}${viewKey.endsWith(".csv") ? "" : ".csv"}`;
 
-const uniqueIndexName = (index) => 
+export const uniqueIndexName = (index) => 
     "idx_" +
     getHashCode(`${index.filter}${index.map}`) +
     ".csv";

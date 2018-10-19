@@ -3,7 +3,6 @@ import getCollectionApi from "./collectionApi";
 import getViewApi from "./viewApi";
 import getTemplateApi from "./templateApi";
 import {setupDatastore} from "./datastores";
-import {isSomething} from "./common";
 
 export const getAppApis = async store => {
 

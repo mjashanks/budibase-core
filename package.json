@@ -7,7 +7,8 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "build": "rollup"
   },
   "keywords": [
     "budibase"
@@ -48,7 +49,9 @@
     "cross-env": "^5.1.4",
     "jest": "^22.4.3",
     "regenerator-runtime": "^0.11.1",
-    "rimraf": "^2.6.2"
+    "rimraf": "^2.6.2",
+    "rollup": "^0.66.6",
+    "rollup-plugin-local-resolve": "^1.0.7"
   },
   "dependencies": {
     "@azure/storage-blob": "^10.1.0-preview",
