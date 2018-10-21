@@ -9,12 +9,13 @@ import {getNewRecordValidationRule, commonRecordValidationRules,
 
 const api = datastore => ({
     
-    getApplicationHeirarchy : async () => 
-        (await datastore.exists(applicationHeirarchy))
-        ? constructHeirarchy(
-                await datastore.loadJson(applicationHeirarchy)
-           )
-        : {},
+    getApplicationHeirarchy : async () => {
+        const exists = await datastore.exists(applicationHeirarchy);
+
+        if(!exists) throw new Error("Application heirarchy does not exist");
+
+        return await datastore.loadJson(applicationHeirarchy);
+    },
 
     saveApplicationHeirarchy : async (appHeirarchy) =>{
         if(await datastore.exists(applicationHeirarchy))

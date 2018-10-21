@@ -45,4 +45,9 @@ describe("Load & Save App Heirarchy", () => {
         .toEqual(JSON.stringify(root));
     });
 
+    it("should throw an error when app heirarchy does not exist", async () => {
+        expect(async () => await templateApi.getApplicationHeirarchy())
+        .toThrow();
+    });
+
 });
