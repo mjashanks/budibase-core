@@ -1,10 +1,10 @@
-import {getApis} from "./specHelpers";
+import {getMemoryTemplateApi} from "./specHelpers";
 import { isEqual } from "lodash";
 
 describe("Load & Save App Heirarchy", () => {
 
     const saveThreeLevelHeirarchy = async () => {
-        const {templateApi} = await getApis();
+        const templateApi = await getMemoryTemplateApi();
         const root = templateApi.getNewRootLevel();
         const collection = templateApi.getNewCollectionTemplate(root);
         collection.name = "customers"
@@ -46,8 +46,14 @@ describe("Load & Save App Heirarchy", () => {
     });
 
     it("should throw an error when app heirarchy does not exist", async () => {
-        expect(async () => await templateApi.getApplicationHeirarchy())
-        .toThrow();
+        let ex;
+        try{
+            await templateApi.getApplicationHeirarchy()
+        }
+        catch(e) {
+            ex = e;
+        }
+        expect(ex).toBeDefined();
     });
 
 });

@@ -1,5 +1,5 @@
 import {isDefined, join, fieldDefinitions, $} from "../src/common";
-import {getApis} from "./specHelpers";
+import {getMemoryTemplateApi} from "./specHelpers";
 import {fieldErrors} from "../src/templateApi/fields";
 
     const getRecordTemplate = templateApi => 
@@ -15,7 +15,7 @@ import {fieldErrors} from "../src/templateApi/fields";
     };
 
     const testMemberIsNotSet = membername => async () => {
-        const {templateApi} = await getApis();
+        const templateApi = await getMemoryTemplateApi();
         const record = getRecordTemplate(templateApi);
         const field = getValidField(templateApi);
         field[membername] = "";
@@ -25,7 +25,7 @@ import {fieldErrors} from "../src/templateApi/fields";
     };
     
     const testMemberIsNotDefined = membername => async () => {
-        const {templateApi} = await getApis();
+        const templateApi = await getMemoryTemplateApi();
         const record = getRecordTemplate(templateApi);
         const field = getValidField(templateApi);
 
@@ -65,7 +65,7 @@ describe("validateField", () => {
         testMemberIsNotSet("getUndefinedValue"));
     
     it("should return no errors when valid field is supplied", async () => {
-        const {templateApi} = await getApis();
+        const templateApi = await getMemoryTemplateApi();
         const record = getRecordTemplate(templateApi);
         const field = getValidField(templateApi);
         const errors = templateApi.validateField(record, field);
@@ -73,7 +73,7 @@ describe("validateField", () => {
     });
 
     it("should return error when field with same name exists already", async () => {
-        const {templateApi} = await getApis();
+        const templateApi = await getMemoryTemplateApi();
         const record = getRecordTemplate(templateApi);
         const field1 = getValidField(templateApi);
         field1.name = "surname";
@@ -87,7 +87,7 @@ describe("validateField", () => {
     });
 
     it("should return error when field is not one of allowed types", async () => {
-        const {templateApi} = await getApis();
+        const templateApi = await getMemoryTemplateApi();
         const record = getRecordTemplate(templateApi);
         const field = getValidField(templateApi);
         field.type = "sometype";
@@ -101,7 +101,7 @@ describe("validateField", () => {
 describe("addField", () => {
 
     it("should throw exception when field is invalid", async () => {
-        const {templateApi} = await getApis();
+        const templateApi = await getMemoryTemplateApi();
         const record = getRecordTemplate(templateApi);
         const field = getValidField(templateApi);
         field.name = "";
@@ -110,7 +110,7 @@ describe("addField", () => {
     });
 
     it("should add field when field is invalid", async () => {
-        const {templateApi} = await getApis();
+        const templateApi = await getMemoryTemplateApi();
         const record = getRecordTemplate(templateApi);
         const field = getValidField(templateApi);
         templateApi.addField(record, field);

@@ -1,8 +1,15 @@
 import {getAppApis} from "../src";
-import memory from "../src/datastores/memory";
+import {getMemoryTemplateApi} from "./specHelpers";
+
 describe("getAppApis", () => {
 
-    const getMemoryAppApis = async () => await getAppApis(memory({}));
+    const getMemoryAppApis = async () => {
+        const templateApi = getMemoryTemplateApi();
+        const rootNode = templateApi.getNewRootLevel();
+        await templateApi.saveApplicationHeirarchy(rootNode);
+
+        return await getAppApis(templateApi._storeHandle);
+    }
 
     it("should return api factory functions", async () => {
         const apis = await getMemoryAppApis();

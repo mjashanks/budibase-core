@@ -14,7 +14,9 @@ const api = datastore => ({
 
         if(!exists) throw new Error("Application heirarchy does not exist");
 
-        return await datastore.loadJson(applicationHeirarchy);
+        return constructHeirarchy(
+            await datastore.loadJson(applicationHeirarchy)
+        );
     },
 
     saveApplicationHeirarchy : async (appHeirarchy) =>{

@@ -6,6 +6,7 @@ import {setupDatastore} from "../src/datastores";
 import {configFolder, fieldDefinitions, 
     templateDefinitions} from "../src/common";
 import { getNewViewTemplate } from "../src/templateApi/createNodes";
+import getTemplateApi from "../src/templateApi";
 
 
 const exp = module.exports;
@@ -15,13 +16,8 @@ export const testConfigFolder = (testAreaName) => path.join(exp.testFileArea(tes
 export const testFieldDefinitionsPath = (testAreaName) => path.join(exp.testFileArea(testAreaName), fieldDefinitions);
 export const testTemplatesPath = (testAreaName) => path.join(exp.testFileArea(testAreaName), templateDefinitions);
  
-export const getApis = async () => 
-    await getAppApis(memory({}));
-
 export const getMemoryStore = () => setupDatastore(memory({}));
-
-export const getMemoryRecordApi = async opts => (await getApis()).recordApi;
-export const getMemoryTemplateApi = async opts => (await getApis()).templateApi;
+export const getMemoryTemplateApi = () => getTemplateApi(getMemoryStore());
 
 export const getRecordApiFromTemplateApi = async templateApi => {
     const appHeirarchy = await templateApi.getApplicationHeirarchy();
@@ -142,7 +138,7 @@ export const basicAppHeirarchyCreator_WithFields_AndViews = templateApi =>
     heirarchyFactory(withFields, withViews)(templateApi);
 
 export const setupAppheirarchy = async creator => {
-    const {templateApi} = await getApis();
+    const templateApi = getMemoryTemplateApi();
     const heirarchy = creator(templateApi);
     await templateApi.saveApplicationHeirarchy(heirarchy.root);
     const collectionApi = await getCollectionApiFromTemplateApi(templateApi);

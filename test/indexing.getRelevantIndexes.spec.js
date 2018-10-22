@@ -1,10 +1,10 @@
-import {getApis} from "./specHelpers";
+import {getMemoryTemplateApi} from "./specHelpers";
 import {getRelevantIndexes} from "../src/indexing/relevant";
 
 describe("getRelevantIndexes", () => {
 
     it("should get view indexes only, when key is root level record", async () => {
-        const {templateApi} = await getApis();
+        const templateApi = await getMemoryTemplateApi();
         const root = templateApi.getNewRootLevel();
         const rootLevelRecord = templateApi.getNewRecordTemplate(root);
 
@@ -23,7 +23,7 @@ describe("getRelevantIndexes", () => {
     });
 
     it("should get collection default view index, when key is child of root level collection", async () => {
-        const {templateApi} = await getApis();
+        const templateApi = await getMemoryTemplateApi();
         const root = templateApi.getNewRootLevel();
         const rootLevelCollection = templateApi.getNewCollectionTemplate(root);
         rootLevelCollection.name = "customers";
@@ -38,7 +38,7 @@ describe("getRelevantIndexes", () => {
     });
 
     it("should get 2 default view indexes when 2 collections nested deep", async () => {
-        const {templateApi} = await getApis();
+        const templateApi = await getMemoryTemplateApi();
         const root = templateApi.getNewRootLevel();
         const rootLevelCollection = templateApi.getNewCollectionTemplate(root);
         rootLevelCollection.name = "customers";
