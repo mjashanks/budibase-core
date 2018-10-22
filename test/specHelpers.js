@@ -1,8 +1,8 @@
 import path from "path";
 import {getAppApis, getRecordApi, 
     getCollectionApi, getViewApi}  from "../src";
-import memory from "../src/datastores/memory";
-import {setupDatastore} from "../src/datastores";
+import memory from "../src/appInitialise/memory";
+import {setupDatastore} from "../src/appInitialise";
 import {configFolder, fieldDefinitions, 
     templateDefinitions} from "../src/common";
 import { getNewViewTemplate } from "../src/templateApi/createNodes";

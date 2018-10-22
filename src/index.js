@@ -2,14 +2,15 @@ import getRecordApi from "./recordApi";
 import getCollectionApi from "./collectionApi";
 import getViewApi from "./viewApi";
 import getTemplateApi from "./templateApi";
-import {setupDatastore} from "./datastores";
+import {setupDatastore, createEventAggregator} from "./appInitialise";
 
-export const getAppApis = async store => {
+export const getAppApis = async (store) => {
 
     store = setupDatastore(store);
     const templateApi = getTemplateApi(store);
     const appHeirarchy = await templateApi.getApplicationHeirarchy();
-    const app = {heirarchy:appHeirarchy, datastore:store};
+    const eventAggregator = createEventAggregator();
+    const app = {heirarchy:appHeirarchy, datastore:store, eventAggregator};
     const recordApi = getRecordApi(app);
     const collectionApi = getCollectionApi(app);
     const viewApi = getViewApi(app);
@@ -18,7 +19,9 @@ export const getAppApis = async store => {
         recordApi, 
         templateApi,
         collectionApi,
-        viewApi});
+        viewApi,
+        eventAggregator:eventAggregator
+    });
 };
 
 export {getTemplateApi} from "./templateApi";

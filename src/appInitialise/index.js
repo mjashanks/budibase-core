@@ -14,4 +14,6 @@ export const setupDatastore = (datastore) => {
     return datastore;
 };
 
+export {createEventAggregator} from "./eventAggregator";
+
 export default setupDatastore;
