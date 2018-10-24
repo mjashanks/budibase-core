@@ -7,7 +7,8 @@ import {configFolder, fieldDefinitions,
     templateDefinitions} from "../src/common";
 import { getNewViewTemplate } from "../src/templateApi/createNodes";
 import getTemplateApi from "../src/templateApi";
-
+import {createEventAggregator} from "../src/appInitialise/eventAggregator";
+import {filter} from "lodash/fp";
 
 const exp = module.exports;
 
@@ -17,23 +18,27 @@ export const testFieldDefinitionsPath = (testAreaName) => path.join(exp.testFile
 export const testTemplatesPath = (testAreaName) => path.join(exp.testFileArea(testAreaName), templateDefinitions);
  
 export const getMemoryStore = () => setupDatastore(memory({}));
-export const getMemoryTemplateApi = () => getTemplateApi(getMemoryStore());
+export const getMemoryTemplateApi = () => {
+    const templateApi = getTemplateApi(getMemoryStore());
+    templateApi._eventAggregator = createEventAggregator();
+    return templateApi;
+}
 
-export const getRecordApiFromTemplateApi = async templateApi => {
-    const appHeirarchy = await templateApi.getApplicationHeirarchy();
-    return getRecordApi({heirarchy:appHeirarchy, datastore:templateApi._storeHandle});
-};
+const appFromTempalteApi = async templateApi => ({
+    heirarchy:await templateApi.getApplicationHeirarchy(), 
+    datastore:templateApi._storeHandle,
+    publish:templateApi._eventAggregator.publish,
+    _eventAggregator: templateApi._eventAggregator // not normally available to the apis
+});
 
-export const getCollectionApiFromTemplateApi = async templateApi => {
-    const appHeirarchy = await templateApi.getApplicationHeirarchy();
-    return getCollectionApi({heirarchy:appHeirarchy, datastore:templateApi._storeHandle});
-};
+export const getRecordApiFromTemplateApi = async templateApi => 
+    getRecordApi(await appFromTempalteApi(templateApi));
 
-export const getViewApiFromTemplateApi = async templateApi => {
-    const heirarchy = await templateApi.getApplicationHeirarchy();
-    return getViewApi({heirarchy, datastore:templateApi._storeHandle});
-};
+export const getCollectionApiFromTemplateApi = async templateApi => 
+    getCollectionApi(await appFromTempalteApi(templateApi));
 
+export const getViewApiFromTemplateApi = async templateApi => 
+    getViewApi(await appFromTempalteApi(templateApi));
 
 export const heirarchyFactory = (...additionalFeatures) => templateApi => {
     const root = templateApi.getNewRootLevel();
@@ -149,7 +154,8 @@ export const setupAppheirarchy = async creator => {
         collectionApi,
         templateApi,
         viewApi,
-        appHeirarchy:heirarchy
+        appHeirarchy:heirarchy,
+        subscribe:templateApi._eventAggregator.subscribe
     })
 };
 
@@ -159,5 +165,17 @@ export const getNewFieldAndAdd = (templateApi, record) => (name, type, initial) 
     field.getInitialValue = !initial ? "default" : initial;
     templateApi.addField(record, field);
     return field;
+};
+
+export const stubEventHandler = () => {
+    const events = [];
+    return {
+        handle: (actionName, context) => {
+            events.push({actionName, context});
+        },
+        events,
+        getEvents: n => filter(e => e.actionName === n)
+                              (events)
+    };
 };
     

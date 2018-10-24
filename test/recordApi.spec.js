@@ -1,6 +1,9 @@
 import {setupAppheirarchy, basicAppHeirarchyCreator,
-    basicAppHeirarchyCreator_WithFields, getNewFieldAndAdd} from "./specHelpers";
+    basicAppHeirarchyCreator_WithFields, getNewFieldAndAdd,
+    stubEventHandler} from "./specHelpers";
 import {isFunction} from "lodash";
+import {onSaveComplete, onSaveBegin, 
+    onRecordCreated, onRecordUpdated} from "../src/recordApi/events";
 
 describe("recordApi > getNew", () => {
 
@@ -174,3 +177,66 @@ describe('recordApi > save then load', () => {
         expect(savedAgain.surname).toBe(saved.surname); 
     });
 });
+
+describe("save", () => {
+
+    it("IsNew() should return false after save", async () => {
+        const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const record = recordApi.getNew("/customers", "customer");
+        record.surname = "Ledog";
+
+        const savedRecord = await recordApi.save(record);
+        expect(savedRecord.isNew()).toBe(false);
+    });
+
+    it("should publish onbegin and oncomplete events", async () => {
+        const {recordApi, subscribe} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const handler = stubEventHandler();
+        subscribe(onSaveBegin, handler.handle);
+        subscribe(onSaveComplete, handler.handle);
+
+        const record = recordApi.getNew("/customers", "customer");
+        record.surname = "Ledog";
+
+        await recordApi.save(record);
+
+        const onBegin = handler.getEvents(onSaveBegin);
+        const onComplete = handler.getEvents(onSaveComplete);
+        expect(onBegin.length).toBe(1);
+        expect(onComplete.length).toBe(1);
+        expect(onBegin[0].context.record).toBeDefined();
+        expect(onBegin[0].context.record.key()).toBe(record.key());
+        expect(onComplete[0].context.record).toBeDefined();
+        expect(onComplete[0].context.record.key()).toBe(record.key());
+
+    });
+
+    it("should publish create on create and update on update", async () => {
+        const {recordApi, subscribe} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const handler = stubEventHandler();
+        subscribe(onRecordCreated, handler.handle);
+        subscribe(onRecordUpdated, handler.handle);
+
+        const record = recordApi.getNew("/customers", "customer");
+        record.surname = "Ledog";
+
+        const savedRecord =await recordApi.save(record);
+        const onCreate = handler.getEvents(onRecordCreated);
+        expect(onCreate.length).toBe(1);
+        expect(onCreate[0].context.record).toBeDefined();
+        expect(onCreate[0].context.record.key()).toBe(record.key());
+
+        savedRecord.surname = "Zeecat";
+        await recordApi.save(savedRecord);
+
+        const onUpdate = handler.getEvents(onRecordUpdated);
+        expect(onUpdate.length).toBe(1);
+        expect(onUpdate[0].context.old).toBeDefined();
+        expect(onUpdate[0].context.old.key()).toBe(record.key());
+        expect(onUpdate[0].context.old.surname).toBe("Ledog");
+        expect(onUpdate[0].context.new).toBeDefined();
+        expect(onUpdate[0].context.new.key()).toBe(record.key());
+        expect(onUpdate[0].context.new.surname).toBe("Zeecat");
+
+    });
+})

@@ -1,20 +1,19 @@
 import {has} from "lodash";
 
-const publish = agg => async (actionName, context) => {
-    if(!has(agg[actionName])) return;
+const publish = agg => (eventName, context) => {
+    if(!has(agg, eventName)) return;
 
-    for(let handler in agg[actionName]) {
-        await handler(context);
+    for(let handler of agg[eventName]) {
+        handler(eventName, context);
     }
 };
 
-const subscribe = agg => (actionName, handler) => {
-    if(!has(agg, actionName)) {
-        agg[actionName] = [];
+const subscribe = agg => (eventName, handler) => {
+    if(!has(agg, eventName)) {
+        agg[eventName] = [];
     }
-    agg[actionName].push(handler);
+    agg[eventName].push(handler);
 };
-    
 
 export const createEventAggregator = () => {
     const agg = {};

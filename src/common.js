@@ -170,6 +170,13 @@ export const awEx = async promise => {
     }
 }
 
+export const event = area => method => name =>
+    `${area}:${method}:${name}`;
+
+export const onBegin = "onBegin";
+export const onComplete = "onEnd";
+export const onError = "onError";
+
 export default {
     ifExists, getOrDefault, isDefined, 
     isNonNull, isNotNaN, allTrue, isSomething, 
