@@ -1,8 +1,9 @@
-import {setupAppheirarchy, basicAppHeirarchyCreator,
+import {setupAppheirarchy, stubEventHandler,
     basicAppHeirarchyCreator_WithFields, getNewFieldAndAdd,
     heirarchyFactory, withFields} from "./specHelpers";
 import {find} from "lodash";
 import {addHours} from "date-fns";
+import {onSaveInvalid} from "../src/recordApi/events"
 
 describe("recordApi > validate", () => {
 
@@ -216,6 +217,33 @@ describe("recordApi > validate", () => {
         const result = recordApi.validate(record);
         expect(result.isValid).toBe(true);
         expect(result.errors.length).toBe(0);
+    });
+
+    it("should publish invalid events", async () => {
+        const withValidationRule = (heirarchy, templateApi) => {
+            templateApi.addRecordValidationRule(heirarchy.customerRecord)
+            (templateApi.commonRecordValidationRules.fieldNotEmpty("surname"));
+        };
+
+        const heirarchyCreator = heirarchyFactory(withFields, withValidationRule);
+
+        const {recordApi, subscribe} = await setupAppheirarchy(heirarchyCreator);
+        const handler = stubEventHandler();
+        subscribe(onSaveInvalid, handler.handle);
+
+        const record = recordApi.getNew("/customers", "customer");
+        record.surname = "";
+
+        try{
+            await recordApi.save(record);
+        } catch(e)
+        {}
+
+        const onInvalid = handler.getEvents(onSaveInvalid);
+        expect(onInvalid.length).toBe(1);
+        expect(onInvalid[0].context.record).toBeDefined();
+        expect(onInvalid[0].context.record.key()).toBe(record.key());
+        expect(onInvalid[0].context.validationResult).toBeDefined();
     });
 
 });

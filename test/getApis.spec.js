@@ -17,7 +17,7 @@ describe("getAppApis", () => {
         expect(apis.templateApi).toBeDefined();
         expect(apis.collectionApi).toBeDefined();
         expect(apis.viewApi).toBeDefined();
-        expect(apis.publish).toBeDefined();
+        expect(apis.subscribe).toBeDefined();
     });
 
 });
