@@ -170,11 +170,11 @@ export const getNewFieldAndAdd = (templateApi, record) => (name, type, initial) 
 export const stubEventHandler = () => {
     const events = [];
     return {
-        handle: (actionName, context) => {
-            events.push({actionName, context});
+        handle: (name, context) => {
+            events.push({name, context});
         },
         events,
-        getEvents: n => filter(e => e.actionName === n)
+        getEvents: n => filter(e => e.name === n)
                               (events)
     };
 };

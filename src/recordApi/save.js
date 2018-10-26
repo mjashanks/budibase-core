@@ -4,55 +4,15 @@ import {validate} from "./validate";
 import {onSaveBegin, onSaveComplete, onSaveInvalid,
     onRecordCreated, onRecordUpdated, onSaveError} from "./events";
 import {load} from "./load";
-import {event, onBegin, onComplete, onError} from "../common";
+import {apiWrapper} from "../common";
 
 export const save = (app,indexingApi) => async (record, context) => 
-    apiMethodWrapper(
+    apiWrapper(
         app,
         "recordApi","save", 
         {record},
         _save, app,indexingApi, record, context);
 
-
-const apiMethodWrapper = (app, area, method, eventContext, func, ...params) => {
-
-    const onError = err => {
-        const ctx = cloneDeep(eventContext);
-        ctx.error = err;
-        app.publish(
-            event(area, method, onError),
-            ctx);
-        throw new Error(err);
-    };
-
-    try {
-        app.publish(
-            event(area, method, onBegin),
-            eventContext
-        );
-
-        const result = func(...params);
-        if(result.catch) {
-            result.catch(onError)
-        }
-
-        if(result.then) {
-            return result.then(r => {
-                const endcontext = cloneDeep(eventContext);
-                endcontext.result = r;
-                app.publish(
-                    event(area, method, onComplete),
-                    endcontext);
-                return r;
-            })
-        }
-        
-        return result;
-
-    } catch (error) {
-        onError(error)
-    }
-}
 
 const _save = async (app,indexingApi, record, context) => {
     const recordClone = cloneDeep(record);
