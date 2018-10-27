@@ -3,7 +3,7 @@ import {isGlobalView, getFlattenedHierarchy
     ,getNodeByKeyOrNodeKey,getNode, isTopLevelCollection,
     isView} from "../templateApi/heirarchy";
 import {find, filter} from "lodash/fp";
-import {joinKey, apiWrapper} from "../common";
+import {joinKey, apiWrapper, events} from "../common";
 import {load} from "../recordApi/load";
 import {evaluate} from "../indexing/evaluate";
 import {writeIndex} from "../indexing/apply";
@@ -28,7 +28,7 @@ Collection View, with record node ancestor
 export const buildIndex = app => async (viewNodeKey) => 
     apiWrapper(
         app,
-        "viewApi","buildIndex", 
+        events.viewApi.buildIndex, 
         {viewNodeKey},
         _buildIndex, app, viewNodeKey);
 

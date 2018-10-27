@@ -2,8 +2,7 @@ import {setupAppheirarchy, basicAppHeirarchyCreator,
     basicAppHeirarchyCreator_WithFields, getNewFieldAndAdd,
     stubEventHandler} from "./specHelpers";
 import {isFunction} from "lodash";
-import {onSaveComplete, onSaveBegin, 
-    onRecordCreated, onRecordUpdated} from "../src/recordApi/events";
+import {events} from "../src/common";
 
 describe("recordApi > getNew", () => {
 
@@ -192,16 +191,16 @@ describe("save", () => {
     it("should publish onbegin and oncomplete events", async () => {
         const {recordApi, subscribe} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
         const handler = stubEventHandler();
-        subscribe(onSaveBegin, handler.handle);
-        subscribe(onSaveComplete, handler.handle);
+        subscribe(events.recordApi.save.onBegin, handler.handle);
+        subscribe(events.recordApi.save.onComplete, handler.handle);
 
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";
 
         await recordApi.save(record);
 
-        const onBegin = handler.getEvents(onSaveBegin);
-        const onComplete = handler.getEvents(onSaveComplete);
+        const onBegin = handler.getEvents(events.recordApi.save.onBegin);
+        const onComplete = handler.getEvents(events.recordApi.save.onComplete);
         expect(onBegin.length).toBe(1);
         expect(onComplete.length).toBe(1);
         expect(onBegin[0].context.record).toBeDefined();
@@ -214,14 +213,14 @@ describe("save", () => {
     it("should publish create on create and update on update", async () => {
         const {recordApi, subscribe} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
         const handler = stubEventHandler();
-        subscribe(onRecordCreated, handler.handle);
-        subscribe(onRecordUpdated, handler.handle);
+        subscribe(events.recordApi.save.onRecordCreated, handler.handle);
+        subscribe(events.recordApi.save.onRecordUpdated, handler.handle);
 
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";
 
         const savedRecord =await recordApi.save(record);
-        const onCreate = handler.getEvents(onRecordCreated);
+        const onCreate = handler.getEvents(events.recordApi.save.onRecordCreated);
         expect(onCreate.length).toBe(1);
         expect(onCreate[0].context.record).toBeDefined();
         expect(onCreate[0].context.record.key()).toBe(record.key());
@@ -229,7 +228,7 @@ describe("save", () => {
         savedRecord.surname = "Zeecat";
         await recordApi.save(savedRecord);
 
-        const onUpdate = handler.getEvents(onRecordUpdated);
+        const onUpdate = handler.getEvents(events.recordApi.save.onRecordUpdated);
         expect(onUpdate.length).toBe(1);
         expect(onUpdate[0].context.old).toBeDefined();
         expect(onUpdate[0].context.old.key()).toBe(record.key());

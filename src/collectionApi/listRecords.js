@@ -1,11 +1,11 @@
-import {safeKey, apiWrapper} from "../common";
+import {safeKey, apiWrapper, events} from "../common";
 import {readIndex, 
     getIndexedDataKey_fromViewKey} from "../indexing/read";
 
 export const listRecords = app => async viewKey => 
     apiWrapper(
         app,
-        "collectionApi","listRecords", 
+        events.collectionApi.listRecords, 
         {viewKey},
         _listRecords, app, viewKey);
 

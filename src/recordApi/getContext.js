@@ -3,12 +3,12 @@ import {getIndexedDataKey} from "../indexing/read";
 import {listItems} from "../viewApi/listItems";
 import {has, some} from "lodash";
 import {map} from "lodash/fp";
-import {$, apiWrapper} from "../common";
+import {$, apiWrapper, events} from "../common";
 
 export const getContext = app => recordKey => 
     apiWrapper(
         app,
-        "recordApi","getContext", 
+        events.recordApi.getContext, 
         {recordKey},
         _getContext, app, recordKey);
 

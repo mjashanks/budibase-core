@@ -4,7 +4,7 @@ import {isUndefined, isNaN, isNull,
     dropRight, flow, takeRight, trim, 
     split, includes, replace, isArray,
     isString, flatten} from "lodash";
-import {event, onComplete, onBegin, onError} from "./events";
+import {event, onComplete, onBegin, onError, events} from "./events";
 import {apiWrapper} from "./apiWrapper";
 import {some} from "lodash/fp";
 // this is the combinator function
@@ -171,7 +171,7 @@ export const awEx = async promise => {
     }
 }
 
-export {event, onComplete, onBegin, onError} from "./events";
+export {event, onComplete, onBegin, onError, events} from "./events";
 export {apiWrapper} from "./apiWrapper";
 
 export default {
@@ -188,6 +188,6 @@ export default {
     somethingOrGetDefault, applicationHeirarchy, isValue,
     isOneOf, memberMatches, defineError, anyTrue, isNonEmptyArray,
     causesException, executesWithoutException, none, getHashCode,
-    awEx, event, onComplete, onBegin, onError, apiWrapper
+    awEx, event, onComplete, onBegin, onError, apiWrapper, events
 };
 

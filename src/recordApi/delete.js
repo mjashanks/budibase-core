@@ -1,10 +1,10 @@
-import {safeKey, apiWrapper} from "../common";
+import {safeKey, apiWrapper, events} from "../common";
 import {load} from "./load";
 
 export const deleteRecord = (app, indexingApi) => async key => 
     apiWrapper(
         app,
-        "recordApi","deleteRecord", 
+        events.recordApi.delete, 
         {key},
         _deleteRecord, app, indexingApi, key);
 

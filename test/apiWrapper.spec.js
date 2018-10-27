@@ -1,7 +1,7 @@
 import {apiWrapper} from "../src/common/apiWrapper";
 import {filter} from "lodash/fp";
 import {event, onComplete, 
-        onBegin, onError} from "../src/common";
+        onBegin, onError, events} from "../src/common";
 
 const getApp = () => {
 
@@ -16,16 +16,22 @@ const getApp = () => {
     };
 };
 
-const getCompleteEvents = app => 
-    app.getEvents(event("testArea")("testMethod")(onComplete));
-
-const getBeginEvents = app => 
-    app.getEvents(event("testArea")("testMethod")(onBegin));
-
-const getErrorEvents = app => 
-    app.getEvents(event("testArea")("testMethod")(onError));
-
 describe("apiWrapper", () => {
+
+    const testNamespace = {
+        onBegin:"testArea:testMethod:onBegin",
+        onComplete:"testArea:testMethod:onComplete",
+        onError:"testArea:testMethod:onError",
+    }
+
+    const getCompleteEvents = app => 
+    app.getEvents(testNamespace.onComplete);
+
+    const getBeginEvents = app => 
+        app.getEvents(testNamespace.onBegin);
+
+    const getErrorEvents = app => 
+        app.getEvents(testNamespace.onError);
 
     const runThrowEx = (arg1, arg2) => {
         const throwEx = (x,y) => {throw new Error("test error");}
@@ -33,7 +39,7 @@ describe("apiWrapper", () => {
         try {
             apiWrapper(
                 app,
-                "testArea", "testMethod", {prop:"hello"}, 
+                testNamespace, {prop:"hello"}, 
                 throwEx, arg1, arg2
             );
         } catch(error) {
@@ -48,7 +54,7 @@ describe("apiWrapper", () => {
         try {
             await apiWrapper(
                 app,
-                "testArea", "testMethod", {prop:"hello"}, 
+                testNamespace, {prop:"hello"}, 
                 throwEx, arg1, arg2
             );
         } catch(error) {
@@ -62,7 +68,7 @@ describe("apiWrapper", () => {
         const app =getApp();
         const result = apiWrapper(
             app,
-            "testArea", "testMethod", {prop:"hello"}, 
+            testNamespace, {prop:"hello"}, 
             add, arg1, arg2
         );
         return {app, result};
@@ -73,7 +79,7 @@ describe("apiWrapper", () => {
         const app =getApp();
         const result = await apiWrapper(
             app,
-            "testArea", "testMethod", {prop:"hello"}, 
+            testNamespace, {prop:"hello"}, 
             add, arg1, arg2
         );
         return {app, result};
@@ -125,3 +131,14 @@ describe("apiWrapper", () => {
     });
 
 });
+
+describe("events", () => {
+    it("should return contain various spot checked events", () => {
+        expect(events.recordApi.save.onComplete)
+        .toBe("recordApi:save:onComplete");
+        expect(events.viewApi.buildIndex.onBegin)
+        .toBe("viewApi:buildIndex:onBegin");
+        expect(events.collectionApi.initialise.onError)
+        .toBe("collectionApi:initialise:onError");
+    });
+})

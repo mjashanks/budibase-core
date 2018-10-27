@@ -1,10 +1,10 @@
 import {readIndex, getIndexedDataKey_fromViewKey} from "../indexing/read";
-import {safeKey, apiWrapper} from "../common";
+import {safeKey, apiWrapper, events} from "../common";
 
 export const listItems = app => async viewKey => 
     apiWrapper(
         app,
-        "viewApi","listItems", 
+        events.viewApi.listItems, 
         {viewKey},
         _listItems, app, viewKey);
 

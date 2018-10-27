@@ -1,13 +1,13 @@
 import {getExactNodeForPath} from "../templateApi/heirarchy";
 import {getNewFieldValue} from "../types";
 import {find, keyBy, mapValues, constant} from "lodash/fp";
-import {$, joinKey, safeKey, apiWrapper} from "../common";
+import {$, joinKey, safeKey, apiWrapper, events} from "../common";
 import {generate} from "shortid";
 
 export const getNew = app => (collectionKey, recordTypeName) => 
     apiWrapper(
         app,
-        "recordApi","getNew", 
+        events.recordApi.getNew, 
         {collectionKey, recordTypeName},
         _getNew, app, collectionKey, recordTypeName);
 

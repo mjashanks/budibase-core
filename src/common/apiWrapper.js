@@ -1,14 +1,12 @@
-import {onComplete, onBegin,
-    onError, event} from "./events";
 import {cloneDeep} from "lodash/fp";
 
-export const apiWrapper = (app, area, method, eventContext, func, ...params) => {
+export const apiWrapper = (app, eventNamespace, eventContext, func, ...params) => {
 
     const publishError = err => {
         const ctx = cloneDeep(eventContext);
         ctx.error = err;
         app.publish(
-            event(area)(method)(onError),
+            eventNamespace.onError,
             ctx);
         throw new Error(err);
     };
@@ -17,14 +15,14 @@ export const apiWrapper = (app, area, method, eventContext, func, ...params) => 
         const endcontext = cloneDeep(eventContext);
         endcontext.result = result;
         app.publish(
-            event(area)(method)(onComplete),
+            eventNamespace.onComplete,
             endcontext);
         return result;
     }
 
     try {
         app.publish(
-            event(area)(method)(onBegin),
+            eventNamespace.onBegin,
             eventContext
         );
 

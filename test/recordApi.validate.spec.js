@@ -3,7 +3,7 @@ import {setupAppheirarchy, stubEventHandler,
     heirarchyFactory, withFields} from "./specHelpers";
 import {find} from "lodash";
 import {addHours} from "date-fns";
-import {onSaveInvalid} from "../src/recordApi/events"
+import {events} from "../src/common"
 
 describe("recordApi > validate", () => {
 
@@ -229,7 +229,8 @@ describe("recordApi > validate", () => {
 
         const {recordApi, subscribe} = await setupAppheirarchy(heirarchyCreator);
         const handler = stubEventHandler();
-        subscribe(onSaveInvalid, handler.handle);
+        subscribe(events.recordApi.save.onInvalid, 
+                  handler.handle);
 
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "";
@@ -239,7 +240,9 @@ describe("recordApi > validate", () => {
         } catch(e)
         {}
 
-        const onInvalid = handler.getEvents(onSaveInvalid);
+        const onInvalid = handler.getEvents(
+            events.recordApi.save.onInvalid
+        );
         expect(onInvalid.length).toBe(1);
         expect(onInvalid[0].context.record).toBeDefined();
         expect(onInvalid[0].context.record.key()).toBe(record.key());

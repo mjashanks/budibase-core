@@ -1,15 +1,13 @@
 import {cloneDeep, constant} from "lodash/fp";
 import {initialiseChildCollections} from "../collectionApi/initialise";
 import {validate} from "./validate";
-import {onSaveInvalid, onRecordCreated, 
-    onRecordUpdated} from "./events";
 import {load} from "./load";
-import {apiWrapper} from "../common";
+import {apiWrapper, events} from "../common";
 
 export const save = (app,indexingApi) => async (record, context) => 
     apiWrapper(
         app,
-        "recordApi","save", 
+        events.recordApi.save, 
         {record},
         _save, app,indexingApi, record, context);
 
@@ -20,7 +18,8 @@ const _save = async (app,indexingApi, record, context) => {
     const validationResult = validate(app)
                                      (recordClone, context);
     if(!validationResult.isValid) {
-        app.publish(onSaveInvalid, {record,validationResult});
+        app.publish(events.recordApi.save.onInvalid, 
+                    {record,validationResult});
         throw new Error("Save : Record Invalid : " + JSON.stringify(validationResult.errors));
     }
 
@@ -31,7 +30,9 @@ const _save = async (app,indexingApi, record, context) => {
     if(recordClone.isNew()) {
         await app.datastore.createJson(recordClone.key(), recordClone);
         await initialiseChildCollections(app, recordClone.key());
-        app.publish(onRecordCreated, {record:recordClone});
+        app.publish(events.recordApi.save.onRecordCreated, {
+            record:recordClone
+        });
         await indexingApi.reindexForCreate(recordClone);
     }
     else {
@@ -39,7 +40,7 @@ const _save = async (app,indexingApi, record, context) => {
         const oldRecord = await loadRecord(recordClone.key());
         await app.datastore.updateJson(recordClone.key(), recordClone);
         
-        app.publish(onRecordUpdated, {
+        app.publish(events.recordApi.save.onRecordUpdated, {
             old:oldRecord,
             new:returnedClone
         });
