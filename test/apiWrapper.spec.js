@@ -109,7 +109,7 @@ describe("apiWrapper", () => {
         const errorEvents = getErrorEvents(app);
         expect(errorEvents.length).toBe(1);
         expect(errorEvents[0].context.error.message).toBe("test error");
-    })
+    });
 
     it("should throw exception when inner function happens, on async", async () => {
         const {error} = await runThrowExAsync(1,2);
@@ -122,6 +122,6 @@ describe("apiWrapper", () => {
         const errorEvents = getErrorEvents(app);
         expect(errorEvents.length).toBe(1);
         expect(errorEvents[0].context.error.message).toBe("test error");
-    })
+    });
 
 });

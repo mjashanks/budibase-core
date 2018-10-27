@@ -3,21 +3,16 @@ import {getIndexedDataKey} from "../indexing/read";
 import {listItems} from "../viewApi/listItems";
 import {has, some} from "lodash";
 import {map} from "lodash/fp";
-import {$} from "../common";
+import {$, apiWrapper} from "../common";
 
- const readReferenceView = async (app, recordKey,field) => {
-    const viewNode = getNode(app.heirarchy, field.typeOptions.viewNodeKey);
-    const indexedDataKey = getIndexedDataKey(recordKey, viewNode);
-    const items = await listItems(app)(indexedDataKey);
-    return $(items, [
-        map(i => ({
-            key: i.key,
-            value: i[field.typeOptions.displayValue]
-        }))
-    ]);
- }
+export const getContext = app => recordKey => 
+    apiWrapper(
+        app,
+        "recordApi","getContext", 
+        {recordKey},
+        _getContext, app, recordKey);
 
-export const getContext = app => recordKey => {
+const _getContext = (app, recordKey) => {
 
     const recordNode = getExactNodeForPath(app.heirarchy)(recordKey);    
 
@@ -51,3 +46,15 @@ export const getContext = app => recordKey => {
         recordNode
     };
 }
+
+const readReferenceView = async (app, recordKey,field) => {
+    const viewNode = getNode(app.heirarchy, field.typeOptions.viewNodeKey);
+    const indexedDataKey = getIndexedDataKey(recordKey, viewNode);
+    const items = await listItems(app)(indexedDataKey);
+    return $(items, [
+        map(i => ({
+            key: i.key,
+            value: i[field.typeOptions.displayValue]
+        }))
+    ]);
+ }
