@@ -1,23 +1,27 @@
-import {has} from "lodash";
+import {has} from "lodash/fp";
 
-const publish = agg => (eventName, context) => {
-    if(!has(agg, eventName)) return;
+const publish = handlers => (eventName, context = {}) => {
+    if(!has(handlers, eventName)) return;
 
-    for(let handler of agg[eventName]) {
+    for(let handler of handlers[eventName]) {
         handler(eventName, context);
     }
 };
 
-const subscribe = agg => (eventName, handler) => {
-    if(!has(agg, eventName)) {
-        agg[eventName] = [];
+const subscribe = handlers => (eventName, handler) => {
+    if(!has(handlers, eventName)) {
+        handlers[eventName] = [];
     }
-    agg[eventName].push(handler);
+    handlers[eventName].push(handler);
 };
 
 export const createEventAggregator = () => {
-    const agg = {};
-    return ({publish: publish(agg), subscribe: subscribe(agg)});
+    const handlers = {};
+    const eventAggregator = ({
+        publish: publish(handlers),
+        subscribe: subscribe(handlers)
+    });
+    return eventAggregator;
 };
 
 export default createEventAggregator;

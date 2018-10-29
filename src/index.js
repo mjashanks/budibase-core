@@ -33,5 +33,4 @@ export {getRecordApi} from "./recordApi";
 export {getCollectionApi} from "./collectionApi";
 export {getViewApi} from "./viewApi";
 
-
 export default getAppApis;
