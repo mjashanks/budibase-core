@@ -76,7 +76,12 @@ const pushCallStack = (app, eventNamespace, seedCallId) => {
     });
 }
 
-const popCallStack = (app) => app.calls.stack.pop();
+const popCallStack = (app) => {
+    app.calls.stack.pop();
+    if(app.calls.stack.length === 0) {
+        delete app.calls;
+    }
+}
 
 
 export default apiWrapper;

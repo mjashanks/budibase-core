@@ -1,4 +1,4 @@
-import {has} from "lodash/fp";
+import {has} from "lodash";
 
 const publish = handlers => (eventName, context = {}) => {
     if(!has(handlers, eventName)) return;
