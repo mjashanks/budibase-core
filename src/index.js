@@ -28,6 +28,8 @@ export const getAppApis = async (store) => {
     });
 };
 
+export {events, eventsList} from "./common/events";
+
 export {getTemplateApi} from "./templateApi";
 export {getRecordApi} from "./recordApi";
 export {getCollectionApi} from "./collectionApi";
