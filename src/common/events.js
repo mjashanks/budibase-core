@@ -29,7 +29,7 @@ const _events = {
     }
 }
 
-//const _eventsList = [];
+const _eventsList = [];
 
 const makeEvent = (area,  method, name) =>
     `${area}:${method}:${name}`;
@@ -46,18 +46,19 @@ for(let areaKey in _events) {
     }
 }
 
-/*
+
 for(let areaKey in _events) {
     for(let methodKey in _events[areaKey]) {
-        for(let name in _events[area][method]) {
+        for(let name in _events[areaKey][methodKey]) {
             _eventsList.push(
                 _events[areaKey][methodKey][name]
             );
         }
     }
 }
-*/
+
 
 export const events = _events;
+
 //export const eventsList = _eventsList;
 export default _events;
