@@ -34,5 +34,6 @@ export {getTemplateApi} from "./templateApi";
 export {getRecordApi} from "./recordApi";
 export {getCollectionApi} from "./collectionApi";
 export {getViewApi} from "./viewApi";
+export {setupDatastore} from "./appInitialise";
 
 export default getAppApis;
