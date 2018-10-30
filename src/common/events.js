@@ -60,5 +60,5 @@ for(let areaKey in _events) {
 
 export const events = _events;
 
-//export const eventsList = _eventsList;
+export const eventsList = _eventsList;
 export default _events;
