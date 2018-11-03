@@ -20,6 +20,8 @@ const createHeaderedIndexFileIfnotExists = async (app, path, view) => {
 
 const ensureCollectionIsInitialised = async (app, node, path) => {
 
+    await app.datastore.createFolder(path);
+
     for(let view of node.views) {
         await createHeaderedIndexFileIfnotExists(app, path, view);
     }    

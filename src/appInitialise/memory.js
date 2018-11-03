@@ -19,7 +19,7 @@ export const loadFile = data => async (path) => {
 };
 export const exists = data => async (path) => has(data, path);
 export const deleteFile = data => async (path) => delete data[path];
-
+export const createFolder = data => async (path) => data[path] = ""; // does nothing really
 
 export default data => {
     return {
@@ -28,6 +28,7 @@ export default data => {
         loadFile : loadFile(data),
         exists : exists(data),
         deleteFile : deleteFile(data),
+        createFolder: createFolder(data),
         datastoreType : "memory",
         datastoreDescription: "",
         data 

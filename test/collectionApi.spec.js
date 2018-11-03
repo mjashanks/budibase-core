@@ -11,8 +11,17 @@ describe("collectionApi > initialiseAll", () => {
     
         await collectionApi.initialiseAll();
 
-        expect(await collectionApi._store.exists(`/customers/default.csv`)).toBeTruthy()
-        expect(await collectionApi._store.exists(`/customers/deceased.csv`)).toBeTruthy()
+        expect(await collectionApi._store.exists(`/customers/default.csv`)).toBeTruthy();
+        expect(await collectionApi._store.exists(`/customers/deceased.csv`)).toBeTruthy();
+    });
+
+    it("should create folder for collection", async () => {
+        const {collectionApi} = 
+            await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndViews);
+
+        await collectionApi.initialiseAll();
+
+        expect(await collectionApi._store.exists(`/customers`)).toBeTruthy();
     });
 
     it("should not overwrite existing index files", async () => {

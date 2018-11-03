@@ -238,4 +238,14 @@ describe("save", () => {
         expect(onUpdate[0].context.new.surname).toBe("Zeecat");
 
     });
+
+    it("should create folder and view for subcollection", async () => {
+        const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const record = recordApi.getNew("/customers", "customer");
+        record.surname = "Ledog";
+
+        const savedRecord = await recordApi.save(record);
+        expect(await recordApi._storeHandle.exists(`${record.key()}/invoices/default.csv`)).toBeTruthy()
+        expect(await recordApi._storeHandle.exists(`${record.key()}/invoices`)).toBeTruthy()
+    });
 })
