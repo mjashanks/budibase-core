@@ -1,7 +1,11 @@
 import {getExactNodeForPath} from "../templateApi/heirarchy";
 import {safeParseField} from "../types";
 import {keyBy, mapValues, constant, last} from "lodash/fp";
-import {$, splitKey, safeKey, apiWrapper, events} from "../common";
+import {$, splitKey, safeKey, 
+    apiWrapper, events, joinKey} from "../common";
+
+export const getRecordFileName = key => 
+    joinKey(key, "record.json");
 
 export const load = (app) => async key => 
     apiWrapper(
@@ -13,7 +17,9 @@ export const load = (app) => async key =>
 const _load = async (app, key) => {
     key = safeKey(key);
     const recordNode = getExactNodeForPath(app.heirarchy)(key);
-    const storedData = await app.datastore.loadJson(key);
+    const storedData = await app.datastore.loadJson(
+        getRecordFileName(key)
+    );
     
     const {type} = storedData;
 

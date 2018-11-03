@@ -1,7 +1,7 @@
 import {cloneDeep, constant} from "lodash/fp";
 import {initialiseChildCollections} from "../collectionApi/initialise";
 import {validate} from "./validate";
-import {load} from "./load";
+import {load, getRecordFileName} from "./load";
 import {apiWrapper, events} from "../common";
 
 export const save = (app,indexingApi) => async (record, context) => 
@@ -28,7 +28,11 @@ const _save = async (app,indexingApi, record, context) => {
 
     recordClone.type = record.type();
     if(recordClone.isNew()) {
-        await app.datastore.createJson(recordClone.key(), recordClone);
+        await app.datastore.createFolder(recordClone.key())
+        await app.datastore.createJson(
+            getRecordFileName(recordClone.key()), 
+            recordClone
+        );
         await initialiseChildCollections(app, recordClone.key());
         app.publish(events.recordApi.save.onRecordCreated, {
             record:recordClone
@@ -38,7 +42,9 @@ const _save = async (app,indexingApi, record, context) => {
     else {
         const loadRecord = load(app);
         const oldRecord = await loadRecord(recordClone.key());
-        await app.datastore.updateJson(recordClone.key(), recordClone);
+        await app.datastore.updateJson(
+            getRecordFileName(recordClone.key()), 
+            recordClone);
         
         app.publish(events.recordApi.save.onRecordUpdated, {
             old:oldRecord,
