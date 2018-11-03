@@ -22,8 +22,10 @@ const api = datastore => ({
     saveApplicationHeirarchy : async (appHeirarchy) =>{
         if(await datastore.exists(applicationHeirarchy))
             await datastore.updateJson(applicationHeirarchy, appHeirarchy);
-        else
+        else {
+            await datastore.createFolder("/.config");
             await datastore.createJson(applicationHeirarchy, appHeirarchy);
+        }
     },
 
     getNewRootLevel, getNewCollectionTemplate, getNewViewTemplate,

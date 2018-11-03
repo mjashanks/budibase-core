@@ -56,4 +56,9 @@ describe("Load & Save App Heirarchy", () => {
         expect(ex).toBeDefined();
     });
 
+    it("should create .config folder on first save ", async () => {
+        const {templateApi} = await saveThreeLevelHeirarchy();
+        expect(await templateApi._storeHandle.exists("/.config")).toBeTruthy();
+    });
+
 });
