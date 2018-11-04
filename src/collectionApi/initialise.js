@@ -1,6 +1,6 @@
 import {getFlattenedHierarchy, hasNoMatchingAncestors, 
     isRecord, isCollection, getExactNodeForPath, isGlobalView} from "../templateApi/heirarchy";
-import {$, allTrue, joinKey, isNothing} from "../common";
+import {$, allTrue, joinKey} from "../common";
 import {filter} from "lodash/fp";
 import {getIndexedDataKey} from "../indexing/read";
 import getIndexing from "../indexing";
@@ -20,7 +20,21 @@ const createHeaderedIndexFileIfnotExists = async (app, path, view) => {
 
 const ensureCollectionIsInitialised = async (app, node, path) => {
 
-    await app.datastore.createFolder(path);
+    if(!await app.datastore.exists(path)) {
+        await app.datastore.createFolder(path);
+        await app.datastore.createFolder(
+            joinKey(path,"allids")
+        );
+        for(let childRecord of node.children) {
+            await app.datastore.createFolder(
+                joinKey(
+                    path,
+                    "allids",
+                    childRecord.collectionChildId.toString())
+            );
+        }
+    }
+    
 
     for(let view of node.views) {
         await createHeaderedIndexFileIfnotExists(app, path, view);

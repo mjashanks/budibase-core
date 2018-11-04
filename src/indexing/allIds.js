@@ -1,8 +1,8 @@
 import {getExactNodeForPath, getParentKey, 
     getFlattenedHierarchy, getNodeByKeyOrNodeKey,
     getNode, isCollection, isAncestor} from "../templateApi/heirarchy";
-import {joinKey, safeKey, $, isNothing} from "../common";
-import {head, tail, join, 
+import {joinKey, safeKey, $, splitKey} from "../common";
+import {head, last, 
         map, flatten, orderBy,
         filter, find} from "lodash/fp";
 
@@ -13,11 +13,15 @@ const allIdsStringsForFactor = collectionNode => {
     const charRangePerShard = 64 / factor;
     const allIdStrings = [];
     let index = 0;
+    let currentIdsShard = "";
     while(index < 64) {
-        const firstChar = allIdChars[index];
-        const lastChar = allIdChars[index + charRangePerShard - 1];
-        allIdStrings.push(`${firstChar}${lastChar}`);
-        index = index + charRangePerShard;
+        currentIdsShard = currentIdsShard 
+                          + allIdChars[index];
+        if((index + 1) % charRangePerShard === 0) {
+            allIdStrings.push(currentIdsShard);
+            currentIdsShard = "";
+        } 
+        index++;
     }
 
     return allIdStrings;
@@ -47,23 +51,56 @@ const _allIdsShardKey = (collectionKey, childNo, shardKey) =>
 
 
 export const getAllIdsShardKey = (appHeirarchy, collectionKey, recordId) => {  
-    const idSplit = recordId.split("-");
+    const indexOfFirstDash = recordId.indexOf("-");
 
     const collectionNode = getExactNodeForPath(appHeirarchy)
                                               (collectionKey);
 
+    const idFirstChar = recordId[indexOfFirstDash + 1];
     const allIdsShardId = $(collectionNode, [
         allIdsStringsForFactor,
-        find(i => i.includes(head(idSplit)))
+        find(i => i.includes(idFirstChar))
     ]);
 
     return _allIdsShardKey(
         collectionKey, 
-        head(idSplit), 
+        recordId.slice(0, indexOfFirstDash), 
         allIdsShardId)
         
 };
 
+/*const tryCreateAllIdsFolders = async (datastore, allIdsKey) => {
+
+    const allIdsSplit = splitKey(allIdsKey);
+
+    const rootParts = $(allIdsSplit, [
+        slice(0, allIdsSplit.length - 3)
+    ]);
+
+    const allIdsParts = $(allIdsSplit, [
+        takeRight(3),
+        reverse
+    ]);
+
+    const typeFolderPath = joinKey(
+        [...rootParts, allIdsParts[0]]
+    );
+
+    const shardFolderPath = joinKey([
+        ...rootParts, 
+        allIdsParts[0], 
+        allIdsParts[1]
+    ]);
+
+    try {
+        await datastore.createFolder(typeFolderPath);
+    } catch(e) {}
+
+    try {
+        await datastore.createFolder(shardFolderPath);
+    } catch(e) {}
+}
+*/
 const getOrCreateFile = async (datastore, allIdsKey) => {
     try {
         return await datastore.loadFile(allIdsKey);

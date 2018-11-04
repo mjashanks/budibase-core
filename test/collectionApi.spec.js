@@ -43,6 +43,18 @@ describe("collectionApi > initialiseAll", () => {
         expect(deceasedViewContent).toBe("deceased test");
     });
 
+    it("should create allids folders", async () => {
+        const {collectionApi} = 
+            await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndViews);
+
+        await collectionApi.initialiseAll();
+
+        const allIdsTypeFolder = "/customers/allids/0";
+        const allIdsFolder = "/customers/allids";
+        expect(await collectionApi._store.exists(allIdsTypeFolder)).toBeTruthy();
+        expect(await collectionApi._store.exists(allIdsFolder)).toBeTruthy();
+    });
+
 });
 
 describe("collectionApi > getAllowedRecordTypes", () => {

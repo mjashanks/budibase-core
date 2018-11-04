@@ -258,4 +258,16 @@ describe("save", () => {
         expect(await recordApi._storeHandle.exists(`${record.key()}`)).toBeTruthy();
         expect(await recordApi._storeHandle.exists(`${record.key()}/record.json`)).toBeTruthy();
     });
+
+    it("should create allids file", async () => {
+        const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const record = recordApi.getNew("/customers", "customer");
+        record.surname = "Ledog";
+
+        await recordApi.save(record);
+
+        const allIdsPath = `/customers/allids/0/${record.id()[2]}`;
+        expect(await recordApi._storeHandle.exists(allIdsPath)).toBeTruthy();
+        
+    });
 })
