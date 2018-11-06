@@ -1,7 +1,10 @@
 import {dirIndex, getDirFromKey, $, 
         getFileFromKey, awEx,
-        getIndexKeyFromFileKey} from "../common";
-import {isUndefined, filter, has} from "lodash";
+        splitKey} from "../common";
+import {isUndefined, filter, has, last} from "lodash";
+
+const folderMarker = "-FOLDER-";
+const isFolder = val => val === folderMarker;
 
 export const createFile = data => async (path, content) => {
     if(await exists(data)(path)) throw new Error(path + " already exists");
@@ -18,8 +21,20 @@ export const loadFile = data => async (path) => {
     return result;
 };
 export const exists = data => async (path) => has(data, path);
-export const deleteFile = data => async (path) => delete data[path];
-export const createFolder = data => async (path) => data[path] = ""; // does nothing really
+export const deleteFile = data => async (path) => {
+    if(!(await exists(data)(path))) throw new Error("Cannot delete file, path " + path + " does not exist");
+    if(isFolder(data[path])) throw new Error("DeleteFile: Path " + path + " is a folder, not a file");
+    delete data[path];
+}
+export const createFolder = data => async (path) => {
+    if(await exists(data)(path)) throw new Error("Cannot create folder, path " + path + " already exists");
+    data[path] = folderMarker; // does nothing really
+}
+export const deleteFolder = data => async (path) => {
+    if(!(await exists(data)(path))) throw new Error("Cannot delete folder, path " + path + " does not exist");
+    if(!isFolder(data[path])) throw new Error("DeleteFolder: Path " + path + " is not a folder");
+    delete data[path];
+} 
 
 export default data => {
     return {
@@ -29,6 +44,7 @@ export default data => {
         exists : exists(data),
         deleteFile : deleteFile(data),
         createFolder: createFolder(data),
+        deleteFolder: deleteFolder(data),
         datastoreType : "memory",
         datastoreDescription: "",
         data 

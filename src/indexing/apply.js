@@ -11,9 +11,15 @@ export const writeIndex = async (datastore, indexedData,
         ? getIndexedDataKey_fromViewKey(viewNodeOrViewKey)
         : getIndexedDataKey(decendantKey, viewNodeOrViewKey);
 
-    await datastore.updateFile(
+    if(await datastore.exists(indexedDataKey)) {
+        await datastore.updateFile(
             indexedDataKey, 
             indexContents);
+    } else {
+        await datastore.createFile(
+            indexedDataKey, 
+            indexContents);
+    }
 };
 
 const compareKey = mappedRecord => i => i.key === mappedRecord.key; 

@@ -27,7 +27,7 @@ const allIdsStringsForFactor = collectionNode => {
     return allIdStrings;
 };
 
-const getAllIdsShardNames = (appHeirarchy, collectionKey) => {
+export const getAllIdsShardNames = (appHeirarchy, collectionKey) => {
     const collectionNode = getExactNodeForPath(appHeirarchy)
                                               (collectionKey);
     return $(collectionNode,[
@@ -49,7 +49,6 @@ const _allIdsShardKey = (collectionKey, childNo, shardKey) =>
         shardKey
     );
 
-
 export const getAllIdsShardKey = (appHeirarchy, collectionKey, recordId) => {  
     const indexOfFirstDash = recordId.indexOf("-");
 
@@ -69,39 +68,7 @@ export const getAllIdsShardKey = (appHeirarchy, collectionKey, recordId) => {
         
 };
 
-/*const tryCreateAllIdsFolders = async (datastore, allIdsKey) => {
-
-    const allIdsSplit = splitKey(allIdsKey);
-
-    const rootParts = $(allIdsSplit, [
-        slice(0, allIdsSplit.length - 3)
-    ]);
-
-    const allIdsParts = $(allIdsSplit, [
-        takeRight(3),
-        reverse
-    ]);
-
-    const typeFolderPath = joinKey(
-        [...rootParts, allIdsParts[0]]
-    );
-
-    const shardFolderPath = joinKey([
-        ...rootParts, 
-        allIdsParts[0], 
-        allIdsParts[1]
-    ]);
-
-    try {
-        await datastore.createFolder(typeFolderPath);
-    } catch(e) {}
-
-    try {
-        await datastore.createFolder(shardFolderPath);
-    } catch(e) {}
-}
-*/
-const getOrCreateFile = async (datastore, allIdsKey) => {
+const getOrCreateShardFile = async (datastore, allIdsKey) => {
     try {
         return await datastore.loadFile(allIdsKey);
     } catch(eLoad) {
@@ -115,7 +82,15 @@ const getOrCreateFile = async (datastore, allIdsKey) => {
                 + " : CREATE : " + eCreate);
         }
     }
-} 
+};
+
+const getShardFile = async (datastore, allIdsKey) => {
+    try {
+        return await datastore.loadFile(allIdsKey);
+    } catch(eLoad) {
+        return "";
+    }
+};
 
 export const addToAllIds = (appHeirarchy, datastore) => async record => {
     const allIdsKey = getAllIdsShardKey(
@@ -124,7 +99,7 @@ export const addToAllIds = (appHeirarchy, datastore) => async record => {
         record.id()
     );
 
-    let allIds = await getOrCreateFile(datastore, allIdsKey);    
+    let allIds = await getOrCreateShardFile(datastore, allIdsKey);    
 
     allIds += `${allIds.length > 0 ? "," : ""}${record.id()}`;
 
@@ -226,7 +201,7 @@ export const getAllIdsIterator = (app) => async (collection_Key_or_NodeKey) => {
 
 const getAllIdsFromShard = async (datastore, shardKey) => {
     
-    const allIdsStr = await getOrCreateFile(datastore, shardKey);
+    const allIdsStr = await getShardFile(datastore, shardKey);
 
     const allIds = [];
     let currentId = "";

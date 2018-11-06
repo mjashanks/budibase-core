@@ -20,12 +20,14 @@ const _events = {
     },
     viewApi : {
         buildIndex: common(),
-        listItems: common()
+        listItems: common(),
+        delete: common()
     },
     collectionApi: {
         getAllowedRecordTypes: common(),
         initialise: common(),
-        listRecords: common()
+        listRecords: common(),
+        delete: common()
     }
 }
 

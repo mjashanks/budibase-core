@@ -1,6 +1,7 @@
 import {setupAppheirarchy, basicAppHeirarchyCreator_WithFields_AndViews} from "./specHelpers";
 import { joinKey } from "../src/common";
 import {some} from "lodash";
+import {getIndexedDataKey_fromViewKey} from "../src/indexing/read";
 
 describe("buildIndex > Global View", () => {
 
@@ -41,7 +42,7 @@ describe("buildIndex > Global View", () => {
 
         const viewKey = appHeirarchy.outstandingInvoicesView.nodeKey();
         await recordApi._storeHandle.deleteFile(
-            viewKey
+            getIndexedDataKey_fromViewKey(viewKey)
         );
 
         await viewApi.buildIndex(viewKey);
@@ -96,7 +97,7 @@ describe("buildIndex > Global View", () => {
 
         const viewKey = appHeirarchy.outstandingInvoicesView.nodeKey();
         await recordApi._storeHandle.deleteFile(
-            viewKey
+            getIndexedDataKey_fromViewKey(viewKey)
         );
 
         await viewApi.buildIndex(viewKey);
@@ -138,7 +139,7 @@ describe("buildIndex > TopLevelCollection", () => {
 
         const viewKey = appHeirarchy.customerInvoicesView.nodeKey();
         await recordApi._storeHandle.deleteFile(
-            viewKey
+            getIndexedDataKey_fromViewKey(viewKey)
         );
 
         await viewApi.buildIndex(viewKey);
@@ -175,7 +176,7 @@ describe("buildIndex > TopLevelCollection", () => {
 
         const viewKey = appHeirarchy.customerInvoicesView.nodeKey();
         await recordApi._storeHandle.deleteFile(
-            viewKey
+            getIndexedDataKey_fromViewKey(viewKey)
         );
 
         await viewApi.buildIndex(viewKey);
@@ -216,7 +217,7 @@ describe("buildIndex > nested collection", () => {
 
         const viewKey = joinKey(customer.key(), "invoices", "default");
         await recordApi._storeHandle.deleteFile(
-            viewKey
+            getIndexedDataKey_fromViewKey(viewKey)
         );
 
         await viewApi.buildIndex(
@@ -274,7 +275,7 @@ describe("buildIndex > nested collection", () => {
 
         const viewKey = joinKey(customer.key(), "invoices", "default");
         await recordApi._storeHandle.deleteFile(
-            viewKey
+            getIndexedDataKey_fromViewKey(viewKey)
         );
 
         await viewApi.buildIndex(
