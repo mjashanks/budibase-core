@@ -7,15 +7,15 @@ describe("collectionApi > delete", () => {
         const {recordApi, collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
         const record1 = recordApi.getNew("/customers", "customer");
         record1.surname = "Ledog";
-    
+
         await recordApi.save(record1);
 
         const record2 = recordApi.getNew("/customers", "customer");
         record2.surname = "Zeecat";
-        
         await recordApi.save(record2);
 
         const childRecord = recordApi.getNew(`${record1.key()}/invoices`, "invoice");
+
         await recordApi.save(childRecord);
 
         await collectionApi.delete("/customers");

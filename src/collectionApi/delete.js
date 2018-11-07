@@ -19,7 +19,7 @@ const _delete = async (app, key) => {
     key = safeKey(key);
     const node = getExactNodeForPath(app.heirarchy)(key);
     
-    await deleteRecords(app, node, key);
+    await deleteRecords(app, key);
     await deleteViews(app,node, key);
     await deleteAllIdsFolders(app, node, key);
     await deleteCollectionFolder(app, key);
@@ -51,7 +51,7 @@ const deleteAllIdsFolders = async (app, node, key) => {
     );
 };
 
-const deleteRecords = async (app, node, key) => {
+const deleteRecords = async (app, key) => {
 
 
     const deletedAllIdsShards = [];
@@ -69,17 +69,19 @@ const deleteRecords = async (app, node, key) => {
         await app.datastore.deleteFile(shardKey);
     }
 
-    const iterate = await (getAllIdsIterator(app)(key));
+    const iterate = await getAllIdsIterator(app)(key);
     const indexingApi = getIndexingApi(app);
 
     let ids = await iterate();
     while(!ids.done) {
 
-        for(let id of ids.result.ids) {
-            await (deleteRecord(app, indexingApi)
-                              (joinKey(key, id)));
-            await deleteAllIdsShard(id);
-        }       
+        if(ids.result.collectionKey === key) {
+            for(let id of ids.result.ids) {
+                await deleteRecord(app, indexingApi)
+                                (joinKey(key, id));
+                await deleteAllIdsShard(id);
+            }       
+        }
 
         ids = await iterate();
     }

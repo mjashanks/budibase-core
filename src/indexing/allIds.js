@@ -1,6 +1,6 @@
 import {getExactNodeForPath, getParentKey, 
     getFlattenedHierarchy, getNodeByKeyOrNodeKey,
-    getNode, isCollection, isAncestor} from "../templateApi/heirarchy";
+    getNode, isCollection, isAncestor, isNode} from "../templateApi/heirarchy";
 import {joinKey, safeKey, $, splitKey} from "../common";
 import {head, last, 
         map, flatten, orderBy,
@@ -138,9 +138,7 @@ export const getAllIdsIterator = (app) => async (collection_Key_or_NodeKey) => {
         };
 
         return allIdsFromShardIterator;
-    }
-    
-    
+    };    
     
     const ancestors = $(getFlattenedHierarchy(app.heirarchy), [
         filter(isCollection),
@@ -148,7 +146,6 @@ export const getAllIdsIterator = (app) => async (collection_Key_or_NodeKey) => {
                     || n.nodeKey() === targetNode.nodeKey()),
         orderBy([n => n.nodeKey().length], ["asc"])
     ]); // parents first
-
 
     const traverseForIteraterators = async (currentRecordKey = "", currentNodeIndex = 0) => {
         const currentNode = ancestors[currentNodeIndex];
