@@ -20,11 +20,4 @@ export const createAction = () => ({
     behaviourName: "",    
 });
 
-export const validateActions = (allActions) => {
-
-};
-
-export const validateTrigger = (allTriggers, allActions) => {
-
-};
 

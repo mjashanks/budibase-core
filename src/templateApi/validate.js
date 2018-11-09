@@ -90,3 +90,23 @@ export const validateAll = appHeirarchy =>
         map(validate),
         flatten
     ]);
+
+const actionRules = [
+    makerule("name", "action must have a name", 
+        a => isNonEmptyString(a.name)),
+    makerule("behaviourName", "must supply a behaviour name to the action",
+        a => isNonEmptyString(a.behviourName)),
+    makerule("behaviourSource", "must supply a behaviour source for the action",
+        a => isNonEmptyString(a.behviourSource)),
+]
+
+export const validateActions = (allActions) => {
+    const errors = [];
+
+    return errors;
+};
+
+export const validateTrigger = (allTriggers, allActions) => {
+
+};
+    
