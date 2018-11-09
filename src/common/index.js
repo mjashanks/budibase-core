@@ -32,7 +32,7 @@ export const getFileFromKey = $$(splitKey, takeRight, head);
 export const configFolder = ".config";
 export const fieldDefinitions = joinKey(configFolder, "fields.json");
 export const templateDefinitions = joinKey(configFolder, "templates.json");
-export const applicationHeirarchy = joinKey(configFolder, "applicationHeirarchy.json");
+export const appDefinitionFile = joinKey(configFolder, "appDefinition.json");
 export const dirIndex = (folderPath) => joinKey(configFolder, "dir", ...splitKey(folderPath), "dir.idx");
 export const getIndexKeyFromFileKey = $$(getDirFomKey, dirIndex);
 
@@ -185,7 +185,7 @@ export default {
     tryAwaitOr, tryAwaitOrIgnore, dirIndex, keySep,
     $, $$, getDirFomKey, getFileFromKey, splitKey,
     somethingOrDefault, getIndexKeyFromFileKey, joinKey,
-    somethingOrGetDefault, applicationHeirarchy, isValue,
+    somethingOrGetDefault, appDefinitionFile, isValue,
     isOneOf, memberMatches, defineError, anyTrue, isNonEmptyArray,
     causesException, executesWithoutException, none, getHashCode,
     awEx, apiWrapper, events

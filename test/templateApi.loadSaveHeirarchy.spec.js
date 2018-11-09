@@ -17,38 +17,38 @@ describe("Load & Save App Heirarchy", () => {
     it("should rehydrate json objects with pathRegx methods", async () => {
 
         const {templateApi} = await saveThreeLevelHeirarchy();
-        const loadedRoot = await templateApi.getApplicationHeirarchy();
+        const {heirarchy} = await templateApi.getApplicationDefinition();
 
-        expect(loadedRoot.pathRegx).toBeDefined();
-        expect(loadedRoot.children[0].pathRegx).toBeDefined();
-        expect(loadedRoot.children[0].children[0].pathRegx).toBeDefined();
+        expect(heirarchy.pathRegx).toBeDefined();
+        expect(heirarchy.children[0].pathRegx).toBeDefined();
+        expect(heirarchy.children[0].children[0].pathRegx).toBeDefined();
 
     });
 
     it("should rehydrate json objects with parent methods", async () => {
 
         const {templateApi} = await saveThreeLevelHeirarchy();
-        const loadedRoot = await templateApi.getApplicationHeirarchy();
+        const {heirarchy} = await templateApi.getApplicationDefinition();
 
-        expect(loadedRoot.parent).toBeDefined();
-        expect(loadedRoot.children[0].parent).toBeDefined();
-        expect(loadedRoot.children[0].children[0].parent).toBeDefined();
+        expect(heirarchy.parent).toBeDefined();
+        expect(heirarchy.children[0].parent).toBeDefined();
+        expect(heirarchy.children[0].children[0].parent).toBeDefined();
 
     });
 
     it("should load heirarchy with exactly the same members - balls deep", async () => {
 
         const {templateApi, root} = await saveThreeLevelHeirarchy();
-        const loadedRoot = await templateApi.getApplicationHeirarchy();
+        const {heirarchy} = await templateApi.getApplicationDefinition();
 
-        expect(JSON.stringify(loadedRoot))
+        expect(JSON.stringify(heirarchy))
         .toEqual(JSON.stringify(root));
     });
 
-    it("should throw an error when app heirarchy does not exist", async () => {
+    it("should throw an error when app definition does not exist", async () => {
         let ex;
         try{
-            await templateApi.getApplicationHeirarchy()
+            await templateApi.getApplicationDefinition()
         }
         catch(e) {
             ex = e;

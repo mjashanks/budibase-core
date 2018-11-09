@@ -8,10 +8,13 @@ export const getAppApis = async (store) => {
 
     store = setupDatastore(store);
     const templateApi = getTemplateApi(store);
-    const appHeirarchy = await templateApi.getApplicationHeirarchy();
+    const appDefinition = await templateApi.getApplicationDefinition();
     const eventAggregator = createEventAggregator();
+
+    subscribeActions(appDefinition.actions, eventAggregator);
+
     const app = {
-        heirarchy:appHeirarchy, 
+        heirarchy:appDefinition.heirarchy, 
         datastore:store, 
         publish:eventAggregator.publish
     };
@@ -27,6 +30,15 @@ export const getAppApis = async (store) => {
         subscribe: eventAggregator.subscribe
     });
 };
+
+// TODO: subscribe actions
+const subscribeActions = (actions, eventAggregator) => {
+    for(let a of actions) {
+        eventAggregator.subscribe(a.eventName, () => {
+            throw new Error("Please implement action execution !!!");
+        });
+    }
+}
 
 export {events, eventsList} from "./common/events";
 

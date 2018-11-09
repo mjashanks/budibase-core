@@ -1,4 +1,4 @@
-import {applicationHeirarchy} from "../common";
+import {appDefinitionFile} from "../common";
 import {each} from "lodash";
 import {getNewCollectionTemplate, getNewRootLevel, 
         getNewRecordTemplate, getNewViewTemplate,
@@ -9,22 +9,28 @@ import {getNewRecordValidationRule, commonRecordValidationRules,
 
 const api = datastore => ({
     
-    getApplicationHeirarchy : async () => {
-        const exists = await datastore.exists(applicationHeirarchy);
+    getApplicationDefinition : async () => {
+        const exists = await datastore.exists(appDefinitionFile);
 
-        if(!exists) throw new Error("Application heirarchy does not exist");
+        if(!exists) throw new Error("Application definition does not exist");
 
-        return constructHeirarchy(
-            await datastore.loadJson(applicationHeirarchy)
+        const appDefinition = await datastore.loadJson(appDefinitionFile);
+        appDefinition.heirarchy = constructHeirarchy(
+            appDefinition.heirarchy            
         );
+        return appDefinition;
     },
 
-    saveApplicationHeirarchy : async (appHeirarchy) =>{
-        if(await datastore.exists(applicationHeirarchy))
-            await datastore.updateJson(applicationHeirarchy, appHeirarchy);
+    saveApplicationHeirarchy : async (heirarchy) =>{
+        if(await datastore.exists(appDefinitionFile)){
+            const appDefinition = await datastore.loadJson(appDefinitionFile);
+            appDefinition.heirarchy = heirarchy;
+            await datastore.updateJson(appDefinitionFile, appDefinition);
+        }
         else {
             await datastore.createFolder("/.config");
-            await datastore.createJson(applicationHeirarchy, appHeirarchy);
+            const appDefinition = {actions:[], heirarchy};
+            await datastore.createJson(appDefinitionFile, appDefinition);
         }
     },
 
