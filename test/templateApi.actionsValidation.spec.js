@@ -75,6 +75,21 @@ describe("tempalteApi triggers validation", () => {
         expect(result[0].field).toEqual("eventName");
     });
     
+    it("should return error when eventName is empty", () => {
+        const {allActions, logOnErrorTrigger} = createValidActionsAndTriggers();
+        logOnErrorTrigger.eventName = "non existant event name";
+        const result = validateTrigger(logOnErrorTrigger, allActions);
+        expect(result.length).toBe(1);
+        expect(result[0].field).toEqual("eventName");
+    });
+
+    it("should return error when actionName is empty", () => {
+        const {allActions, logOnErrorTrigger} = createValidActionsAndTriggers();
+        logOnErrorTrigger.actionName = "non existent action name";
+        const result = validateTrigger(logOnErrorTrigger, allActions);
+        expect(result.length).toBe(1);
+        expect(result[0].field).toEqual("actionName");
+    });
 });
 
 const createValidActionsAndTriggers = () => {
