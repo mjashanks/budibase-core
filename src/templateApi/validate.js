@@ -10,18 +10,21 @@
 import {$, isSomething, switchCase
         ,anyTrue, isNonEmptyArray
         , isNonEmptyString, defaultCase
-        , executesWithoutException} from "../common";
+        , executesWithoutException,
+        somethingOrDefault} from "../common";
 import {isCollection, isRecord, isRoot, 
         isView, getFlattenedHierarchy} from "./heirarchy";
-import {reduce, union, constant, 
-        map, flatten, every} from "lodash/fp";
+import {filter, union, constant, 
+        map, flatten, every, uniqBy,
+        some, includes} from "lodash/fp";
 import {has} from "lodash";
 import {compileFilter, compileMap} from "../indexing/evaluate";
+import {eventsList} from "../common/events";
 
 
 const stringNotEmpty = s => isSomething(s) && s.trim().length > 0;
 
-const validationError = (rule, node) => ({...rule, node});
+const validationError = (rule, item) => ({...rule, item});
 export const makerule = (field, error, isValid) => ({field, error, isValid});
 
 
@@ -61,10 +64,10 @@ const viewRules = [
 const ruleSet = (...sets) => 
     constant(union(...sets));
 
-const applyRule = (errors, rule, node) => 
-    rule.isValid(node) 
-    ? errors 
-    : union(errors)([validationError(rule, node)]);
+const applyRule = itemTovalidate => rule => 
+    rule.isValid(itemTovalidate) 
+    ? null
+    : validationError(rule, itemTovalidate);
 
 
 const getRuleSet = 
@@ -75,19 +78,19 @@ const getRuleSet =
         [defaultCase, ruleSet(commonRules, [])]
     );
 
-
-export const validate = node => 
-    $(node, [
-        getRuleSet,
-        reduce((errors,rule) => 
-            applyRule(errors, rule, node) 
-        , [])
+const applyRuleSet = (itemToValidate, ruleSet) => 
+    $(ruleSet, [
+        map(applyRule(itemToValidate)),
+        filter(isSomething)
     ]);
+
+export const validateNode = node => 
+    applyRuleSet(node, getRuleSet(node));
 
 export const validateAll = appHeirarchy => 
     $(appHeirarchy, [
         getFlattenedHierarchy,
-        map(validate),
+        map(validateNode),
         flatten
     ]);
 
@@ -95,18 +98,53 @@ const actionRules = [
     makerule("name", "action must have a name", 
         a => isNonEmptyString(a.name)),
     makerule("behaviourName", "must supply a behaviour name to the action",
-        a => isNonEmptyString(a.behviourName)),
+        a => isNonEmptyString(a.behaviourName)),
     makerule("behaviourSource", "must supply a behaviour source for the action",
-        a => isNonEmptyString(a.behviourSource)),
-]
+        a => isNonEmptyString(a.behaviourSource)),
+];
+
+const duplicateActionRule = 
+    makerule("", "action name must be unique", () =>{});
+
+const validateAction = action => 
+    applyRuleSet(action, actionRules);
+
 
 export const validateActions = (allActions) => {
-    const errors = [];
+    
+    const duplicateActions = $(allActions, [
+        filter(a => filter(a2 => a2.name === a.name)
+                          (allActions).length > 1),
+        map(a => validationError(duplicateActionRule, a))
+    ]);
+    
+    const errors = $(allActions, [
+        map(validateAction),
+        flatten,
+        union(duplicateActions),
+        uniqBy("name")
+    ]);
 
     return errors;
 };
 
-export const validateTrigger = (allTriggers, allActions) => {
+const triggerRules = actions => ([
+    makerule("actionName", "must specify an action", 
+        t => isNonEmptyString(t.actionName)),
+    makerule("eventName", "must specify and event",
+        t => isNonEmptyString(t.eventName)),
+    makerule("actionName", "specified action not supplied",
+        t => !t.actionName 
+             || some(a => a.name === t.actionName)(actions)),
+    makerule("eventName", "invalid Event Name",
+        t => !t.eventName 
+             || includes(t.eventName)(eventsList))
+]);
 
+export const validateTrigger = (trigger, allActions) => {
+
+    const errors = applyRuleSet(trigger, triggerRules(allActions));
+
+    return errors;
 };
     

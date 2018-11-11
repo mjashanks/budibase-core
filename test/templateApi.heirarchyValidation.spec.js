@@ -32,7 +32,7 @@ describe("heirarchy validation", () => {
 
     const expectInvalidField = (validationResult, fieldName, expectedNode) => {
         expect(validationResult.length).toBe(1);
-        expect(some(validationResult, r => r.field === fieldName && r.node === expectedNode)).toBe(true);
+        expect(some(validationResult, r => r.field === fieldName && r.item === expectedNode)).toBe(true);
     }
 
     it("should return no errors when heirarchy is valid", () => {
