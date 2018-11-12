@@ -15,6 +15,7 @@ export const getAppApis = async (store) => {
 
     const app = {
         heirarchy:appDefinition.heirarchy, 
+        actions:appDefinition.actions,
         datastore:store, 
         publish:eventAggregator.publish
     };

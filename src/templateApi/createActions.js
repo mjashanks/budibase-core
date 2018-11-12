@@ -1,5 +1,3 @@
-import {isUndefined} from "lodash/fp";
-import {isNothing} from "../common";
 
 export const createTrigger = () => ({
     actionName: "",
@@ -7,7 +5,7 @@ export const createTrigger = () => ({
     // function, has access to event context, 
     // returns object that is used as parameter to action
     // only used if triggered by event
-    paramsCreator: "",
+    optionsCreator: "",
     // action runs if true, 
     // has access to event context 
     condition: "" 
@@ -17,7 +15,11 @@ export const createAction = () => ({
     name: "", 
     behaviourSource: "", 
     // name of function in actionSource
-    behaviourName: "",    
+    behaviourName: "",
+    // parameter passed into behaviour. 
+    // any other parms passed at runtime e.g.
+    // by trigger, or manually, will be merged into this
+    initialOptions: {}
 });
 
 

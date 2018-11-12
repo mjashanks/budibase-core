@@ -1,18 +1,17 @@
 import {getMemoryTemplateApi} from "./specHelpers";
-import { isEqual } from "lodash";
+
+const saveThreeLevelHeirarchy = async () => {
+    const templateApi = await getMemoryTemplateApi();
+    const root = templateApi.getNewRootLevel();
+    const collection = templateApi.getNewCollectionTemplate(root);
+    collection.name = "customers"
+    const record = templateApi.getNewRecordTemplate(collection);
+    record.name = "customer";
+    await templateApi.saveApplicationHeirarchy(root);
+    return {templateApi, root};
+};
 
 describe("Load & Save App Heirarchy", () => {
-
-    const saveThreeLevelHeirarchy = async () => {
-        const templateApi = await getMemoryTemplateApi();
-        const root = templateApi.getNewRootLevel();
-        const collection = templateApi.getNewCollectionTemplate(root);
-        collection.name = "customers"
-        const record = templateApi.getNewRecordTemplate(collection);
-        record.name = "customer";
-        await templateApi.saveApplicationHeirarchy(root);
-        return {templateApi, root};
-    };
 
     it("should rehydrate json objects with pathRegx methods", async () => {
 
@@ -60,5 +59,74 @@ describe("Load & Save App Heirarchy", () => {
         const {templateApi} = await saveThreeLevelHeirarchy();
         expect(await templateApi._storeHandle.exists("/.config")).toBeTruthy();
     });
+
+});
+
+describe("save load actions", () => {
+
+    const appDefinitionWithTriggersAndActions = async () => {
+        const {templateApi} = await saveThreeLevelHeirarchy();
+        
+        const logAction = templateApi.createAction();
+        logAction.behaviourName = "log";
+        logAction.behaviourSource = "test";
+        logAction.name = "log_something";
+
+        const logOnErrorTrigger = templateApi.createTrigger();
+        logOnErrorTrigger.actionName = "log_something";
+        logOnErrorTrigger.eventName = "recordApi:save:onError";
+
+        return ({
+            templateApi, 
+            actions:[logAction],
+            triggers:[logOnErrorTrigger]
+        });
+
+    }
+
+    it("should load actions with exactly the same members", async () => {
+
+        const {templateApi, actions, triggers} = 
+            await appDefinitionWithTriggersAndActions();
+        
+        await templateApi.saveActionsAndTriggers(actions, triggers);
+
+        const appDef = await templateApi.getApplicationDefinition();
+
+        expect(appDef.actions).toEqual(actions);
+        expect(appDef.triggers).toEqual(triggers);
+    });
+
+    it("should throw error when actions are invalid", async () => {
+        const {templateApi, actions, triggers} = 
+            await appDefinitionWithTriggersAndActions();
+        
+        actions[0].name = "";
+
+        let err;
+        try {
+            await templateApi.saveActionsAndTriggers(actions, triggers);
+        } catch (e) {
+            err = e;
+        }
+
+        expect(err).toBeDefined();
+    });
+
+    it("should throw error when triggers are invalid", async () => {
+        const {templateApi, actions, triggers} = 
+            await appDefinitionWithTriggersAndActions();
+        
+        triggers[0].eventName = "";
+
+        let err;
+        try {
+            await templateApi.saveActionsAndTriggers(actions, triggers);
+        } catch (e) {
+            err = e;
+        }
+
+        expect(err).toBeDefined();
+    })
 
 });

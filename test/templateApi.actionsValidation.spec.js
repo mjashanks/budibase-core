@@ -1,9 +1,5 @@
 import {validateActions, validateTrigger} from "../src/templateApi/validate";
 import {createAction, createTrigger} from "../src/templateApi/createActions";
-import {some} from "lodash";
-import {getNewField, addField} from "../src/templateApi/fields";
-import {getNewRecordValidationRule, commonRecordValidationRules,
-    addRecordValidationRule} from "../src/templateApi/recordValidationRules";
   
 describe("templateApi actions validation", () => {
     
@@ -75,7 +71,7 @@ describe("tempalteApi triggers validation", () => {
         expect(result[0].field).toEqual("eventName");
     });
     
-    it("should return error when eventName is empty", () => {
+    it("should return error when eventName does not exist in allowed events", () => {
         const {allActions, logOnErrorTrigger} = createValidActionsAndTriggers();
         logOnErrorTrigger.eventName = "non existant event name";
         const result = validateTrigger(logOnErrorTrigger, allActions);
@@ -83,12 +79,42 @@ describe("tempalteApi triggers validation", () => {
         expect(result[0].field).toEqual("eventName");
     });
 
-    it("should return error when actionName is empty", () => {
+    it("should return error when actionName does not exist in supplied actions", () => {
         const {allActions, logOnErrorTrigger} = createValidActionsAndTriggers();
         logOnErrorTrigger.actionName = "non existent action name";
         const result = validateTrigger(logOnErrorTrigger, allActions);
         expect(result.length).toBe(1);
         expect(result[0].field).toEqual("actionName");
+    });
+
+    it("should return error when optionsCreator is invalid javascript", () => {
+        const {allActions, logOnErrorTrigger} = createValidActionsAndTriggers();
+        logOnErrorTrigger.optionsCreator = "this is nonsense";
+        const result = validateTrigger(logOnErrorTrigger, allActions);
+        expect(result.length).toBe(1);
+        expect(result[0].field).toEqual("optionsCreator");
+    });
+
+    it("should return error when condition is invalid javascript", () => {
+        const {allActions, logOnErrorTrigger} = createValidActionsAndTriggers();
+        logOnErrorTrigger.condition = "this is nonsense";
+        const result = validateTrigger(logOnErrorTrigger, allActions);
+        expect(result.length).toBe(1);
+        expect(result[0].field).toEqual("condition");
+    });
+
+    it("should not return error when condition is empty", () => {
+        const {allActions, logOnErrorTrigger} = createValidActionsAndTriggers();
+        logOnErrorTrigger.condition = "";
+        const result = validateTrigger(logOnErrorTrigger, allActions);
+        expect(result.length).toBe(0);
+    });
+
+    it("should not return error when optionsCreator is empty", () => {
+        const {allActions, logOnErrorTrigger} = createValidActionsAndTriggers();
+        logOnErrorTrigger.optionsCreator = "";
+        const result = validateTrigger(logOnErrorTrigger, allActions);
+        expect(result.length).toBe(0);
     });
 });
 
@@ -112,12 +138,13 @@ const createValidActionsAndTriggers = () => {
     const logOnErrorTrigger = createTrigger();
     logOnErrorTrigger.actionName = "log message";
     logOnErrorTrigger.eventName = "recordApi:save:onError";
-    logOnErrorTrigger.paramsCreator = "return {error: context.error};";
+    logOnErrorTrigger.optionsCreator = "return {error: context.error};";
+    logOnErrorTrigger.condition = "context.error !== null;";
 
     const timeRecordSaveTrigger = createTrigger();
     timeRecordSaveTrigger.actionName = "measure save";
     timeRecordSaveTrigger.eventName = "recordApi:save:onComplete";
-    timeRecordSaveTrigger.paramsCreator = "return {context.elapsed:elapsed}";
+    timeRecordSaveTrigger.optionsCreator = "return {context.elapsed:elapsed}";
 
     const allActions = [logAction, timerAction, sendEmailAction];
     const allTriggers = [logOnErrorTrigger, timeRecordSaveTrigger];

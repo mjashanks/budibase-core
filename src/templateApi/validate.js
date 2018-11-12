@@ -11,7 +11,7 @@ import {$, isSomething, switchCase
         ,anyTrue, isNonEmptyArray
         , isNonEmptyString, defaultCase
         , executesWithoutException,
-        somethingOrDefault} from "../common";
+        tryOr} from "../common";
 import {isCollection, isRecord, isRoot, 
         isView, getFlattenedHierarchy} from "./heirarchy";
 import {filter, union, constant, 
@@ -20,6 +20,7 @@ import {filter, union, constant,
 import {has} from "lodash";
 import {compileFilter, compileMap} from "../indexing/evaluate";
 import {eventsList} from "../common/events";
+import {compileExpression, compileCode} from "@nx-js/compiler-util";
 
 
 const stringNotEmpty = s => isSomething(s) && s.trim().length > 0;
@@ -138,7 +139,23 @@ const triggerRules = actions => ([
              || some(a => a.name === t.actionName)(actions)),
     makerule("eventName", "invalid Event Name",
         t => !t.eventName 
-             || includes(t.eventName)(eventsList))
+             || includes(t.eventName)(eventsList)),
+    makerule("optionsCreator", "Options Creator does not compile - check your expression",
+        t => {
+            if(!t.optionsCreator) return true;
+            try { 
+                compileCode(t.optionsCreator);
+                return true;
+            } catch(_) { return false; }
+        }),
+    makerule("condition", "Trigger condition does not compile - check your expression",
+        t => {
+            if(!t.condition) return true;
+            try { 
+                compileExpression(t.condition);
+                return true;
+            } catch(_) { return false; }
+        })
 ]);
 
 export const validateTrigger = (trigger, allActions) => {
@@ -147,4 +164,10 @@ export const validateTrigger = (trigger, allActions) => {
 
     return errors;
 };
+
+export const validateTriggers = (triggers, allActions) => 
+    $(triggers, [
+        map(t => validateTrigger(t, allActions)),
+        flatten
+    ]);
     
