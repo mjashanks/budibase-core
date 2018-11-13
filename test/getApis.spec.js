@@ -34,13 +34,16 @@ describe("getAppApis > initialiseActions", () => {
         await templateApi.saveApplicationHeirarchy(root);
         
         const actionsAndTriggers = createValidActionsAndTriggers();
+        const {allActions, allTriggers} = actionsAndTriggers;
         await templateApi.saveActionsAndTriggers(allActions, allTriggers);
 
         return {templateApi, ...actionsAndTriggers};
     }
 
     it("should expose actions when all sources and behvaviours are present", async () => {
-        const {logs, emails, call_timers, behaviourSources} = await createAppDefinition();
+        const {logs, emails, 
+            call_timers, behaviourSources,
+            templateApi} = await createAppDefinition();
         const {actions} = await getAppApis(
             templateApi._storeHandle, behaviourSources);
 

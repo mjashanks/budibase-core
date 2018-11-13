@@ -1,11 +1,14 @@
 import {has} from "lodash";
 
-export const createBehaviourSources = () => ({
-    register: (name, funcsObj) => {
-        if(has(this, name)) {
+export const createBehaviourSources = () => {
+    const sources = {};
+    const register = (name, funcsObj) => {
+        if(has(sources, name)) {
             throw new Error(`Source '${name}' already exists`);
         }
 
-        this[name] = funcsObj;
-    }
-})
+        sources[name] = funcsObj;
+    };
+    sources.register = register;
+    return sources;
+}

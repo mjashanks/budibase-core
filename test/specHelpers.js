@@ -10,6 +10,7 @@ import getTemplateApi from "../src/templateApi";
 import {createEventAggregator} from "../src/appInitialise/eventAggregator";
 import {filter} from "lodash/fp";
 import {createBehaviourSources} from "../src/actions/buildBehaviourSource";
+import {createAction, createTrigger} from "../src/templateApi/createActions";
 
 const exp = module.exports;
 
@@ -207,7 +208,7 @@ export const createValidActionsAndTriggers = () => {
     const timeRecordSaveTrigger = createTrigger();
     timeRecordSaveTrigger.actionName = "measureCallTime";
     timeRecordSaveTrigger.eventName = "recordApi:save:onComplete";
-    timeRecordSaveTrigger.optionsCreator = "return {context.elapsed:elapsed}";
+    timeRecordSaveTrigger.optionsCreator = "return {elapsed:context.elapsed}";
 
     const allActions = [logAction, timerAction, sendEmailAction];
     const allTriggers = [logOnErrorTrigger, timeRecordSaveTrigger];
