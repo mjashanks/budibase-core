@@ -3,15 +3,20 @@ import getCollectionApi from "./collectionApi";
 import getViewApi from "./viewApi";
 import getTemplateApi from "./templateApi";
 import {setupDatastore, createEventAggregator} from "./appInitialise";
+import {initialiseActions} from "./actions"
 
-export const getAppApis = async (store) => {
+export const getAppApis = async (store, behaviourSources = {}) => {
 
     store = setupDatastore(store);
     const templateApi = getTemplateApi(store);
     const appDefinition = await templateApi.getApplicationDefinition();
     const eventAggregator = createEventAggregator();
 
-    subscribeActions(appDefinition.actions, eventAggregator);
+    const actions = initialiseActions(
+        eventAggregator.subscribe,
+        behaviourSources,
+        appDefinition.actions,
+        appDefinition.triggers);
 
     const app = {
         heirarchy:appDefinition.heirarchy, 
@@ -28,18 +33,10 @@ export const getAppApis = async (store) => {
         templateApi,
         collectionApi,
         viewApi,
-        subscribe: eventAggregator.subscribe
+        subscribe: eventAggregator.subscribe,
+        actions
     });
 };
-
-// TODO: subscribe actions
-const subscribeActions = (actions, eventAggregator) => {
-    for(let a of actions) {
-        eventAggregator.subscribe(a.eventName, () => {
-            throw new Error("Please implement action execution !!!");
-        });
-    }
-}
 
 export {events, eventsList} from "./common/events";
 

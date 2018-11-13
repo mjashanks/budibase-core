@@ -9,6 +9,7 @@ import { getNewViewTemplate } from "../src/templateApi/createNodes";
 import getTemplateApi from "../src/templateApi";
 import {createEventAggregator} from "../src/appInitialise/eventAggregator";
 import {filter} from "lodash/fp";
+import {createBehaviourSources} from "../src/actions/buildBehaviourSource";
 
 const exp = module.exports;
 
@@ -177,6 +178,57 @@ export const stubEventHandler = () => {
         events,
         getEvents: n => filter(e => e.name === n)
                               (events)
+    };
+};
+
+export const createValidActionsAndTriggers = () => {
+    const logAction = createAction();
+    logAction.name = "logMessage";
+    logAction.behaviourName = "log";
+    logAction.behaviourSource = "budibase-behaviours";
+    
+    const timerAction = createAction();
+    timerAction.name = "measureCallTime";
+    timerAction.behaviourName = "call_timer";
+    timerAction.behaviourSource = "buidbase-behaviours";
+
+
+    const sendEmailAction = createAction();
+    sendEmailAction.name = "sendEmail";
+    sendEmailAction.behaviourName = "send_email";
+    sendEmailAction.behaviourSource = "my-custom-lib";
+
+    const logOnErrorTrigger = createTrigger();
+    logOnErrorTrigger.actionName = "logMessage";
+    logOnErrorTrigger.eventName = "recordApi:save:onError";
+    logOnErrorTrigger.optionsCreator = "return {error: context.error};";
+    logOnErrorTrigger.condition = "context.error !== null;";
+
+    const timeRecordSaveTrigger = createTrigger();
+    timeRecordSaveTrigger.actionName = "measureCallTime";
+    timeRecordSaveTrigger.eventName = "recordApi:save:onComplete";
+    timeRecordSaveTrigger.optionsCreator = "return {context.elapsed:elapsed}";
+
+    const allActions = [logAction, timerAction, sendEmailAction];
+    const allTriggers = [logOnErrorTrigger, timeRecordSaveTrigger];
+
+    const behaviourSources = createBehaviourSources();
+    const logs = [];
+    const call_timers = [];
+    const emails = [];
+    behaviourSources.register("budibase-behaviours", {
+        log: message => logs.push(message),
+        call_timer: opts => call_timers.push({event:opts.event, elapsed:opts.elapsed})
+    });
+    behaviourSources.register("my-custom-lib", {
+        send_email: em => emails.push(em)
+    });
+
+    return {
+        logAction, timerAction, sendEmailAction,
+        logOnErrorTrigger, timeRecordSaveTrigger,
+        allActions, allTriggers, behaviourSources,
+        logs, call_timers, emails
     };
 };
     
