@@ -1,8 +1,7 @@
 import {getAppApis} from "../src";
 import {getMemoryTemplateApi, 
-    basicAppHeirarchyCreator_WithFields,
-    createValidActionsAndTriggers} from "./specHelpers";
-import {createBehaviourSources} from "../src/actions/buildBehaviourSource";
+    createAppDefinitionWithActionsAndTriggers} from "./specHelpers";
+import {isFunction} from "lodash";
 
 describe("getAppApis", () => {
 
@@ -28,22 +27,10 @@ describe("getAppApis", () => {
 
 describe("getAppApis > initialiseActions", () => {
 
-    const createAppDefinition = async () => {
-        const templateApi = getMemoryTemplateApi();
-        const {root} = basicAppHeirarchyCreator_WithFields(templateApi);
-        await templateApi.saveApplicationHeirarchy(root);
-        
-        const actionsAndTriggers = createValidActionsAndTriggers();
-        const {allActions, allTriggers} = actionsAndTriggers;
-        await templateApi.saveActionsAndTriggers(allActions, allTriggers);
-
-        return {templateApi, ...actionsAndTriggers};
-    }
-
     it("should expose actions when all sources and behvaviours are present", async () => {
         const {logs, emails, 
             call_timers, behaviourSources,
-            templateApi} = await createAppDefinition();
+            templateApi} = await createAppDefinitionWithActionsAndTriggers();
         const {actions} = await getAppApis(
             templateApi._storeHandle, behaviourSources);
 
@@ -51,19 +38,14 @@ describe("getAppApis > initialiseActions", () => {
         actions.measureCallTime("calltime");
         actions.logMessage("message");
 
-        expect(logs.length).toBe(1);
-        expect(logs[0]).toBe("message");
-
-        expect(emails.length).toBe(1);
-        expect(emails[0]).toBe("email");
-
-        expect(call_timers.length).toBe(1);
-        expect(call_timers[0]).toBe("calltime");
+        expect(isFunction(actions.sendEmail)).toBeTruthy();
+        expect(isFunction(actions.measureCallTime)).toBeTruthy();
+        expect(isFunction(actions.logMessage)).toBeTruthy();
 
     });
 
     it("should throw exception when behaviour source is missing", async () => {
-        const {behaviourSources} = await createAppDefinition();
+        const {behaviourSources, templateApi} = await createAppDefinitionWithActionsAndTriggers();
         delete behaviourSources["my-custom-lib"];
         
         let ex;
@@ -73,6 +55,7 @@ describe("getAppApis > initialiseActions", () => {
                 templateApi._storeHandle, behaviourSources);
         }
         catch (e) {
+            expect(e.message).toContain("behaviour");
             ex = e;
         }
 
@@ -81,7 +64,7 @@ describe("getAppApis > initialiseActions", () => {
     });
 
     it("should throw exception when behaviour is missing", async () => {
-        const {behaviourSources} = await createAppDefinition();
+        const {behaviourSources, templateApi} = await createAppDefinitionWithActionsAndTriggers();
         delete behaviourSources["my-custom-lib"]["send_email"];
         
         let ex;
@@ -91,6 +74,7 @@ describe("getAppApis > initialiseActions", () => {
                 templateApi._storeHandle, behaviourSources);
         }
         catch (e) {
+            expect(e.message).toContain("behaviour");
             ex = e;
         }
 

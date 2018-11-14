@@ -191,7 +191,7 @@ export const createValidActionsAndTriggers = () => {
     const timerAction = createAction();
     timerAction.name = "measureCallTime";
     timerAction.behaviourName = "call_timer";
-    timerAction.behaviourSource = "buidbase-behaviours";
+    timerAction.behaviourSource = "budibase-behaviours";
 
 
     const sendEmailAction = createAction();
@@ -233,3 +233,15 @@ export const createValidActionsAndTriggers = () => {
     };
 };
     
+
+export const createAppDefinitionWithActionsAndTriggers = async () => {
+    const templateApi = getMemoryTemplateApi();
+    const {root} = basicAppHeirarchyCreator_WithFields(templateApi);
+    await templateApi.saveApplicationHeirarchy(root);
+    
+    const actionsAndTriggers = createValidActionsAndTriggers();
+    const {allActions, allTriggers} = actionsAndTriggers;
+    await templateApi.saveActionsAndTriggers(allActions, allTriggers);
+    const appDefinition = await templateApi.getApplicationDefinition();
+    return {templateApi, appDefinition, ...actionsAndTriggers};
+};

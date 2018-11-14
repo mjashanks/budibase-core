@@ -1,5 +1,4 @@
 
 
-export const execute = (behaviourSources, action, options) => {
-    
-}
+export const executeAction = (behaviourSources, action, options) => 
+    behaviourSources[action.behaviourSource][action.behaviourName](options);

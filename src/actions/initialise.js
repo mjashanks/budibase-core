@@ -2,7 +2,7 @@ import {isFunction, filter, map,
         uniqBy, keys, difference,
         join, reduce} from "lodash/fp";
 import {$} from "../common";
-import {execute} from "./execute";
+import {executeAction} from "./execute";
 import {compileExpression, compileCode} from "@nx-js/compiler-util";
 
 export const initialiseActions = (subscribe, behaviourSources, actions, triggers) => {
@@ -16,7 +16,7 @@ export const initialiseActions = (subscribe, behaviourSources, actions, triggers
 const createActionsCollection = (behaviourSources, actions) =>
     $(actions,[
         reduce((all,a) => {
-            all[a.name] = opts => execute(behaviourSources, a, opts)
+            all[a.name] = opts => executeAction(behaviourSources, a, opts)
             return all;
         }, {})
     ]);
@@ -38,7 +38,7 @@ const subscribeTriggers = (subscribe, behaviourSources, actions, triggers) => {
     for(let trig of triggers) {
         subscribe(trig.eventName, (ev, ctx) => {
             if(shouldRunTrigger(trig, ctx)) {
-                execute(
+                executeAction(
                     behaviourSources, 
                     actions[trig.actionName], 
                     createOptions(trig.optionsCreator));
@@ -50,8 +50,10 @@ const subscribeTriggers = (subscribe, behaviourSources, actions, triggers) => {
 
 const validateSources = (behaviourSources, actions) => {
 
-    const declaredSources = 
-        uniqBy(a => behaviourSource)(actions).behaviourSource;
+    const declaredSources = $(actions, [
+        uniqBy(a => a.behaviourSource),
+        map(a => a.behaviourSource)
+    ]);
 
     const suppliedSources = keys(behaviourSources);
 
@@ -64,7 +66,7 @@ const validateSources = (behaviourSources, actions) => {
     }
 
     const missingBehaviours = $(actions, [
-        filter(a => !isFunction(behaviourSources[a.behaviourName])),
+        filter(a => !isFunction(behaviourSources[a.behaviourSource][a.behaviourName])),
         map(a => `Action: ${a.name} : ${a.behaviourSource}.${a.behaviourName}`)
     ]);
 
