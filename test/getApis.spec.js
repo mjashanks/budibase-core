@@ -55,8 +55,8 @@ describe("getAppApis > initialiseActions", () => {
                 templateApi._storeHandle, behaviourSources);
         }
         catch (e) {
-            expect(e.message).toContain("behaviour");
             ex = e;
+            expect(e.message).toContain("behaviour");
         }
 
         expect(ex).toBeDefined();

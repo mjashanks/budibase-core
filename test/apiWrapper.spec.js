@@ -107,7 +107,7 @@ describe("apiWrapper", () => {
     it("should throw exception when inner function happens", () => {
         const {error} = runThrowEx(1,2);
         expect(error).toBeDefined();
-        expect(error.message).toBe("Error: test error");
+        expect(error.message).toBe("test error");
     });
 
     it("should publish error event when inner exception", () => {

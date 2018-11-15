@@ -15,7 +15,7 @@ export const apiWrapper = (app, eventNamespace, eventContext, func, ...params) =
             eventNamespace.onError,
             ctx);
         popCallStack(app);
-        throw new Error(err);
+        throw err;
     };
 
     const publishComplete = result => {
@@ -27,7 +27,7 @@ export const apiWrapper = (app, eventNamespace, eventContext, func, ...params) =
             endcontext);
         popCallStack(app);
         return result;
-    }
+    };
 
     pushCallStack(app,eventNamespace);
 
@@ -38,12 +38,12 @@ export const apiWrapper = (app, eventNamespace, eventContext, func, ...params) =
         ); 
 
         const result = func(...params);
-        if(result.catch) {
-            result.catch(publishError)
-        }
 
         if(result.then) {
-            return result.then(publishComplete);
+            result
+                .then(publishComplete)
+                .catch(publishError);
+            return result;
         }
         
         publishComplete(result);

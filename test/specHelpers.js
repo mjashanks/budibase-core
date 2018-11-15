@@ -159,7 +159,7 @@ export const setupAppheirarchy = async creator => {
         viewApi,
         appHeirarchy:heirarchy,
         subscribe:templateApi._eventAggregator.subscribe
-    })
+    });
 };
 
 export const getNewFieldAndAdd = (templateApi, record) => (name, type, initial) => {
@@ -183,35 +183,35 @@ export const stubEventHandler = () => {
 };
 
 export const createValidActionsAndTriggers = () => {
-    const logAction = createAction();
-    logAction.name = "logMessage";
-    logAction.behaviourName = "log";
-    logAction.behaviourSource = "budibase-behaviours";
+    const logMessage = createAction();
+    logMessage.name = "logMessage";
+    logMessage.behaviourName = "log";
+    logMessage.behaviourSource = "budibase-behaviours";
     
-    const timerAction = createAction();
-    timerAction.name = "measureCallTime";
-    timerAction.behaviourName = "call_timer";
-    timerAction.behaviourSource = "budibase-behaviours";
+    const measureCallTime = createAction();
+    measureCallTime.name = "measureCallTime";
+    measureCallTime.behaviourName = "call_timer";
+    measureCallTime.behaviourSource = "budibase-behaviours";
 
 
-    const sendEmailAction = createAction();
-    sendEmailAction.name = "sendEmail";
-    sendEmailAction.behaviourName = "send_email";
-    sendEmailAction.behaviourSource = "my-custom-lib";
+    const sendEmail = createAction();
+    sendEmail.name = "sendEmail";
+    sendEmail.behaviourName = "send_email";
+    sendEmail.behaviourSource = "my-custom-lib";
 
     const logOnErrorTrigger = createTrigger();
     logOnErrorTrigger.actionName = "logMessage";
     logOnErrorTrigger.eventName = "recordApi:save:onError";
-    logOnErrorTrigger.optionsCreator = "return {error: context.error};";
-    logOnErrorTrigger.condition = "context.error !== null;";
+    logOnErrorTrigger.optionsCreator = "return context.error.message;";
 
-    const timeRecordSaveTrigger = createTrigger();
-    timeRecordSaveTrigger.actionName = "measureCallTime";
-    timeRecordSaveTrigger.eventName = "recordApi:save:onComplete";
-    timeRecordSaveTrigger.optionsCreator = "return {elapsed:context.elapsed}";
+    const timeCustomerSaveTrigger = createTrigger();
+    timeCustomerSaveTrigger.actionName = "measureCallTime";
+    timeCustomerSaveTrigger.eventName = "recordApi:save:onComplete";
+    timeCustomerSaveTrigger.optionsCreator = "return 999;";
+    timeCustomerSaveTrigger.condition = "context.record.type() === 'customer'";
 
-    const allActions = [logAction, timerAction, sendEmailAction];
-    const allTriggers = [logOnErrorTrigger, timeRecordSaveTrigger];
+    const allActions = [logMessage, measureCallTime, sendEmail];
+    const allTriggers = [logOnErrorTrigger, timeCustomerSaveTrigger];
 
     const behaviourSources = createBehaviourSources();
     const logs = [];
@@ -219,15 +219,15 @@ export const createValidActionsAndTriggers = () => {
     const emails = [];
     behaviourSources.register("budibase-behaviours", {
         log: message => logs.push(message),
-        call_timer: opts => call_timers.push({event:opts.event, elapsed:opts.elapsed})
+        call_timer: opts => call_timers.push(opts)
     });
     behaviourSources.register("my-custom-lib", {
         send_email: em => emails.push(em)
     });
 
     return {
-        logAction, timerAction, sendEmailAction,
-        logOnErrorTrigger, timeRecordSaveTrigger,
+        logMessage, measureCallTime, sendEmail,
+        logOnErrorTrigger, timeCustomerSaveTrigger,
         allActions, allTriggers, behaviourSources,
         logs, call_timers, emails
     };
@@ -235,13 +235,21 @@ export const createValidActionsAndTriggers = () => {
     
 
 export const createAppDefinitionWithActionsAndTriggers = async () => {
-    const templateApi = getMemoryTemplateApi();
-    const {root} = basicAppHeirarchyCreator_WithFields(templateApi);
-    await templateApi.saveApplicationHeirarchy(root);
+
+    const {appHeirarchy, templateApi} = await setupAppheirarchy(
+        basicAppHeirarchyCreator_WithFields
+    );
+
+    // adding validation rule so it can fail when we save it 
+    templateApi.addRecordValidationRule(appHeirarchy.customerRecord)(
+        templateApi.commonRecordValidationRules.fieldNotEmpty("surname")
+    );
+
+    await templateApi.saveApplicationHeirarchy(appHeirarchy.root);
     
     const actionsAndTriggers = createValidActionsAndTriggers();
     const {allActions, allTriggers} = actionsAndTriggers;
     await templateApi.saveActionsAndTriggers(allActions, allTriggers);
     const appDefinition = await templateApi.getApplicationDefinition();
-    return {templateApi, appDefinition, ...actionsAndTriggers};
+    return {templateApi, appDefinition, ...actionsAndTriggers, ...appHeirarchy};
 };

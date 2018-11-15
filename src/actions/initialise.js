@@ -1,6 +1,6 @@
 import {isFunction, filter, map, 
         uniqBy, keys, difference,
-        join, reduce} from "lodash/fp";
+        join, reduce, find} from "lodash/fp";
 import {$} from "../common";
 import {executeAction} from "./execute";
 import {compileExpression, compileCode} from "@nx-js/compiler-util";
@@ -23,16 +23,16 @@ const createActionsCollection = (behaviourSources, actions) =>
 
 const subscribeTriggers = (subscribe, behaviourSources, actions, triggers) => {
 
-    const createOptions = (trigger, eventContext) => {
-        if(!trigger.optionsCreator) return {};
-        const create = compileCode(trigger.optionsCreator);
-        return create(eventContext);
+    const createOptions = (optionsCreator, eventContext) => {
+        if(!optionsCreator) return {};
+        const create = compileCode(optionsCreator);
+        return create({context:eventContext});
     };
 
     const shouldRunTrigger = (trigger, eventContext) => {
         if(!trigger.condition) return true;
         const shouldRun = compileExpression(trigger.condition);
-        return shouldRun(eventContext);
+        return shouldRun({context:eventContext});
     };
 
     for(let trig of triggers) {
@@ -40,8 +40,8 @@ const subscribeTriggers = (subscribe, behaviourSources, actions, triggers) => {
             if(shouldRunTrigger(trig, ctx)) {
                 executeAction(
                     behaviourSources, 
-                    actions[trig.actionName], 
-                    createOptions(trig.optionsCreator));
+                    find(a => a.name === trig.actionName)(actions),
+                    createOptions(trig.optionsCreator, ctx));
             }
         });
     }

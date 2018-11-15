@@ -13,8 +13,8 @@ describe("templateApi actions validation", () => {
 
     it("should return error for empty behaviourName", () => {
 
-        const {allActions, logAction} = createValidActionsAndTriggers();
-        logAction.behaviourName = "";
+        const {allActions, logMessage} = createValidActionsAndTriggers();
+        logMessage.behaviourName = "";
         const result = validateActions(allActions);
         expect(result.length).toBe(1);
         expect(result[0].field).toEqual("behaviourName");
@@ -23,8 +23,8 @@ describe("templateApi actions validation", () => {
 
     it("should return error for empty behaviourSource", () => {
 
-        const {allActions, logAction} = createValidActionsAndTriggers();
-        logAction.behaviourSource = "";
+        const {allActions, logMessage} = createValidActionsAndTriggers();
+        logMessage.behaviourSource = "";
         const result = validateActions(allActions);
         expect(result.length).toBe(1);
         expect(result[0].field).toEqual("behaviourSource");
@@ -33,8 +33,8 @@ describe("templateApi actions validation", () => {
 
     it("should return error for empty name", () => {
 
-        const {allActions, logAction} = createValidActionsAndTriggers();
-        logAction.name = "";
+        const {allActions, logMessage} = createValidActionsAndTriggers();
+        logMessage.name = "";
         const result = validateActions(allActions);
         expect(result.length).toBe(1);
         expect(result[0].field).toEqual("name");
@@ -43,8 +43,8 @@ describe("templateApi actions validation", () => {
 
     it("should return error for duplicate name", () => {
 
-        const {allActions, logAction, timerAction} = createValidActionsAndTriggers();
-        logAction.name = timerAction.name;
+        const {allActions, logMessage, measureCallTime} = createValidActionsAndTriggers();
+        logMessage.name = measureCallTime.name;
         const result = validateActions(allActions);
         expect(result.length).toBe(1);
         expect(result[0].field).toEqual("");
