@@ -4,11 +4,13 @@ import {map} from "lodash/fp";
 import {getNewCollectionTemplate, getNewRootLevel, 
         getNewRecordTemplate, getNewViewTemplate,
         createNodeErrors, constructHeirarchy} from "./createNodes";
-import {getNewField, validateField, addField, fieldErrors} from "./fields";
+import {getNewField, validateField, 
+        addField, fieldErrors} from "./fields";
 import {getNewRecordValidationRule, commonRecordValidationRules,
         addRecordValidationRule} from "./recordValidationRules";
 import {createAction, createTrigger} from "./createActions";
-import {validateTriggers, validateTrigger, validateActions} from "./validate";
+import {validateTriggers, validateTrigger, 
+        validateActions, validateAll} from "./validate";
 
 const api = datastore => ({
     
@@ -25,6 +27,15 @@ const api = datastore => ({
     },
 
     saveApplicationHeirarchy : async (heirarchy) =>{
+
+        const validationErrors = await validateAll(heirarchy);
+        if(validationErrors.length > 0) {
+            throw new Error("Heirarchy is invalid: " + join(
+                validationErrors.map(e => `${e.item.nodeKey()} : ${e.error}`),
+                ","
+            ));
+        } 
+
         if(await datastore.exists(appDefinitionFile)){
             const appDefinition = await datastore.loadJson(appDefinitionFile);
             appDefinition.heirarchy = heirarchy;

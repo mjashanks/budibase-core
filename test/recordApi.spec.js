@@ -7,7 +7,7 @@ import {events} from "../src/common";
 describe("recordApi > getNew", () => {
 
     it("should get object with generated id and key (full path)", async () => {
-        const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator);
+        const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
         const record = recordApi.getNew("/customers", "customer");
 
         expect(record.id).toBeDefined();
@@ -31,10 +31,12 @@ describe("recordApi > getNew", () => {
 
     it("should create object with all declared fields, and use inital values", async () => {
         const {recordApi} = await setupAppheirarchy(templateApi => {
-            const heirarchy = basicAppHeirarchyCreator(templateApi);
+            const heirarchy = basicAppHeirarchyCreator_WithFields(templateApi);
             const {root, customerRecord} = heirarchy;
+
+            customerRecord.fields = [];
+
             const newField = getNewFieldAndAdd(templateApi, customerRecord);
-        
             newField("surname", "string", "hello");
             newField("isalive", "bool", "true");
             newField("age", "number", "999");

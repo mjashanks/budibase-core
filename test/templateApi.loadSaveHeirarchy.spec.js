@@ -7,6 +7,11 @@ const saveThreeLevelHeirarchy = async () => {
     collection.name = "customers"
     const record = templateApi.getNewRecordTemplate(collection);
     record.name = "customer";
+    const surname = templateApi.getNewField("string");
+    surname.name = "surname";
+    surname.label = "surname";
+    templateApi.addField(record, surname);
+
     await templateApi.saveApplicationHeirarchy(root);
     return {templateApi, root};
 };

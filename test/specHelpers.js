@@ -77,7 +77,7 @@ export const heirarchyFactory = (...additionalFeatures) => templateApi => {
     const heirarchy = ({root, customersCollection, customerRecord,
             invoicesCollection, invoiceRecord, chargesCollection, 
             partnersCollection, partnerRecord, partnerInvoicesCollection,
-            partnerInvoiceRecord});
+            partnerInvoiceRecord, chargeRecord});
     for(let feature of additionalFeatures) {
         feature(heirarchy, templateApi);
     }
@@ -88,7 +88,9 @@ export const basicAppHeirarchyCreator = templateApis =>
     heirarchyFactory()(templateApis);
 
 export const withFields = (heirarchy, templateApi) => {
-    const {customerRecord, invoiceRecord, partnerInvoiceRecord} = heirarchy;
+    const {customerRecord, invoiceRecord, 
+        partnerInvoiceRecord, chargeRecord,
+        partnerRecord} = heirarchy;
     const newCustomerField = getNewFieldAndAdd(templateApi, customerRecord);
 
     newCustomerField("surname", "string");
@@ -102,10 +104,16 @@ export const withFields = (heirarchy, templateApi) => {
     newInvoiceField("createdDate", "datetime");
     newInvoiceField("paidAmount", "number");
 
+    const newPartnerField = getNewFieldAndAdd(templateApi, partnerRecord);
+    newPartnerField("businessName", "string");
+
     const newPartnerInvoiceField = getNewFieldAndAdd(templateApi, partnerInvoiceRecord);
     newPartnerInvoiceField("totalIncVat", "number");
     newPartnerInvoiceField("createdDate", "datetime");
     newPartnerInvoiceField("paidAmount", "number");
+
+    const newChargeField = getNewFieldAndAdd(templateApi, chargeRecord);
+    newChargeField("amount", "number");
 
     const customersReferenceView = templateApi.getNewViewTemplate(heirarchy.root);
     customersReferenceView.name = "customersReference";
