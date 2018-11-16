@@ -11,6 +11,15 @@ const createValidHeirarchy = () => {
     const customerCollection = createNodes.getNewCollectionTemplate(root);
     customerCollection.name = "customers";
 
+    const partnersCollection = createNodes.getNewCollectionTemplate(root);
+    partnersCollection.name = "partners";
+    const partnerRecord = createNodes.getNewRecordTemplate(partnersCollection);
+    partnerRecord.name = "partner";
+    const businessName = getNewField("string");
+    businessName.name = "businessname";
+    businessName.label = "bn";
+    addField(partnerRecord,businessName);
+
     const customerRecord = createNodes.getNewRecordTemplate(customerCollection);
     customerRecord.name = "customer";
     const surnameField = getNewField("string");
@@ -30,8 +39,8 @@ const createValidHeirarchy = () => {
 
 describe("heirarchy validation", () => {
 
-    const expectInvalidField = (validationResult, fieldName, expectedNode) => {
-        expect(validationResult.length).toBe(1);
+    const expectInvalidField = (validationResult, fieldName, expectedNode, count = 1) => {
+        expect(validationResult.length).toBe(count);
         expect(some(validationResult, r => r.field === fieldName && r.item === expectedNode)).toBe(true);
     }
 
@@ -43,17 +52,20 @@ describe("heirarchy validation", () => {
 
     it("should return an error on name field, when name not set, on all nodes types", () => {
         let heirarchy = createValidHeirarchy();
-        const expectInvalidName = (node) => expectInvalidField(validationResult, "name", node);
+        const expectInvalidName = (node) => expectInvalidField(validationResult, "name", node, 1);
         
         heirarchy = createValidHeirarchy();
         heirarchy.customerCollection.name = "";
         let validationResult = validateAll(heirarchy.root);
         expectInvalidName(heirarchy.customerCollection);
+        heirarchy.customerCollection.name = "customers";
 
         heirarchy = createValidHeirarchy();
         heirarchy.customerRecord.name = "";
         validationResult = validateAll(heirarchy.root);
         expectInvalidName(heirarchy.customerRecord); 
+        heirarchy.customerRecord.name = "customer";
+
     });
 
     it("record > should return an error on fields member if empty", () => {
@@ -88,6 +100,13 @@ describe("heirarchy validation", () => {
         heirarchy.customerCollection.children = [];
         const validationResult = validateAll(heirarchy.root);
         expectInvalidField(validationResult, "children", heirarchy.customerCollection);
+    });
+
+    it("collection > should return error when duplicate names", () => {
+        const heirarchy = createValidHeirarchy();
+        heirarchy.customerCollection.name = "partners"
+        const validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "name", heirarchy.customerCollection, 2);
     });
 
     it("view > should return error when index has no map", () => {

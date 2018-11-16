@@ -16,7 +16,7 @@ import {isCollection, isRecord, isRoot,
         isView, getFlattenedHierarchy} from "./heirarchy";
 import {filter, union, constant, 
         map, flatten, every, uniqBy,
-        some, includes} from "lodash/fp";
+        some, includes, countBy} from "lodash/fp";
 import {has} from "lodash";
 import {compileFilter, compileMap} from "../indexing/evaluate";
 import {eventsList} from "../common/events";
@@ -79,21 +79,40 @@ const getRuleSet =
         [defaultCase, ruleSet(commonRules, [])]
     );
 
-const applyRuleSet = (itemToValidate, ruleSet) => 
+const applyRuleSet = ruleSet => itemToValidate => 
     $(ruleSet, [
         map(applyRule(itemToValidate)),
         filter(isSomething)
     ]);
 
 export const validateNode = node => 
-    applyRuleSet(node, getRuleSet(node));
+    applyRuleSet(getRuleSet(node))(node);
 
-export const validateAll = appHeirarchy => 
-    $(appHeirarchy, [
-        getFlattenedHierarchy,
-        map(validateNode),
+export const validateAll = appHeirarchy => {
+    
+    var flattened = getFlattenedHierarchy(
+        appHeirarchy
+    );
+
+    const duplicateNameRule = makerule(
+        "name", "node names must be unique under shared parent",
+        n => filter(f => f.parent() === n.parent()
+                          && f.name === n.name) 
+                    (flattened).length === 1
+    );
+
+    const duplicateNodeKeyErrors = $(flattened, [
+        map(n => applyRuleSet([duplicateNameRule])(n)),
+        filter(isSomething),
         flatten
     ]);
+
+    return $(flattened, [
+        map(validateNode),
+        flatten,
+        union(duplicateNodeKeyErrors)
+    ]);
+};
 
 const actionRules = [
     makerule("name", "action must have a name", 
@@ -108,7 +127,7 @@ const duplicateActionRule =
     makerule("", "action name must be unique", () =>{});
 
 const validateAction = action => 
-    applyRuleSet(action, actionRules);
+    applyRuleSet(actionRules)(action);
 
 
 export const validateActions = (allActions) => {
@@ -160,7 +179,7 @@ const triggerRules = actions => ([
 
 export const validateTrigger = (trigger, allActions) => {
 
-    const errors = applyRuleSet(trigger, triggerRules(allActions));
+    const errors = applyRuleSet(triggerRules(allActions))(trigger);
 
     return errors;
 };

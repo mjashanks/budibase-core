@@ -13,7 +13,7 @@ const saveThreeLevelHeirarchy = async () => {
     templateApi.addField(record, surname);
 
     await templateApi.saveApplicationHeirarchy(root);
-    return {templateApi, root};
+    return {templateApi, root, collection};
 };
 
 describe("Load & Save App Heirarchy", () => {
@@ -38,6 +38,22 @@ describe("Load & Save App Heirarchy", () => {
         expect(heirarchy.children[0].parent).toBeDefined();
         expect(heirarchy.children[0].children[0].parent).toBeDefined();
 
+    });
+
+
+    it("should throw error when validation fails", async () => {
+
+        const {templateApi, collection, root} = await saveThreeLevelHeirarchy();
+        collection.name = "";
+        
+        let err;
+        try {
+            await templateApi.saveApplicationHeirarchy(root);
+        } catch(e) {
+            err = e;
+        }
+        expect(err).toBeDefined();
+        
     });
 
     it("should load heirarchy with exactly the same members - balls deep", async () => {
