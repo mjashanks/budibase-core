@@ -1,12 +1,3 @@
-// name not null
-// name(path?) not duplicated
-// view.index has a map 
-// view.index.map produces an object with memebers
-// record has fields
-// collection has type/children
-// field types recognised
-// field names valid
-
 import {$, isSomething, switchCase
         ,anyTrue, isNonEmptyArray
         , isNonEmptyString, defaultCase
@@ -21,13 +12,9 @@ import {has} from "lodash";
 import {compileFilter, compileMap} from "../indexing/evaluate";
 import {eventsList} from "../common/events";
 import {compileExpression, compileCode} from "@nx-js/compiler-util";
-
-
-const stringNotEmpty = s => isSomething(s) && s.trim().length > 0;
-
-const validationError = (rule, item) => ({...rule, item});
-export const makerule = (field, error, isValid) => ({field, error, isValid});
-
+import {validateField} from "./fields";
+import {applyRuleSet, makerule, stringNotEmpty, 
+    ruleSet, validationError} from "./validationCommon";
 
 const commonRules = [
     makerule("name", "node name is not set", 
@@ -62,15 +49,6 @@ const viewRules = [
                 ||  executesWithoutException(() => compileFilter(node.index)))
 ];
 
-const ruleSet = (...sets) => 
-    constant(union(...sets));
-
-const applyRule = itemTovalidate => rule => 
-    rule.isValid(itemTovalidate) 
-    ? null
-    : validationError(rule, itemTovalidate);
-
-
 const getRuleSet = 
     switchCase(
         [isCollection, ruleSet(commonRules, collectionRules)],
@@ -78,12 +56,6 @@ const getRuleSet =
         [isView, ruleSet(commonRules, viewRules)],
         [defaultCase, ruleSet(commonRules, [])]
     );
-
-const applyRuleSet = ruleSet => itemToValidate => 
-    $(ruleSet, [
-        map(applyRule(itemToValidate)),
-        filter(isSomething)
-    ]);
 
 export const validateNode = node => 
     applyRuleSet(getRuleSet(node))(node);

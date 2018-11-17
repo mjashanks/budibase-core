@@ -23,6 +23,7 @@ describe("heirarchy node creation", () => {
         expect(record.type).toBe("record");
         expect(record.children).toEqual([]);
         expect(record.validationRules).toEqual([]);
+        expect(record.referenceIndexes).toEqual([]);
         expect(record.parent()).toBe(root);
     });
 

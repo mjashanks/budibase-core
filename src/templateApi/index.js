@@ -3,7 +3,8 @@ import {join} from "lodash";
 import {map} from "lodash/fp";
 import {getNewCollectionTemplate, getNewRootLevel, 
         getNewRecordTemplate, getNewViewTemplate,
-        createNodeErrors, constructHeirarchy} from "./createNodes";
+        createNodeErrors, constructHeirarchy} 
+        from "./createNodes";
 import {getNewField, validateField, 
         addField, fieldErrors} from "./fields";
 import {getNewRecordValidationRule, commonRecordValidationRules,
@@ -11,6 +12,7 @@ import {getNewRecordValidationRule, commonRecordValidationRules,
 import {createAction, createTrigger} from "./createActions";
 import {validateTriggers, validateTrigger, 
         validateActions, validateAll} from "./validate";
+import {addNewReferenceIndex} from "./indexes";
 
 const api = datastore => ({
     
@@ -80,7 +82,7 @@ const api = datastore => ({
     getNewField, validateField, addField, fieldErrors,
     getNewRecordValidationRule, commonRecordValidationRules, 
     addRecordValidationRule, createAction, createTrigger, validateActions,
-    validateTrigger,
+    validateTrigger, addNewReferenceIndex,
     _storeHandle : datastore
 });
 

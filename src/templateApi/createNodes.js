@@ -3,6 +3,7 @@ import {switchCase, defaultCase, joinKey,
 import {each, constant} from "lodash";
 import {isCollection, isView, isRoot
     , isRecord} from "./heirarchy";
+import {getNewIndex} from "./indexes";
 
 export const createNodeErrors = {
     viewCannotBeParent : "View template cannot be a parent",
@@ -114,7 +115,8 @@ export const getNewRecordTemplate = parent =>
         collectionChildId: isSomething(parent) 
                            && isCollection(parent)
                            ? parent.children.length
-                           : 0
+                           : 0,
+        referenceIndexes: []
     });
 
 export const getNewCollectionTemplate = parent => {
@@ -134,9 +136,7 @@ export const getNewViewTemplate = parent =>
     constructNode(parent, {
         name:"",
         type:"view",
-        index:{
-            map:"return {...record};", 
-            filter:"" }
+        index:getNewIndex()
     });
 
 export default {
