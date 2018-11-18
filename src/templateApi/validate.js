@@ -14,7 +14,10 @@ import {eventsList} from "../common/events";
 import {compileExpression, compileCode} from "@nx-js/compiler-util";
 import {validateField} from "./fields";
 import {applyRuleSet, makerule, stringNotEmpty, 
-    ruleSet, validationError} from "./validationCommon";
+        validationError} from "./validationCommon";
+
+export const ruleSet = (...sets) => 
+    constant(union(...sets));
 
 const commonRules = [
     makerule("name", "node name is not set", 

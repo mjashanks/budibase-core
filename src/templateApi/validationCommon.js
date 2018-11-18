@@ -14,9 +14,6 @@ export const applyRuleSet = ruleSet => itemToValidate =>
         filter(isSomething)
     ]);
 
-export const ruleSet = (...sets) => 
-    constant(union(...sets));
-
 export const applyRule = itemTovalidate => rule => 
     rule.isValid(itemTovalidate) 
     ? null
