@@ -1,7 +1,7 @@
 import Papa from "papaparse";
 import {isSomething, getHashCode, 
     joinKey} from "../common";
-import {getActualKeyOfParent, isGlobalView} from "../templateApi/heirarchy";
+import {getActualKeyOfParent, isGlobalIndex} from "../templateApi/heirarchy";
 
 export const readIndex = async(datastore, indexedDataKey) => {
     const file = await datastore.loadFile(indexedDataKey);
@@ -10,28 +10,28 @@ export const readIndex = async(datastore, indexedDataKey) => {
         {header:true}).data;
 }
 
-export const getIndexedDataKey_fromViewKey = viewKey => 
-    `${viewKey}${viewKey.endsWith(".csv") ? "" : ".csv"}`;
+export const getIndexedDataKey_fromIndexKey = indexKey => 
+    `${indexKey}${indexKey.endsWith(".csv") ? "" : ".csv"}`;
 
 export const uniqueIndexName = (index) => 
     "idx_" +
     getHashCode(`${index.filter}${index.map}`) +
     ".csv";
 
-export const getIndexedDataKey = (decendantKey, viewNode) => {
+export const getIndexedDataKey = (decendantKey, indexNode) => {
 
-    if(isGlobalView(viewNode))
-        return `${viewNode.nodeKey()}.csv`
+    if(isGlobalIndex(indexNode))
+        return `${indexNode.nodeKey()}.csv`
 
     const indexedDataParentKey = 
             getActualKeyOfParent(
-                viewNode.parent().nodeKey()    
+                indexNode.parent().nodeKey()    
                 ,decendantKey);
 
     const indexName = 
-        viewNode.name 
-        ? `${viewNode.name}.csv`
-        : uniqueIndexName(viewNode.index);
+        indexNode.name 
+        ? `${indexNode.name}.csv`
+        : uniqueIndexName(indexNode);
 
     return joinKey(
         indexedDataParentKey,

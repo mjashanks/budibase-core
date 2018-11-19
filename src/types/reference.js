@@ -29,7 +29,7 @@ const referenceTryParse = v =>
     )(v);
 
 const options = {
-    viewNodeKey: {
+    indexNodeKey: {
         defaultValue: null,
         nullAllowed: false
     },

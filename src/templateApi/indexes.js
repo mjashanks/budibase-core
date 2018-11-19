@@ -7,23 +7,24 @@ import { all } from "../types";
 
 export const getNewIndex = () => ({
     map:"return {...record};",
-    filter:""
+    filter:"",
+    name:"",
+    type:"index"
 });
 
 export const addNewReferenceIndex = recordNode => {
     const index = getNewIndex();
-    index.name = "";
     recordNode.referenceIndexes.push(index);
     return index;
 };
 
 const ruleSet = [
-    makerule("map", "view index has no map function",
+    makerule("map", "index has no map function",
         index => isNonEmptyString(index.map)),
-    makerule("map", "view index's map function does not compile",
+    makerule("map", "index's map function does not compile",
         index => !isNonEmptyString(index.map)
                 || executesWithoutException(() => compileMap(index))),
-    makerule("filter", "view index's filter function does not compile",
+    makerule("filter", "index's filter function does not compile",
         index => !isNonEmptyString(index.filter)
                 ||  executesWithoutException(() => compileFilter(index)))
 ];

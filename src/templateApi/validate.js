@@ -4,7 +4,7 @@ import {$, isSomething, switchCase
         , executesWithoutException,
         tryOr} from "../common";
 import {isCollection, isRecord, isRoot, 
-        isView, getFlattenedHierarchy} from "./heirarchy";
+        isIndex, getFlattenedHierarchy} from "./heirarchy";
 import {filter, union, constant, 
         map, flatten, every, uniqBy,
         some, includes, countBy} from "lodash/fp";
@@ -23,7 +23,7 @@ const commonRules = [
     makerule("name", "node name is not set", 
          node => stringNotEmpty(node.name)),
     makerule("type", "node type not recognised",
-        anyTrue(isRecord, isCollection, isRoot, isView ))
+        anyTrue(isRecord, isCollection, isRoot, isIndex ))
 ];
 
 const recordRules = [
@@ -41,22 +41,22 @@ const collectionRules = [
     makerule("children", "collection does not have and children",
         node => isNonEmptyArray(node.children))
 ];
-const viewRules = [
-    makerule("index", "view index has no map function",
-        node => isNonEmptyString(node.index.map)),
-    makerule("index", "view index's map function does not compile",
-        node => !isNonEmptyString(node.index.map)
-                || executesWithoutException(() => compileMap(node.index))),
-    makerule("index", "view index's filter function does not compile",
-        node => !isNonEmptyString(node.index.filter)
-                ||  executesWithoutException(() => compileFilter(node.index)))
+const indexRules = [
+    makerule("index", "index has no map function",
+        node => isNonEmptyString(node.map)),
+    makerule("index", "index's map function does not compile",
+        node => !isNonEmptyString(node.map)
+                || executesWithoutException(() => compileMap(node))),
+    makerule("index", "index's filter function does not compile",
+        node => !isNonEmptyString(node.filter)
+                ||  executesWithoutException(() => compileFilter(node)))
 ];
 
 const getRuleSet = 
     switchCase(
         [isCollection, ruleSet(commonRules, collectionRules)],
         [isRecord, ruleSet(commonRules, recordRules)],
-        [isView, ruleSet(commonRules, viewRules)],
+        [isIndex, ruleSet(commonRules, indexRules)],
         [defaultCase, ruleSet(commonRules, [])]
     );
 

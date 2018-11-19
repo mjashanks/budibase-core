@@ -73,14 +73,13 @@ describe("heirarchy node creation", () => {
         expect(collection.pathRegx()).toBe("/customers")
     });
 
-    it("> getNewCollectionTemplate > should add default view", async () => {
+    it("> getNewCollectionTemplate > should add default index", async () => {
         const templateApi = await getMemoryTemplateApi();
         const root = templateApi.getNewRootLevel();
         const collection = templateApi.getNewCollectionTemplate(root);
         collection.name = "customers";
-        expect(collection.views.length).toBe(1);
-        expect(collection.views[0].name).toBe("default");
-        expect(collection.views[0].index).toBeDefined();
+        expect(collection.indexes.length).toBe(1);
+        expect(collection.indexes[0].name).toBe("default");
     });
 
     it("> getNewCollectionTemplate > should add itself to root's children", async () => {
@@ -100,55 +99,54 @@ describe("heirarchy node creation", () => {
         expect(record.children[0]).toBe(collection);
     });
 
-    it("> getNewViewTemplate > should initialise with correct members", async () => {
+    it("> getNewIndexTemplate > should initialise with correct members", async () => {
         const templateApi = await getMemoryTemplateApi();
         const root = templateApi.getNewRootLevel();
-        const view = templateApi.getNewViewTemplate(root);
-        expect(view.type).toBe("view");
-        expect(view.name).toBeDefined();
-        expect(view.index).toBeDefined();
-        expect(view.index.map).toBeDefined();
-        expect(view.index.filter).toBeDefined();
-        expect(view.children).toBeUndefined();
-        view.name = "naughty-customers";
-        expect(view.pathRegx()).toBe("/naughty-customers");
-        expect(view.parent()).toBe(root);
+        const index = templateApi.getNewIndexTemplate(root);
+        expect(index.type).toBe("index");
+        expect(index.name).toBeDefined();
+        expect(index.map).toBeDefined();
+        expect(index.filter).toBeDefined();
+        expect(index.children).toBeUndefined();
+        index.name = "naughty-customers";
+        expect(index.pathRegx()).toBe("/naughty-customers");
+        expect(index.parent()).toBe(root);
     });
 
-    it("> getNewViewTemplate > should add itself to roots children", async () => {
+    it("> getNewIndexTemplate > should add itself to roots children", async () => {
         const templateApi = await getMemoryTemplateApi();
         const root = templateApi.getNewRootLevel();
-        const view = templateApi.getNewViewTemplate(root);
+        const index = templateApi.getNewIndexTemplate(root);
         expect(root.children.length).toBe(1);
-        expect(root.children[0]).toBe(view);
+        expect(root.children[0]).toBe(index);
     });
 
-    it("> getNewViewTemplate > should add itself to collection views", async () => {
+    it("> getNewIndexTemplate > should add itself to collection indexes", async () => {
         const templateApi = await getMemoryTemplateApi();
         const root = templateApi.getNewRootLevel();
         const collection = templateApi.getNewCollectionTemplate(root);
-        const view = templateApi.getNewViewTemplate(collection);
-        expect(collection.views.length).toBe(2);
-        expect(collection.views[1]).toBe(view);
-        expect(view.parent()).toBe(collection);
+        const index = templateApi.getNewIndexTemplate(collection);
+        expect(collection.indexes.length).toBe(2);
+        expect(collection.indexes[1]).toBe(index);
+        expect(index.parent()).toBe(collection);
     });
 
-    it("should throw exception when view is supplied as parent", async () => {
+    it("should throw exception when index is supplied as parent", async () => {
         const templateApi = await getMemoryTemplateApi();
         const root = templateApi.getNewRootLevel();
-        const view = templateApi.getNewViewTemplate(root);
-        expect(() => templateApi.getNewCollectionTemplate(view))
-        .toThrow(errors.viewCannotBeParent);
-        expect(() => templateApi.getNewRecordTemplate(view))
-        .toThrow(errors.viewCannotBeParent);
+        const index = templateApi.getNewIndexTemplate(root);
+        expect(() => templateApi.getNewCollectionTemplate(index))
+        .toThrow(errors.indexCannotBeParent);
+        expect(() => templateApi.getNewRecordTemplate(index))
+        .toThrow(errors.indexCannotBeParent);
     });
 
-    it("should throw exception when view is add to record", async () => {
+    it("should throw exception when index is add to record", async () => {
         const templateApi = await getMemoryTemplateApi();
         const root = templateApi.getNewRootLevel();
         const record = templateApi.getNewRecordTemplate(root);
-        expect(() => templateApi.getNewViewTemplate(record))
-        .toThrow(errors.viewParentMustBeCollectionOrRoot);
+        expect(() => templateApi.getNewIndexTemplate(record))
+        .toThrow(errors.indexParentMustBeCollectionOrRoot);
     });
 
     it("should throw exception when no parent supplied, for non root node", async () => {

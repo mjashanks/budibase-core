@@ -3,26 +3,24 @@ import {getRelevantIndexes} from "../src/indexing/relevant";
 
 describe("getRelevantIndexes", () => {
 
-    it("should get view indexes only, when key is root level record", async () => {
+    it("should get indexes only, when key is root level record", async () => {
         const templateApi = await getMemoryTemplateApi();
         const root = templateApi.getNewRootLevel();
         const rootLevelRecord = templateApi.getNewRecordTemplate(root);
 
         rootLevelRecord.name = "customer";
 
-        const view = templateApi.getNewViewTemplate(root);
-        view.index.name = "test index";
-        view.name = "naughty-customers";
+        const index = templateApi.getNewIndexTemplate(root);
+        index.name = "naughty-customers";
         
         const indexesByPath = getRelevantIndexes(root, "/customer");
 
-        expect(indexesByPath.globalViews.length).toBe(1);
-        expect(indexesByPath.globalViews[0].viewNode.index.name).toBe("test index");
-        expect(indexesByPath.globalViews[0].path).toBe("/naughty-customers");
+        expect(indexesByPath.globalIndexes.length).toBe(1);
+        expect(indexesByPath.globalIndexes[0].path).toBe("/naughty-customers");
         
     });
 
-    it("should get collection default view index, when key is child of root level collection", async () => {
+    it("should get collection default index, when key is child of root level collection", async () => {
         const templateApi = await getMemoryTemplateApi();
         const root = templateApi.getNewRootLevel();
         const rootLevelCollection = templateApi.getNewCollectionTemplate(root);
@@ -37,7 +35,7 @@ describe("getRelevantIndexes", () => {
         expect(indexes.collections[0].path).toBe("/customers/default");
     });
 
-    it("should get 2 default view indexes when 2 collections nested deep", async () => {
+    it("should get 2 default indexes when 2 collections nested deep", async () => {
         const templateApi = await getMemoryTemplateApi();
         const root = templateApi.getNewRootLevel();
         const rootLevelCollection = templateApi.getNewCollectionTemplate(root);

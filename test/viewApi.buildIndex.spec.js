@@ -1,13 +1,13 @@
-import {setupAppheirarchy, basicAppHeirarchyCreator_WithFields_AndViews} from "./specHelpers";
+import {setupAppheirarchy, basicAppHeirarchyCreator_WithFields_AndIndexes} from "./specHelpers";
 import { joinKey } from "../src/common";
 import {some} from "lodash";
-import {getIndexedDataKey_fromViewKey} from "../src/indexing/read";
+import {getIndexedDataKey_fromIndexKey} from "../src/indexing/read";
 
-describe("buildIndex > Global View", () => {
+describe("buildIndex > Global index", () => {
 
     it("should index a record when record node is not decendant", async () => {
-        const {recordApi, viewApi, appHeirarchy} = await setupAppheirarchy(
-            basicAppHeirarchyCreator_WithFields_AndViews
+        const {recordApi, indexApi, appHeirarchy} = await setupAppheirarchy(
+            basicAppHeirarchyCreator_WithFields_AndIndexes
         );
 
         const customer = recordApi.getNew(
@@ -40,21 +40,21 @@ describe("buildIndex > Global View", () => {
 
         await recordApi.save(paidInvoice);
 
-        const viewKey = appHeirarchy.outstandingInvoicesView.nodeKey();
+        const indexKey = appHeirarchy.outstandingInvoicesIndex.nodeKey();
         await recordApi._storeHandle.deleteFile(
-            getIndexedDataKey_fromViewKey(viewKey)
+            getIndexedDataKey_fromIndexKey(indexKey)
         );
 
-        await viewApi.buildIndex(viewKey);
-        const viewItems = await viewApi.listItems(viewKey);
+        await indexApi.buildIndex(indexKey);
+        const indexItems = await indexApi.listItems(indexKey);
 
-        expect(viewItems.length).toBe(1);
-        expect(viewItems[0].key).toBe(outstandingInvoice.key());
+        expect(indexItems.length).toBe(1);
+        expect(indexItems[0].key).toBe(outstandingInvoice.key());
     });
 
     it("should index records from 2 seperate tree branches", async () => {
-        const {recordApi, viewApi, appHeirarchy} = await setupAppheirarchy(
-            basicAppHeirarchyCreator_WithFields_AndViews
+        const {recordApi, indexApi, appHeirarchy} = await setupAppheirarchy(
+            basicAppHeirarchyCreator_WithFields_AndIndexes
         );
 
         const customer = recordApi.getNew(
@@ -95,17 +95,17 @@ describe("buildIndex > Global View", () => {
 
         await recordApi.save(partnerInvoice);
 
-        const viewKey = appHeirarchy.outstandingInvoicesView.nodeKey();
+        const indexKey = appHeirarchy.outstandingInvoicesIndex.nodeKey();
         await recordApi._storeHandle.deleteFile(
-            getIndexedDataKey_fromViewKey(viewKey)
+            getIndexedDataKey_fromIndexKey(indexKey)
         );
 
-        await viewApi.buildIndex(viewKey);
-        const viewItems = await viewApi.listItems(viewKey);
+        await indexApi.buildIndex(indexKey);
+        const indexItems = await indexApi.listItems(indexKey);
 
-        expect(viewItems.length).toBe(2);
-        expect(viewItems[0].key).toBe(invoice.key());
-        expect(viewItems[1].key).toBe(partnerInvoice.key());
+        expect(indexItems.length).toBe(2);
+        expect(indexItems[0].key).toBe(invoice.key());
+        expect(indexItems[1].key).toBe(partnerInvoice.key());
 
     });
 
@@ -114,8 +114,8 @@ describe("buildIndex > Global View", () => {
 describe("buildIndex > TopLevelCollection", () => {
 
     it("should index a record when it is a nested decendant of the collection node", async() => {
-        const {recordApi, viewApi, appHeirarchy} = await setupAppheirarchy(
-            basicAppHeirarchyCreator_WithFields_AndViews
+        const {recordApi, indexApi, appHeirarchy} = await setupAppheirarchy(
+            basicAppHeirarchyCreator_WithFields_AndIndexes
         );
 
         const customer = recordApi.getNew(
@@ -137,22 +137,22 @@ describe("buildIndex > TopLevelCollection", () => {
 
         await recordApi.save(invoice);
 
-        const viewKey = appHeirarchy.customerInvoicesView.nodeKey();
+        const indexKey = appHeirarchy.customerInvoicesIndex.nodeKey();
         await recordApi._storeHandle.deleteFile(
-            getIndexedDataKey_fromViewKey(viewKey)
+            getIndexedDataKey_fromIndexKey(indexKey)
         );
 
-        await viewApi.buildIndex(viewKey);
-        const viewItems = await viewApi.listItems(viewKey);
+        await indexApi.buildIndex(indexKey);
+        const indexItems = await indexApi.listItems(indexKey);
 
-        expect(viewItems.length).toBe(1);
-        expect(viewItems[0].key).toBe(invoice.key());
+        expect(indexItems.length).toBe(1);
+        expect(indexItems[0].key).toBe(invoice.key());
 
     });
 
     it("should not index a record when it is not decendant", async() => {
-        const {recordApi, viewApi, appHeirarchy} = await setupAppheirarchy(
-            basicAppHeirarchyCreator_WithFields_AndViews
+        const {recordApi, indexApi, appHeirarchy} = await setupAppheirarchy(
+            basicAppHeirarchyCreator_WithFields_AndIndexes
         );
 
         const partner = recordApi.getNew(
@@ -174,15 +174,15 @@ describe("buildIndex > TopLevelCollection", () => {
 
         await recordApi.save(invoice);
 
-        const viewKey = appHeirarchy.customerInvoicesView.nodeKey();
+        const indexKey = appHeirarchy.customerInvoicesIndex.nodeKey();
         await recordApi._storeHandle.deleteFile(
-            getIndexedDataKey_fromViewKey(viewKey)
+            getIndexedDataKey_fromIndexKey(indexKey)
         );
 
-        await viewApi.buildIndex(viewKey);
-        const viewItems = await viewApi.listItems(viewKey);
+        await indexApi.buildIndex(indexKey);
+        const indexItems = await indexApi.listItems(indexKey);
 
-        expect(viewItems.length).toBe(0);
+        expect(indexItems.length).toBe(0);
 
     });
 
@@ -192,8 +192,8 @@ describe("buildIndex > nested collection", () => {
 
     it("should build a single record into index", async () => {
 
-        const {recordApi, viewApi, appHeirarchy} = await setupAppheirarchy(
-            basicAppHeirarchyCreator_WithFields_AndViews
+        const {recordApi, indexApi, appHeirarchy} = await setupAppheirarchy(
+            basicAppHeirarchyCreator_WithFields_AndIndexes
         );
 
         const customer = recordApi.getNew(
@@ -215,24 +215,24 @@ describe("buildIndex > nested collection", () => {
 
         await recordApi.save(invoice);
 
-        const viewKey = joinKey(customer.key(), "invoices", "default");
+        const indexKey = joinKey(customer.key(), "invoices", "default");
         await recordApi._storeHandle.deleteFile(
-            getIndexedDataKey_fromViewKey(viewKey)
+            getIndexedDataKey_fromIndexKey(indexKey)
         );
 
-        await viewApi.buildIndex(
-            appHeirarchy.invoicesCollection.views[0].nodeKey());
-        const viewItems = await viewApi.listItems(viewKey);
+        await indexApi.buildIndex(
+            appHeirarchy.invoicesCollection.indexes[0].nodeKey());
+        const indexItems = await indexApi.listItems(indexKey);
 
-        expect(viewItems.length).toBe(1);
-        expect(viewItems[0].key).toBe(invoice.key());
+        expect(indexItems.length).toBe(1);
+        expect(indexItems[0].key).toBe(invoice.key());
 
     });
 
     it("should build multiple records, from different parents into index", async () => {
 
-        const {recordApi, viewApi, appHeirarchy} = await setupAppheirarchy(
-            basicAppHeirarchyCreator_WithFields_AndViews
+        const {recordApi, indexApi, appHeirarchy} = await setupAppheirarchy(
+            basicAppHeirarchyCreator_WithFields_AndIndexes
         );
 
         const customer = recordApi.getNew(
@@ -273,18 +273,18 @@ describe("buildIndex > nested collection", () => {
 
         await recordApi.save(invoice2);
 
-        const viewKey = joinKey(customer.key(), "invoices", "default");
+        const indexKey = joinKey(customer.key(), "invoices", "default");
         await recordApi._storeHandle.deleteFile(
-            getIndexedDataKey_fromViewKey(viewKey)
+            getIndexedDataKey_fromIndexKey(indexKey)
         );
 
-        await viewApi.buildIndex(
-            appHeirarchy.invoicesCollection.views[0].nodeKey());
-        const viewItems = await viewApi.listItems(viewKey);
+        await indexApi.buildIndex(
+            appHeirarchy.invoicesCollection.indexes[0].nodeKey());
+        const indexItems = await indexApi.listItems(indexKey);
 
-        expect(viewItems.length).toBe(2);
-        expect(some(viewItems, i => i.key === invoice.key())).toBeTruthy();
-        expect(some(viewItems, i => i.key === invoice2.key())).toBeTruthy();
+        expect(indexItems.length).toBe(2);
+        expect(some(indexItems, i => i.key === invoice.key())).toBeTruthy();
+        expect(some(indexItems, i => i.key === invoice2.key())).toBeTruthy();
 
     });
 

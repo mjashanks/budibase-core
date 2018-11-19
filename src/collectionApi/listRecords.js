@@ -1,16 +1,16 @@
 import {safeKey, apiWrapper, events} from "../common";
 import {readIndex, 
-    getIndexedDataKey_fromViewKey} from "../indexing/read";
+    getIndexedDataKey_fromIndexKey} from "../indexing/read";
 
-export const listRecords = app => async viewKey => 
+export const listRecords = app => async indexKey => 
     apiWrapper(
         app,
         events.collectionApi.listRecords, 
-        {viewKey},
-        _listRecords, app, viewKey);
+        {indexKey},
+        _listRecords, app, indexKey);
 
-const _listRecords = async (app, viewKey) => {
-    viewKey = safeKey(viewKey);
-    const indexedDataKey = getIndexedDataKey_fromViewKey(viewKey);    
+const _listRecords = async (app, indexKey) => {
+    indexKey = safeKey(indexKey);
+    const indexedDataKey = getIndexedDataKey_fromIndexKey(indexKey);    
     return await readIndex(app.datastore, indexedDataKey);
 };

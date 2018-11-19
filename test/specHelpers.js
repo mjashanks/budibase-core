@@ -1,11 +1,11 @@
 import path from "path";
 import {getAppApis, getRecordApi, 
-    getCollectionApi, getViewApi}  from "../src";
+    getCollectionApi, getIndexApi}  from "../src";
 import memory from "../src/appInitialise/memory";
 import {setupDatastore} from "../src/appInitialise";
 import {configFolder, fieldDefinitions, 
     templateDefinitions} from "../src/common";
-import { getNewViewTemplate } from "../src/templateApi/createNodes";
+import { getNewIndexTemplate } from "../src/templateApi/createNodes";
 import getTemplateApi from "../src/templateApi";
 import {createEventAggregator} from "../src/appInitialise/eventAggregator";
 import {filter} from "lodash/fp";
@@ -40,14 +40,14 @@ export const getRecordApiFromTemplateApi = async templateApi =>
 export const getCollectionApiFromTemplateApi = async templateApi => 
     getCollectionApi(await appFromTempalteApi(templateApi));
 
-export const getViewApiFromTemplateApi = async templateApi => 
-    getViewApi(await appFromTempalteApi(templateApi));
+export const getIndexApiFromTemplateApi = async templateApi => 
+    getIndexApi(await appFromTempalteApi(templateApi));
 
 export const heirarchyFactory = (...additionalFeatures) => templateApi => {
     const root = templateApi.getNewRootLevel();
     const customersCollection = templateApi.getNewCollectionTemplate(root);
     customersCollection.name = "customers";
-    customersCollection.views[0].index.map = "return {surname:record.surname, isalive:record.isalive};";
+    customersCollection.indexes[0].map = "return {surname:record.surname, isalive:record.isalive};";
     const customerRecord = templateApi.getNewRecordTemplate(customersCollection);
     customerRecord.name = "customer";
 
@@ -65,7 +65,7 @@ export const heirarchyFactory = (...additionalFeatures) => templateApi => {
 
     const invoicesCollection = templateApi.getNewCollectionTemplate(customerRecord);
     invoicesCollection.name = "invoices";
-    invoicesCollection.views[0].index.map = "return {createdDate: record.createdDate, totalIncVat: record.totalIncVat};";
+    invoicesCollection.indexes[0].map = "return {createdDate: record.createdDate, totalIncVat: record.totalIncVat};";
     const invoiceRecord = templateApi.getNewRecordTemplate(invoicesCollection);
     invoiceRecord.name = "invoice";
     
@@ -115,56 +115,56 @@ export const withFields = (heirarchy, templateApi) => {
     const newChargeField = getNewFieldAndAdd(templateApi, chargeRecord);
     newChargeField("amount", "number");
 
-    const customersReferenceView = templateApi.getNewViewTemplate(heirarchy.root);
-    customersReferenceView.name = "customersReference";
-    customersReferenceView.index.map = "return {name:record.surname}";
-    customersReferenceView.index.filter = "record.isalive === true";
+    const customersReferenceIndex = templateApi.getNewIndexTemplate(heirarchy.root);
+    customersReferenceIndex.name = "customersReference";
+    customersReferenceIndex.map = "return {name:record.surname}";
+    customersReferenceIndex.filter = "record.isalive === true";
     const invoiceCustomerField = newInvoiceField("customer", "reference");
-    invoiceCustomerField.typeOptions.viewNodeKey = "/customersReference";
+    invoiceCustomerField.typeOptions.indexNodeKey = "/customersReference";
     invoiceCustomerField.typeOptions.displayValue = "name";
 }
 
-export const withViews = (heirarchy, templateApi) => {
+export const withIndexes = (heirarchy, templateApi) => {
     const {root, customersCollection} = heirarchy;
-    const deceasedCustomersView = getNewViewTemplate(customersCollection);
-    deceasedCustomersView.name = "deceased";
-    deceasedCustomersView.index.map = "return {surname: record.surname, age:record.age};";
-    deceasedCustomersView.index.filter = "record.isalive === false";
-    customersCollection.views[0].index.map = "return record;"
+    const deceasedCustomersIndex = getNewIndexTemplate(customersCollection);
+    deceasedCustomersIndex.name = "deceased";
+    deceasedCustomersIndex.map = "return {surname: record.surname, age:record.age};";
+    deceasedCustomersIndex.filter = "record.isalive === false";
+    customersCollection.indexes[0].map = "return record;"
 
-    const customerInvoicesView = getNewViewTemplate(customersCollection);
-    customerInvoicesView.name = "invoices";
-    customerInvoicesView.index.map = "return record;";
-    customerInvoicesView.index.filter = "record.type() === 'invoice'";
+    const customerInvoicesIndex = getNewIndexTemplate(customersCollection);
+    customerInvoicesIndex.name = "invoices";
+    customerInvoicesIndex.map = "return record;";
+    customerInvoicesIndex.filter = "record.type() === 'invoice'";
 
-    const outstandingInvoicesView = getNewViewTemplate(root);
-    outstandingInvoicesView.name = "Outstanding Invoices";
-    outstandingInvoicesView.index.filter = "record.type() === 'invoice' && record.paidAmount < record.totalIncVat";
-    outstandingInvoicesView.index.map = "return record;";
+    const outstandingInvoicesIndex = getNewIndexTemplate(root);
+    outstandingInvoicesIndex.name = "Outstanding Invoices";
+    outstandingInvoicesIndex.filter = "record.type() === 'invoice' && record.paidAmount < record.totalIncVat";
+    outstandingInvoicesIndex.map = "return record;";
 
-    heirarchy.outstandingInvoicesView = outstandingInvoicesView;
-    heirarchy.deceasedCustomersView = deceasedCustomersView;
-    heirarchy.customerInvoicesView = customerInvoicesView;
+    heirarchy.outstandingInvoicesIndex = outstandingInvoicesIndex;
+    heirarchy.deceasedCustomersIndex = deceasedCustomersIndex;
+    heirarchy.customerInvoicesIndex = customerInvoicesIndex;
 }
 
 export const basicAppHeirarchyCreator_WithFields = templateApi => 
     heirarchyFactory(withFields)(templateApi);
     
-export const basicAppHeirarchyCreator_WithFields_AndViews = templateApi => 
-    heirarchyFactory(withFields, withViews)(templateApi);
+export const basicAppHeirarchyCreator_WithFields_AndIndexes = templateApi => 
+    heirarchyFactory(withFields, withIndexes)(templateApi);
 
 export const setupAppheirarchy = async creator => {
     const templateApi = getMemoryTemplateApi();
     const heirarchy = creator(templateApi);
     await templateApi.saveApplicationHeirarchy(heirarchy.root);
     const collectionApi = await getCollectionApiFromTemplateApi(templateApi);
-    const viewApi = await getViewApiFromTemplateApi(templateApi);
+    const indexApi = await getIndexApiFromTemplateApi(templateApi);
     await collectionApi.initialiseAll();
     return ({
         recordApi: await getRecordApiFromTemplateApi(templateApi),
         collectionApi,
         templateApi,
-        viewApi,
+        indexApi,
         appHeirarchy:heirarchy,
         subscribe:templateApi._eventAggregator.subscribe
     });

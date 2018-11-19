@@ -1,7 +1,7 @@
 import {getAllIdsIterator} from "../indexing/allIds";
-import {isGlobalView, getFlattenedHierarchy
+import {isGlobalIndex, getFlattenedHierarchy
     ,getNodeByKeyOrNodeKey,getNode, isTopLevelCollection,
-    isView} from "../templateApi/heirarchy";
+    isIndex} from "../templateApi/heirarchy";
 import {find, filter} from "lodash/fp";
 import {joinKey, apiWrapper, events} from "../common";
 import {load} from "../recordApi/load";
@@ -9,13 +9,13 @@ import {evaluate} from "../indexing/evaluate";
 import {writeIndex} from "../indexing/apply";
 
 /*
-GlobalView:
+GlobalIndex:
 - iterate all records in system, through collections, and apply index
 
-Top Level Collection View
+Top Level Collection Index
 - iterate decendant records, and apply index
 
-Collection View, with record node ancestor
+Collection Index, with record node ancestor
 - iterate records of immediate record node ancestor
 - foreach, iterate all decendant records and apply index
 
@@ -23,37 +23,37 @@ Collection View, with record node ancestor
 
 /** rebuilds an index
  * @param {object} app - the application container
- * @param {string} viewNodeKey - node key of the view, which the index belongs to 
+ * @param {string} indexNodeKey - node key of the index, which the index belongs to 
  */
-export const buildIndex = app => async (viewNodeKey) => 
+export const buildIndex = app => async (indexNodeKey) => 
     apiWrapper(
         app,
-        events.viewApi.buildIndex, 
-        {viewNodeKey},
-        _buildIndex, app, viewNodeKey);
+        events.indexApi.buildIndex, 
+        {indexNodeKey},
+        _buildIndex, app, indexNodeKey);
 
-const _buildIndex = async (app, viewNodeKey) => {
-    const viewNode = getNode(app.heirarchy, viewNodeKey);
+const _buildIndex = async (app, indexNodeKey) => {
+    const indexNode = getNode(app.heirarchy, indexNodeKey);
 
-    if(!isView(viewNode)) 
-        throw new Error("BuildIndex: must supply a viewnode");
+    if(!isIndex(indexNode)) 
+        throw new Error("BuildIndex: must supply a indexnode");
 
-    if(isGlobalView(viewNode)) {
-        await buildGlobalViewIndex(
-            app, viewNode);
-    } else if(isTopLevelCollection(viewNode.parent())) {
+    if(isGlobalIndex(indexNode)) {
+        await buildGlobalIndex(
+            app, indexNode);
+    } else if(isTopLevelCollection(indexNode.parent())) {
         await buildCollectionIndex(
-            app, viewNode, viewNode.parent().nodeKey()
+            app, indexNode, indexNode.parent().nodeKey()
         ); 
     }
     else {
         await buildNestedCollectionIndex(
-            app, viewNode
+            app, indexNode
         );
     }
 };
 
-const buildGlobalViewIndex = async (app, viewNode) => {
+const buildGlobalIndex = async (app, indexNode) => {
 
     const flatHeirarchy = getFlattenedHierarchy(app.heirarchy);
     const filterNodes = pred => filter(pred)(flatHeirarchy);
@@ -66,28 +66,28 @@ const buildGlobalViewIndex = async (app, viewNode) => {
         await applyAllDecendantRecords(
             app, 
             col.nodeKey(), indexedData,
-            viewNode);
+            indexNode);
     }
     
-    await writeIndex(app.datastore,indexedData, viewNode.nodeKey());
+    await writeIndex(app.datastore,indexedData, indexNode.nodeKey());
 
 };
 
-const buildCollectionIndex = async (app, viewNode, collectionKey) => {
+const buildCollectionIndex = async (app, indexNode, collectionKey) => {
     const indexedData = [];
     await applyAllDecendantRecords(
         app, 
         collectionKey, 
-        indexedData, viewNode
+        indexedData, indexNode
     );
     await writeIndex(
         app.datastore, indexedData, 
-        joinKey(collectionKey, viewNode.name));
+        joinKey(collectionKey, indexNode.name));
 };
 
-const buildNestedCollectionIndex = async (app, viewNode) => {
+const buildNestedCollectionIndex = async (app, indexNode) => {
     
-    const nestedCollection = viewNode.parent();
+    const nestedCollection = indexNode.parent();
     const parentCollectionNode = nestedCollection
                             .parent() //record
                             .parent(); //parentcollection
@@ -106,7 +106,7 @@ const buildNestedCollectionIndex = async (app, viewNode) => {
                 );
 
             await buildCollectionIndex(
-                app, viewNode, collectionKey
+                app, indexNode, collectionKey
             );
         }
         allids = await allIdsIterator(); 
@@ -118,7 +118,7 @@ const chooseChildRecordNodeByKey = (collectionNode, recordId) =>
         (collectionNode.children);
 
 const applyAllDecendantRecords = 
-    async (app, collection_Key_or_NodeKey, indexedData, viewNode) => {
+    async (app, collection_Key_or_NodeKey, indexedData, indexNode) => {
 
     const collectionNode = 
         getNodeByKeyOrNodeKey(app.heirarchy, collection_Key_or_NodeKey);
@@ -130,7 +130,7 @@ const applyAllDecendantRecords =
         await load(app)(recordKey);
 
     const applyToIndex = record => {
-        const result = evaluate(record)(viewNode.index);
+        const result = evaluate(record)(indexNode);
         if(result.passedFilter) 
             indexedData.push(result.result);
     };
@@ -151,7 +151,7 @@ const applyAllDecendantRecords =
                 await applyAllDecendantRecords(
                     app,
                     joinKey(recordKey, childCollectionNode.name),
-                    indexedData, viewNode);
+                    indexedData, indexNode);
             }
         }
     };

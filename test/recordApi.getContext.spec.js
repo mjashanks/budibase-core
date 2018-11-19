@@ -68,7 +68,7 @@ describe("recordApi > getContext", () => {
 
     });
 
-    it("referenceOptions() should return an empty list when no records are in the view", async () => {
+    it("referenceOptions() should return an empty list when no records are in the index", async () => {
 
         const {recordApi, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
 

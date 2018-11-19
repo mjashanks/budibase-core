@@ -1,6 +1,6 @@
 import {setupAppheirarchy,
     basicAppHeirarchyCreator_WithFields, 
-    basicAppHeirarchyCreator_WithFields_AndViews} from "./specHelpers";
+    basicAppHeirarchyCreator_WithFields_AndIndexes} from "./specHelpers";
 import {joinKey} from "../src/common";
 import {some, isArray} from "lodash";
 
@@ -9,7 +9,7 @@ describe("recordApi > create > reindex", () => {
     it("should add to default index, when record created", async () => {
 
         const {recordApi,
-        collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndViews);
+        collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
         const record = recordApi.getNew("/customers", "customer");
 
         record.surname = "Ledog";
@@ -30,7 +30,7 @@ describe("recordApi > create > reindex", () => {
     it("should add to index with filter, when record created and passes filter", async () => {
 
         const {recordApi,
-        collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndViews);
+        collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
         const record = recordApi.getNew("/customers", "customer");
 
         record.surname = "Ledog";
@@ -51,7 +51,7 @@ describe("recordApi > create > reindex", () => {
     it("should not add to index with filter, when record created and fails filter", async () => {
 
         const {recordApi,
-        collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndViews);
+        collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
         const record = recordApi.getNew("/customers", "customer");
 
         record.surname = "Ledog";
@@ -89,8 +89,8 @@ describe("recordApi > create > reindex", () => {
 
     });
 
-    it("should add to global view index, when required", async () => {
-        const {recordApi, viewApi} = 
+    it("should add to global index, when required", async () => {
+        const {recordApi, indexApi} = 
             await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
 
         const customer = recordApi.getNew("/customers", "customer");
@@ -100,7 +100,7 @@ describe("recordApi > create > reindex", () => {
         customer.createdDate = new Date();
         await recordApi.save(customer);
 
-        const customers = await viewApi.listItems("/customersReference");
+        const customers = await indexApi.listItems("/customersReference");
 
         expect(isArray(customers)).toBeTruthy();
         expect(customers.length).toBe(1);
@@ -113,7 +113,7 @@ describe("recordApi > delete > reindex", () => {
 
     it("should remove from default index", async () => {
         const {recordApi,
-            collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndViews);
+            collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
         const record = recordApi.getNew("/customers", "customer");
 
         record.surname = "Ledog";
@@ -130,7 +130,7 @@ describe("recordApi > delete > reindex", () => {
 
     it("should remove from all indexes", async () => {
         const {recordApi,
-            collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndViews);
+            collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
         const record = recordApi.getNew("/customers", "customer");
 
         record.surname = "Ledog";
@@ -152,7 +152,7 @@ describe("recordApi > delete > reindex", () => {
 
     it("should only remove relevant record from all indexes", async () => {
         const {recordApi,
-            collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndViews);
+            collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
         const record = recordApi.getNew("/customers", "customer");
 
         record.surname = "Ledog";
@@ -182,8 +182,8 @@ describe("recordApi > delete > reindex", () => {
         expect(deceasedItemsAfterDelete[0].surname).toBe("Zeecat");
     });
 
-    it("should remove from global view", async () => {
-        const {recordApi, viewApi} = 
+    it("should remove from global index", async () => {
+        const {recordApi, indexApi} = 
             await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
 
         const customer = recordApi.getNew("/customers", "customer");
@@ -193,7 +193,7 @@ describe("recordApi > delete > reindex", () => {
         customer.createdDate = new Date();
         await recordApi.save(customer);
         await recordApi.delete(customer.key());
-        const customers = await viewApi.listItems("/customersReference");
+        const customers = await indexApi.listItems("/customersReference");
 
         expect(isArray(customers)).toBeTruthy();
         expect(customers.length).toBe(0);
@@ -202,9 +202,9 @@ describe("recordApi > delete > reindex", () => {
 
 describe("recordApi > update > reindex", () => {
 
-    it("should update values in views", async () => {
+    it("should update values in indexes", async () => {
         const {recordApi,
-            collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndViews);
+            collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
         const record = recordApi.getNew("/customers", "customer");
 
         record.surname = "Ledog";
@@ -226,7 +226,7 @@ describe("recordApi > update > reindex", () => {
 
     it("should only update values of relevant item", async () => {
         const {recordApi,
-            collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndViews);
+            collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
         const record = recordApi.getNew("/customers", "customer");
 
         record.surname = "Ledog";
@@ -259,8 +259,8 @@ describe("recordApi > update > reindex", () => {
         expect(items.length).toBe(2);
     });
 
-    it("should update global view", async () => {
-        const {recordApi, viewApi} = 
+    it("should update global index", async () => {
+        const {recordApi, indexApi} = 
             await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
 
         const customer = recordApi.getNew("/customers", "customer");
@@ -274,7 +274,7 @@ describe("recordApi > update > reindex", () => {
         loadedCustomer.surname = "Zeecat";
         await recordApi.save(loadedCustomer);
 
-        const customers = await viewApi.listItems("/customersReference");
+        const customers = await indexApi.listItems("/customersReference");
         expect(isArray(customers)).toBeTruthy();
         expect(customers.length).toBe(1);
         expect(customers[0].name).toBe("Zeecat");

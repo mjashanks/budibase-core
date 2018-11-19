@@ -136,8 +136,8 @@ describe("events", () => {
     it("should return contain various spot checked events", () => {
         expect(events.recordApi.save.onComplete)
         .toBe("recordApi:save:onComplete");
-        expect(events.viewApi.buildIndex.onBegin)
-        .toBe("viewApi:buildIndex:onBegin");
+        expect(events.indexApi.buildIndex.onBegin)
+        .toBe("indexApi:buildIndex:onBegin");
         expect(events.collectionApi.initialise.onError)
         .toBe("collectionApi:initialise:onError");
     });

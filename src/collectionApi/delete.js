@@ -4,7 +4,7 @@ import {safeKey, apiWrapper,
 import {deleteRecord} from "../recordApi/delete";
 import {getAllIdsIterator, getAllIdsShardKey} from "../indexing/allIds"
 import getIndexingApi from "../indexing";
-import {deleteView} from "../viewApi/delete";
+import {deleteIndex} from "../indexApi/delete";
 import {includes} from "lodash/fp";
 
 export const deleteCollection = (app) => async key => 
@@ -20,7 +20,7 @@ const _delete = async (app, key) => {
     const node = getExactNodeForPath(app.heirarchy)(key);
     
     await deleteRecords(app, key);
-    await deleteViews(app,node, key);
+    await deleteIndexes(app,node, key);
     await deleteAllIdsFolders(app, node, key);
     await deleteCollectionFolder(app, key);
 };
@@ -28,10 +28,10 @@ const _delete = async (app, key) => {
 const deleteCollectionFolder = async (app, key) =>
     await app.datastore.deleteFolder(key);
 
-const deleteViews = async (app, node, key) => {
-    for(let view of node.views) {
-        const viewKey = joinKey(key, view.name);
-        await deleteView(app)(viewKey);
+const deleteIndexes = async (app, node, key) => {
+    for(let index of node.indexes) {
+        const indexKey = joinKey(key, index.name);
+        await deleteIndex(app)(indexKey);
     }
 };
 

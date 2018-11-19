@@ -1,5 +1,5 @@
 import {setupAppheirarchy, basicAppHeirarchyCreator_WithFields,
-    basicAppHeirarchyCreator_WithFields_AndViews} from "./specHelpers";
+    basicAppHeirarchyCreator_WithFields_AndIndexes} from "./specHelpers";
 import {includes, union} from "lodash";
 import {joinKey} from "../src/common";
 
@@ -7,7 +7,7 @@ describe("collectionApi > initialiseAll", () => {
 
     it("should create csv file for each index, when does not exist", async () => {
         const {collectionApi, appHeirarchy} = 
-            await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndViews);
+            await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
     
         await collectionApi.initialiseAll();
 
@@ -17,7 +17,7 @@ describe("collectionApi > initialiseAll", () => {
 
     it("should create folder for collection", async () => {
         const {collectionApi} = 
-            await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndViews);
+            await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
 
         await collectionApi.initialiseAll();
 
@@ -26,7 +26,7 @@ describe("collectionApi > initialiseAll", () => {
 
     it("should not overwrite existing index files", async () => {
         const {collectionApi, appHeirarchy} = 
-            await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndViews);
+            await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
 
         const defaultIndexName = "/customers/default.csv";
         const deceasedIndexName = "/customers/deceased.csv";
@@ -36,16 +36,16 @@ describe("collectionApi > initialiseAll", () => {
         
         await collectionApi.initialiseAll();
 
-        const defaultViewContent = await collectionApi._store.loadFile(defaultIndexName);
-        const deceasedViewContent = await collectionApi._store.loadFile(deceasedIndexName);
+        const defaultIndexContent = await collectionApi._store.loadFile(defaultIndexName);
+        const deceasedIndexContent = await collectionApi._store.loadFile(deceasedIndexName);
 
-        expect(defaultViewContent).toBe("default test");
-        expect(deceasedViewContent).toBe("deceased test");
+        expect(defaultIndexContent).toBe("default test");
+        expect(deceasedIndexContent).toBe("deceased test");
     });
 
     it("should create allids folders", async () => {
         const {collectionApi} = 
-            await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndViews);
+            await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
 
         await collectionApi.initialiseAll();
 

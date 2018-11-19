@@ -1,14 +1,14 @@
 import {switchCase, defaultCase, joinKey, 
     $, isNothing, isSomething} from "../common";
 import {each, constant} from "lodash";
-import {isCollection, isView, isRoot
+import {isCollection, isIndex, isRoot
     , isRecord} from "./heirarchy";
 import {getNewIndex} from "./indexes";
 
 export const createNodeErrors = {
-    viewCannotBeParent : "View template cannot be a parent",
+    indexCannotBeParent : "Index template cannot be a parent",
     allNonRootNodesMustHaveParent: "Only the root node may have no parent",
-    viewParentMustBeCollectionOrRoot: "A view may only have a collection or root as a parent"
+    indexParentMustBeCollectionOrRoot: "An index may only have a collection or root as a parent"
 };
 
 const pathRegxMaker = (node) => () => 
@@ -36,14 +36,14 @@ const nodeKeyMaker = (node) => () => {
 
 const validate = parent => node => {
     
-    if(isSomething(parent) && isView(parent)) 
-        throw new Error(createNodeErrors.viewCannotBeParent);
+    if(isSomething(parent) && isIndex(parent)) 
+        throw new Error(createNodeErrors.indexCannotBeParent);
 
-    if(isView(node) 
+    if(isIndex(node) 
         && isSomething(parent) 
         && !isCollection(parent)
         && !isRoot(parent)) {
-        throw new Error(createNodeErrors.viewParentMustBeCollectionOrRoot);
+        throw new Error(createNodeErrors.indexParentMustBeCollectionOrRoot);
     }
 
     if(isNothing(parent) && !isRoot(node))
@@ -66,10 +66,10 @@ const construct = (parent) => (node) => {
 const addToParent = obj => {
     const parent = obj.parent();
     if(isSomething(parent)) {
-        if(isCollection(parent) && isView(obj))
-            // Q: why are views not children ?
+        if(isCollection(parent) && isIndex(obj))
+            // Q: why are indexes not children ?
             // A: because they cannot have children of their own.
-            parent.views.push(obj);
+            parent.indexes.push(obj);
         else
             parent.children.push(obj);
     }
@@ -86,7 +86,7 @@ const constructNode = (parent, obj) =>
 export const constructHeirarchy = (node, parent) => {
     construct(parent)(node);
     if(isCollection(node)) {
-        each(node.views, 
+        each(node.indexes, 
             child => constructHeirarchy(child, node));
     }
     if(node.children && node.children.length > 0) {
@@ -123,23 +123,21 @@ export const getNewCollectionTemplate = parent => {
     const collection = constructNode(parent, {
         name:"",
         type:"collection",
-        views: [],
+        indexes: [],
         children:[],
         allidsShardFactor: isRecord(parent) ? 1 : 64
     });
-    const defaultview = getNewViewTemplate(collection);
-    defaultview.name = "default";
+    const defaultIndex = getNewIndexTemplate(collection);
+    defaultIndex.name = "default";
     return collection;
 };
 
-export const getNewViewTemplate = parent => 
+export const getNewIndexTemplate = parent => 
     constructNode(parent, {
-        name:"",
-        type:"view",
-        index:getNewIndex()
+        ...getNewIndex()
     });
 
 export default {
     getNewRootLevel, getNewRecordTemplate,  
-    getNewViewTemplate, getNewCollectionTemplate, createNodeErrors,
+    getNewIndexTemplate, getNewCollectionTemplate, createNodeErrors,
     constructHeirarchy};

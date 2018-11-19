@@ -1,12 +1,12 @@
 import {buildIndex} from "./buildIndex";
 import {listItems} from "./listItems";
-import {deleteView} from "./delete";
+import {deleteIndex} from "./delete";
 
-export const getViewApi = app => ({
+export const getIndexApi = app => ({
     listItems : listItems(app), 
     buildIndex: buildIndex(app),
-    delete: deleteView(app),
+    delete: deleteIndex(app),
     _store : app.datastore
 });
 
-export default getViewApi;
+export default getIndexApi;

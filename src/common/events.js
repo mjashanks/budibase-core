@@ -18,7 +18,7 @@ const _events = {
         load: common(),
         validate: common()
     },
-    viewApi : {
+    indexApi : {
         buildIndex: common(),
         listItems: common(),
         delete: common()

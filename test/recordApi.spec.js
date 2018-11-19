@@ -241,7 +241,7 @@ describe("save", () => {
 
     });
 
-    it("should create folder and view for subcollection", async () => {
+    it("should create folder and index for subcollection", async () => {
         const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";

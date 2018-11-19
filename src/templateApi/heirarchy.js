@@ -15,7 +15,7 @@ export const getFlattenedHierarchy = appHeirarchy => {
         }
         const children = 
             isCollection(currentNode) 
-            ? union(currentNode.children, currentNode.views)
+            ? union(currentNode.children, currentNode.indexes)
             : currentNode.children;
 
         for(let child of children) {
@@ -104,11 +104,11 @@ export const isAncestor = decendant => ancestor =>
     
 export const isRecord = node => isSomething(node) && node.type === "record";
 export const isCollection = node => isSomething(node) && node.type === "collection";
-export const isView = node => isSomething(node) && node.type === "view";
+export const isIndex = node => isSomething(node) && node.type === "index";
 export const isRoot = node => isSomething(node) && node.isRoot();
 export const isDecendantOfARecord = hasMatchingAncestor(isRecord)
-export const isGlobalView = node => 
-    isView(node) && isRoot(node.parent()); 
+export const isGlobalIndex = node => 
+    isIndex(node) && isRoot(node.parent()); 
 export const isTopLevelCollection = node => 
     isCollection(node)
     && !isDecendantOfARecord(node);

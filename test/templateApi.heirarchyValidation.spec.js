@@ -29,11 +29,11 @@ const createValidHeirarchy = () => {
     addRecordValidationRule(customerRecord)
             (commonRecordValidationRules.fieldNotEmpty("surname"));
 
-    const customersDefaultView = customerCollection.views[0];
+    const customersDefaultIndex = customerCollection.indexes[0];
 
     return {
         root, customerCollection, 
-        customerRecord, customersDefaultView
+        customerRecord, customersDefaultIndex
     }
 };
 
@@ -109,25 +109,25 @@ describe("heirarchy validation", () => {
         expectInvalidField(validationResult, "name", heirarchy.customerCollection, 2);
     });
 
-    it("view > should return error when index has no map", () => {
+    it("index > should return error when index has no map", () => {
         const heirarchy = createValidHeirarchy();
-        heirarchy.customersDefaultView.index.map = "";
+        heirarchy.customersDefaultIndex.map = "";
         const validationResult = validateAll(heirarchy.root);
-        expectInvalidField(validationResult, "index", heirarchy.customersDefaultView);
+        expectInvalidField(validationResult, "index", heirarchy.customersDefaultIndex);
     });
 
-    it("view > should return error when index map function does not compile", () => {
+    it("index > should return error when index map function does not compile", () => {
         const heirarchy = createValidHeirarchy();
-        heirarchy.customersDefaultView.index.map = "invalid js!!";
+        heirarchy.customersDefaultIndex.map = "invalid js!!";
         const validationResult = validateAll(heirarchy.root);
-        expectInvalidField(validationResult, "index", heirarchy.customersDefaultView);
+        expectInvalidField(validationResult, "index", heirarchy.customersDefaultIndex);
     });
 
-    it("view > should return error when index filter function does not compile", () => {
+    it("index > should return error when index filter function does not compile", () => {
         const heirarchy = createValidHeirarchy();
-        heirarchy.customersDefaultView.index.filter = "invalid js!!";
+        heirarchy.customersDefaultIndex.filter = "invalid js!!";
         const validationResult = validateAll(heirarchy.root);
-        expectInvalidField(validationResult, "index", heirarchy.customersDefaultView);
+        expectInvalidField(validationResult, "index", heirarchy.customersDefaultIndex);
     });
 
 });

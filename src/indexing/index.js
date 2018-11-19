@@ -14,19 +14,19 @@ const reindexFor = async (datastore, appHeirarchy, record, forAction) =>  {
     const evaluateRecord = evaluate(record);
 
     const getIndexNodesToApply = $$(
-        map(n => ({mappedRecord:evaluateRecord(n.viewNode.index), 
-                    viewNode:n.viewNode, 
+        map(n => ({mappedRecord:evaluateRecord(n.indexNode), 
+                    indexNode:n.indexNode, 
                     path:n.path})),
         filter(n => n.mappedRecord.passedFilter)
     );
 
     for(let i of getIndexNodesToApply(indexes.collections)) {
-        await forAction(datastore, i.viewNode, i.mappedRecord.result);
+        await forAction(datastore, i.indexNode, i.mappedRecord.result);
     }
 
     // this can definately be done in parallel (as can be in js)
-    for(let i of getIndexNodesToApply(indexes.globalViews)) {
-        await forAction(datastore, i.viewNode, i.mappedRecord.result);
+    for(let i of getIndexNodesToApply(indexes.globalIndexes)) {
+        await forAction(datastore, i.indexNode, i.mappedRecord.result);
     }
 } 
 
@@ -49,10 +49,10 @@ const reindexForUpdate = (datastore, appHeirarchy) =>
 
     const indexes = getRelevantIndexes(appHeirarchy, newRecord.key());
 
-    const evaluateIndex = (record, viewNodeAndPath) => 
-        ({mappedRecord:evaluate(record)(viewNodeAndPath.viewNode.index), 
-        viewNode:viewNodeAndPath.viewNode, 
-        path:viewNodeAndPath.path});
+    const evaluateIndex = (record, indexNodeAndPath) => 
+        ({mappedRecord:evaluate(record)(indexNodeAndPath.indexNode), 
+        indexNode:indexNodeAndPath.indexNode, 
+        path:indexNodeAndPath.path});
 
     const getIndexNodesToApply = indexFilter => $$(
         map(n => ({
@@ -80,32 +80,32 @@ const reindexForUpdate = (datastore, appHeirarchy) =>
     const filteredOut_toRemove =
         union(
             getIndexNodesToApply(toRemoveFilter)(indexes.collections),
-            getIndexNodesToApply(toRemoveFilter)(indexes.globalViews)
+            getIndexNodesToApply(toRemoveFilter)(indexes.globalIndexes)
         );
 
     // new records to add (filtered in)
     const filteredIn_toAdd =
         union(
             getIndexNodesToApply(toAddFilter)(indexes.collections),
-            getIndexNodesToApply(toAddFilter)(indexes.globalViews)
+            getIndexNodesToApply(toAddFilter)(indexes.globalIndexes)
         );
 
     const changed = 
         union(
             getIndexNodesToApply(toUpdateFilter)(indexes.collections),
-            getIndexNodesToApply(toUpdateFilter)(indexes.globalViews)
+            getIndexNodesToApply(toUpdateFilter)(indexes.globalIndexes)
         );
 
     for(let i of filteredOut_toRemove) {
-        await remove(datastore, i.new.viewNode, i.new.mappedRecord.result);
+        await remove(datastore, i.new.indexNode, i.new.mappedRecord.result);
     }
 
     for(let i of filteredIn_toAdd) {
-        await add(datastore, i.new.viewNode, i.new.mappedRecord.result);
+        await add(datastore, i.new.indexNode, i.new.mappedRecord.result);
     }
 
     for(let i of changed) {
-        await update(datastore, i.new.viewNode, i.new.mappedRecord.result);
+        await update(datastore, i.new.indexNode, i.new.mappedRecord.result);
     }
 
 }

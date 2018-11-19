@@ -3,7 +3,7 @@ import {joinKey, splitKey,
 import {orderBy, constant} from "lodash";
 import {reduce, find, 
         filter, each, map} from "lodash/fp";
-import {getFlattenedHierarchy, isView, 
+import {getFlattenedHierarchy, isIndex, 
         isCollection} from "../templateApi/heirarchy";
 
 export const getRelevantIndexes = (appHeirarchy, key) => {
@@ -15,11 +15,11 @@ export const getRelevantIndexes = (appHeirarchy, key) => {
                 [node => node.pathRegx().length],
                 ["desc"]);
 
-    const makeViewNodeAndPath = (viewNode, path) => ({viewNode, path});
-    const makeViewNodeKeyAndPath_ForCollectionView = (viewNode, path) => 
-        makeViewNodeAndPath(viewNode, joinKey(path, viewNode.name));
+    const makeIndexNodeAndPath = (indexNode, path) => ({indexNode, path});
+    const makeindexNodeKeyAndPath_ForCollectionIndex = (indexNode, path) => 
+        makeIndexNodeAndPath(indexNode, joinKey(path, indexNode.name));
 
-    const traverseHeirarchyCollectionViewIndexesInPath = () => 
+    const traverseHeirarchyCollectionIndexesInPath = () => 
         reduce((acc, part) => {
             const currentPath = joinKey(acc.lastPath, part);
             acc.lastPath = currentPath;
@@ -30,30 +30,30 @@ export const getRelevantIndexes = (appHeirarchy, key) => {
             if(isNothing(nodeMatch)) 
                 return acc;
             
-            if(!isCollection(nodeMatch) || nodeMatch.views.length === 0)
+            if(!isCollection(nodeMatch) || nodeMatch.indexes.length === 0)
                 return acc;
 
             each(v => 
                 acc.nodesAndPaths.push(
-                    makeViewNodeKeyAndPath_ForCollectionView(v, currentPath)))
-            (nodeMatch.views);
+                    makeindexNodeKeyAndPath_ForCollectionIndex(v, currentPath)))
+            (nodeMatch.indexes);
 
             return acc;             
         }, {lastPath:"", nodesAndPaths:[]})
         (pathParts).nodesAndPaths;
     
-    const getGlobalViews = () => 
-        // returns views that are direct children of root
+    const getGlobalIndexes = () => 
+        // returns indexes that are direct children of root
         // and therefor apply globally
         $(appHeirarchy.children, [
-            filter(isView),
-            map(c => makeViewNodeAndPath(c, c.nodeKey()))
+            filter(isIndex),
+            map(c => makeIndexNodeAndPath(c, c.nodeKey()))
         ]);
     
 
     return ({
-        globalViews: getGlobalViews(),
-        collections: traverseHeirarchyCollectionViewIndexesInPath()
+        globalIndexes: getGlobalIndexes(),
+        collections: traverseHeirarchyCollectionIndexesInPath()
     });
 };
 

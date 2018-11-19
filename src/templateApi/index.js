@@ -2,7 +2,7 @@ import {appDefinitionFile} from "../common";
 import {join} from "lodash";
 import {map} from "lodash/fp";
 import {getNewCollectionTemplate, getNewRootLevel, 
-        getNewRecordTemplate, getNewViewTemplate,
+        getNewRecordTemplate, getNewIndexTemplate,
         createNodeErrors, constructHeirarchy} 
         from "./createNodes";
 import {getNewField, validateField, 
@@ -77,8 +77,8 @@ const api = datastore => ({
         }
     },
 
-    getNewRootLevel, getNewCollectionTemplate, getNewViewTemplate,
-    getNewViewTemplate, getNewRecordTemplate,
+    getNewRootLevel, getNewCollectionTemplate, 
+    getNewIndexTemplate, getNewRecordTemplate,
     getNewField, validateField, addField, fieldErrors,
     getNewRecordValidationRule, commonRecordValidationRules, 
     addRecordValidationRule, createAction, createTrigger, validateActions,

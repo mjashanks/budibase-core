@@ -1,21 +1,21 @@
 import {getFlattenedHierarchy, hasNoMatchingAncestors, 
-    isRecord, isCollection, getExactNodeForPath, isGlobalView} from "../templateApi/heirarchy";
+    isRecord, isCollection, getExactNodeForPath, isGlobalIndex} from "../templateApi/heirarchy";
 import {$, allTrue, joinKey} from "../common";
 import {filter} from "lodash/fp";
 import {getIndexedDataKey} from "../indexing/read";
 import getIndexing from "../indexing";
 
 
-const createHeaderedIndexFileIfnotExists = async (app, path, view) => {
+const createHeaderedIndexFileIfnotExists = async (app, path, index) => {
 
     const indexing = getIndexing(app);        
-    const indexedDataKey = getIndexedDataKey(path, view);
+    const indexedDataKey = getIndexedDataKey(path, index);
 
     if(await app.datastore.exists(indexedDataKey)) return;
 
     await indexing.createIndexFile(
         indexedDataKey, 
-        view.index);
+        index);
 };
 
 const ensureCollectionIsInitialised = async (app, node, path) => {
@@ -36,8 +36,8 @@ const ensureCollectionIsInitialised = async (app, node, path) => {
     }
     
 
-    for(let view of node.views) {
-        await createHeaderedIndexFileIfnotExists(app, path, view);
+    for(let index of node.indexes) {
+        await createHeaderedIndexFileIfnotExists(app, path, index);
     }    
 }
 
@@ -55,8 +55,8 @@ export const initialiseAll = app => async () => {
         filter(collectionThatIsNotAnAncestorOfARecord)
     ]);
 
-    const globalViews = $(flatheirarchy, [
-        filter(isGlobalView)
+    const globalIndexes = $(flatheirarchy, [
+        filter(isGlobalIndex)
     ]);
     
     for(let col of collections) {
@@ -66,8 +66,8 @@ export const initialiseAll = app => async () => {
                 col.pathRegx());
     }
 
-    for(let view of globalViews) {
-        await createHeaderedIndexFileIfnotExists(app, "", view);
+    for(let index of globalIndexes) {
+        await createHeaderedIndexFileIfnotExists(app, "", index);
     }
 };
 
