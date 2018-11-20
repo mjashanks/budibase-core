@@ -1,24 +1,13 @@
 import {applyRuleSet, makerule} from "./validationCommon";
 import {compileFilter, compileMap} from "../indexing/evaluate";
-import {isUndefined, isEmpty, 
-        countBy, union} from "lodash/fp";
-import {isNonEmptyString, executesWithoutException} from "../common";
-import { all } from "../types";
+import {isEmpty, countBy, flatten, includes} from "lodash/fp";
+import {join, keys} from "lodash";
+import {isNonEmptyString, executesWithoutException, $} from "../common";
+import {isRecord} from "./heirarchy";
 
-export const getNewIndex = () => ({
-    map:"return {...record};",
-    filter:"",
-    name:"",
-    type:"index"
-});
+export const indexTypes = { reference: "reference", heirarchal: "heirarchal" };
 
-export const addNewReferenceIndex = recordNode => {
-    const index = getNewIndex();
-    recordNode.referenceIndexes.push(index);
-    return index;
-};
-
-const ruleSet = [
+export const indexRuleSet = [
     makerule("map", "index has no map function",
         index => isNonEmptyString(index.map)),
     makerule("map", "index's map function does not compile",
@@ -26,27 +15,26 @@ const ruleSet = [
                 || executesWithoutException(() => compileMap(index))),
     makerule("filter", "index's filter function does not compile",
         index => !isNonEmptyString(index.filter)
-                ||  executesWithoutException(() => compileFilter(index)))
+                ||  executesWithoutException(() => compileFilter(index))),
+    makerule("name", "must declare a name for index",
+        index => isNonEmptyString(index.name)),
+    makerule("name", "there is a duplicate named index on this node",
+        index => isEmpty(index.name)  
+                || countBy('name')
+                   (index.parent().indexes)[index.name] === 1) ,
+    makerule("indexType", `reference index may only exist on a record node`,
+        index =>  isRecord(index.parent()) 
+                  || index.indexType !== indexTypes.reference),
+    makerule("indexType", `index type must be one of: ${join(", ", keys(indexTypes))}`,
+        index =>  includes(index.indexType)(keys(indexTypes)))
 ];
 
-const referenceIndexRules = allReferenceIndexesOnNode => [
-    makerule("name", "must declare a name for reference index",
-        index => isNonEmptyString(index.map)),
-    makerule("name", "there is a duplicate named reference index on this node",
-        index => isEmpty(index.map)  
-                 || countBy(i => i.name)
-                    (allReferenceIndexesOnNode)[index.name] === 1) 
-];
+export const validateIndex = (index, allReferenceIndexesOnNode) => 
+    applyRuleSet(indexRuleSet(allReferenceIndexesOnNode))
+                (index);
 
-export const validateIndex = (index, allReferenceIndexesOnNode = null) => {
-
-    const isReferenceIndex = !isUndefined(
-        allReferenceIndexesOnNode);
-    
-    const rules = isReferenceIndex
-                  ? union(ruleSet)
-                    (referenceIndexRules(allReferenceIndexesOnNode))
-                  : ruleSet;
-
-    return applyRuleSet(rules)(index);
-};
+export const validateAllIndexes = (node) => 
+    $(node.indexes, [
+        map(i => validateIndex(i, node.indexes)),
+        flatten
+    ]);

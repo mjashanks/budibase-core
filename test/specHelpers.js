@@ -4,7 +4,8 @@ import {getAppApis, getRecordApi,
 import memory from "../src/appInitialise/memory";
 import {setupDatastore} from "../src/appInitialise";
 import {configFolder, fieldDefinitions, 
-    templateDefinitions} from "../src/common";
+    templateDefinitions,
+    joinKey} from "../src/common";
 import { getNewIndexTemplate } from "../src/templateApi/createNodes";
 import getTemplateApi from "../src/templateApi";
 import {createEventAggregator} from "../src/appInitialise/eventAggregator";
@@ -45,6 +46,10 @@ export const getIndexApiFromTemplateApi = async templateApi =>
 
 export const heirarchyFactory = (...additionalFeatures) => templateApi => {
     const root = templateApi.getNewRootLevel();
+
+    const settingsRecord = templateApi.getNewRecordTemplate(root);
+    settingsRecord.name = "settings";
+
     const customersCollection = templateApi.getNewCollectionTemplate(root);
     customersCollection.name = "customers";
     customersCollection.indexes[0].map = "return {surname:record.surname, isalive:record.isalive};";
@@ -77,7 +82,7 @@ export const heirarchyFactory = (...additionalFeatures) => templateApi => {
     const heirarchy = ({root, customersCollection, customerRecord,
             invoicesCollection, invoiceRecord, chargesCollection, 
             partnersCollection, partnerRecord, partnerInvoicesCollection,
-            partnerInvoiceRecord, chargeRecord});
+            partnerInvoiceRecord, chargeRecord, settingsRecord});
     for(let feature of additionalFeatures) {
         feature(heirarchy, templateApi);
     }
@@ -90,13 +95,32 @@ export const basicAppHeirarchyCreator = templateApis =>
 export const withFields = (heirarchy, templateApi) => {
     const {customerRecord, invoiceRecord, 
         partnerInvoiceRecord, chargeRecord,
-        partnerRecord} = heirarchy;
+        partnerRecord, partnersCollection, 
+        settingsRecord} = heirarchy;
+
+    getNewFieldAndAdd(templateApi, settingsRecord)("appName", "string", "");
+    
     const newCustomerField = getNewFieldAndAdd(templateApi, customerRecord);
+
+
+    const partnersReferenceIndex = templateApi.getNewIndexTemplate(partnersCollection);
+    partnersReferenceIndex.name = "partnersReference";
+    partnersReferenceIndex.map = "return {name:record.businessName};";
+
+    const partnerCustomersReverseIndex = templateApi.getNewIndexTemplate(partnerRecord);
+    partnerCustomersReverseIndex.name = "partnerCustomers";
+    partnerCustomersReverseIndex.map = "return {...record};";
+    heirarchy.partnerCustomersReverseIndex = partnerCustomersReverseIndex;
 
     newCustomerField("surname", "string");
     newCustomerField("isalive", "bool");
     newCustomerField("createddate", "datetime");
     newCustomerField("age", "number");
+    const customerPartnerField = newCustomerField("partner", "reference");
+    customerPartnerField.typeOptions.indexNodeKey = "/partners/partnersRefererence";
+    customerPartnerField.typeOptions.displayValue = "businessName";
+    customerPartnerField.typeOptions.reverseIndexNodeKey = joinKey(
+        partnerRecord.nodeKey(), "partnerCustomers" );
 
     const newInvoiceField = getNewFieldAndAdd(templateApi, invoiceRecord);
 
@@ -119,6 +143,7 @@ export const withFields = (heirarchy, templateApi) => {
     customersReferenceIndex.name = "customersReference";
     customersReferenceIndex.map = "return {name:record.surname}";
     customersReferenceIndex.filter = "record.isalive === true";
+
     const invoiceCustomerField = newInvoiceField("customer", "reference");
     invoiceCustomerField.typeOptions.indexNodeKey = "/customersReference";
     invoiceCustomerField.typeOptions.displayValue = "name";

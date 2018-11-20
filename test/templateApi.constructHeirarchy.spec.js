@@ -13,6 +13,7 @@ describe("heirarchy node creation", () => {
         expect(root.pathRegx()).toBe("/");
         expect(root.parent).toBeDefined();
         expect(root.isRoot()).toBeTruthy();
+        expect(root.indexes).toEqual([]);
     });
 
     it("> getNewRecordTemplate > should be initialise with correct members", async () => {
@@ -23,7 +24,7 @@ describe("heirarchy node creation", () => {
         expect(record.type).toBe("record");
         expect(record.children).toEqual([]);
         expect(record.validationRules).toEqual([]);
-        expect(record.referenceIndexes).toEqual([]);
+        expect(record.indexes).toEqual([]);
         expect(record.parent()).toBe(root);
     });
 
@@ -108,17 +109,18 @@ describe("heirarchy node creation", () => {
         expect(index.map).toBeDefined();
         expect(index.filter).toBeDefined();
         expect(index.children).toBeUndefined();
+        expect(index.indexType).toBe("heirarchal");
         index.name = "naughty-customers";
         expect(index.pathRegx()).toBe("/naughty-customers");
         expect(index.parent()).toBe(root);
     });
 
-    it("> getNewIndexTemplate > should add itself to roots children", async () => {
+    it("> getNewIndexTemplate > should add itself to roots indexes", async () => {
         const templateApi = await getMemoryTemplateApi();
         const root = templateApi.getNewRootLevel();
         const index = templateApi.getNewIndexTemplate(root);
-        expect(root.children.length).toBe(1);
-        expect(root.children[0]).toBe(index);
+        expect(root.indexes.length).toBe(1);
+        expect(root.indexes[0]).toBe(index);
     });
 
     it("> getNewIndexTemplate > should add itself to collection indexes", async () => {
@@ -139,14 +141,6 @@ describe("heirarchy node creation", () => {
         .toThrow(errors.indexCannotBeParent);
         expect(() => templateApi.getNewRecordTemplate(index))
         .toThrow(errors.indexCannotBeParent);
-    });
-
-    it("should throw exception when index is add to record", async () => {
-        const templateApi = await getMemoryTemplateApi();
-        const root = templateApi.getNewRootLevel();
-        const record = templateApi.getNewRecordTemplate(root);
-        expect(() => templateApi.getNewIndexTemplate(record))
-        .toThrow(errors.indexParentMustBeCollectionOrRoot);
     });
 
     it("should throw exception when no parent supplied, for non root node", async () => {

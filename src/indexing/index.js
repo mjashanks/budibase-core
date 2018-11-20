@@ -9,7 +9,7 @@ import {unparse} from "papaparse";
 
 const reindexFor = async (datastore, appHeirarchy, record, forAction) =>  {
 
-    const indexes = getRelevantIndexes(appHeirarchy, record.key());
+    const indexes = getRelevantIndexes(appHeirarchy, record);
 
     const evaluateRecord = evaluate(record);
 
@@ -47,7 +47,7 @@ const reindexForDelete = (datastore, appHeirarchy) =>
 const reindexForUpdate = (datastore, appHeirarchy) => 
                          async (oldRecord, newRecord) => {
 
-    const indexes = getRelevantIndexes(appHeirarchy, newRecord.key());
+    const indexes = getRelevantIndexes(appHeirarchy, newRecord);
 
     const evaluateIndex = (record, indexNodeAndPath) => 
         ({mappedRecord:evaluate(record)(indexNodeAndPath.indexNode), 

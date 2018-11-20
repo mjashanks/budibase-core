@@ -15,9 +15,10 @@ import {compileExpression, compileCode} from "@nx-js/compiler-util";
 import {validateField} from "./fields";
 import {applyRuleSet, makerule, stringNotEmpty, 
         validationError} from "./validationCommon";
+import {indexRuleSet} from "./indexes";
 
 export const ruleSet = (...sets) => 
-    constant(union(...sets));
+    constant(flatten([...sets]));
 
 const commonRules = [
     makerule("name", "node name is not set", 
@@ -41,24 +42,23 @@ const collectionRules = [
     makerule("children", "collection does not have and children",
         node => isNonEmptyArray(node.children))
 ];
-const indexRules = [
-    makerule("index", "index has no map function",
-        node => isNonEmptyString(node.map)),
-    makerule("index", "index's map function does not compile",
-        node => !isNonEmptyString(node.map)
-                || executesWithoutException(() => compileMap(node))),
-    makerule("index", "index's filter function does not compile",
-        node => !isNonEmptyString(node.filter)
-                ||  executesWithoutException(() => compileFilter(node)))
-];
 
-const getRuleSet = 
+const getRuleSet = node => 
     switchCase(
-        [isCollection, ruleSet(commonRules, collectionRules)],
-        [isRecord, ruleSet(commonRules, recordRules)],
-        [isIndex, ruleSet(commonRules, indexRules)],
+        [isCollection, ruleSet(
+                        commonRules, 
+                        collectionRules)],
+
+        [isRecord, ruleSet(
+                    commonRules, 
+                    recordRules)],
+
+        [isIndex, ruleSet(
+                      commonRules, 
+                      indexRuleSet)],
+
         [defaultCase, ruleSet(commonRules, [])]
-    );
+    )(node);
 
 export const validateNode = node => 
     applyRuleSet(getRuleSet(node))(node);

@@ -3,7 +3,7 @@ import {switchCase, defaultCase, joinKey,
 import {each, constant} from "lodash";
 import {isCollection, isIndex, isRoot
     , isRecord} from "./heirarchy";
-import {getNewIndex} from "./indexes";
+import {validateAll} from "./validate";
 
 export const createNodeErrors = {
     indexCannotBeParent : "Index template cannot be a parent",
@@ -42,7 +42,8 @@ const validate = parent => node => {
     if(isIndex(node) 
         && isSomething(parent) 
         && !isCollection(parent)
-        && !isRoot(parent)) {
+        && !isRoot(parent)
+        && !isRecord(parent)) {
         throw new Error(createNodeErrors.indexParentMustBeCollectionOrRoot);
     }
 
@@ -66,7 +67,7 @@ const construct = (parent) => (node) => {
 const addToParent = obj => {
     const parent = obj.parent();
     if(isSomething(parent)) {
-        if(isCollection(parent) && isIndex(obj))
+        if(isIndex(obj))
             // Q: why are indexes not children ?
             // A: because they cannot have children of their own.
             parent.indexes.push(obj);
@@ -85,7 +86,7 @@ const constructNode = (parent, obj) =>
 
 export const constructHeirarchy = (node, parent) => {
     construct(parent)(node);
-    if(isCollection(node)) {
+    if(node.indexes) {
         each(node.indexes, 
             child => constructHeirarchy(child, node));
     }
@@ -102,7 +103,8 @@ export const getNewRootLevel = () =>
         name:"root",
         type:"root",
         children:[],
-        pathMaps:[]
+        pathMaps:[],
+        indexes:[]
     });
 
 export const getNewRecordTemplate = parent => 
@@ -116,7 +118,7 @@ export const getNewRecordTemplate = parent =>
                            && isCollection(parent)
                            ? parent.children.length
                            : 0,
-        referenceIndexes: []
+        indexes: []
     });
 
 export const getNewCollectionTemplate = parent => {
@@ -134,7 +136,13 @@ export const getNewCollectionTemplate = parent => {
 
 export const getNewIndexTemplate = parent => 
     constructNode(parent, {
-        ...getNewIndex()
+        name:"",
+        type:"index",
+        map:"return {...record};",
+        filter:"",
+        indexType: isRecord(parent) 
+                   ? "reference" 
+                   : "heirarchal"
     });
 
 export default {

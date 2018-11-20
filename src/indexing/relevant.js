@@ -1,13 +1,15 @@
 import {joinKey, splitKey, 
-    isNothing, $} from "../common";
+    isNothing, $, isSomething} from "../common";
 import {orderBy, constant} from "lodash";
 import {reduce, find, 
         filter, each, map} from "lodash/fp";
 import {getFlattenedHierarchy, isIndex, 
-        isCollection} from "../templateApi/heirarchy";
+        isCollection,
+        getExactNodeForPath} from "../templateApi/heirarchy";
 
-export const getRelevantIndexes = (appHeirarchy, key) => {
+export const getRelevantIndexes = (appHeirarchy, record) => {
 
+    const key = record.key();
     const pathParts = splitKey(key);
 
     const flatHeirarchy = 
@@ -45,15 +47,31 @@ export const getRelevantIndexes = (appHeirarchy, key) => {
     const getGlobalIndexes = () => 
         // returns indexes that are direct children of root
         // and therefor apply globally
-        $(appHeirarchy.children, [
+        $(appHeirarchy.indexes, [
             filter(isIndex),
             map(c => makeIndexNodeAndPath(c, c.nodeKey()))
+        ]);
+    
+    const getReverseReferenceIndexes = () => 
+        $(key, [
+            getExactNodeForPath(appHeirarchy),
+            n => n.fields,
+            filter(f => f.type === "reference"
+                        && isSomething(f.typeOptions.reverseIndexNodeKey)),
+            map(f => {
+                const revIndexNode = getExactNodeForPath(appHeirarchy)
+                                     (f.typeOptions.reverseIndexNodeKey);
+                const indexPath = joinKey(
+                    record[f.name].key, revIndexNode.name);
+                return makeIndexNodeAndPath(revIndexNode, indexPath);
+            }),
         ]);
     
 
     return ({
         globalIndexes: getGlobalIndexes(),
-        collections: traverseHeirarchyCollectionIndexesInPath()
+        collections: traverseHeirarchyCollectionIndexesInPath(),
+        reverseReference: getReverseReferenceIndexes()
     });
 };
 

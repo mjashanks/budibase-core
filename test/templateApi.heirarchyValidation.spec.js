@@ -113,21 +113,39 @@ describe("heirarchy validation", () => {
         const heirarchy = createValidHeirarchy();
         heirarchy.customersDefaultIndex.map = "";
         const validationResult = validateAll(heirarchy.root);
-        expectInvalidField(validationResult, "index", heirarchy.customersDefaultIndex);
+        expectInvalidField(validationResult, "map", heirarchy.customersDefaultIndex);
     });
 
     it("index > should return error when index map function does not compile", () => {
         const heirarchy = createValidHeirarchy();
         heirarchy.customersDefaultIndex.map = "invalid js!!";
         const validationResult = validateAll(heirarchy.root);
-        expectInvalidField(validationResult, "index", heirarchy.customersDefaultIndex);
+        expectInvalidField(validationResult, "map", heirarchy.customersDefaultIndex);
     });
 
     it("index > should return error when index filter function does not compile", () => {
         const heirarchy = createValidHeirarchy();
         heirarchy.customersDefaultIndex.filter = "invalid js!!";
         const validationResult = validateAll(heirarchy.root);
-        expectInvalidField(validationResult, "index", heirarchy.customersDefaultIndex);
+        expectInvalidField(validationResult, "filter", heirarchy.customersDefaultIndex);
+    });
+
+    it("index > should return error when index type is not one of allowed values", () => {
+        const heirarchy = createValidHeirarchy();
+        heirarchy.customersDefaultIndex.indexType = "";
+        const validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "indexType", heirarchy.customersDefaultIndex);
+
+        heirarchy.customersDefaultIndex.indexType = "should not be allowed";
+        const validationResult2 = validateAll(heirarchy.root);
+        expectInvalidField(validationResult2, "indexType", heirarchy.customersDefaultIndex);
+    });
+
+    it("index > should return error when reference index's parent is not a record", () => {
+        const heirarchy = createValidHeirarchy();
+        heirarchy.customersDefaultIndex.indexType = "reference";
+        const validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "indexType", heirarchy.customersDefaultIndex);
     });
 
 });

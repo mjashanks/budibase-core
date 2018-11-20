@@ -14,8 +14,8 @@ export const getFlattenedHierarchy = appHeirarchy => {
             return flattened;
         }
         const children = 
-            isCollection(currentNode) 
-            ? union(currentNode.children, currentNode.indexes)
+            currentNode.indexes 
+            ? union(currentNode.children)(currentNode.indexes)
             : currentNode.children;
 
         for(let child of children) {
