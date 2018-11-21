@@ -122,6 +122,18 @@ export const withFields = (heirarchy, templateApi) => {
     customerPartnerField.typeOptions.reverseIndexNodeKey = joinKey(
         partnerRecord.nodeKey(), "partnerCustomers" );
 
+    const referredToCustomersReverseIndex = templateApi.getNewIndexTemplate(customerRecord);
+    referredToCustomersReverseIndex.name = "referredToCustomers";
+    referredToCustomersReverseIndex.map = "return {...record};";
+    heirarchy.referredToCustomersReverseIndex = referredToCustomersReverseIndex;
+
+    const customerReferredByField = newCustomerField("referredBy", "reference");
+    customerReferredByField.typeOptions.indexNodeKey = "/customers/default";
+    customerReferredByField.typeOptions.displayValue = "surname";
+    customerReferredByField.typeOptions.reverseIndexNodeKey = joinKey(
+        customerRecord.nodeKey(), "referredToCustomers");
+    heirarchy.customerReferredByField = customerReferredByField;
+
     const newInvoiceField = getNewFieldAndAdd(templateApi, invoiceRecord);
 
     newInvoiceField("totalIncVat", "number");

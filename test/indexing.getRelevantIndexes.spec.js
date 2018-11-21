@@ -4,6 +4,7 @@ import {getMemoryTemplateApi,
         basicAppHeirarchyCreator_WithFields_AndIndexes} from "./specHelpers";
 import {getRelevantIndexes} from "../src/indexing/relevant";
 import {some} from "lodash";
+import {joinKey} from "../src/common";
 
 describe("getRelevantIndexes", () => {
 
@@ -51,8 +52,8 @@ describe("getRelevantIndexes", () => {
     });
 
     it("should get reverseReferenceIndex accross heirarchy branches", async () => {
-        const {appHeirarchy, partnerCustomersReverseIndex,
-                recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {appHeirarchy,
+                recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
         
         const partner = recordApi.getNew("/partners", "partner");
         partner.businessName = "acme inc";
@@ -65,20 +66,26 @@ describe("getRelevantIndexes", () => {
         
         const indexes = getRelevantIndexes(appHeirarchy.root, customer);
         expect(indexes.reverseReference.length).toBe(1);
-        expect(indexes.reverseReference[0].path).toBe(partnerCustomersReverseIndex.nodeKey());
-        /*
-        const templateApi = await getMemoryTemplateApi();
-        const root = templateApi.getNewRootLevel();
-        const rootLevelCollection1 = templateApi.getNewCollectionTemplate(root);
-        rootLevelCollection1.name = "customers";
+        expect(indexes.reverseReference[0].path)
+        .toBe(joinKey(partner.key(), appHeirarchy.partnerCustomersReverseIndex.name));
 
-        const recordNode1 = templateApi.getNewRecordTemplate(rootLevelCollection1);
-        recordNode1.name = "customer";
-        const referenceField = templateApi.getNewField("reference");
-        referenceField.name = "partner";
-        referenceField.typeOptions.indexNodeKey = "/partners/default";
-        referenceField.typeOptions.displayValue = 
-*/
+
+    });
+
+    it("should get reverseReferenceIndex when referencing record in same collection", async () => {
+        const {appHeirarchy,
+                recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+        
+        const referredByCustomer = recordApi.getNew("/customers", "customer");
+        referredByCustomer.surname = "ledog";
+
+        const referredToCustomer = recordApi.getNew("/customers", "customer");
+        referredToCustomer.referredBy = {key:referredByCustomer.key(), value:"ledog"};        
+        
+        const indexes = getRelevantIndexes(appHeirarchy.root, referredToCustomer);
+        expect(indexes.reverseReference.length).toBe(1);
+        expect(indexes.reverseReference[0].path)
+        .toBe(joinKey(referredByCustomer.key(), appHeirarchy.referredToCustomersReverseIndex.name));
 
     });
 });
