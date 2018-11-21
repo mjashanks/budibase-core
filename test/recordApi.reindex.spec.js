@@ -107,6 +107,36 @@ describe("recordApi > create > reindex", () => {
         expect(customers[0].name).toBe("Ledog");
     });
 
+    it("should add to reverse reference index, when required", async () => {
+        const {recordApi, indexApi} = 
+            await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+
+        const referredByCustomer = recordApi.getNew("/customers", "customer");
+        referredByCustomer.surname = "Ledog";
+        referredByCustomer.age = 9;
+        referredByCustomer.isalive = true,
+        referredByCustomer.createdDate = new Date();
+        await recordApi.save(referredByCustomer);
+
+        const referredCustomer = recordApi.getNew("/customers", "customer");
+        referredCustomer.surname = "Zeecat";
+        referredCustomer.age = 9;
+        referredCustomer.isalive = true,
+        referredCustomer.createdDate = new Date();
+        referredCustomer.referredBy = {
+            key:referredByCustomer.key(), 
+            value:referredByCustomer.surname};
+        await recordApi.save(referredCustomer);
+
+        const customersReferredTo = await indexApi.listItems(
+            joinKey(referredByCustomer.key(), "referredToCustomers")
+        );
+
+        expect(isArray(customersReferredTo)).toBeTruthy();
+        expect(customersReferredTo.length).toBe(1);
+        expect(customersReferredTo[0].surname).toBe("Zeecat");
+    });
+
 });
 
 describe("recordApi > delete > reindex", () => {
