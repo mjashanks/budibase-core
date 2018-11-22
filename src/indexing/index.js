@@ -28,6 +28,10 @@ const reindexFor = async (datastore, appHeirarchy, record, forAction) =>  {
     for(let i of getIndexNodesToApply(indexes.globalIndexes)) {
         await forAction(datastore, i.indexNode, i.mappedRecord.result);
     }
+
+    for(let i of getIndexNodesToApply(indexes.reverseReference)) {
+        await forAction(datastore, i.indexNode, i.mappedRecord.result);
+    }
 } 
 
 const reindexForCreate = (datastore, appHeirarchy) => 
@@ -80,7 +84,8 @@ const reindexForUpdate = (datastore, appHeirarchy) =>
     const filteredOut_toRemove =
         union(
             getIndexNodesToApply(toRemoveFilter)(indexes.collections),
-            getIndexNodesToApply(toRemoveFilter)(indexes.globalIndexes)
+            getIndexNodesToApply(toRemoveFilter)(indexes.globalIndexes),
+            getIndexNodesToApply(toRemoveFilter)(indexes.reverseReference)
         );
 
     // new records to add (filtered in)

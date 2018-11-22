@@ -2,7 +2,7 @@ import {getExactNodeForPath, findField, getNode} from "../templateApi/heirarchy"
 import {getIndexedDataKey} from "../indexing/read";
 import {listItems} from "../indexApi/listItems";
 import {has, some} from "lodash";
-import {map} from "lodash/fp";
+import {map, isString} from "lodash/fp";
 import {$, apiWrapper, events} from "../common";
 
 export const getContext = app => recordKey => 
@@ -18,43 +18,49 @@ const _getContext = (app, recordKey) => {
 
     const cachedReferenceIndexes = {};
 
-    const lazyLoadReferenceIndex = async fieldName => {
-        
-        const field = findField(recordNode, fieldName);
+    const lazyLoadReferenceIndex = async typeOptions => {
 
-        if(!has(cachedReferenceIndexes, fieldName)) {
-            cachedReferenceIndexes[fieldName] = {
-                field: field,
+        if(!has(cachedReferenceIndexes, typeOptions.indexNodeKey)) {
+            cachedReferenceIndexes[typeOptions.indexNodeKey] = {
+                typeOptions: typeOptions,
                 data: await readReferenceIndex(
-                        app, recordKey, field)
+                        app, recordKey, typeOptions)
             }
                     
         }
 
-        return cachedReferenceIndexes[fieldName];
+        return cachedReferenceIndexes[typeOptions.indexNodeKey];
     }
 
+    const getTypeOptions = typeOptions_or_fieldName => 
+        isString(typeOptions_or_fieldName)
+        ? findField(recordNode, typeOptions_or_fieldName)
+            .typeOptions
+        : typeOptions_or_fieldName;
+
     return {
-        referenceExists : async (fieldName, key) => {
-            const {data} = await lazyLoadReferenceIndex(fieldName);
+        referenceExists : async (typeOptions_or_fieldName, key) => {
+            const typeOptions = getTypeOptions(typeOptions_or_fieldName);
+            const {data} = await lazyLoadReferenceIndex(typeOptions);
             return some(data, i => i.key === key);
         },
-        referenceOptions: async (fieldName) => {
-            const {data} = await lazyLoadReferenceIndex(fieldName);
+        referenceOptions: async (typeOptions_or_fieldName) => {
+            const typeOptions = getTypeOptions(typeOptions_or_fieldName);
+            const {data} = await lazyLoadReferenceIndex(typeOptions);
             return data;
         },
         recordNode
     };
 }
 
-const readReferenceIndex = async (app, recordKey,field) => {
-    const indexNode = getNode(app.heirarchy, field.typeOptions.indexNodeKey);
+const readReferenceIndex = async (app, recordKey,typeOptions) => {
+    const indexNode = getNode(app.heirarchy, typeOptions.indexNodeKey);
     const indexedDataKey = getIndexedDataKey(recordKey, indexNode);
     const items = await listItems(app)(indexedDataKey);
     return $(items, [
         map(i => ({
             key: i.key,
-            value: i[field.typeOptions.displayValue]
+            value: i[typeOptions.displayValue]
         }))
     ]);
  }

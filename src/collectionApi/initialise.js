@@ -6,7 +6,7 @@ import {getIndexedDataKey} from "../indexing/read";
 import getIndexing from "../indexing";
 
 
-const createHeaderedIndexFileIfnotExists = async (app, path, index) => {
+export const createHeaderedIndexFileIfnotExists = async (app, path, index) => {
 
     const indexing = getIndexing(app);        
     const indexedDataKey = getIndexedDataKey(path, index);

@@ -43,8 +43,7 @@ const isEmptyString = s =>
 
 const ensureReferenceExists = (val, opts, context) => 
     isEmptyString(val.key) 
-    || context.referenceExistsInIndex(
-        uniqueIndexName(opts.index), val);
+    || context.referenceExists(opts, val.key);
 
 const typeConstraints = [
     makerule(

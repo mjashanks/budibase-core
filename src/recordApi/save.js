@@ -1,8 +1,15 @@
-import {cloneDeep, constant} from "lodash/fp";
-import {initialiseChildCollections} from "../collectionApi/initialise";
+import {cloneDeep, constant, 
+        flatten, map, filter,
+        includes} from "lodash/fp";
+import {initialiseChildCollections,
+    createHeaderedIndexFileIfnotExists} from "../collectionApi/initialise";
 import {validate} from "./validate";
 import {load, getRecordFileName} from "./load";
-import {apiWrapper, events} from "../common";
+import {apiWrapper, events, 
+        $, isSomething} from "../common";
+import { getFlattenedHierarchy, 
+        getExactNodeForPath, isRecord,
+        getNode } from "../templateApi/heirarchy";
 
 export const save = (app,indexingApi) => async (record, context) => 
     apiWrapper(
@@ -33,6 +40,7 @@ const _save = async (app,indexingApi, record, context) => {
             getRecordFileName(recordClone.key()), 
             recordClone
         );
+        await initialiseReverseReferenceIndexes(app, record);
         await initialiseChildCollections(app, recordClone.key());
         app.publish(events.recordApi.save.onRecordCreated, {
             record:recordClone
@@ -56,3 +64,32 @@ const _save = async (app,indexingApi, record, context) => {
    
     return returnedClone;
 };
+
+const initialiseReverseReferenceIndexes = async (app, record) => {
+
+    const recordNode = getExactNodeForPath(app.heirarchy)
+                                          (record.key());
+
+    const fieldReversesReferenceToHere = f => 
+        f.type === "reference"
+        && isSomething(f.typeOptions.reverseIndexNodeKey)
+        && includes(f.typeOptions.reverseIndexNodeKey)
+                   (map(i => i.nodeKey())(recordNode.indexes));
+
+    const indexNodes = $(app.heirarchy, [
+        getFlattenedHierarchy,
+        filter(isRecord),
+        map(n => n.fields),
+        flatten,
+        filter(fieldReversesReferenceToHere),
+        map(f => getNode(
+                    app.heirarchy,
+                    f.typeOptions.reverseIndexNodeKey))
+    ]);
+
+    for(let indexNode of indexNodes) {
+        await createHeaderedIndexFileIfnotExists(
+            app, record.key(), indexNode
+        );
+    }
+}
