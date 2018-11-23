@@ -92,13 +92,15 @@ const reindexForUpdate = (datastore, appHeirarchy) =>
     const filteredIn_toAdd =
         union(
             getIndexNodesToApply(toAddFilter)(indexes.collections),
-            getIndexNodesToApply(toAddFilter)(indexes.globalIndexes)
+            getIndexNodesToApply(toAddFilter)(indexes.globalIndexes),
+            getIndexNodesToApply(toAddFilter)(indexes.reverseReference)
         );
 
     const changed = 
         union(
             getIndexNodesToApply(toUpdateFilter)(indexes.collections),
-            getIndexNodesToApply(toUpdateFilter)(indexes.globalIndexes)
+            getIndexNodesToApply(toUpdateFilter)(indexes.globalIndexes),
+            getIndexNodesToApply(toUpdateFilter)(indexes.reverseReference)
         );
 
     for(let i of filteredOut_toRemove) {

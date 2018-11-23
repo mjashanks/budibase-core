@@ -161,23 +161,36 @@ describe("recordApi > delete > reindex", () => {
     it("should remove from all indexes", async () => {
         const {recordApi,
             collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
-        const record = recordApi.getNew("/customers", "customer");
+        
+        const referredBy = recordApi.getNew("/customers", "customer");
+        referredBy.surname = "Zeecat";
 
+        await recordApi.save(referredBy);
+
+        const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";
         record.isalive = false;
         record.age = 9;
         record.createddate = new Date();
+        record.referredBy = {
+            key: referredBy.key(),
+            value: referredBy.surname
+        };
 
         await recordApi.save(record);
-
         await recordApi.delete(record.key());
 
         const itemsAfterDelete= await collectionApi.listRecords("/customers/default");
-        expect(itemsAfterDelete.length).toBe(0);
+        expect(itemsAfterDelete.length).toBe(1);
 
         const deceasedItemsAfterDelete=
             await collectionApi.listRecords("/customers/deceased");
         expect(deceasedItemsAfterDelete.length).toBe(0);
+
+        const referredToItemsAfterDelete = 
+            await collectionApi.listRecords(`${referredBy.key()}/referredToCustomers`);
+        expect(referredToItemsAfterDelete.length).toBe(0);
+
     });
 
     it("should only remove relevant record from all indexes", async () => {
@@ -308,6 +321,41 @@ describe("recordApi > update > reindex", () => {
         expect(isArray(customers)).toBeTruthy();
         expect(customers.length).toBe(1);
         expect(customers[0].name).toBe("Zeecat");
+    });
+
+    it("should remove from one reference index and add to another when field changed", async () => {
+        const {recordApi, indexApi} = 
+        await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+
+        const partner1 = recordApi.getNew("/partners", "partner");
+        partner1.businessName = "ACME inc";
+        await recordApi.save(partner1);
+
+        const partner2 = recordApi.getNew("/partners", "partner");
+        partner2.businessName = "Big Corp ltd";
+        await recordApi.save(partner2);
+
+        const customer = recordApi.getNew("/customers", "customer");
+        customer.surname = "Ledog";
+        customer.partner = {
+            key: partner1.key(), value: partner1.businessName
+        };
+
+        const customerSaved = await recordApi.save(customer);
+
+        customerSaved.partner = {
+            key: partner2.key(), value: partner2.businessName
+        };
+
+        await recordApi.save(customerSaved);
+
+        const partner1Customer = 
+            await indexApi.listItems(`${partner1.key()}/partnerCustomers`);
+        expect(partner1Customer.length).toBe(0);
+
+        const partner2Customer = 
+            await indexApi.listItems(`${partner2.key()}/partnerCustomers`);
+        expect(partner2Customer.length).toBe(1);
     });
 
 });
