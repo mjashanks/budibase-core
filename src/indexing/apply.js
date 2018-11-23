@@ -3,13 +3,10 @@ import {find, pull, merge, isString} from "lodash";
 import {readIndex, getIndexedDataKey, getIndexedDataKey_fromIndexKey} from "./read";
 // refactor write and read
 export const writeIndex = async (datastore, indexedData, 
-                                indexNodeOrIndexKey, decendantKey) => {
+                                indexKey) => {
     const indexContents = Papa.unparse(indexedData);
 
-    const indexedDataKey = 
-        isString(indexNodeOrIndexKey)
-        ? getIndexedDataKey_fromIndexKey(indexNodeOrIndexKey)
-        : getIndexedDataKey(decendantKey, indexNodeOrIndexKey);
+    const indexedDataKey = getIndexedDataKey_fromIndexKey(indexKey);
 
     if(await datastore.exists(indexedDataKey)) {
         await datastore.updateFile(
@@ -25,15 +22,15 @@ export const writeIndex = async (datastore, indexedData,
 const compareKey = mappedRecord => i => i.key === mappedRecord.key; 
 
 
-export const add = async (store, indexNode, mappedRecord) => {
-    const indexedDataKey = getIndexedDataKey(mappedRecord.key, indexNode);
+export const add = async (store, mappedRecord, indexKey) => {
+    const indexedDataKey = getIndexedDataKey_fromIndexKey(indexKey);
     const indexedData = await readIndex(store, indexedDataKey);
     indexedData.push(mappedRecord);
-    await writeIndex(store, indexedData, indexNode, mappedRecord.key);
+    await writeIndex(store, indexedData, indexedDataKey);
 };
 
-export const remove = async (store, indexNode, mappedRecord)  => {
-    const indexedDataKey = getIndexedDataKey(mappedRecord.key, indexNode);
+export const remove = async (store, mappedRecord, indexKey)  => {
+    const indexedDataKey = getIndexedDataKey_fromIndexKey(indexKey);
     const indexedData = await readIndex(store, indexedDataKey);
     // using pull to mutate on purpose, so we dont have a copy of the array
     // (which may be large)
@@ -41,11 +38,11 @@ export const remove = async (store, indexNode, mappedRecord)  => {
          find(indexedData, compareKey(mappedRecord))
     );
 
-    await writeIndex(store, indexedData, indexNode, mappedRecord.key);
+    await writeIndex(store, indexedData, indexedDataKey);
 };
 
-export const update = async (store, indexNode, mappedRecord) => {
-    const indexedDataKey = getIndexedDataKey(mappedRecord.key, indexNode);
+export const update = async (store, mappedRecord, indexKey) => {
+    const indexedDataKey = getIndexedDataKey_fromIndexKey(indexKey);
     const indexedData = await readIndex(store, indexedDataKey);
 
     merge(
@@ -53,5 +50,5 @@ export const update = async (store, indexNode, mappedRecord) => {
         mappedRecord
     );
 
-    await writeIndex(store, indexedData, indexNode, mappedRecord.key);
+    await writeIndex(store, indexedData, indexedDataKey);
 };

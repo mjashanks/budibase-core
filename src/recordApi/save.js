@@ -9,7 +9,7 @@ import {apiWrapper, events,
         $, isSomething} from "../common";
 import { getFlattenedHierarchy, 
         getExactNodeForPath, isRecord,
-        getNode } from "../templateApi/heirarchy";
+        getNode, fieldReversesReferenceToNode} from "../templateApi/heirarchy";
 
 export const save = (app,indexingApi) => async (record, context) => 
     apiWrapper(
@@ -70,18 +70,12 @@ const initialiseReverseReferenceIndexes = async (app, record) => {
     const recordNode = getExactNodeForPath(app.heirarchy)
                                           (record.key());
 
-    const fieldReversesReferenceToHere = f => 
-        f.type === "reference"
-        && isSomething(f.typeOptions.reverseIndexNodeKey)
-        && includes(f.typeOptions.reverseIndexNodeKey)
-                   (map(i => i.nodeKey())(recordNode.indexes));
-
     const indexNodes = $(app.heirarchy, [
         getFlattenedHierarchy,
         filter(isRecord),
         map(n => n.fields),
         flatten,
-        filter(fieldReversesReferenceToHere),
+        filter(fieldReversesReferenceToNode(recordNode)),
         map(f => getNode(
                     app.heirarchy,
                     f.typeOptions.reverseIndexNodeKey))

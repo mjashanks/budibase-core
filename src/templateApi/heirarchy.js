@@ -1,4 +1,5 @@
-import {find, constant, take, union} from "lodash/fp";
+import {find, constant, map,
+        take, union, includes} from "lodash/fp";
 import {$, switchCase, isNothing, isSomething,
     defaultCase, splitKey, joinKey} from "../common";
 
@@ -112,3 +113,9 @@ export const isGlobalIndex = node =>
 export const isTopLevelCollection = node => 
     isCollection(node)
     && !isDecendantOfARecord(node);
+
+export const fieldReversesReferenceToNode = node => field => 
+    field.type === "reference"
+    && isSomething(field.typeOptions.reverseIndexNodeKey)
+    && includes(field.typeOptions.reverseIndexNodeKey)
+            (map(i => i.nodeKey())(node.indexes));

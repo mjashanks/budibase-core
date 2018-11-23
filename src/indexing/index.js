@@ -21,16 +21,16 @@ const reindexFor = async (datastore, appHeirarchy, record, forAction) =>  {
     );
 
     for(let i of getIndexNodesToApply(indexes.collections)) {
-        await forAction(datastore, i.indexNode, i.mappedRecord.result);
+        await forAction(datastore, i.mappedRecord.result, i.path);
     }
 
     // this can definately be done in parallel (as can be in js)
     for(let i of getIndexNodesToApply(indexes.globalIndexes)) {
-        await forAction(datastore, i.indexNode, i.mappedRecord.result);
+        await forAction(datastore, i.mappedRecord.result, i.path);
     }
 
     for(let i of getIndexNodesToApply(indexes.reverseReference)) {
-        await forAction(datastore, i.indexNode, i.mappedRecord.result);
+        await forAction(datastore, i.mappedRecord.result, i.path);
     }
 } 
 
@@ -102,15 +102,15 @@ const reindexForUpdate = (datastore, appHeirarchy) =>
         );
 
     for(let i of filteredOut_toRemove) {
-        await remove(datastore, i.new.indexNode, i.new.mappedRecord.result);
+        await remove(datastore, i.new.mappedRecord.result, i.new.path);
     }
 
     for(let i of filteredIn_toAdd) {
-        await add(datastore, i.new.indexNode, i.new.mappedRecord.result);
+        await add(datastore, i.new.mappedRecord.result, i.new.path);
     }
 
     for(let i of changed) {
-        await update(datastore, i.new.indexNode, i.new.mappedRecord.result);
+        await update(datastore, i.new.mappedRecord.result, i.new.path);
     }
 
 }
