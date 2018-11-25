@@ -98,7 +98,7 @@ const reindexForUpdate = (datastore, appHeirarchy) =>
             getIndexNodesToApply(toRemoveFilter)(referenceChanges.notChanged),
             // un referenced - remove if in there already
             getIndexNodesToApply(n => toRemoveFilter(n,true))
-                                (referenceChanges.unReferenced),
+                                (referenceChanges.unReferenced)
         );
 
     // new records to add (filtered in)
@@ -122,7 +122,7 @@ const reindexForUpdate = (datastore, appHeirarchy) =>
         );
 
     for(let i of filteredOut_toRemove) {
-        await remove(datastore, i.new.mappedRecord.result, i.new.path);
+        await remove(datastore, i.old.mappedRecord.result, i.new.path);
     }
 
     for(let i of filteredIn_toAdd) {
@@ -132,7 +132,6 @@ const reindexForUpdate = (datastore, appHeirarchy) =>
     for(let i of changed) {
         await update(datastore, i.new.mappedRecord.result, i.new.path);
     }
-
 }
 
 const diffReverseRefForUpdate = (appHeirarchy, oldRecord, newRecord) => {

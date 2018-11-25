@@ -24,7 +24,7 @@ describe("recordApi > getNew", () => {
         const newRecord = recordApi.getNew("/customers", "customer")
 
         expect(newRecord.surname).toBe(null);
-        expect(newRecord.isalive).toBe(null);
+        expect(newRecord.isalive).toBe(true);
         expect(newRecord.createddate).toBe(null);
         expect(newRecord.age).toBe(null);        
     });
@@ -104,7 +104,7 @@ describe('recordApi > save then load', () => {
         const saved = await recordApi.load(record.key());
 
         expect(saved.surname).toBe(null);
-        expect(saved.isalive).toBe(null);
+        expect(saved.isalive).toBe(true);
         expect(saved.age).toBe(record.age);
         expect(saved.createddate).toEqual(record.createddate);
 

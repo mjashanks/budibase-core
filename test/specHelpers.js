@@ -110,10 +110,11 @@ export const withFields = (heirarchy, templateApi) => {
     const partnerCustomersReverseIndex = templateApi.getNewIndexTemplate(partnerRecord);
     partnerCustomersReverseIndex.name = "partnerCustomers";
     partnerCustomersReverseIndex.map = "return {...record};";
+    partnerCustomersReverseIndex.filter = "record.isalive === true"
     heirarchy.partnerCustomersReverseIndex = partnerCustomersReverseIndex;
 
     newCustomerField("surname", "string");
-    newCustomerField("isalive", "bool");
+    newCustomerField("isalive", "bool", "true");
     newCustomerField("createddate", "datetime");
     newCustomerField("age", "number");
     const customerPartnerField = newCustomerField("partner", "reference");

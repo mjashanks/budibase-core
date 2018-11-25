@@ -358,4 +358,152 @@ describe("recordApi > update > reindex", () => {
         expect(partner2Customer.length).toBe(1);
     });
 
+    it("should remove from reference index when reference blanked", async () => {
+        const {recordApi, indexApi} = 
+        await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+
+        const partner1 = recordApi.getNew("/partners", "partner");
+        partner1.businessName = "ACME inc";
+        await recordApi.save(partner1);
+
+        const customer = recordApi.getNew("/customers", "customer");
+        customer.surname = "Ledog";
+        customer.partner = {
+            key: partner1.key(), value: partner1.businessName
+        };
+
+        const customerSaved = await recordApi.save(customer);
+
+        customerSaved.partner = {
+            key: "", value: ""
+        };
+
+        await recordApi.save(customerSaved);
+
+        const partner1Customer = 
+            await indexApi.listItems(`${partner1.key()}/partnerCustomers`);
+        expect(partner1Customer.length).toBe(0);
+    });
+
+    it("should remove from reference index when filter no longer passes", async () => {
+        const {recordApi, indexApi} = 
+        await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+
+        const partner1 = recordApi.getNew("/partners", "partner");
+        partner1.businessName = "ACME inc";
+        await recordApi.save(partner1);
+
+        const customer = recordApi.getNew("/customers", "customer");
+        customer.surname = "Ledog";
+        customer.partner = {
+            key: partner1.key(), value: partner1.businessName
+        };
+
+        const customerSaved = await recordApi.save(customer);
+
+        customerSaved.isalive = false;
+
+        await recordApi.save(customerSaved);
+
+        const partner1Customer = 
+            await indexApi.listItems(`${partner1.key()}/partnerCustomers`);
+        expect(partner1Customer.length).toBe(0);
+    });
+
+    it("should not add to reference index when filter does not pass", async () => {
+        const {recordApi, indexApi} = 
+        await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+
+        const partner1 = recordApi.getNew("/partners", "partner");
+        partner1.businessName = "ACME inc";
+        await recordApi.save(partner1);
+
+        const customer = recordApi.getNew("/customers", "customer");
+        customer.surname = "Ledog";
+        customer.partner = {
+            key: partner1.key(), value: partner1.businessName
+        };
+        customer.isalive = false;
+
+        await recordApi.save(customer);
+
+        const partner1Customer = 
+            await indexApi.listItems(`${partner1.key()}/partnerCustomers`);
+        expect(partner1Customer.length).toBe(0);
+    });
+
+
+    it("should remove from reference index, and not re-added when no longer passes filter, but reference is changed", async () => {
+        const {recordApi, indexApi} = 
+        await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+
+        const partner1 = recordApi.getNew("/partners", "partner");
+        partner1.businessName = "ACME inc";
+        await recordApi.save(partner1);
+
+        const partner2 = recordApi.getNew("/partners", "partner");
+        partner2.businessName = "Big Corp ltd";
+        await recordApi.save(partner2);
+
+        const customer = recordApi.getNew("/customers", "customer");
+        customer.surname = "Ledog";
+        customer.partner = {
+            key: partner1.key(), value: partner1.businessName
+        };
+
+        const customerSaved = await recordApi.save(customer);
+
+        customerSaved.partner = {
+            key: partner2.key(), value: partner2.businessName
+        };
+        customerSaved.isalive = false;
+
+        await recordApi.save(customerSaved);
+
+        const partner1Customer = 
+            await indexApi.listItems(`${partner1.key()}/partnerCustomers`);
+        expect(partner1Customer.length).toBe(0);
+
+        const partner2Customer = 
+            await indexApi.listItems(`${partner2.key()}/partnerCustomers`);
+        expect(partner2Customer.length).toBe(0);
+    });
+
+    it("should add to reference index, when reference is changed, and did not previsouly pass filter", async () => {
+        const {recordApi, indexApi} = 
+        await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+
+        const partner1 = recordApi.getNew("/partners", "partner");
+        partner1.businessName = "ACME inc";
+        await recordApi.save(partner1);
+
+        const partner2 = recordApi.getNew("/partners", "partner");
+        partner2.businessName = "Big Corp ltd";
+        await recordApi.save(partner2);
+
+        const customer = recordApi.getNew("/customers", "customer");
+        customer.surname = "Ledog";
+        customer.partner = {
+            key: partner1.key(), value: partner1.businessName
+        };
+        customer.isalive = false;
+
+        const customerSaved = await recordApi.save(customer);
+
+        customerSaved.partner = {
+            key: partner2.key(), value: partner2.businessName
+        };
+        customerSaved.isalive = true;
+
+        await recordApi.save(customerSaved);
+
+        const partner1Customer = 
+            await indexApi.listItems(`${partner1.key()}/partnerCustomers`);
+        expect(partner1Customer.length).toBe(0);
+
+        const partner2Customer = 
+            await indexApi.listItems(`${partner2.key()}/partnerCustomers`);
+        expect(partner2Customer.length).toBe(1);
+    });
+
 });
