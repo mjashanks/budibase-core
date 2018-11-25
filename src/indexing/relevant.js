@@ -7,7 +7,7 @@ import {getFlattenedHierarchy, isIndex,
         isCollection, getNode,
         getExactNodeForPath} from "../templateApi/heirarchy";
 
-export const getRelevantIndexes = (appHeirarchy, record) => {
+export const getRelevantHeirarchalIndexes = (appHeirarchy, record) => {
 
     const key = record.key();
     const pathParts = splitKey(key);
@@ -17,7 +17,6 @@ export const getRelevantIndexes = (appHeirarchy, record) => {
                 [node => node.pathRegx().length],
                 ["desc"]);
 
-    const makeIndexNodeAndPath = (indexNode, path) => ({indexNode, path});
     const makeindexNodeKeyAndPath_ForCollectionIndex = (indexNode, path) => 
         makeIndexNodeAndPath(indexNode, joinKey(path, indexNode.name));
 
@@ -52,31 +51,31 @@ export const getRelevantIndexes = (appHeirarchy, record) => {
             map(c => makeIndexNodeAndPath(c, c.nodeKey()))
         ]);
     
-    const getReverseReferenceIndexes = () => 
-        $(key, [
-            getExactNodeForPath(appHeirarchy),
-            n => n.fields,
-            filter(f => f.type === "reference"
-                        && isSomething(f.typeOptions.reverseIndexNodeKey)
-                        && isSomething(record[f.name])
-                        && record[f.name].key),
-            map(f => {
-                const revIndexNode = getNode(
-                                        appHeirarchy,
-                                        f.typeOptions.reverseIndexNodeKey
-                                    );
-                const indexPath = joinKey(
-                    record[f.name].key, revIndexNode.name);
-                return makeIndexNodeAndPath(revIndexNode, indexPath);
-            }),
-        ]);
-    
-
     return ({
         globalIndexes: getGlobalIndexes(),
-        collections: traverseHeirarchyCollectionIndexesInPath(),
-        reverseReference: getReverseReferenceIndexes()
+        collections: traverseHeirarchyCollectionIndexesInPath()
     });
 };
 
-export default getRelevantIndexes;
+export const getRelevantReverseReferenceIndexes = (appHeirarchy, record) => 
+    $(record.key(), [
+        getExactNodeForPath(appHeirarchy),
+        n => n.fields,
+        filter(f => f.type === "reference"
+                    && isSomething(f.typeOptions.reverseIndexNodeKey)
+                    && isSomething(record[f.name])
+                    && record[f.name].key),
+        map(f => {
+            const revIndexNode = getNode(
+                                    appHeirarchy,
+                                    f.typeOptions.reverseIndexNodeKey
+                                );
+            const indexPath = joinKey(
+                record[f.name].key, revIndexNode.name);
+            return makeIndexNodeAndPath(revIndexNode, indexPath);
+        }),
+    ]);
+
+const makeIndexNodeAndPath = (indexNode, path) => ({indexNode, path});
+
+export default getRelevantHeirarchalIndexes;

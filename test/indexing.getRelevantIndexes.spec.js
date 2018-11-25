@@ -2,7 +2,8 @@ import {getMemoryTemplateApi,
         basicAppHeirarchyCreator_WithFields, 
         setupAppheirarchy, 
         basicAppHeirarchyCreator_WithFields_AndIndexes} from "./specHelpers";
-import {getRelevantIndexes} from "../src/indexing/relevant";
+import {getRelevantHeirarchalIndexes,
+        getRelevantReverseReferenceIndexes} from "../src/indexing/relevant";
 import {some} from "lodash";
 import {joinKey} from "../src/common";
 
@@ -12,14 +13,23 @@ describe("getRelevantIndexes", () => {
         const {appHeirarchy} = await setupAppheirarchy(
             basicAppHeirarchyCreator_WithFields_AndIndexes);
         
-        const indexesByPath = getRelevantIndexes(appHeirarchy.root, {
-            appName:"hello", 
-            key: () => "/settings"});
+        const heirarchalIndexesByPath = getRelevantHeirarchalIndexes(
+            appHeirarchy.root, {
+                appName:"hello", 
+                key: () => "/settings"
+            }
+        );
 
+        const reverseReferenceIndexesByPath = getRelevantReverseReferenceIndexes(
+            appHeirarchy.root, {
+                appName:"hello", 
+                key: () => "/settings"
+            }
+        );
 
-        expect(indexesByPath.globalIndexes.length).toBeGreaterThan(0);
-        expect(indexesByPath.collections.length).toBe(0);
-        expect(indexesByPath.reverseReference.length).toBe(0);
+        expect(heirarchalIndexesByPath.globalIndexes.length).toBeGreaterThan(0);
+        expect(heirarchalIndexesByPath.collections.length).toBe(0);
+        expect(reverseReferenceIndexesByPath.length).toBe(0);
         
     });
 
@@ -30,7 +40,8 @@ describe("getRelevantIndexes", () => {
         
         const customer = recordApi.getNew("/customers", "customer");
 
-        const indexes = getRelevantIndexes(appHeirarchy.root, customer);
+        const indexes = getRelevantHeirarchalIndexes(
+            appHeirarchy.root, customer);
 
         expect(indexes.collections.length).toBe(3);
         expect(indexes.collections[0].path).toBe("/customers/default");
@@ -44,7 +55,8 @@ describe("getRelevantIndexes", () => {
 
         const invoice  = recordApi.getNew("/customers/0-1234/invoices", "invoice")
 
-        const indexes = getRelevantIndexes(appHeirarchy.root, invoice);
+        const indexes = getRelevantHeirarchalIndexes(
+            appHeirarchy.root, invoice);
 
         expect(indexes.collections.length).toBe(4);
         expect(some(indexes.collections, i => i.path === "/customers/default")).toBeTruthy();
@@ -64,9 +76,10 @@ describe("getRelevantIndexes", () => {
         //await recordApi.save(customer);
         
         
-        const indexes = getRelevantIndexes(appHeirarchy.root, customer);
-        expect(indexes.reverseReference.length).toBe(1);
-        expect(indexes.reverseReference[0].path)
+        const indexes = getRelevantReverseReferenceIndexes(
+            appHeirarchy.root, customer);
+        expect(indexes.length).toBe(1);
+        expect(indexes[0].path)
         .toBe(joinKey(partner.key(), appHeirarchy.partnerCustomersReverseIndex.name));
 
 
@@ -82,9 +95,10 @@ describe("getRelevantIndexes", () => {
         const referredToCustomer = recordApi.getNew("/customers", "customer");
         referredToCustomer.referredBy = {key:referredByCustomer.key(), value:"ledog"};        
         
-        const indexes = getRelevantIndexes(appHeirarchy.root, referredToCustomer);
-        expect(indexes.reverseReference.length).toBe(1);
-        expect(indexes.reverseReference[0].path)
+        const indexes = getRelevantReverseReferenceIndexes(
+            appHeirarchy.root, referredToCustomer);
+        expect(indexes.length).toBe(1);
+        expect(indexes[0].path)
         .toBe(joinKey(referredByCustomer.key(), appHeirarchy.referredToCustomersReverseIndex.name));
 
     });
