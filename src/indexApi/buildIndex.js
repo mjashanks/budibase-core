@@ -1,9 +1,10 @@
 import {getAllIdsIterator} from "../indexing/allIds";
 import {isGlobalIndex, getFlattenedHierarchy
     ,getNodeByKeyOrNodeKey,getNode, isTopLevelCollection,
-    isIndex} from "../templateApi/heirarchy";
+    isIndex, isCollection, 
+    fieldReversesReferenceToIndex} from "../templateApi/heirarchy";
 import {find, filter} from "lodash/fp";
-import {joinKey, apiWrapper, events} from "../common";
+import {joinKey, apiWrapper, events, somethingOrDefault} from "../common";
 import {load} from "../recordApi/load";
 import {evaluate} from "../indexing/evaluate";
 import {writeIndex} from "../indexing/apply";
@@ -46,11 +47,36 @@ const _buildIndex = async (app, indexNodeKey) => {
             app, indexNode, indexNode.parent().nodeKey()
         ); 
     }
-    else {
+    else if(isCollection(indexNode.parent())){
         await buildNestedCollectionIndex(
             app, indexNode
         );
+    } else if(indexNode.type === "reference") {
+        await buildReverseReferenceIndex(
+            app, indexNode
+        );
     }
+};
+
+const buildReverseReferenceIndex = async (app, indexNode) => {
+
+    const parentCollectionNode = indexNode.parent().parent();
+
+    const referencingNodes = $(app.heirarchy, [
+        getFlattenedHierarchy,
+        filter(n => isRecord(n)
+                    && some(fieldReversesReferenceToIndex(node))
+                           (n.fields))
+    ]);
+
+    const referencedRecordIterator = 
+        await getAllIdsIterator(app)(parentCollectionNode.nodeKey());
+
+    const referencedIds = referencedRecordIterator();
+    while(!referencedIds.done) {
+
+    }
+
 };
 
 const buildGlobalIndex = async (app, indexNode) => {

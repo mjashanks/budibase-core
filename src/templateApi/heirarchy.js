@@ -119,3 +119,9 @@ export const fieldReversesReferenceToNode = node => field =>
     && isSomething(field.typeOptions.reverseIndexNodeKey)
     && includes(field.typeOptions.reverseIndexNodeKey)
             (map(i => i.nodeKey())(node.indexes));
+
+export const fieldReversesReferenceToIndex = indexNode => field => 
+    field.type === "reference"
+    && isSomething(field.typeOptions.reverseIndexNodeKey)
+    && field.typeOptions.reverseIndexNodeKey === indexNode.nodeKey();
+            

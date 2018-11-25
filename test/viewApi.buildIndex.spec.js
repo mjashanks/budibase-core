@@ -289,3 +289,39 @@ describe("buildIndex > nested collection", () => {
     });
 
 });
+
+describe("buildIndex > reverse reference index", () => {
+
+    it("should build a single record into index", async () => {
+        const {recordApi, indexApi, appHeirarchy} = 
+            await setupAppheirarchy(
+                basicAppHeirarchyCreator_WithFields_AndIndexes
+            );
+
+        const partner1 = recordApi.getNew("/partners", "partner");
+        partner1.businessName = "ACME inc";
+        await recordApi.save(partner1);
+
+        const customer = recordApi.getNew("/customers", "customer");
+        customer.surname = "Ledog";
+        customer.partner = {
+            key: partner1.key(), value: partner1.businessName
+        };
+        customer.isalive = false;
+
+        await recordApi.save(customer);
+
+        const indexKey = joinKey(partner1.key(), "partnerCustomers");
+        await recordApi._storeHandle.deleteFile(
+            getIndexedDataKey_fromIndexKey(indexKey)
+        );
+
+        await indexApi.buildIndex(
+            appHeirarchy.partnerCustomersReverseIndex.nodeKey());
+        const indexItems = await indexApi.listItems(indexKey);
+
+        expect(indexItems.length).toBe(2);
+        expect(some(indexItems, i => i.key === customer.key())).toBeTruthy();
+    });
+
+});
