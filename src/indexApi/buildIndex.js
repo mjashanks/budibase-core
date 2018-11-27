@@ -1,13 +1,14 @@
 import {getAllIdsIterator} from "../indexing/allIds";
 import {isGlobalIndex, getFlattenedHierarchy
     ,getNodeByKeyOrNodeKey,getNode, isTopLevelCollection,
-    isIndex, isCollection, 
+    isIndex, isCollection, isRecord,
     fieldReversesReferenceToIndex} from "../templateApi/heirarchy";
-import {find, filter} from "lodash/fp";
-import {joinKey, apiWrapper, events, somethingOrDefault} from "../common";
+import {find, filter, some} from "lodash/fp";
+import {joinKey, apiWrapper, events, $} from "../common";
 import {load} from "../recordApi/load";
 import {evaluate} from "../indexing/evaluate";
 import {writeIndex} from "../indexing/apply";
+import { getIndexedDataKey_fromIndexKey, readIndex } from "../indexing/read";
 
 /*
 GlobalIndex:
@@ -51,7 +52,7 @@ const _buildIndex = async (app, indexNodeKey) => {
         await buildNestedCollectionIndex(
             app, indexNode
         );
-    } else if(indexNode.type === "reference") {
+    } else if(indexNode.indexType === "reference") {
         await buildReverseReferenceIndex(
             app, indexNode
         );
@@ -62,19 +63,73 @@ const buildReverseReferenceIndex = async (app, indexNode) => {
 
     const parentCollectionNode = indexNode.parent().parent();
 
+    const iterateReferencedRecords =
+        await getAllIdsIterator(app)
+                (parentCollectionNode.nodeKey());
+    
+    let referencedRecordsIterator = 
+        await iterateReferencedRecords();
+
+    // clear out existing indexes
+    while(!referencedRecordsIterator.done) {
+        const {result} = referencedRecordsIterator;
+        for(let id of result.ids) {
+            await writeIndex(
+                app.datastore, [], 
+                joinKey(result.collectionKey, 
+                        id, indexNode.name));
+        }
+        referencedRecordsIterator = await iterateReferencedRecords();
+    }
+
+    // Iterate through all referencING records, 
+    // and update referenced index for each record
+
     const referencingNodes = $(app.heirarchy, [
         getFlattenedHierarchy,
         filter(n => isRecord(n)
-                    && some(fieldReversesReferenceToIndex(node))
+                    && some(fieldReversesReferenceToIndex(indexNode))
                            (n.fields))
     ]);
 
-    const referencedRecordIterator = 
-        await getAllIdsIterator(app)(parentCollectionNode.nodeKey());
+    const applyIndexForReferencingNode = async referencingNode => {
 
-    const referencedIds = referencedRecordIterator();
-    while(!referencedIds.done) {
+        const referencingFields = 
+            filter(fieldReversesReferenceToIndex(indexNode))
+                  (referencingNode.fields);
 
+        const iterateReferencingNodes = 
+            await getAllIdsIterator(app)
+                    (referencingNode.parent().nodeKey());
+
+        let referencingIdIterator = await iterateReferencingNodes();
+        while(!referencingIdIterator.done) {
+            const {result} = referencingIdIterator;
+            for(let id of result.ids) {
+                const record = await load(app)(
+                    joinKey(result.collectionKey, id)
+                );
+
+                for(let field of referencingFields) {
+                    const referencedKey = record[field.name].key;
+                    if(!referencedKey) continue;
+                    const indexDataKey = getIndexedDataKey_fromIndexKey(
+                        joinKey(referencedKey, indexNode.name)
+                    );
+                    const indexedData = await readIndex(
+                        app.datastore, indexDataKey);
+                    applyToIndex(record, indexNode, indexedData);
+                    await writeIndex(
+                        app.datastore, indexedData, indexDataKey)
+                }
+            }
+            referencingIdIterator = await iterateReferencingNodes();
+        }
+
+    };
+
+    for(let referencingNode of referencingNodes) {
+        await applyIndexForReferencingNode(referencingNode);
     }
 
 };
@@ -143,6 +198,12 @@ const chooseChildRecordNodeByKey = (collectionNode, recordId) =>
     find(c => recordId.startsWith(c.collectionChildId))
         (collectionNode.children);
 
+const applyToIndex = (record, indexNode, indexedData) => {
+    const result = evaluate(record)(indexNode);
+    if(result.passedFilter) 
+        indexedData.push(result.result);
+};
+
 const applyAllDecendantRecords = 
     async (app, collection_Key_or_NodeKey, indexedData, indexNode) => {
 
@@ -154,12 +215,6 @@ const applyAllDecendantRecords =
 
     const getRecord = async (recordKey) => 
         await load(app)(recordKey);
-
-    const applyToIndex = record => {
-        const result = evaluate(record)(indexNode);
-        if(result.passedFilter) 
-            indexedData.push(result.result);
-    };
     
     const buildForIds = async (collectionKey, allIds) => {
         for(let recordId of allIds) {
@@ -167,7 +222,7 @@ const applyAllDecendantRecords =
             const record = await getRecord(
                 recordKey
             );
-            applyToIndex(record);
+            applyToIndex(record, indexNode, indexedData);
             const recordNode = chooseChildRecordNodeByKey(
                 collectionNode,
                 recordId

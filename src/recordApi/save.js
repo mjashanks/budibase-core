@@ -76,9 +76,12 @@ const initialiseReverseReferenceIndexes = async (app, record) => {
         map(n => n.fields),
         flatten,
         filter(fieldReversesReferenceToNode(recordNode)),
-        map(f => getNode(
+        map(f => {
+            const n = getNode(
                     app.heirarchy,
-                    f.typeOptions.reverseIndexNodeKey))
+                    f.typeOptions.reverseIndexNodeKey);
+            return n;
+            })
     ]);
 
     for(let indexNode of indexNodes) {

@@ -10,8 +10,11 @@ export const getFlattenedHierarchy = appHeirarchy => {
 
     const flattenHeirarchy = (currentNode, flattened) => {
         flattened.push(currentNode);
-        if(!currentNode.children 
-            || currentNode.children.length == 0){
+        if((!currentNode.children 
+            || currentNode.children.length === 0)
+            && 
+            (!currentNode.indexes
+            || currentNode.indexes.length === 0)){
             return flattened;
         }
         const children = 
@@ -56,7 +59,7 @@ export const hasMatchingAncestor = ancestorPredicate => decendantNode =>
 
     )(decendantNode);
 
-export const getNode = (appHeirarchy, nodeKey) =>
+export const getNode = (appHeirarchy, nodeKey) => 
     $(appHeirarchy, [
         getFlattenedHierarchy,
         find(n => n.nodeKey() === nodeKey)

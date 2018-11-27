@@ -307,11 +307,88 @@ describe("buildIndex > reverse reference index", () => {
         customer.partner = {
             key: partner1.key(), value: partner1.businessName
         };
-        customer.isalive = false;
+        customer.isalive = true;
 
         await recordApi.save(customer);
 
         const indexKey = joinKey(partner1.key(), "partnerCustomers");
+
+        await recordApi._storeHandle.deleteFile(
+            getIndexedDataKey_fromIndexKey(indexKey)
+        );
+
+        await indexApi.buildIndex(
+            appHeirarchy.partnerCustomersReverseIndex.nodeKey());
+        const indexItems = await indexApi.listItems(indexKey);
+
+        expect(indexItems.length).toBe(1);
+        expect(some(indexItems, i => i.key === customer.key())).toBeTruthy();
+    });
+
+    it("should build index when reverse reference index is in the same node as referenching record", async () => {
+        const {recordApi, indexApi, appHeirarchy} = 
+            await setupAppheirarchy(
+                basicAppHeirarchyCreator_WithFields_AndIndexes
+            );
+
+        const referencedCustomer = recordApi.getNew("/customers", "customer");
+        referencedCustomer.surname = "Zecat";
+        await recordApi.save(referencedCustomer);
+
+        const referencingCustomer = recordApi.getNew("/customers", "customer");
+        referencingCustomer.surname = "Ledog";
+        referencingCustomer.referredBy = {
+            key: referencedCustomer.key(), value: referencedCustomer.surname
+        };
+        referencingCustomer.isalive = true;
+
+        await recordApi.save(referencingCustomer);
+
+        const indexKey = joinKey(referencedCustomer.key(), "referredToCustomers");
+
+        await recordApi._storeHandle.deleteFile(
+            getIndexedDataKey_fromIndexKey(indexKey)
+        );
+
+        await indexApi.buildIndex(
+            appHeirarchy.referredToCustomersReverseIndex.nodeKey());
+
+        const indexItems = await indexApi.listItems(indexKey);
+
+        expect(indexItems.length).toBe(1);
+        expect(some(indexItems, i => i.key === referencingCustomer.key())).toBeTruthy();
+    });
+
+    it("should build multiple records into an index, when referencing same record", async () => {
+        const {recordApi, indexApi, appHeirarchy} = 
+            await setupAppheirarchy(
+                basicAppHeirarchyCreator_WithFields_AndIndexes
+            );
+
+        const partner1 = recordApi.getNew("/partners", "partner");
+        partner1.businessName = "ACME inc";
+        await recordApi.save(partner1);
+
+        const customer1 = recordApi.getNew("/customers", "customer");
+        customer1.surname = "Ledog";
+        customer1.partner = {
+            key: partner1.key(), value: partner1.businessName
+        };
+        customer1.isalive = true;
+
+        await recordApi.save(customer1);
+
+        const customer2 = recordApi.getNew("/customers", "customer");
+        customer2.surname = "Zeecat";
+        customer2.partner = {
+            key: partner1.key(), value: partner1.businessName
+        };
+        customer2.isalive = true;
+
+        await recordApi.save(customer2);
+
+        const indexKey = joinKey(partner1.key(), "partnerCustomers");
+
         await recordApi._storeHandle.deleteFile(
             getIndexedDataKey_fromIndexKey(indexKey)
         );
@@ -321,7 +398,115 @@ describe("buildIndex > reverse reference index", () => {
         const indexItems = await indexApi.listItems(indexKey);
 
         expect(indexItems.length).toBe(2);
-        expect(some(indexItems, i => i.key === customer.key())).toBeTruthy();
+        expect(some(indexItems, i => i.key === customer1.key())).toBeTruthy();
+        expect(some(indexItems, i => i.key === customer2.key())).toBeTruthy();
+    });
+
+
+    it("should build multiple records into seperate indexes, when referencing different records", async () => {
+        const {recordApi, indexApi, appHeirarchy} = 
+            await setupAppheirarchy(
+                basicAppHeirarchyCreator_WithFields_AndIndexes
+            );
+
+        const partner1 = recordApi.getNew("/partners", "partner");
+        partner1.businessName = "ACME inc";
+        await recordApi.save(partner1);
+
+        const partner2 = recordApi.getNew("/partners", "partner");
+        partner2.businessName = "ACME inc";
+        await recordApi.save(partner2);
+
+        const customer1 = recordApi.getNew("/customers", "customer");
+        customer1.surname = "Ledog";
+        customer1.partner = {
+            key: partner1.key(), value: partner1.businessName
+        };
+        customer1.isalive = true;
+
+        await recordApi.save(customer1);
+
+        const customer2 = recordApi.getNew("/customers", "customer");
+        customer2.surname = "Zeecat";
+        customer2.partner = {
+            key: partner2.key(), value: partner1.businessName
+        };
+        customer2.isalive = true;
+
+        await recordApi.save(customer2);
+
+        const indexKey1 = joinKey(partner1.key(), "partnerCustomers");
+        const indexKey2 = joinKey(partner2.key(), "partnerCustomers");
+
+        await recordApi._storeHandle.deleteFile(
+            getIndexedDataKey_fromIndexKey(indexKey1)
+        );
+
+        await recordApi._storeHandle.deleteFile(
+            getIndexedDataKey_fromIndexKey(indexKey2)
+        );
+
+        await indexApi.buildIndex(
+            appHeirarchy.partnerCustomersReverseIndex.nodeKey());
+
+        const indexItems1 = await indexApi.listItems(indexKey1);
+
+        expect(indexItems1.length).toBe(1);
+        expect(some(indexItems1, i => i.key === customer1.key())).toBeTruthy();
+
+        const indexItems2 = await indexApi.listItems(indexKey2);
+
+        expect(indexItems2.length).toBe(1);
+        expect(some(indexItems2, i => i.key === customer2.key())).toBeTruthy();
+    });
+
+    it("should build record into index, when referencing and referenced records are in multiple nested collections", async () => {
+        const {recordApi, indexApi, appHeirarchy} = 
+            await setupAppheirarchy(
+                basicAppHeirarchyCreator_WithFields_AndIndexes
+            );
+
+        const partner = recordApi.getNew("/partners", "partner");
+        partner.businessName = "ACME inc";
+        await recordApi.save(partner);
+
+        const partnerInvoice = recordApi.getNew(
+            joinKey(partner.key(), "invoices"), "invoice"
+        );
+        await recordApi.save(partnerInvoice);
+ 
+
+        const customer = recordApi.getNew("/customers", "customer");
+        customer.surname = "Ledog";
+        await recordApi.save(customer);
+
+        const customerInvoice = recordApi.getNew(
+            joinKey(customer.key(), "invoices"), "invoice"
+        );
+        await recordApi.save(customerInvoice);
+
+        const charge = recordApi.getNew(
+            joinKey(customerInvoice.key(), "charges"), "charge"
+        );
+        charge.partnerInvoice = {
+            key: partnerInvoice.key(), value: "something"
+        };
+        await recordApi.save(charge);
+
+
+        const indexKey = joinKey(partnerInvoice.key(), "partnerCharges");
+
+        await recordApi._storeHandle.deleteFile(
+            getIndexedDataKey_fromIndexKey(indexKey)
+        );
+
+        await indexApi.buildIndex(
+            appHeirarchy.partnerChargesReverseIndex.nodeKey());
+
+        const indexItems = await indexApi.listItems(indexKey);
+
+        expect(indexItems.length).toBe(1);
+        expect(some(indexItems, i => i.key === charge.key())).toBeTruthy();
     });
 
 });
