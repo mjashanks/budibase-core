@@ -12,7 +12,7 @@ import {has} from "lodash";
 import {compileFilter, compileMap} from "../indexing/evaluate";
 import {eventsList} from "../common/events";
 import {compileExpression, compileCode} from "@nx-js/compiler-util";
-import {validateField} from "./fields";
+import {validateAllFields} from "./fields";
 import {applyRuleSet, makerule, stringNotEmpty, 
         validationError} from "./validationCommon";
 import {indexRuleSet} from "./indexes";
@@ -82,10 +82,17 @@ export const validateAll = appHeirarchy => {
         flatten
     ]);
 
+    const fieldErrors = $(flattened, [
+        filter(isRecord),
+        map(validateAllFields),
+        flatten
+    ]);
+
     return $(flattened, [
         map(validateNode),
         flatten,
-        union(duplicateNodeKeyErrors)
+        union(duplicateNodeKeyErrors),
+        union(fieldErrors)
     ]);
 };
 

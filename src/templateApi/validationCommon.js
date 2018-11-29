@@ -1,6 +1,5 @@
 import {$, isSomething} from "../common";
-import {filter, union, constant, 
-    map} from "lodash/fp";
+import {filter, map} from "lodash/fp";
 
 export const stringNotEmpty = s => isSomething(s) && s.trim().length > 0;
 

@@ -63,6 +63,7 @@ export const anyTrue = (...funcArgs) => (val) =>
 
 export const isSomething = allTrue(isDefined, isNonNull, isNotNaN);
 export const isNothing = not(isSomething);
+export const isNothingOrEmpty = v => isNothing(v) || isEmpty(v);
 export const somethingOrGetDefault = getDefaultFunc => val =>
     isSomething(val) ? val : getDefaultFunc();
 export const somethingOrDefault = (val, defaultVal) => 
@@ -188,6 +189,6 @@ export default {
     somethingOrGetDefault, appDefinitionFile, isValue,
     isOneOf, memberMatches, defineError, anyTrue, isNonEmptyArray,
     causesException, executesWithoutException, none, getHashCode,
-    awEx, apiWrapper, events
+    awEx, apiWrapper, events, isNothingOrEmpty
 };
 

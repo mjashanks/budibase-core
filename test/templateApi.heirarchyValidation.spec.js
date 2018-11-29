@@ -148,4 +148,12 @@ describe("heirarchy validation", () => {
         expectInvalidField(validationResult, "indexType", heirarchy.customersDefaultIndex);
     });
 
+    it("field > should return error when a field is invalid", () => {
+        const heirarchy = createValidHeirarchy();
+        const invalidField =heirarchy.customerRecord.fields[0];
+        invalidField.name = "";
+        const validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "name", invalidField);
+    });
+
 });
