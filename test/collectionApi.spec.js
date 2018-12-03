@@ -103,6 +103,38 @@ describe("collectionApi > allids", () => {
         
     });
 
+    it("delete record should remove id from allids shard", async () => {
+        const {collectionApi, recordApi, appHeirarchy} = 
+            await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+
+        const customer1 = await recordApi.getNew(
+            appHeirarchy.customersCollection.nodeKey(), "customer");
+        customer1.surname = "thedog";
+        
+        await recordApi.save(customer1);
+        
+        const customer2 = await recordApi.getNew(
+            appHeirarchy.customersCollection.nodeKey(), "customer");
+        customer2.surname = "thedog";
+        
+        await recordApi.save(customer2);
+        
+        await recordApi.delete(customer1.key());
+
+        const allIdsIterator = await collectionApi.getAllIdsIterator("/customers");
+        let allIds = [];
+
+        let shardIds = await allIdsIterator();
+        while(shardIds.done === false) {
+            allIds = union(allIds, shardIds.result.ids);
+            shardIds = await allIdsIterator();
+        }
+
+        expect(allIds.length).toBe(1);
+        expect(includes(allIds, customer2.id())).toBeTruthy();
+        
+    });
+
     it("should add and read record, that starts with any allowed key char (testing correct sharding of allids)", async () => {
 
         const allIdChars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-".split("");

@@ -1,7 +1,7 @@
 import {getRelevantHeirarchalIndexes,
     getRelevantReverseReferenceIndexes} from "./relevant";
 import {mapRecord, evaluate} from "./evaluate";
-import {allToAllIds, addToAllIds} from "./allIds";
+import {removeFromAllIds, addToAllIds} from "./allIds";
 import {$$} from "../common";
 import {filter, map, keys, 
         isEqual, constant} from "lodash/fp";
@@ -47,6 +47,7 @@ const reindexForCreate = (datastore, appHeirarchy) =>
 const reindexForDelete = (datastore, appHeirarchy) => 
                          async deletedRecord => 
 {
+    await removeFromAllIds(appHeirarchy, datastore)(deletedRecord);
     return await reindexFor(datastore, appHeirarchy, deletedRecord, remove);
 }
 

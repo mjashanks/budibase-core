@@ -1,8 +1,8 @@
 import {getExactNodeForPath, getParentKey, 
     getFlattenedHierarchy, getNodeByKeyOrNodeKey,
-    getNode, isCollection, isAncestor, isNode} from "../templateApi/heirarchy";
-import {joinKey, safeKey, $, splitKey} from "../common";
-import {head, last, 
+    getNode, isCollection, isAncestor} from "../templateApi/heirarchy";
+import {joinKey, safeKey, $} from "../common";
+import {join, pull, 
         map, flatten, orderBy,
         filter, find} from "lodash/fp";
 
@@ -217,12 +217,20 @@ const getAllIdsFromShard = async (datastore, shardKey) => {
 }
 
 export const removeFromAllIds = (appHeirarchy,datastore) => 
-                                async (collectionKey, recordId) => {
-    const shardKey = await getAllIdsShardKey(
-        appHeirarchy, collectionKey, recordId);
+                                async (record) => {
+    const shardKey = getAllIdsShardKey(
+        appHeirarchy,
+        getParentKey(record.key()),
+        record.id()
+    );
     const allIds = await getAllIdsFromShard(datastore, shardKey);
-    allIds.pull(recordId);
-    await datastore.updateFile(shardKey, allIds.join(","));
+    
+    const newIds = $(allIds, [
+        pull(record.id()),
+        join(",")
+    ]);
+
+    await datastore.updateFile(shardKey, newIds);
 };
 
 export default getAllIdsIterator;
