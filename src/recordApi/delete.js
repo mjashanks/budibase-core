@@ -7,6 +7,7 @@ import {getExactNodeForPath,
         fieldReversesReferenceToNode} from "../templateApi/heirarchy";
 import {map, flatten, filter} from "lodash/fp";
 import { getIndexedDataKey_fromIndexKey } from "../indexing/read";
+import {deleteIndex} from "../indexApi/delete";
 
 export const deleteRecord = (app, indexingApi) => async (key) => 
     apiWrapper(
@@ -48,11 +49,10 @@ const deleteIndexes = async (app, key) => {
         map(f => getNode(
             app.heirarchy,
             f.typeOptions.reverseIndexNodeKey)),
-        map(n => getIndexedDataKey_fromIndexKey(
-                    joinKey(key, n.name)))
+        map(n => joinKey(key, n.name))
     ]);
 
     for(let i of reverseIndexKeys) {
-        await app.datastore.deleteFile(i);
+        await deleteIndex(app)(i);
     }
 }

@@ -2,7 +2,7 @@ import {cloneDeep, constant,
         flatten, map, filter,
         includes} from "lodash/fp";
 import {initialiseChildCollections,
-    createHeaderedIndexFileIfnotExists} from "../collectionApi/initialise";
+    initialiseIndex} from "../collectionApi/initialise";
 import {validate} from "./validate";
 import {load, getRecordFileName} from "./load";
 import {apiWrapper, events, 
@@ -85,7 +85,7 @@ const initialiseReverseReferenceIndexes = async (app, record) => {
     ]);
 
     for(let indexNode of indexNodes) {
-        await createHeaderedIndexFileIfnotExists(
+        await initialiseIndex(
             app, record.key(), indexNode
         );
     }

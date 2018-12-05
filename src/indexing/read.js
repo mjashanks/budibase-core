@@ -1,7 +1,9 @@
 import Papa from "papaparse";
 import {isSomething, getHashCode, 
     joinKey} from "../common";
-import {getActualKeyOfParent, isGlobalIndex} from "../templateApi/heirarchy";
+import {getActualKeyOfParent, 
+        isGlobalIndex, isShardedIndex,
+        getExactNodeForPath} from "../templateApi/heirarchy";
 
 export const readIndex = async(datastore, indexedDataKey) => {
     const file = await datastore.loadFile(indexedDataKey);
@@ -10,8 +12,9 @@ export const readIndex = async(datastore, indexedDataKey) => {
         {header:true}).data;
 }
 
-export const getIndexedDataKey_fromIndexKey = indexKey => 
-    `${indexKey}${indexKey.endsWith(".csv") ? "" : ".csv"}`;
+export const getIndexedDataKey_fromIndexKey = (indexKey, record) => {
+    return `${indexKey}${indexKey.endsWith(".csv") ? "" : ".csv"}`;
+}
 
 export const uniqueIndexName = (index) => 
     "idx_" +

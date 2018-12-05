@@ -1,7 +1,8 @@
 import {find, constant, map,
         take, union, includes} from "lodash/fp";
 import {$, switchCase, isNothing, isSomething,
-    defaultCase, splitKey, joinKey} from "../common";
+    defaultCase, splitKey, isNonEmptyString,
+    joinKey} from "../common";
 
 export const getFlattenedHierarchy = appHeirarchy => {
 
@@ -109,6 +110,7 @@ export const isAncestor = decendant => ancestor =>
 export const isRecord = node => isSomething(node) && node.type === "record";
 export const isCollection = node => isSomething(node) && node.type === "collection";
 export const isIndex = node => isSomething(node) && node.type === "index";
+export const isShardedIndex = node => isIndex(node) && isNonEmptyString(node.getShardName);
 export const isRoot = node => isSomething(node) && node.isRoot();
 export const isDecendantOfARecord = hasMatchingAncestor(isRecord)
 export const isGlobalIndex = node => 

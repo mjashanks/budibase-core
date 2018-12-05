@@ -1,34 +1,41 @@
 import {getFlattenedHierarchy, hasNoMatchingAncestors, 
-    isRecord, isCollection, getExactNodeForPath, isGlobalIndex} from "../templateApi/heirarchy";
+    isRecord, isCollection, isShardedIndex, 
+    getExactNodeForPath, isGlobalIndex} from "../templateApi/heirarchy";
 import {$, allTrue, joinKey} from "../common";
 import {filter} from "lodash/fp";
 import {getIndexedDataKey} from "../indexing/read";
 import getIndexing from "../indexing";
+import {getShardMapKey, getUnshardedIndexDataKey} from "../indexing/sharding";
 
+export const initialiseIndex = async (app, parentKey, index) => {
+    const indexKey = joinKey(parentKey, index.name);
+    await app.datastore.createFolder(indexKey);
 
-export const createHeaderedIndexFileIfnotExists = async (app, path, index) => {
-
-    const indexing = getIndexing(app);        
-    const indexedDataKey = getIndexedDataKey(path, index);
-
-    if(await app.datastore.exists(indexedDataKey)) return;
-
-    await indexing.createIndexFile(
-        indexedDataKey, 
-        index);
+    if(isShardedIndex(index)) {
+        await app.datastore.createFile(
+            getShardMapKey(indexKey),
+            ""
+        );
+    } else {
+        const indexing = getIndexing(app);
+        await indexing.createIndexFile(
+            getUnshardedIndexDataKey(indexKey), 
+            index
+        );
+    }
 };
 
-const ensureCollectionIsInitialised = async (app, node, path) => {
+const ensureCollectionIsInitialised = async (app, node, parentKey) => {
 
-    if(!await app.datastore.exists(path)) {
-        await app.datastore.createFolder(path);
+    if(!await app.datastore.exists(parentKey)) {
+        await app.datastore.createFolder(parentKey);
         await app.datastore.createFolder(
-            joinKey(path,"allids")
+            joinKey(parentKey,"allids")
         );
         for(let childRecord of node.children) {
             await app.datastore.createFolder(
                 joinKey(
-                    path,
+                    parentKey,
                     "allids",
                     childRecord.collectionChildId.toString())
             );
@@ -37,7 +44,7 @@ const ensureCollectionIsInitialised = async (app, node, path) => {
     
 
     for(let index of node.indexes) {
-        await createHeaderedIndexFileIfnotExists(app, path, index);
+        await initialiseIndex(app, parentKey, index);
     }    
 }
 
@@ -67,7 +74,7 @@ export const initialiseAll = app => async () => {
     }
 
     for(let index of globalIndexes) {
-        await createHeaderedIndexFileIfnotExists(app, "", index);
+        await initialiseIndex(app, "", index);
     }
 };
 

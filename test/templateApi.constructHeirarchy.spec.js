@@ -110,6 +110,7 @@ describe("heirarchy node creation", () => {
         expect(index.filter).toBeDefined();
         expect(index.children).toBeUndefined();
         expect(index.indexType).toBe("heirarchal");
+        expect(index.getShardName).toBeDefined();
         index.name = "naughty-customers";
         expect(index.pathRegx()).toBe("/naughty-customers");
         expect(index.parent()).toBe(root);

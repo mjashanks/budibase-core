@@ -142,7 +142,8 @@ export const getNewIndexTemplate = parent =>
         filter:"",
         indexType: isRecord(parent) 
                    ? "reference" 
-                   : "heirarchal"
+                   : "heirarchal",
+        getShardName: ""
     });
 
 export default {

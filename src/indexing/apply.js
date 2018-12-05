@@ -1,12 +1,11 @@
 import Papa from "papaparse";
 import {find, pull, merge, isString} from "lodash";
-import {readIndex, getIndexedDataKey, getIndexedDataKey_fromIndexKey} from "./read";
+import {readIndex} from "./read";
+import {getIndexedDataKey} from "./sharding";
 // refactor write and read
-export const writeIndex = async (datastore, indexedData, 
-                                indexKey) => {
+const writeIndex = async (datastore, indexedData, 
+                                indexedDataKey) => {
     const indexContents = Papa.unparse(indexedData);
-
-    const indexedDataKey = getIndexedDataKey_fromIndexKey(indexKey);
 
     if(await datastore.exists(indexedDataKey)) {
         await datastore.updateFile(
@@ -22,15 +21,15 @@ export const writeIndex = async (datastore, indexedData,
 const compareKey = mappedRecord => i => i.key === mappedRecord.key; 
 
 
-export const add = async (store, mappedRecord, indexKey) => {
-    const indexedDataKey = getIndexedDataKey_fromIndexKey(indexKey);
+export const add = async (store, mappedRecord, indexKey, indexNode) => {
+    const indexedDataKey = getIndexedDataKey(indexNode, indexKey, mappedRecord);
     const indexedData = await readIndex(store, indexedDataKey);
     indexedData.push(mappedRecord);
     await writeIndex(store, indexedData, indexedDataKey);
 };
 
-export const remove = async (store, mappedRecord, indexKey)  => {
-    const indexedDataKey = getIndexedDataKey_fromIndexKey(indexKey);
+export const remove = async (store, mappedRecord, indexKey, indexNode)  => {
+    const indexedDataKey = getIndexedDataKey(indexNode, indexKey, mappedRecord);
     const indexedData = await readIndex(store, indexedDataKey);
     // using pull to mutate on purpose, so we dont have a copy of the array
     // (which may be large)
@@ -41,8 +40,8 @@ export const remove = async (store, mappedRecord, indexKey)  => {
     await writeIndex(store, indexedData, indexedDataKey);
 };
 
-export const update = async (store, mappedRecord, indexKey) => {
-    const indexedDataKey = getIndexedDataKey_fromIndexKey(indexKey);
+export const update = async (store, mappedRecord, indexKey, indexNode) => {
+    const indexedDataKey = getIndexedDataKey(indexNode, indexKey, mappedRecord);
     const indexedData = await readIndex(store, indexedDataKey);
 
     merge(

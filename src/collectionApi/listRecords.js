@@ -1,16 +1,39 @@
-import {safeKey, apiWrapper, events} from "../common";
-import {readIndex, 
-    getIndexedDataKey_fromIndexKey} from "../indexing/read";
+import {safeKey, apiWrapper, $,
+        events} from "../common";
+import {readIndex} from "../indexing/read";
+import {getUnshardedIndexDataKey, 
+        getShardKeysInRange} from "../indexing/sharding";
+import {getExactNodeForPath, isIndex, 
+        isShardedIndex} from "../templateApi/heirarchy";
+import {flatten} from "lodash/fp";
 
-export const listRecords = app => async indexKey => 
+export const listRecords = app => async (indexKey, rangeStartParams=null, rangeEndParams=null) => 
     apiWrapper(
         app,
         events.collectionApi.listRecords, 
         {indexKey},
-        _listRecords, app, indexKey);
+        _listRecords, app, indexKey, rangeStartParams, rangeEndParams);
 
-const _listRecords = async (app, indexKey) => {
+const _listRecords = async (app, indexKey, rangeStartParams, rangeEndParams) => {
     indexKey = safeKey(indexKey);
-    const indexedDataKey = getIndexedDataKey_fromIndexKey(indexKey);    
-    return await readIndex(app.datastore, indexedDataKey);
+    const indexNode = getExactNodeForPath(app.heirarchy)(indexKey);
+
+    if(!isIndex(indexNode))
+        throw new Error("supplied key is not an index");
+
+    if(isShardedIndex(indexNode)) {
+        const shardKeys = await getShardKeysInRange(
+            app, indexKey, rangeStartParams, rangeEndParams
+        );
+        const items = [];
+        for(let k of shardKeys) {
+            items.push(await readIndex(app.datastore, k));
+        }
+        return flatten(items);
+    } else {
+        return await readIndex(
+            app.datastore, 
+            getUnshardedIndexDataKey(indexKey)
+        );
+    }    
 };
