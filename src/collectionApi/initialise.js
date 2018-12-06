@@ -3,7 +3,6 @@ import {getFlattenedHierarchy, hasNoMatchingAncestors,
     getExactNodeForPath, isGlobalIndex} from "../templateApi/heirarchy";
 import {$, allTrue, joinKey} from "../common";
 import {filter} from "lodash/fp";
-import {getIndexedDataKey} from "../indexing/read";
 import getIndexing from "../indexing";
 import {getShardMapKey, getUnshardedIndexDataKey} from "../indexing/sharding";
 

@@ -1,9 +1,9 @@
 import {getExactNodeForPath, findField, getNode} from "../templateApi/heirarchy";
-import {getIndexedDataKey} from "../indexing/read";
 import {listItems} from "../indexApi/listItems";
 import {has, some} from "lodash";
 import {map, isString} from "lodash/fp";
-import {$, apiWrapper, events} from "../common";
+import {$, apiWrapper, events, joinKey} from "../common";
+import {getIndexKey_BasedOnDecendant} from "../indexing/sharding";
 
 export const getContext = app => recordKey => 
     apiWrapper(
@@ -55,8 +55,10 @@ const _getContext = (app, recordKey) => {
 
 const readReferenceIndex = async (app, recordKey,typeOptions) => {
     const indexNode = getNode(app.heirarchy, typeOptions.indexNodeKey);
-    const indexedDataKey = getIndexedDataKey(recordKey, indexNode);
-    const items = await listItems(app)(indexedDataKey);
+    const indexKey = getIndexKey_BasedOnDecendant(
+        recordKey, indexNode
+    );
+    const items = await listItems(app)(indexKey);
     return $(items, [
         map(i => ({
             key: i.key,

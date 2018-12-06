@@ -11,8 +11,10 @@ describe("collectionApi > initialiseAll", () => {
     
         await collectionApi.initialiseAll();
 
-        expect(await collectionApi._store.exists(`/customers/default.csv`)).toBeTruthy();
-        expect(await collectionApi._store.exists(`/customers/deceased.csv`)).toBeTruthy();
+        expect(await collectionApi._store.exists(`/customers/default/index.csv`)).toBeTruthy();
+        expect(await collectionApi._store.exists(`/customers/default`)).toBeTruthy();
+        expect(await collectionApi._store.exists(`/customers/deceased/index.csv`)).toBeTruthy();
+        expect(await collectionApi._store.exists(`/customers/deceased`)).toBeTruthy();
     });
 
     it("should create folder for collection", async () => {
@@ -28,8 +30,8 @@ describe("collectionApi > initialiseAll", () => {
         const {collectionApi, appHeirarchy} = 
             await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
 
-        const defaultIndexName = "/customers/default.csv";
-        const deceasedIndexName = "/customers/deceased.csv";
+        const defaultIndexName = "/customers/default/index.csv";
+        const deceasedIndexName = "/customers/deceased/index.csv";
 
         await collectionApi._store.updateFile(defaultIndexName, "default test");
         await collectionApi._store.updateFile(deceasedIndexName, "deceased test");

@@ -1,4 +1,4 @@
-import {getExactNodeForPath, isShardedIndex} from "../templateApi/heirarchy";
+import {getActualKeyOfParent, isGlobalIndex} from "../templateApi/heirarchy";
 import {joinKey, isNonEmptyString, $} from "../common";
 import {compileCode} from "@nx-js/compiler-util";
 import {filter} from "lodash/fp";
@@ -38,3 +38,19 @@ export const getUnshardedIndexDataKey = indexKey =>
     joinKey(indexKey, "index.csv");
 
 export const getIndexFolderKey = indexKey => indexKey;
+
+export const getIndexKey_BasedOnDecendant = (decendantKey, indexNode) => {
+
+    if(isGlobalIndex(indexNode))
+        return `${indexNode.nodeKey()}`
+
+    const indexedDataParentKey = 
+            getActualKeyOfParent(
+                indexNode.parent().nodeKey()    
+                ,decendantKey);
+
+    return joinKey(
+        indexedDataParentKey,
+        indexNode.name
+    );
+};

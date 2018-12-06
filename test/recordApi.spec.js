@@ -247,7 +247,8 @@ describe("save", () => {
         record.surname = "Ledog";
 
         const savedRecord = await recordApi.save(record);
-        expect(await recordApi._storeHandle.exists(`${record.key()}/invoices/default.csv`)).toBeTruthy()
+        expect(await recordApi._storeHandle.exists(`${record.key()}/invoices/default/index.csv`)).toBeTruthy()
+        expect(await recordApi._storeHandle.exists(`${record.key()}/invoices/default`)).toBeTruthy()
         expect(await recordApi._storeHandle.exists(`${record.key()}/invoices`)).toBeTruthy()
     });
 
@@ -257,7 +258,8 @@ describe("save", () => {
         record.surname = "Ledog";
 
         await recordApi.save(record);
-        expect(await recordApi._storeHandle.exists(`${record.key()}/referredToCustomers.csv`)).toBeTruthy();
+        expect(await recordApi._storeHandle.exists(`${record.key()}/referredToCustomers/index.csv`)).toBeTruthy();
+        expect(await recordApi._storeHandle.exists(`${record.key()}/referredToCustomers`)).toBeTruthy();
     });
 
     it("should create folder for record", async () => {
