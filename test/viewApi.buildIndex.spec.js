@@ -1,7 +1,7 @@
 import {setupAppheirarchy, basicAppHeirarchyCreator_WithFields_AndIndexes} from "./specHelpers";
 import { joinKey } from "../src/common";
 import {some} from "lodash";
-import {getIndexedDataKey_fromIndexKey} from "../src/indexing/read";
+import {getUnshardedIndexDataKey} from "../src/indexing/sharding";
 
 describe("buildIndex > Global index", () => {
 
@@ -42,7 +42,7 @@ describe("buildIndex > Global index", () => {
 
         const indexKey = appHeirarchy.outstandingInvoicesIndex.nodeKey();
         await recordApi._storeHandle.deleteFile(
-            getIndexedDataKey_fromIndexKey(indexKey)
+            getUnshardedIndexDataKey(indexKey)
         );
 
         await indexApi.buildIndex(indexKey);
@@ -97,7 +97,7 @@ describe("buildIndex > Global index", () => {
 
         const indexKey = appHeirarchy.outstandingInvoicesIndex.nodeKey();
         await recordApi._storeHandle.deleteFile(
-            getIndexedDataKey_fromIndexKey(indexKey)
+            getUnshardedIndexDataKey(indexKey)
         );
 
         await indexApi.buildIndex(indexKey);
@@ -139,7 +139,7 @@ describe("buildIndex > TopLevelCollection", () => {
 
         const indexKey = appHeirarchy.customerInvoicesIndex.nodeKey();
         await recordApi._storeHandle.deleteFile(
-            getIndexedDataKey_fromIndexKey(indexKey)
+            getUnshardedIndexDataKey(indexKey)
         );
 
         await indexApi.buildIndex(indexKey);
@@ -176,7 +176,7 @@ describe("buildIndex > TopLevelCollection", () => {
 
         const indexKey = appHeirarchy.customerInvoicesIndex.nodeKey();
         await recordApi._storeHandle.deleteFile(
-            getIndexedDataKey_fromIndexKey(indexKey)
+            getUnshardedIndexDataKey(indexKey)
         );
 
         await indexApi.buildIndex(indexKey);
@@ -217,7 +217,7 @@ describe("buildIndex > nested collection", () => {
 
         const indexKey = joinKey(customer.key(), "invoices", "default");
         await recordApi._storeHandle.deleteFile(
-            getIndexedDataKey_fromIndexKey(indexKey)
+            getUnshardedIndexDataKey(indexKey)
         );
 
         await indexApi.buildIndex(
@@ -275,7 +275,7 @@ describe("buildIndex > nested collection", () => {
 
         const indexKey = joinKey(customer.key(), "invoices", "default");
         await recordApi._storeHandle.deleteFile(
-            getIndexedDataKey_fromIndexKey(indexKey)
+            getUnshardedIndexDataKey(indexKey)
         );
 
         await indexApi.buildIndex(
@@ -314,7 +314,7 @@ describe("buildIndex > reverse reference index", () => {
         const indexKey = joinKey(partner1.key(), "partnerCustomers");
 
         await recordApi._storeHandle.deleteFile(
-            getIndexedDataKey_fromIndexKey(indexKey)
+            getUnshardedIndexDataKey(indexKey)
         );
 
         await indexApi.buildIndex(
@@ -347,7 +347,7 @@ describe("buildIndex > reverse reference index", () => {
         const indexKey = joinKey(referencedCustomer.key(), "referredToCustomers");
 
         await recordApi._storeHandle.deleteFile(
-            getIndexedDataKey_fromIndexKey(indexKey)
+            getUnshardedIndexDataKey(indexKey)
         );
 
         await indexApi.buildIndex(
@@ -390,7 +390,7 @@ describe("buildIndex > reverse reference index", () => {
         const indexKey = joinKey(partner1.key(), "partnerCustomers");
 
         await recordApi._storeHandle.deleteFile(
-            getIndexedDataKey_fromIndexKey(indexKey)
+            getUnshardedIndexDataKey(indexKey)
         );
 
         await indexApi.buildIndex(
@@ -439,11 +439,11 @@ describe("buildIndex > reverse reference index", () => {
         const indexKey2 = joinKey(partner2.key(), "partnerCustomers");
 
         await recordApi._storeHandle.deleteFile(
-            getIndexedDataKey_fromIndexKey(indexKey1)
+            getUnshardedIndexDataKey(indexKey1)
         );
 
         await recordApi._storeHandle.deleteFile(
-            getIndexedDataKey_fromIndexKey(indexKey2)
+            getUnshardedIndexDataKey(indexKey2)
         );
 
         await indexApi.buildIndex(
@@ -497,7 +497,7 @@ describe("buildIndex > reverse reference index", () => {
         const indexKey = joinKey(partnerInvoice.key(), "partnerCharges");
 
         await recordApi._storeHandle.deleteFile(
-            getIndexedDataKey_fromIndexKey(indexKey)
+            getUnshardedIndexDataKey(indexKey)
         );
 
         await indexApi.buildIndex(

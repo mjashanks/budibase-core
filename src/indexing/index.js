@@ -1,13 +1,13 @@
 import {getRelevantHeirarchalIndexes,
     getRelevantReverseReferenceIndexes} from "./relevant";
-import {mapRecord, evaluate} from "./evaluate";
+import {evaluate} from "./evaluate";
 import {removeFromAllIds, addToAllIds} from "./allIds";
 import {$$} from "../common";
 import {filter, map, keys, 
         isEqual, constant} from "lodash/fp";
 import {union, differenceBy, intersectionBy} from "lodash";
 import {add, update, remove} from "./apply";
-import {unparse} from "papaparse";
+import {createIndexFile} from "./sharding";
 
 const reindexFor = async (datastore, appHeirarchy, record, forAction) =>  {
 
@@ -164,15 +164,6 @@ const diffReverseRefForUpdate = (appHeirarchy, oldRecord, newRecord) => {
         notChanged
     };
 }
-
-
-// TODO: how does this change
-const createIndexFile = (datastore) => async (indexedDataKey, index) => {
-    const dummyMapped = mapRecord({}, index);
-    const indexCsv_headerOnly = unparse([keys(dummyMapped)]);
-    await datastore.createFile(indexedDataKey, indexCsv_headerOnly);
-};
-
 
 export default (app) => ({
     reindexForCreate : reindexForCreate(app.datastore, app.heirarchy), 

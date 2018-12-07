@@ -1,9 +1,7 @@
-import {getNewFieldValue} from "../types";
-import {find, keyBy, mapValues, constant} from "lodash/fp";
-import {$, joinKey, safeKey, apiWrapper, events} from "../common";
+import {apiWrapper, events} from "../common";
 import {isIndex, isShardedIndex, 
         getExactNodeForPath} from "../templateApi/heirarchy";
-import {getShardMapKey, getAllShardKeys, 
+import {getAllShardKeys, 
         getUnshardedIndexDataKey} from "../indexing/sharding";
 
 export const deleteIndex = app => async indexKey => 

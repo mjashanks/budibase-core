@@ -96,7 +96,8 @@ export const withFields = (heirarchy, templateApi) => {
     const {customerRecord, invoiceRecord, 
         partnerInvoiceRecord, chargeRecord,
         partnerRecord, partnersCollection, 
-        settingsRecord, chargesCollection} = heirarchy;
+        settingsRecord, chargesCollection,
+        customersCollection} = heirarchy;
 
     getNewFieldAndAdd(templateApi, settingsRecord)("appName", "string", "");
     
@@ -122,6 +123,12 @@ export const withFields = (heirarchy, templateApi) => {
     customerPartnerField.typeOptions.displayValue = "businessName";
     customerPartnerField.typeOptions.reverseIndexNodeKey = joinKey(
         partnerRecord.nodeKey(), "partnerCustomers" );
+
+    const customersBySurnameIndex = templateApi.getNewIndexTemplate(customersCollection);
+    customersBySurnameIndex.name = "customersBySurname";
+    customersBySurnameIndex.map = "return {...record};"
+    customersBySurnameIndex.filter = "";
+    customersBySurnameIndex.getShardName = "return !record.surname ? 'null' : record.surname.substring(0,1);"
 
     const referredToCustomersReverseIndex = templateApi.getNewIndexTemplate(customerRecord);
     referredToCustomersReverseIndex.name = "referredToCustomers";

@@ -8,12 +8,13 @@ import {getShardMapKey, getUnshardedIndexDataKey} from "../indexing/sharding";
 
 export const initialiseIndex = async (app, parentKey, index) => {
     const indexKey = joinKey(parentKey, index.name);
+
     await app.datastore.createFolder(indexKey);
 
     if(isShardedIndex(index)) {
         await app.datastore.createFile(
             getShardMapKey(indexKey),
-            ""
+            "[]"
         );
     } else {
         const indexing = getIndexing(app);
@@ -43,7 +44,9 @@ const ensureCollectionIsInitialised = async (app, node, parentKey) => {
     
 
     for(let index of node.indexes) {
-        await initialiseIndex(app, parentKey, index);
+        const indexKey = joinKey(parentKey, index.name);
+        if(!await app.datastore.exists(indexKey))
+            await initialiseIndex(app, parentKey, index);
     }    
 }
 
@@ -73,7 +76,8 @@ export const initialiseAll = app => async () => {
     }
 
     for(let index of globalIndexes) {
-        await initialiseIndex(app, "", index);
+        if(!await app.datastore.exists(index.nodeKey()))
+            await initialiseIndex(app, "", index);
     }
 };
 

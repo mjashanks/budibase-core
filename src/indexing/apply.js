@@ -3,7 +3,7 @@ import {find, pull, merge, isString} from "lodash";
 import {readIndex} from "./read";
 import {getIndexedDataKey} from "./sharding";
 // refactor write and read
-const writeIndex = async (datastore, indexedData, 
+export const writeIndex = async (datastore, indexedData, 
                                 indexedDataKey) => {
     const indexContents = Papa.unparse(indexedData);
 
@@ -23,14 +23,14 @@ const compareKey = mappedRecord => i => i.key === mappedRecord.key;
 
 export const add = async (store, mappedRecord, indexKey, indexNode) => {
     const indexedDataKey = getIndexedDataKey(indexNode, indexKey, mappedRecord);
-    const indexedData = await readIndex(store, indexedDataKey);
+    const indexedData = await readIndex(store, indexNode, indexedDataKey);
     indexedData.push(mappedRecord);
     await writeIndex(store, indexedData, indexedDataKey);
 };
 
 export const remove = async (store, mappedRecord, indexKey, indexNode)  => {
     const indexedDataKey = getIndexedDataKey(indexNode, indexKey, mappedRecord);
-    const indexedData = await readIndex(store, indexedDataKey);
+    const indexedData = await readIndex(store, indexNode, indexedDataKey);
     // using pull to mutate on purpose, so we dont have a copy of the array
     // (which may be large)
     pull(indexedData, 
@@ -42,7 +42,7 @@ export const remove = async (store, mappedRecord, indexKey, indexNode)  => {
 
 export const update = async (store, mappedRecord, indexKey, indexNode) => {
     const indexedDataKey = getIndexedDataKey(indexNode, indexKey, mappedRecord);
-    const indexedData = await readIndex(store, indexedDataKey);
+    const indexedData = await readIndex(store, indexNode, indexedDataKey);
 
     merge(
         find(indexedData, compareKey(mappedRecord)),

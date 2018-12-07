@@ -27,12 +27,13 @@ const _listRecords = async (app, indexKey, rangeStartParams, rangeEndParams) => 
         );
         const items = [];
         for(let k of shardKeys) {
-            items.push(await readIndex(app.datastore, k));
+            items.push(await readIndex(app.datastore, indexNode, k));
         }
         return flatten(items);
     } else {
         return await readIndex(
             app.datastore, 
+            indexNode,
             getUnshardedIndexDataKey(indexKey)
         );
     }    

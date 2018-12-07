@@ -9,6 +9,7 @@ import {load} from "../recordApi/load";
 import {evaluate} from "../indexing/evaluate";
 import {writeIndex} from "../indexing/apply";
 import { getIndexedDataKey_fromIndexKey, readIndex } from "../indexing/read";
+import {getUnshardedIndexDataKey} from "../indexing/sharding";
 
 /*
 GlobalIndex:
@@ -77,7 +78,7 @@ const buildReverseReferenceIndex = async (app, indexNode) => {
             await writeIndex(
                 app.datastore, [], 
                 joinKey(result.collectionKey, 
-                        id, indexNode.name));
+                        id, indexNode.name, "index.csv"));
         }
         referencedRecordsIterator = await iterateReferencedRecords();
     }
@@ -114,10 +115,10 @@ const buildReverseReferenceIndex = async (app, indexNode) => {
                     const referencedKey = record[field.name].key;
                     if(!referencedKey) continue;
                     const indexDataKey = getIndexedDataKey_fromIndexKey(
-                        joinKey(referencedKey, indexNode.name)
+                        joinKey(referencedKey, indexNode.name, "index.csv")
                     );
                     const indexedData = await readIndex(
-                        app.datastore, indexDataKey);
+                        app.datastore, indexNode, indexDataKey);
                     applyToIndex(record, indexNode, indexedData);
                     await writeIndex(
                         app.datastore, indexedData, indexDataKey)
@@ -150,7 +151,8 @@ const buildGlobalIndex = async (app, indexNode) => {
             indexNode);
     }
     
-    await writeIndex(app.datastore,indexedData, indexNode.nodeKey());
+    const indexedDataKey = joinKey(indexNode.nodeKey(), "index.csv");
+    await writeIndex(app.datastore,indexedData, indexedDataKey);
 
 };
 
@@ -161,9 +163,10 @@ const buildCollectionIndex = async (app, indexNode, collectionKey) => {
         collectionKey, 
         indexedData, indexNode
     );
+    const indexedDataKey = joinKey(collectionKey, indexNode.name, "index.csv");
     await writeIndex(
         app.datastore, indexedData, 
-        joinKey(collectionKey, indexNode.name));
+        indexedDataKey);
 };
 
 const buildNestedCollectionIndex = async (app, indexNode) => {
