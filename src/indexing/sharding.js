@@ -20,13 +20,13 @@ export const getIndexedDataKey = (indexNode, indexKey, record) => {
 
 export const getShardKeysInRange = async (app, indexKey, startRecord=null, endRecord=null) => {
 
-    const startKey = getIndexedDataKey(app.heirarchy, indexKey, startRecord);
-    const endKey = getIndexedDataKey(app.heirarchy, indexKey, endRecord);
+    const startKey = !startRecord ? null : getIndexedDataKey(app.heirarchy, indexKey, startRecord);
+    const endKey = !endRecord ? null : getIndexedDataKey(app.heirarchy, indexKey, endRecord);
 
     return $(await getShardMap(app.datastore, indexKey),[
         filter(k => (startKey === null || k >= startKey) 
                     && (endKey === null || k <= endKey)),
-        map(k => joinKey(indexKey, k))
+        map(k => joinKey(indexKey, k + ".csv"))
     ]);
 };
 

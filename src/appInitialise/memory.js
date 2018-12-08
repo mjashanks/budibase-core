@@ -22,7 +22,8 @@ export const loadFile = data => async (path) => {
 };
 export const exists = data => async (path) => has(data, path);
 export const deleteFile = data => async (path) => {
-    if(!await exists(data)(path)) throw new Error("Cannot delete file, path " + path + " does not exist");
+    if(!await exists(data)(path)) 
+        throw new Error("Cannot delete file, path " + path + " does not exist");
     if(isFolder(data[path])) throw new Error("DeleteFile: Path " + path + " is a folder, not a file");
     delete data[path];
 }

@@ -1,7 +1,7 @@
 import {apiWrapper, events} from "../common";
 import {isIndex, isShardedIndex, 
         getExactNodeForPath} from "../templateApi/heirarchy";
-import {getAllShardKeys, 
+import {getAllShardKeys, getShardMapKey,
         getUnshardedIndexDataKey} from "../indexing/sharding";
 
 export const deleteIndex = app => async indexKey => 
@@ -22,6 +22,9 @@ const _deleteIndex = async (app, indexKey) => {
         for(let k of shardKeys) {
             await app.datastore.deleteFile(k);
         }
+        await app.datastore.deleteFile(
+            getShardMapKey(indexKey)
+        );
     } else {
         await app.datastore.deleteFile(
             getUnshardedIndexDataKey(indexKey)
