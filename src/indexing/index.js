@@ -2,12 +2,12 @@ import {getRelevantHeirarchalIndexes,
     getRelevantReverseReferenceIndexes} from "./relevant";
 import {evaluate} from "./evaluate";
 import {removeFromAllIds, addToAllIds} from "./allIds";
-import {$$} from "../common";
+import {$$, $} from "../common";
 import {filter, map, keys, 
-        isEqual, constant} from "lodash/fp";
+        isEqual, pull} from "lodash/fp";
 import {union, differenceBy, intersectionBy} from "lodash";
 import {add, update, remove} from "./apply";
-import {createIndexFile} from "./sharding";
+import {createIndexFile, getIndexedDataKey} from "./sharding";
 
 const reindexFor = async (datastore, appHeirarchy, record, forAction) =>  {
 
@@ -122,8 +122,26 @@ const reindexForUpdate = (datastore, appHeirarchy) =>
             getIndexNodesToApply(toUpdateFilter)(referenceChanges.notChanged),
         );
 
+    // for changed - if shard key has changed, we need to  
+    // remove from old and add to new
+    const indexedDataKeyForResult = res => 
+        getIndexedDataKey(
+            res.indexNode, res.path, res.mappedRecord.result
+        );
+
+    const shardKeyChanged = $(changed,[
+        filter(c => indexedDataKeyForResult(c.old) !== indexedDataKeyForResult(c.new))
+    ]);
+
+    for(let res of shardKeyChanged) {
+        pull(res)(changed);
+        filteredOut_toRemove.push(res);
+        filteredIn_toAdd.push(res);
+    }
+
     for(let i of filteredOut_toRemove) {
-        await remove(datastore, i.old.mappedRecord.result, i.new.path, i.new.indexNode);
+        // be sure to remove from old index path, in case shard key changed
+        await remove(datastore, i.old.mappedRecord.result, i.old.path, i.new.indexNode);
     }
 
     for(let i of filteredIn_toAdd) {

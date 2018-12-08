@@ -1,5 +1,6 @@
 import {getActualKeyOfParent, isGlobalIndex, 
-        getParentKey ,isShardedIndex} from "../templateApi/heirarchy";
+        getParentKey ,isShardedIndex,
+        getExactNodeForPath} from "../templateApi/heirarchy";
 import {joinKey, isNonEmptyString, splitKey, $} from "../common";
 import {compileCode} from "@nx-js/compiler-util";
 import {filter, keys, map, last} from "lodash/fp";
@@ -20,12 +21,30 @@ export const getIndexedDataKey = (indexNode, indexKey, record) => {
 
 export const getShardKeysInRange = async (app, indexKey, startRecord=null, endRecord=null) => {
 
-    const startKey = !startRecord ? null : getIndexedDataKey(app.heirarchy, indexKey, startRecord);
-    const endKey = !endRecord ? null : getIndexedDataKey(app.heirarchy, indexKey, endRecord);
+    const indexNode = getExactNodeForPath(app.heirarchy)
+                                         (indexKey);
+
+    const startShardName = !startRecord 
+                           ? null 
+                           : shardNameFromKey(
+                                getIndexedDataKey(
+                                    indexNode, 
+                                    indexKey, 
+                                    startRecord)
+                             );
+
+    const endShardName = !endRecord 
+                         ? null 
+                         : shardNameFromKey(
+                            getIndexedDataKey(
+                                indexNode, 
+                                indexKey, 
+                                endRecord)
+                           );
 
     return $(await getShardMap(app.datastore, indexKey),[
-        filter(k => (startKey === null || k >= startKey) 
-                    && (endKey === null || k <= endKey)),
+        filter(k => (startRecord === null || k >= startShardName) 
+                    && (endRecord === null || k <= endShardName)),
         map(k => joinKey(indexKey, k + ".csv"))
     ]);
 };
