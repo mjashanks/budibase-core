@@ -124,13 +124,6 @@ export const withFields = (heirarchy, templateApi) => {
     customerPartnerField.typeOptions.reverseIndexNodeKey = joinKey(
         partnerRecord.nodeKey(), "partnerCustomers" );
 
-    const customersBySurnameIndex = templateApi.getNewIndexTemplate(customersCollection);
-    customersBySurnameIndex.name = "customersBySurname";
-    customersBySurnameIndex.map = "return {...record};"
-    customersBySurnameIndex.filter = "";
-    customersBySurnameIndex.getShardName = "return !record.surname ? 'null' : record.surname.substring(0,1);"
-    heirarchy.customersBySurnameIndex = customersBySurnameIndex;
-    
     const referredToCustomersReverseIndex = templateApi.getNewIndexTemplate(customerRecord);
     referredToCustomersReverseIndex.name = "referredToCustomers";
     referredToCustomersReverseIndex.map = "return {...record};";
@@ -184,7 +177,8 @@ export const withFields = (heirarchy, templateApi) => {
 }
 
 export const withIndexes = (heirarchy, templateApi) => {
-    const {root, customersCollection} = heirarchy;
+    const {root, customersCollection,
+        invoicesCollection} = heirarchy;
     const deceasedCustomersIndex = getNewIndexTemplate(customersCollection);
     deceasedCustomersIndex.name = "deceased";
     deceasedCustomersIndex.map = "return {surname: record.surname, age:record.age};";
@@ -201,6 +195,21 @@ export const withIndexes = (heirarchy, templateApi) => {
     outstandingInvoicesIndex.filter = "record.type() === 'invoice' && record.paidAmount < record.totalIncVat";
     outstandingInvoicesIndex.map = "return record;";
 
+    const customersBySurnameIndex = templateApi.getNewIndexTemplate(customersCollection);
+    customersBySurnameIndex.name = "customersBySurname";
+    customersBySurnameIndex.map = "return {...record};"
+    customersBySurnameIndex.filter = "";
+    customersBySurnameIndex.getShardName = "return !record.surname ? 'null' : record.surname.substring(0,1);"
+    
+    const invoicesByOutstandingIndex = templateApi.getNewIndexTemplate(invoicesCollection);
+    invoicesByOutstandingIndex.name = "invoicesByOutstanding";
+    invoicesByOutstandingIndex.map = "return {...record};"
+    invoicesByOutstandingIndex.filter = "";
+    invoicesByOutstandingIndex.getShardName = "return (record.totalIncVat > record.paidAmount ? 'outstanding' : 'paid');"
+
+    
+    heirarchy.invoicesByOutstandingIndex = invoicesByOutstandingIndex;
+    heirarchy.customersBySurnameIndex = customersBySurnameIndex;
     heirarchy.outstandingInvoicesIndex = outstandingInvoicesIndex;
     heirarchy.deceasedCustomersIndex = deceasedCustomersIndex;
     heirarchy.customerInvoicesIndex = customerInvoicesIndex;

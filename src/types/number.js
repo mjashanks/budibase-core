@@ -28,7 +28,7 @@ const options = {
     minValue: {
         defaultValue: null, 
         nullAllowed: true, 
-        valueIfNull: Number.MIN_VALUE},
+        valueIfNull: 0-Number.MAX_VALUE},
     decimalPlaces: {
         defaultValue: null, 
         nullAllowed: true, 

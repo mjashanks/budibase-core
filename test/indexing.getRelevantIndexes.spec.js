@@ -44,10 +44,14 @@ describe("getRelevantIndexes", () => {
             appHeirarchy.root, customer);
 
         expect(indexes.collections.length).toBe(4);
-        expect(indexes.collections[0].path).toBe("/customers/default");
-        expect(indexes.collections[1].path).toBe("/customers/customersBySurname");
-        expect(indexes.collections[2].path).toBe("/customers/deceased");
-        expect(indexes.collections[3].path).toBe("/customers/invoices");
+        
+        const indexExists = key => 
+            some(indexes.collections, c => c.path === key);
+        
+        expect(indexExists("/customers/default")).toBeTruthy();
+        expect(indexExists("/customers/customersBySurname")).toBeTruthy();
+        expect(indexExists("/customers/deceased")).toBeTruthy();
+        expect(indexExists("/customers/invoices")).toBeTruthy();
     });
 
     it("should get 2 default indexes when 2 collections nested deep", async () => {
@@ -59,7 +63,7 @@ describe("getRelevantIndexes", () => {
         const indexes = getRelevantHeirarchalIndexes(
             appHeirarchy.root, invoice);
 
-        expect(indexes.collections.length).toBe(5);
+        expect(indexes.collections.length).toBe(6);
         expect(some(indexes.collections, i => i.path === "/customers/default")).toBeTruthy();
         expect(some(indexes.collections, i => i.path === "/customers/0-1234/invoices/default")).toBeTruthy();
     });

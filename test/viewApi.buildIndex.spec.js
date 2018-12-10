@@ -1,7 +1,6 @@
 import {setupAppheirarchy, basicAppHeirarchyCreator_WithFields_AndIndexes} from "./specHelpers";
 import { joinKey } from "../src/common";
 import {some} from "lodash";
-import {getUnshardedIndexDataKey} from "../src/indexing/sharding";
 
 describe("buildIndex > Global index", () => {
 
@@ -304,6 +303,88 @@ describe("buildIndex > sharded index", () => {
 
         expect(indexItems.length).toBe(1);
         expect(indexItems[0].key).toBe(customer.key());
+
+    });
+
+    it("should index multiple record into a sharded index", async() => {
+        const {recordApi, indexApi, appHeirarchy} = await setupAppheirarchy(
+            basicAppHeirarchyCreator_WithFields_AndIndexes
+        );
+
+        const customer1 = recordApi.getNew(
+            appHeirarchy.customersCollection.nodeKey(),
+            "customer");
+        customer1.surname = "thedog";
+        await recordApi.save(customer1);
+
+        const customer2 = recordApi.getNew(
+            appHeirarchy.customersCollection.nodeKey(),
+            "customer");
+        customer2.surname = "Zeecat";
+        await recordApi.save(customer2);
+
+        const indexKey = appHeirarchy
+                            .customersBySurnameIndex
+                            .nodeKey();
+
+        await indexApi.delete(indexKey);
+
+        await indexApi.buildIndex(indexKey);
+        const indexItems = await indexApi.listItems(indexKey);
+
+        expect(indexItems.length).toBe(2);
+        expect(some(indexItems, i => i.key === customer1.key())).toBeTruthy();
+        expect(some(indexItems, i => i.key === customer2.key())).toBeTruthy();
+
+    });
+
+    it("should index multiple records into a sharded and nested index", async() => {
+        const {recordApi, indexApi, appHeirarchy} = await setupAppheirarchy(
+            basicAppHeirarchyCreator_WithFields_AndIndexes
+        );
+
+        const customer = recordApi.getNew(
+            appHeirarchy.customersCollection.nodeKey(),
+            "customer");
+        customer.surname = "thedog";
+        await recordApi.save(customer);
+
+        const invoiceCollectionKey = joinKey(
+            customer.key(), "invoices");
+
+        const invoice1 = recordApi.getNew(
+            invoiceCollectionKey,
+            "invoice"
+        );
+        invoice1.totalIncVat = 10;
+        invoice1.paidAmount = 10;
+        await recordApi.save(invoice1);
+
+        const invoice2 = recordApi.getNew(
+            invoiceCollectionKey,
+            "invoice"
+        );
+        invoice2.totalIncVat = 10;
+        invoice2.paidAmount = 0;
+        await recordApi.save(invoice2);
+
+        const indexKey = joinKey(
+            invoiceCollectionKey, 
+            appHeirarchy.invoicesByOutstandingIndex.name);
+
+        await indexApi.delete(indexKey);
+
+        await indexApi.buildIndex(
+            appHeirarchy.invoicesByOutstandingIndex.nodeKey());
+        const indexItems = await indexApi.listItems(indexKey);
+
+        expect(indexItems.length).toBe(2);
+        expect(some(indexItems, i => i.key === invoice1.key())).toBeTruthy();
+        expect(some(indexItems, i => i.key === invoice2.key())).toBeTruthy();
+
+        const outstandingRange = {totalIncVat:1, paidAmount:0};
+        const outstandingItems = await indexApi.listItems(indexKey, outstandingRange, outstandingRange);
+        expect(outstandingItems.length).toBe(1);
 
     });
 
