@@ -8,8 +8,10 @@ import {joinKey, apiWrapper, events, $} from "../common";
 import {load} from "../recordApi/load";
 import {evaluate} from "../indexing/evaluate";
 import {writeIndex} from "../indexing/apply";
-import { getIndexedDataKey_fromIndexKey, readIndex } from "../indexing/read";
-import {getUnshardedIndexDataKey} from "../indexing/sharding";
+import {initialiseIndex} from "../collectionApi/initialise";
+import {getIndexedDataKey_fromIndexKey, readIndex} from "../indexing/read";
+import {deleteIndex} from "../indexApi/delete";
+import {getIndexedDataKey} from "../indexing/sharding";
 
 /*
 GlobalIndex:
@@ -46,7 +48,8 @@ const _buildIndex = async (app, indexNodeKey) => {
             app, indexNode);
     } else if(isTopLevelCollection(indexNode.parent())) {
         await buildCollectionIndex(
-            app, indexNode, indexNode.parent().nodeKey()
+            app, indexNode.nodeKey(),
+            indexNode, indexNode.parent().nodeKey()
         ); 
     }
     else if(isCollection(indexNode.parent())){
@@ -142,31 +145,30 @@ const buildGlobalIndex = async (app, indexNode) => {
     
     const topLevelCollections = filterNodes(isTopLevelCollection);
 
-    const indexedData = [];
-
     for(let col of topLevelCollections) {
         await applyAllDecendantRecords(
             app, 
-            col.nodeKey(), indexedData,
-            indexNode);
+            col.nodeKey(), 
+            indexNode,
+            indexNode.nodeKey(),
+            [], "");
     }
-    
-    const indexedDataKey = joinKey(indexNode.nodeKey(), "index.csv");
-    await writeIndex(app.datastore,indexedData, indexedDataKey);
-
 };
 
-const buildCollectionIndex = async (app, indexNode, collectionKey) => {
-    const indexedData = [];
+const buildCollectionIndex = async (app, indexKey, indexNode, collectionKey) => {
+    try {
+        await deleteIndex(app)(indexKey);
+    }
+    catch(_){} // tolerate if already gone
+
+    await initialiseIndex(app, collectionKey, indexNode);
     await applyAllDecendantRecords(
         app, 
         collectionKey, 
-        indexedData, indexNode
+        indexNode,
+        indexKey,
+        [] ,""
     );
-    const indexedDataKey = joinKey(collectionKey, indexNode.name, "index.csv");
-    await writeIndex(
-        app.datastore, indexedData, 
-        indexedDataKey);
 };
 
 const buildNestedCollectionIndex = async (app, indexNode) => {
@@ -189,8 +191,10 @@ const buildNestedCollectionIndex = async (app, indexNode) => {
                     nestedCollection.name
                 );
 
+            const indexKey = joinKey(
+                collectionKey, indexNode.name);
             await buildCollectionIndex(
-                app, indexNode, collectionKey
+                app, indexKey, indexNode, collectionKey
             );
         }
         allids = await allIdsIterator(); 
@@ -207,12 +211,43 @@ const applyToIndex = (record, indexNode, indexedData) => {
         indexedData.push(result.result);
 };
 
+const reloadIndexedDataIfRequired = async (datastore,
+                                           indexNode, 
+                                           indexKey, 
+                                           record,
+                                           currentIndexedData,
+                                           currentIndexedDataKey) => {
+
+    const indexedDataKey = getIndexedDataKey(
+        indexNode, indexKey, record
+    );
+
+    if(indexedDataKey === currentIndexedDataKey) 
+        return {indexedData:currentIndexedData, 
+                indexedDataKey:currentIndexedDataKey};
+    
+    await writeIndex(
+        datastore, 
+        currentIndexedData, 
+        currentIndexedDataKey);
+    
+    const indexedData = await readIndex(
+        datastore,
+        indexNode,
+        indexedDataKey
+    );
+
+    return {indexedData, indexedDataKey};
+};
+
 const applyAllDecendantRecords = 
-    async (app, collection_Key_or_NodeKey, indexedData, indexNode) => {
+    async (app, collection_Key_or_NodeKey, 
+            indexNode, indexKey, currentIndexedData, 
+           currentIndexedDataKey, inRecursion=false) => {
 
     const collectionNode = 
         getNodeByKeyOrNodeKey(app.heirarchy, collection_Key_or_NodeKey);
-    
+
     const allIdsIterator = await  getAllIdsIterator(app)
                                                    (collection_Key_or_NodeKey);
 
@@ -220,12 +255,24 @@ const applyAllDecendantRecords =
         await load(app)(recordKey);
     
     const buildForIds = async (collectionKey, allIds) => {
+
         for(let recordId of allIds) {
             const recordKey = joinKey(collectionKey, recordId);
             const record = await getRecord(
                 recordKey
             );
-            applyToIndex(record, indexNode, indexedData);
+            
+            // if index is sharded, we may need to get a different
+            // shard than the current one
+            const newIndexedData =  await reloadIndexedDataIfRequired(
+                app.datastore, indexNode, indexKey, record,
+                currentIndexedData, currentIndexedDataKey
+            );
+
+            currentIndexedData = newIndexedData.indexedData;
+            currentIndexedDataKey = newIndexedData.indexedDataKey;
+
+            applyToIndex(record, indexNode, currentIndexedData);
             const recordNode = chooseChildRecordNodeByKey(
                 collectionNode,
                 recordId
@@ -235,7 +282,8 @@ const applyAllDecendantRecords =
                 await applyAllDecendantRecords(
                     app,
                     joinKey(recordKey, childCollectionNode.name),
-                    indexedData, indexNode);
+                    indexNode, indexKey, currentIndexedData,
+                    currentIndexedDataKey, true);
             }
         }
     };
@@ -248,6 +296,12 @@ const applyAllDecendantRecords =
         allIds = await allIdsIterator();
     }
 
+    if(!inRecursion) {
+        await writeIndex(
+            app.datastore,
+            currentIndexedData, 
+            currentIndexedDataKey);
+    }
 };
 
 

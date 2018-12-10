@@ -129,7 +129,8 @@ export const withFields = (heirarchy, templateApi) => {
     customersBySurnameIndex.map = "return {...record};"
     customersBySurnameIndex.filter = "";
     customersBySurnameIndex.getShardName = "return !record.surname ? 'null' : record.surname.substring(0,1);"
-
+    heirarchy.customersBySurnameIndex = customersBySurnameIndex;
+    
     const referredToCustomersReverseIndex = templateApi.getNewIndexTemplate(customerRecord);
     referredToCustomersReverseIndex.name = "referredToCustomers";
     referredToCustomersReverseIndex.map = "return {...record};";

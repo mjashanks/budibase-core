@@ -41,9 +41,7 @@ describe("buildIndex > Global index", () => {
         await recordApi.save(paidInvoice);
 
         const indexKey = appHeirarchy.outstandingInvoicesIndex.nodeKey();
-        await recordApi._storeHandle.deleteFile(
-            getUnshardedIndexDataKey(indexKey)
-        );
+        await indexApi.delete(indexKey);
 
         await indexApi.buildIndex(indexKey);
         const indexItems = await indexApi.listItems(indexKey);
@@ -96,9 +94,7 @@ describe("buildIndex > Global index", () => {
         await recordApi.save(partnerInvoice);
 
         const indexKey = appHeirarchy.outstandingInvoicesIndex.nodeKey();
-        await recordApi._storeHandle.deleteFile(
-            getUnshardedIndexDataKey(indexKey)
-        );
+        await indexApi.delete(indexKey);
 
         await indexApi.buildIndex(indexKey);
         const indexItems = await indexApi.listItems(indexKey);
@@ -138,9 +134,7 @@ describe("buildIndex > TopLevelCollection", () => {
         await recordApi.save(invoice);
 
         const indexKey = appHeirarchy.customerInvoicesIndex.nodeKey();
-        await recordApi._storeHandle.deleteFile(
-            getUnshardedIndexDataKey(indexKey)
-        );
+        await indexApi.delete(indexKey);
 
         await indexApi.buildIndex(indexKey);
         const indexItems = await indexApi.listItems(indexKey);
@@ -175,9 +169,7 @@ describe("buildIndex > TopLevelCollection", () => {
         await recordApi.save(invoice);
 
         const indexKey = appHeirarchy.customerInvoicesIndex.nodeKey();
-        await recordApi._storeHandle.deleteFile(
-            getUnshardedIndexDataKey(indexKey)
-        );
+        await indexApi.delete(indexKey);
 
         await indexApi.buildIndex(indexKey);
         const indexItems = await indexApi.listItems(indexKey);
@@ -216,9 +208,7 @@ describe("buildIndex > nested collection", () => {
         await recordApi.save(invoice);
 
         const indexKey = joinKey(customer.key(), "invoices", "default");
-        await recordApi._storeHandle.deleteFile(
-            getUnshardedIndexDataKey(indexKey)
-        );
+        await indexApi.delete(indexKey);
 
         await indexApi.buildIndex(
             appHeirarchy.invoicesCollection.indexes[0].nodeKey());
@@ -274,9 +264,7 @@ describe("buildIndex > nested collection", () => {
         await recordApi.save(invoice2);
 
         const indexKey = joinKey(customer.key(), "invoices", "default");
-        await recordApi._storeHandle.deleteFile(
-            getUnshardedIndexDataKey(indexKey)
-        );
+        await indexApi.delete(indexKey);
 
         await indexApi.buildIndex(
             appHeirarchy.invoicesCollection.indexes[0].nodeKey());
@@ -285,6 +273,37 @@ describe("buildIndex > nested collection", () => {
         expect(indexItems.length).toBe(2);
         expect(some(indexItems, i => i.key === invoice.key())).toBeTruthy();
         expect(some(indexItems, i => i.key === invoice2.key())).toBeTruthy();
+
+    });
+
+});
+
+describe("buildIndex > sharded index", () => {
+
+    it("should index a record into a sharded index", async() => {
+        const {recordApi, indexApi, appHeirarchy} = await setupAppheirarchy(
+            basicAppHeirarchyCreator_WithFields_AndIndexes
+        );
+
+        const customer = recordApi.getNew(
+            appHeirarchy.customersCollection.nodeKey(),
+            "customer");
+        
+        customer.surname = "thedog";
+        
+        await recordApi.save(customer);
+
+        const indexKey = appHeirarchy
+                            .customersBySurnameIndex
+                            .nodeKey();
+
+        await indexApi.delete(indexKey);
+
+        await indexApi.buildIndex(indexKey);
+        const indexItems = await indexApi.listItems(indexKey);
+
+        expect(indexItems.length).toBe(1);
+        expect(indexItems[0].key).toBe(customer.key());
 
     });
 
@@ -313,9 +332,7 @@ describe("buildIndex > reverse reference index", () => {
 
         const indexKey = joinKey(partner1.key(), "partnerCustomers");
 
-        await recordApi._storeHandle.deleteFile(
-            getUnshardedIndexDataKey(indexKey)
-        );
+        await indexApi.delete(indexKey);
 
         await indexApi.buildIndex(
             appHeirarchy.partnerCustomersReverseIndex.nodeKey());
@@ -346,9 +363,7 @@ describe("buildIndex > reverse reference index", () => {
 
         const indexKey = joinKey(referencedCustomer.key(), "referredToCustomers");
 
-        await recordApi._storeHandle.deleteFile(
-            getUnshardedIndexDataKey(indexKey)
-        );
+        await indexApi.delete(indexKey);
 
         await indexApi.buildIndex(
             appHeirarchy.referredToCustomersReverseIndex.nodeKey());
@@ -389,9 +404,7 @@ describe("buildIndex > reverse reference index", () => {
 
         const indexKey = joinKey(partner1.key(), "partnerCustomers");
 
-        await recordApi._storeHandle.deleteFile(
-            getUnshardedIndexDataKey(indexKey)
-        );
+        await indexApi.delete(indexKey);
 
         await indexApi.buildIndex(
             appHeirarchy.partnerCustomersReverseIndex.nodeKey());
@@ -438,13 +451,9 @@ describe("buildIndex > reverse reference index", () => {
         const indexKey1 = joinKey(partner1.key(), "partnerCustomers");
         const indexKey2 = joinKey(partner2.key(), "partnerCustomers");
 
-        await recordApi._storeHandle.deleteFile(
-            getUnshardedIndexDataKey(indexKey1)
-        );
+        await indexApi.delete(indexKey1);
 
-        await recordApi._storeHandle.deleteFile(
-            getUnshardedIndexDataKey(indexKey2)
-        );
+        await indexApi.delete(indexKey2);
 
         await indexApi.buildIndex(
             appHeirarchy.partnerCustomersReverseIndex.nodeKey());
@@ -496,9 +505,7 @@ describe("buildIndex > reverse reference index", () => {
 
         const indexKey = joinKey(partnerInvoice.key(), "partnerCharges");
 
-        await recordApi._storeHandle.deleteFile(
-            getUnshardedIndexDataKey(indexKey)
-        );
+        await indexApi.delete(indexKey);
 
         await indexApi.buildIndex(
             appHeirarchy.partnerChargesReverseIndex.nodeKey());
