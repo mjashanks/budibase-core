@@ -388,6 +388,38 @@ describe("buildIndex > sharded index", () => {
 
     });
 
+    it("should build reverse reference index", async () => {
+        const {recordApi, indexApi, appHeirarchy} = 
+            await setupAppheirarchy(
+                basicAppHeirarchyCreator_WithFields_AndIndexes
+            );
+
+        const referencedCustomer = recordApi.getNew("/customers", "customer");
+        referencedCustomer.surname = "Zecat";
+        await recordApi.save(referencedCustomer);
+
+        const referencingCustomer = recordApi.getNew("/customers", "customer");
+        referencingCustomer.surname = "Ledog";
+        referencingCustomer.referredBy = {
+            key: referencedCustomer.key(), value: referencedCustomer.surname
+        };
+        referencingCustomer.isalive = true;
+
+        await recordApi.save(referencingCustomer);
+
+        const indexKey = joinKey(referencedCustomer.key(), "referredToCustomers");
+
+        await indexApi.delete(indexKey);
+
+        await indexApi.buildIndex(
+            appHeirarchy.referredToCustomersReverseIndex.nodeKey());
+
+        const indexItems = await indexApi.listItems(indexKey);
+
+        expect(indexItems.length).toBe(1);
+        expect(some(indexItems, i => i.key === referencingCustomer.key())).toBeTruthy();
+    });
+
 });
 
 describe("buildIndex > reverse reference index", () => {
@@ -421,38 +453,6 @@ describe("buildIndex > reverse reference index", () => {
 
         expect(indexItems.length).toBe(1);
         expect(some(indexItems, i => i.key === customer.key())).toBeTruthy();
-    });
-
-    it("should build index when reverse reference index is in the same node as referenching record", async () => {
-        const {recordApi, indexApi, appHeirarchy} = 
-            await setupAppheirarchy(
-                basicAppHeirarchyCreator_WithFields_AndIndexes
-            );
-
-        const referencedCustomer = recordApi.getNew("/customers", "customer");
-        referencedCustomer.surname = "Zecat";
-        await recordApi.save(referencedCustomer);
-
-        const referencingCustomer = recordApi.getNew("/customers", "customer");
-        referencingCustomer.surname = "Ledog";
-        referencingCustomer.referredBy = {
-            key: referencedCustomer.key(), value: referencedCustomer.surname
-        };
-        referencingCustomer.isalive = true;
-
-        await recordApi.save(referencingCustomer);
-
-        const indexKey = joinKey(referencedCustomer.key(), "referredToCustomers");
-
-        await indexApi.delete(indexKey);
-
-        await indexApi.buildIndex(
-            appHeirarchy.referredToCustomersReverseIndex.nodeKey());
-
-        const indexItems = await indexApi.listItems(indexKey);
-
-        expect(indexItems.length).toBe(1);
-        expect(some(indexItems, i => i.key === referencingCustomer.key())).toBeTruthy();
     });
 
     it("should build multiple records into an index, when referencing same record", async () => {

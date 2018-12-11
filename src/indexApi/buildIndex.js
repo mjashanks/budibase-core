@@ -78,10 +78,11 @@ const buildReverseReferenceIndex = async (app, indexNode) => {
     while(!referencedRecordsIterator.done) {
         const {result} = referencedRecordsIterator;
         for(let id of result.ids) {
-            await writeIndex(
-                app.datastore, [], 
-                joinKey(result.collectionKey, 
-                        id, indexNode.name, "index.csv"));
+            const indexKey = joinKey(
+                result.collectionKey, 
+                id, indexNode.name);
+
+            await tryDeleteIndex(app, indexKey);
         }
         referencedRecordsIterator = await iterateReferencedRecords();
     }
@@ -117,14 +118,19 @@ const buildReverseReferenceIndex = async (app, indexNode) => {
                 for(let field of referencingFields) {
                     const referencedKey = record[field.name].key;
                     if(!referencedKey) continue;
-                    const indexDataKey = getIndexedDataKey_fromIndexKey(
-                        joinKey(referencedKey, indexNode.name, "index.csv")
+
+                    const indexKey = joinKey(
+                        referencedKey, indexNode.name)
+
+                    const indexedDataKey = getIndexedDataKey(
+                        indexNode, indexKey, record
                     );
+
                     const indexedData = await readIndex(
-                        app.datastore, indexNode, indexDataKey);
+                        app.datastore, indexNode, indexedDataKey);
                     applyToIndex(record, indexNode, indexedData);
                     await writeIndex(
-                        app.datastore, indexedData, indexDataKey)
+                        app.datastore, indexedData, indexedDataKey)
                 }
             }
             referencingIdIterator = await iterateReferencingNodes();
@@ -155,12 +161,15 @@ const buildGlobalIndex = async (app, indexNode) => {
     }
 };
 
-const buildCollectionIndex = async (app, indexKey, indexNode, collectionKey) => {
+const tryDeleteIndex = async (app, indexKey) => {
     try {
         await deleteIndex(app)(indexKey);
     }
     catch(_){} // tolerate if already gone
+}
 
+const buildCollectionIndex = async (app, indexKey, indexNode, collectionKey) => {
+    await tryDeleteIndex(app,indexKey);
     await initialiseIndex(app, collectionKey, indexNode);
     await applyAllDecendantRecords(
         app, 

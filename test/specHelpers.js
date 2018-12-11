@@ -127,6 +127,7 @@ export const withFields = (heirarchy, templateApi) => {
     const referredToCustomersReverseIndex = templateApi.getNewIndexTemplate(customerRecord);
     referredToCustomersReverseIndex.name = "referredToCustomers";
     referredToCustomersReverseIndex.map = "return {...record};";
+    referredToCustomersReverseIndex.getShardName = "return !record.surname ? 'null' : record.surname.substring(0,1);"
     heirarchy.referredToCustomersReverseIndex = referredToCustomersReverseIndex;
 
     const customerReferredByField = newCustomerField("referredBy", "reference");

@@ -49,10 +49,15 @@ export const getShardKeysInRange = async (app, indexKey, startRecord=null, endRe
     ]);
 };
 
-export const getShardMap = async (datastore, indexKey) =>
-    await datastore.loadJson(
-        getShardMapKey(indexKey)
-    );
+export const getShardMap = async (datastore, indexKey) => {
+    const shardMapKey = getShardMapKey(indexKey);
+    try {
+        return await datastore.loadJson(shardMapKey);
+    } catch(_) {
+        await datastore.createJson(shardMapKey, []);
+        return [];
+    }
+}
 
 export const writeShardMap = async (datastore, indexKey, shardMap) => 
     await datastore.updateJson(

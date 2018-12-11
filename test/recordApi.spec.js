@@ -252,13 +252,13 @@ describe("save", () => {
         expect(await recordApi._storeHandle.exists(`${record.key()}/invoices`)).toBeTruthy()
     });
 
-    it("should create index for reverse reference index", async () => {
+    it("should create index folder and shardMap for sharded reverse reference index", async () => {
         const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";
 
         await recordApi.save(record);
-        expect(await recordApi._storeHandle.exists(`${record.key()}/referredToCustomers/index.csv`)).toBeTruthy();
+        expect(await recordApi._storeHandle.exists(`${record.key()}/referredToCustomers/shardMap.json`)).toBeTruthy();
         expect(await recordApi._storeHandle.exists(`${record.key()}/referredToCustomers`)).toBeTruthy();
     });
 
