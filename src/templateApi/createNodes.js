@@ -2,13 +2,15 @@ import {switchCase, defaultCase, joinKey,
     $, isNothing, isSomething} from "../common";
 import {each, constant} from "lodash";
 import {isCollection, isIndex, isRoot
-    , isRecord} from "./heirarchy";
+    , isRecord,
+    isAggregateSet} from "./heirarchy";
 import {validateAll} from "./validate";
 
 export const createNodeErrors = {
     indexCannotBeParent : "Index template cannot be a parent",
     allNonRootNodesMustHaveParent: "Only the root node may have no parent",
-    indexParentMustBeCollectionOrRoot: "An index may only have a collection or root as a parent"
+    indexParentMustBeCollectionOrRoot: "An index may only have a collection or root as a parent",
+    aggregateParentMustBeAnIndex: "aggregateSet parent must be an index"
 };
 
 const pathRegxMaker = (node) => () => 
@@ -35,9 +37,6 @@ const nodeKeyMaker = (node) => () => {
 };
 
 const validate = parent => node => {
-    
-    if(isSomething(parent) && isIndex(parent)) 
-        throw new Error(createNodeErrors.indexCannotBeParent);
 
     if(isIndex(node) 
         && isSomething(parent) 
@@ -45,6 +44,12 @@ const validate = parent => node => {
         && !isRoot(parent)
         && !isRecord(parent)) {
         throw new Error(createNodeErrors.indexParentMustBeCollectionOrRoot);
+    }
+
+    if(isAggregateSet(node) 
+        && isSomething(parent) 
+        && !isIndex(parent)) {
+        throw new Error(createNodeErrors.aggregateParentMustBeAnIndex);
     }
 
     if(isNothing(parent) && !isRoot(node))
@@ -71,6 +76,8 @@ const addToParent = obj => {
             // Q: why are indexes not children ?
             // A: because they cannot have children of their own.
             parent.indexes.push(obj);
+        else if(isAggregateSet(obj))
+            parent.aggregateSets.push(obj);
         else
             parent.children.push(obj);
     }
@@ -143,10 +150,31 @@ export const getNewIndexTemplate = parent =>
         indexType: isRecord(parent) 
                    ? "reference" 
                    : "heirarchal",
-        getShardName: ""
+        getShardName: "",
+        aggregateSets: []
     });
+
+export const getNewAggregateSetTemplate = index => 
+    constructNode(index, {
+        name: "",
+        type:"aggregateset",
+        groupBy: "",
+        aggregateFunctions: []
+    });
+
+export const getNewAggregateFunctionTemplate = set => {
+    const functions = {
+        name: "",
+        condition: "",
+        functions: [],
+        aggregatedValue: ""
+    };
+    set.aggregateFunctions.push(functions);
+    return functions;
+}
 
 export default {
     getNewRootLevel, getNewRecordTemplate,  
     getNewIndexTemplate, getNewCollectionTemplate, createNodeErrors,
-    constructHeirarchy};
+    constructHeirarchy, getNewAggregateSetTemplate,
+    getNewAggregateFunctionTemplate};

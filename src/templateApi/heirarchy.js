@@ -110,6 +110,7 @@ export const isAncestor = decendant => ancestor =>
 export const isRecord = node => isSomething(node) && node.type === "record";
 export const isCollection = node => isSomething(node) && node.type === "collection";
 export const isIndex = node => isSomething(node) && node.type === "index";
+export const isAggregateSet = node => isSomething(node) && node.type === "aggregateset"
 export const isShardedIndex = node => isIndex(node) && isNonEmptyString(node.getShardName);
 export const isRoot = node => isSomething(node) && node.isRoot();
 export const isDecendantOfARecord = hasMatchingAncestor(isRecord)

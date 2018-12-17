@@ -202,19 +202,28 @@ export const withIndexes = (heirarchy, templateApi) => {
     customersBySurnameIndex.filter = "";
     customersBySurnameIndex.getShardName = "return !record.surname ? 'null' : record.surname.substring(0,1);"
     
+    const customersDefaultIndex = customersCollection.indexes[0];
+    const customersNoGroupAggregateSet = templateApi.getNewAggregateSetTemplate(customersDefaultIndex);
+    customersNoGroupAggregateSet.name = "Customers Summary";
+    const allCustomersAgeFunctions = templateApi.getNewAggregateFunctionTemplate(customersNoGroupAggregateSet);
+    allCustomersAgeFunctions.functions = ["count","max","min","sum","average"];
+    allCustomersAgeFunctions.aggregatedValue = "return record.age";
+
     const invoicesByOutstandingIndex = templateApi.getNewIndexTemplate(invoicesCollection);
     invoicesByOutstandingIndex.name = "invoicesByOutstanding";
     invoicesByOutstandingIndex.map = "return {...record};"
     invoicesByOutstandingIndex.filter = "";
     invoicesByOutstandingIndex.getShardName = "return (record.totalIncVat > record.paidAmount ? 'outstanding' : 'paid');"
 
-    
+    heirarchy.customersDefaultIndex = customersDefaultIndex;
+    heirarchy.allCustomersAgeFunctions = allCustomersAgeFunctions;
+    heirarchy.customersNoGroupAggregateSet = customersNoGroupAggregateSet;
     heirarchy.invoicesByOutstandingIndex = invoicesByOutstandingIndex;
     heirarchy.customersBySurnameIndex = customersBySurnameIndex;
     heirarchy.outstandingInvoicesIndex = outstandingInvoicesIndex;
     heirarchy.deceasedCustomersIndex = deceasedCustomersIndex;
     heirarchy.customerInvoicesIndex = customerInvoicesIndex;
-}
+};
 
 export const basicAppHeirarchyCreator_WithFields = templateApi => 
     heirarchyFactory(withFields)(templateApi);

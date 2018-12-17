@@ -1,21 +1,19 @@
 import {$, isSomething, switchCase
         ,anyTrue, isNonEmptyArray
-        , isNonEmptyString, defaultCase
-        , executesWithoutException,
-        tryOr} from "../common";
-import {isCollection, isRecord, isRoot, 
+        , isNonEmptyString, defaultCase} from "../common";
+import {isCollection, isRecord, isRoot, isAggregateSet,
         isIndex, getFlattenedHierarchy} from "./heirarchy";
 import {filter, union, constant, 
         map, flatten, every, uniqBy,
         some, includes, countBy} from "lodash/fp";
 import {has} from "lodash";
-import {compileFilter, compileMap} from "../indexing/evaluate";
 import {eventsList} from "../common/events";
 import {compileExpression, compileCode} from "@nx-js/compiler-util";
 import {validateAllFields} from "./fields";
 import {applyRuleSet, makerule, stringNotEmpty, 
         validationError} from "./validationCommon";
 import {indexRuleSet} from "./indexes";
+import {validateAllAggregates} from "./validateAggregate";
 
 export const ruleSet = (...sets) => 
     constant(flatten([...sets]));
@@ -38,6 +36,12 @@ const recordRules = [
                 (node.validationRules)),
 ];
 
+
+const aggregateSetRules = [
+    makerule("aggregateFunctions", "no functions have been added",
+        node => isNonEmptyArray(node.aggregateFunctions))
+]
+
 const collectionRules = [
     makerule("children", "collection does not have and children",
         node => isNonEmptyArray(node.children))
@@ -56,6 +60,10 @@ const getRuleSet = node =>
         [isIndex, ruleSet(
                       commonRules, 
                       indexRuleSet)],
+
+        [isAggregateSet, ruleSet(
+                            commonRules,
+                            aggregateSetRules)],
 
         [defaultCase, ruleSet(commonRules, [])]
     )(node);
@@ -88,11 +96,18 @@ export const validateAll = appHeirarchy => {
         flatten
     ]);
 
+    const aggregateErrors = $(flattened, [
+        filter(isAggregateSet),
+        map(validateAllAggregates),
+        flatten
+    ]);
+
     return $(flattened, [
         map(validateNode),
         flatten,
         union(duplicateNodeKeyErrors),
-        union(fieldErrors)
+        union(fieldErrors),
+        union(aggregateErrors)
     ]);
 };
 

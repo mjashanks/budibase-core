@@ -114,6 +114,7 @@ describe("heirarchy node creation", () => {
         index.name = "naughty-customers";
         expect(index.pathRegx()).toBe("/naughty-customers");
         expect(index.parent()).toBe(root);
+        expect(index.aggregateSets).toEqual([]);
     });
 
     it("> getNewIndexTemplate > should add itself to roots indexes", async () => {
@@ -134,16 +135,6 @@ describe("heirarchy node creation", () => {
         expect(index.parent()).toBe(collection);
     });
 
-    it("should throw exception when index is supplied as parent", async () => {
-        const templateApi = await getMemoryTemplateApi();
-        const root = templateApi.getNewRootLevel();
-        const index = templateApi.getNewIndexTemplate(root);
-        expect(() => templateApi.getNewCollectionTemplate(index))
-        .toThrow(errors.indexCannotBeParent);
-        expect(() => templateApi.getNewRecordTemplate(index))
-        .toThrow(errors.indexCannotBeParent);
-    });
-
     it("should throw exception when no parent supplied, for non root node", async () => {
         const templateApi = await getMemoryTemplateApi();
         const root = templateApi.getNewRootLevel();
@@ -161,5 +152,23 @@ describe("heirarchy node creation", () => {
 
         expect(root.children.length).toBe(1);
         expect(collection.children.length).toBe(1);
+    });
+
+    it("> getNewAggregateSetTemplate > should throw exception when non index supplied as parent", async () => {
+        const templateApi = await getMemoryTemplateApi();
+        const root = templateApi.getNewRootLevel();
+        expect(() => templateApi.getNewAggregateSetTemplate(root))
+        .toThrow();
+    });
+
+    it("> getNewAggregateSetTemplate > should add itself to index aggregateSets", async () => {
+        const templateApi = await getMemoryTemplateApi();
+        const root = templateApi.getNewRootLevel();
+        const collection = templateApi.getNewCollectionTemplate(root);
+        const index = templateApi.getNewIndexTemplate(collection);
+        const aggregateSet = templateApi.getNewAggregateSetTemplate(index);
+        expect(index.aggregateSets.length).toBe(1);
+        expect(index.aggregateSets[0]).toBe(aggregateSet);
+        expect(aggregateSet.parent()).toBe(index);
     });
 });
