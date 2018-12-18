@@ -1,9 +1,9 @@
 import {applyRuleSet, makerule} from "./validationCommon";
-import {flatten} from "lodash/fp";
+import {flatten, map} from "lodash/fp";
 import {isEmpty, difference} from "lodash";
 import {isNonEmptyString, executesWithoutException, 
         $, isNonEmptyArray} from "../common";
-import {compileExpression} from "@nx-js/compiler-util";
+import {compileExpression, compileCode} from "@nx-js/compiler-util";
 
 export const allowedAggregateFunctions = [
     "count", "sum", "max", "min", "average"
@@ -27,7 +27,7 @@ const aggregateRules = [
     makerule("aggregatedValue", "aggregatedValue does not compile",
         a => isEmpty(a.aggregatedValue)
             || executesWithoutException(
-                () => compileExpression(a.aggregatedValue)))
+                () => compileCode(a.aggregatedValue)))
 ];
 
 export const validateAggregate = (aggregate) => 

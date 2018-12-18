@@ -15,13 +15,21 @@ export const getFlattenedHierarchy = appHeirarchy => {
             || currentNode.children.length === 0)
             && 
             (!currentNode.indexes
-            || currentNode.indexes.length === 0)){
+            || currentNode.indexes.length === 0)
+            && 
+            (!currentNode.aggregateSets
+            || currentNode.aggregateSets.length === 0)){
             return flattened;
         }
-        const children = 
-            currentNode.indexes 
-            ? union(currentNode.children)(currentNode.indexes)
-            : currentNode.children;
+
+        const unionIfAny = l2 => l1 =>
+            union(l1)(!l2 ? [] : l2);
+
+        const children = $([], [
+            unionIfAny(currentNode.children),
+            unionIfAny(currentNode.indexes),
+            unionIfAny(currentNode.aggregateSets)
+        ]);
 
         for(let child of children) {
             flattenHeirarchy(child, flattened);

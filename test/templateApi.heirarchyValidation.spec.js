@@ -11,6 +11,14 @@ const createValidHeirarchy = () => {
     const customerCollection = createNodes.getNewCollectionTemplate(root);
     customerCollection.name = "customers";
 
+    const customersDefaultIndex = customerCollection.indexes[0];
+    const customersNoGroupAggregateSet = createNodes.getNewAggregateSetTemplate(customersDefaultIndex);
+    customersNoGroupAggregateSet.name = "Customers Summary";
+    const allCustomersOwedFunctions = createNodes.getNewAggregateFunctionTemplate(customersNoGroupAggregateSet);
+    allCustomersOwedFunctions.functions = ["count","max","min","sum","average"];
+    allCustomersOwedFunctions.aggregatedValue = "return record.owed";
+    allCustomersOwedFunctions.name = "all customers owed amount";
+
     const partnersCollection = createNodes.getNewCollectionTemplate(root);
     partnersCollection.name = "partners";
     const partnerRecord = createNodes.getNewRecordTemplate(partnersCollection);
@@ -29,11 +37,11 @@ const createValidHeirarchy = () => {
     addRecordValidationRule(customerRecord)
             (commonRecordValidationRules.fieldNotEmpty("surname"));
 
-    const customersDefaultIndex = customerCollection.indexes[0];
-
     return {
         root, customerCollection, 
-        customerRecord, customersDefaultIndex
+        customerRecord, customersDefaultIndex,
+        customersNoGroupAggregateSet,
+        allCustomersOwedFunctions
     }
 };
 
@@ -154,6 +162,63 @@ describe("heirarchy validation", () => {
         invalidField.name = "";
         const validationResult = validateAll(heirarchy.root);
         expectInvalidField(validationResult, "name", invalidField);
+    });
+
+    it("aggregateSet > should return error when name is not supplied", () => {
+        const heirarchy = createValidHeirarchy();
+        heirarchy.customersNoGroupAggregateSet.name = "";
+        const validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "name", heirarchy.customersNoGroupAggregateSet);
+    });
+
+    it("aggregateSet > should return error no functions added", () => {
+        const heirarchy = createValidHeirarchy();
+        heirarchy.customersNoGroupAggregateSet.aggregateFunctions = [];
+        const validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "aggregateFunctions", heirarchy.customersNoGroupAggregateSet);
+    });
+
+    it("aggregateFunction > should return error when name note set", () => {
+        const heirarchy = createValidHeirarchy();
+        heirarchy.allCustomersOwedFunctions.name = "";
+        const validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "name", heirarchy.allCustomersOwedFunctions);
+    });
+
+    it("aggregateFunction > should return error when condition does not compile", () => {
+        const heirarchy = createValidHeirarchy();
+        heirarchy.allCustomersOwedFunctions.condition = "invalid condition";
+        const validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "condition", heirarchy.allCustomersOwedFunctions);
+    });
+
+    it("aggregateFunction > should return error when functions are empty", () => {
+        const heirarchy = createValidHeirarchy();
+        heirarchy.allCustomersOwedFunctions.functions = [];
+        const validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "functions", heirarchy.allCustomersOwedFunctions);
+    });
+
+    it("aggregateFunction > should return error when has unkonwn function", () => {
+        const heirarchy = createValidHeirarchy();
+        heirarchy.allCustomersOwedFunctions.functions = ["count", "invalid"];
+        const validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "functions", heirarchy.allCustomersOwedFunctions);
+    });
+
+    it("aggregateFunction > should return error when aggregatedValue does not compile", () => {
+        const heirarchy = createValidHeirarchy();
+        heirarchy.allCustomersOwedFunctions.aggregatedValue = "invalid value";
+        const validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "aggregatedValue", heirarchy.allCustomersOwedFunctions);
+    });
+
+    it("aggregateFunction > should be valid when valid condition and aggregatedValue supplied", () => {
+        const heirarchy = createValidHeirarchy();
+        heirarchy.allCustomersOwedFunctions.aggregatedValue = "return record.owed;";
+        heirarchy.allCustomersOwedFunctions.condition = "record.owed > 0;";
+        const validationResult = validateAll(heirarchy.root);
+        expect(validationResult.length).toBe(0);
     });
 
 });

@@ -22,7 +22,7 @@ const commonRules = [
     makerule("name", "node name is not set", 
          node => stringNotEmpty(node.name)),
     makerule("type", "node type not recognised",
-        anyTrue(isRecord, isCollection, isRoot, isIndex ))
+        anyTrue(isRecord, isCollection, isRoot, isIndex, isAggregateSet ))
 ];
 
 const recordRules = [
@@ -98,7 +98,8 @@ export const validateAll = appHeirarchy => {
 
     const aggregateErrors = $(flattened, [
         filter(isAggregateSet),
-        map(validateAllAggregates),
+        map(s => validateAllAggregates(
+                    s.aggregateFunctions)),
         flatten
     ]);
 
