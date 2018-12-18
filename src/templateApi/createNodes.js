@@ -97,6 +97,10 @@ export const constructHeirarchy = (node, parent) => {
         each(node.indexes, 
             child => constructHeirarchy(child, node));
     }
+    if(node.aggregateSets) {
+        each(node.aggregateSets, 
+            child => constructHeirarchy(child, node));
+    }
     if(node.children && node.children.length > 0) {
         each(node.children, 
             child => constructHeirarchy(child, node));

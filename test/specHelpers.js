@@ -208,7 +208,8 @@ export const withIndexes = (heirarchy, templateApi) => {
     const allCustomersAgeFunctions = templateApi.getNewAggregateFunctionTemplate(customersNoGroupAggregateSet);
     allCustomersAgeFunctions.functions = ["count","max","min","sum","average"];
     allCustomersAgeFunctions.aggregatedValue = "return record.age";
-
+    allCustomersAgeFunctions.name = "all customers - age breakdown";
+    
     const invoicesByOutstandingIndex = templateApi.getNewIndexTemplate(invoicesCollection);
     invoicesByOutstandingIndex.name = "invoicesByOutstanding";
     invoicesByOutstandingIndex.map = "return {...record};"
