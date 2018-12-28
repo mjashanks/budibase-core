@@ -171,7 +171,9 @@ export const getNewAggregateFunctionTemplate = set => {
         name: "",
         condition: "",
         functions: [],
-        aggregatedValue: ""
+        aggregatedValue: "",
+        maxValueHistoryCount: 100,
+        minValueHistoryCount: 100
     };
     set.aggregateFunctions.push(functions);
     return functions;

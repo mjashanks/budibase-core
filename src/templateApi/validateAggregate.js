@@ -6,7 +6,7 @@ import {isNonEmptyString, executesWithoutException,
 import {compileExpression, compileCode} from "@nx-js/compiler-util";
 
 export const allowedAggregateFunctions = [
-    "count", "sum", "max", "min", "average"
+    "count", "sum", "max", "min", "mean"
 ];
 
 const aggregateRules = [
