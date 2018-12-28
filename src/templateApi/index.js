@@ -35,7 +35,7 @@ const api = datastore => ({
         const validationErrors = await validateAll(heirarchy);
         if(validationErrors.length > 0) {
             throw new Error("Heirarchy is invalid: " + join(
-                validationErrors.map(e => `${e.item.nodeKey()} : ${e.error}`),
+                validationErrors.map(e => `${e.item.nodeKey ? e.item.nodeKey() : ""} : ${e.error}`),
                 ","
             ));
         } 

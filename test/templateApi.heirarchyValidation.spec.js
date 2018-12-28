@@ -15,7 +15,7 @@ const createValidHeirarchy = () => {
     const customersNoGroupAggregateSet = createNodes.getNewAggregateSetTemplate(customersDefaultIndex);
     customersNoGroupAggregateSet.name = "Customers Summary";
     const allCustomersOwedFunctions = createNodes.getNewAggregateFunctionTemplate(customersNoGroupAggregateSet);
-    allCustomersOwedFunctions.functions = ["count","max","min","sum","average"];
+    allCustomersOwedFunctions.functions = ["count","max","min","sum","mean"];
     allCustomersOwedFunctions.aggregatedValue = "return record.owed";
     allCustomersOwedFunctions.name = "all customers owed amount";
 

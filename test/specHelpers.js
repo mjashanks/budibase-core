@@ -206,7 +206,7 @@ export const withIndexes = (heirarchy, templateApi) => {
     const customersNoGroupAggregateSet = templateApi.getNewAggregateSetTemplate(customersDefaultIndex);
     customersNoGroupAggregateSet.name = "Customers Summary";
     const allCustomersAgeFunctions = templateApi.getNewAggregateFunctionTemplate(customersNoGroupAggregateSet);
-    allCustomersAgeFunctions.functions = ["count","max","min","sum","average"];
+    allCustomersAgeFunctions.functions = ["count","max","min","sum","mean"];
     allCustomersAgeFunctions.aggregatedValue = "return record.age";
     allCustomersAgeFunctions.name = "all customers - age breakdown";
     
