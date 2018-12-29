@@ -4,9 +4,9 @@ import {$, switchCase, isNothing, isSomething,
     defaultCase, splitKey, isNonEmptyString,
     joinKey} from "../common";
 
-export const getFlattenedHierarchy = appHeirarchy => {
+export const getFlattenedHierarchy = (appHeirarchy, useCached=true) => {
 
-    if(isSomething(appHeirarchy.getFlattenedHeirarchy))
+    if(isSomething(appHeirarchy.getFlattenedHeirarchy) && useCached)
         return appHeirarchy.getFlattenedHeirarchy();
 
     const flattenHeirarchy = (currentNode, flattened) => {

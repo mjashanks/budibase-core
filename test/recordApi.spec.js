@@ -273,13 +273,13 @@ describe("save", () => {
     });
 
     it("should create allids file", async () => {
-        const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";
 
         await recordApi.save(record);
 
-        const allIdsPath = `/customers/allids/0/${record.id()[2]}`;
+        const allIdsPath = `/customers/allids/${appHeirarchy.customerRecord.recordNodeId}/${record.id()[2]}`;
         expect(await recordApi._storeHandle.exists(allIdsPath)).toBeTruthy();
         
     });

@@ -49,4 +49,5 @@ export default getDefaultExport(
     dateTryParse, 
     dateFunctions,
     options, 
-    typeConstraints);
+    typeConstraints,
+    new Date(1984,4,1));

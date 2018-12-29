@@ -56,4 +56,5 @@ export default getDefaultExport(
     referenceTryParse, 
     referenceFunctions,
     options, 
-    typeConstraints);
+    typeConstraints,
+    {key:"key", value:"value"});

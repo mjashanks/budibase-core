@@ -1,9 +1,8 @@
 import {switchCase, defaultCase, joinKey, 
     $, isNothing, isSomething} from "../common";
-import {each, constant} from "lodash";
+import {each, constant, filter} from "lodash";
 import {isCollection, isIndex, isRoot
-    , isRecord,
-    isAggregateSet} from "./heirarchy";
+    , isRecord, isAggregateSet, getFlattenedHierarchy} from "./heirarchy";
 import {validateAll} from "./validate";
 
 export const createNodeErrors = {
@@ -25,7 +24,7 @@ const nodeKeyMaker = (node) => () => {
     return switchCase(
 
         [n => isRecord(n) && isCollection(n.parent()),
-         n => parentNodeKeyPlus(n.collectionChildId + "-{id}")],
+         n => parentNodeKeyPlus(n.recordNodeId + "-{id}")],
         
         [isRoot,
          constant("/")],
@@ -91,6 +90,19 @@ const constructNode = (parent, obj) =>
         addToParent
     ]);
 
+const getRecordNodeId = (parentNode) => {
+    // this case is handled better elsewhere 
+    if(!parentNode) return null;
+    const findRoot = n => isRoot(n) ? n : findRoot(n.parent());
+    const root = findRoot(parentNode);
+    
+    const records = filter(
+        getFlattenedHierarchy(root),
+        isRecord);
+
+    return records.length;    
+}
+
 export const constructHeirarchy = (node, parent) => {
     construct(parent)(node);
     if(node.indexes) {
@@ -125,10 +137,7 @@ export const getNewRecordTemplate = parent =>
         fields:[], 
         children:[],  
         validationRules:[],
-        collectionChildId: isSomething(parent) 
-                           && isCollection(parent)
-                           ? parent.children.length
-                           : 0,
+        recordNodeId: getRecordNodeId(parent),
         indexes: []
     });
 
@@ -155,7 +164,8 @@ export const getNewIndexTemplate = parent =>
                    ? "reference" 
                    : "heirarchal",
         getShardName: "",
-        aggregateSets: []
+        aggregateSets: [],
+        allowedRecordNodeIds: []
     });
 
 export const getNewAggregateSetTemplate = index => 

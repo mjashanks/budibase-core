@@ -46,4 +46,5 @@ export default getDefaultExport(
     stringTryParse, 
     stringFunctions,
     options, 
-    typeConstraints);
+    typeConstraints,
+    "abcde");

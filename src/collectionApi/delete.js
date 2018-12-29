@@ -41,7 +41,7 @@ const deleteAllIdsFolders = async (app, node, key) => {
         await app.datastore.deleteFolder(
             joinKey(
                 key, "allids", 
-                child.collectionChildId
+                child.recordNodeId
             )
         );
     }

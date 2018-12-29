@@ -211,7 +211,7 @@ const buildNestedCollectionIndex = async (app, indexNode) => {
 }
 
 const chooseChildRecordNodeByKey = (collectionNode, recordId) => 
-    find(c => recordId.startsWith(c.collectionChildId))
+    find(c => recordId.startsWith(c.recordNodeId))
         (collectionNode.children);
 
 const applyToIndex = (record, indexNode, indexedData) => {

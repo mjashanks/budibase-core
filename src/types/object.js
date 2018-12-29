@@ -40,10 +40,11 @@ const objectTryParse = (definition, allTypes) =>
        [defaultCase, parsedFailed]
    );
 
-export default (typeName, definition,allTypes, defaultOptions, typeConstraints) => 
+export default (typeName, definition,allTypes, defaultOptions, typeConstraints, sampleValue) => 
    getDefaultExport(
        typeName,
        objectTryParse(definition,allTypes), 
        objectFunctions(definition,allTypes),
        defaultOptions,
-       typeConstraints);
+       typeConstraints,
+       sampleValue);

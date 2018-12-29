@@ -58,14 +58,15 @@ describe("getRelevantIndexes", () => {
         const {recordApi, appHeirarchy} = await setupAppheirarchy(
         basicAppHeirarchyCreator_WithFields_AndIndexes);
 
-        const invoice  = recordApi.getNew("/customers/0-1234/invoices", "invoice")
+        const nodeid = appHeirarchy.customerRecord.recordNodeId;
+        const invoice  = recordApi.getNew(`/customers/${nodeid}-1234/invoices`, "invoice")
 
         const indexes = getRelevantHeirarchalIndexes(
             appHeirarchy.root, invoice);
 
         expect(indexes.collections.length).toBe(6);
         expect(some(indexes.collections, i => i.path === "/customers/default")).toBeTruthy();
-        expect(some(indexes.collections, i => i.path === "/customers/0-1234/invoices/default")).toBeTruthy();
+        expect(some(indexes.collections, i => i.path === `/customers/${nodeid}-1234/invoices/default`)).toBeTruthy();
     });
 
     it("should get reverseReferenceIndex accross heirarchy branches", async () => {

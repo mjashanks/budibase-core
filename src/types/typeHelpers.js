@@ -70,13 +70,14 @@ const getDefaultOptions = mapValues(v => v.defaultValue)
 export const makerule = (isValid, getMessage) => ({isValid, getMessage});
 export const parsedFailed = val => ({success:false, value:val});
 export const parsedSuccess = val => ({success:true, value:val});
-export const getDefaultExport = (name, tryParse, functions, options, validationRules) => ({
+export const getDefaultExport = (name, tryParse, functions, options, validationRules, sampleValue) => ({
     getNew : getNewValue(tryParse, functions), 
     safeParseField: getSafeFieldParser(tryParse, functions), 
     safeParseValue: getSafeValueParser(tryParse, functions),
     tryParse, 
     name,
     getDefaultOptions : () => getDefaultOptions(cloneDeep(options)), 
-    validateTypeConstraints : validateTypeConstraints(validationRules, options)
+    validateTypeConstraints : validateTypeConstraints(validationRules, options),
+    sampleValue
 });
 

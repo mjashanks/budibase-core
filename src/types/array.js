@@ -45,5 +45,6 @@ export default type =>
         arrayTryParse(type), 
         arrayFunctions(type),
         options,
-        typeConstraints
+        typeConstraints,
+        [type.sampleValue]
         );

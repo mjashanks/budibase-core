@@ -55,4 +55,5 @@ export default getDefaultExport(
     numberTryParse, 
     numberFunctions, 
     options, 
-    typeConstraints);
+    typeConstraints,
+    1);

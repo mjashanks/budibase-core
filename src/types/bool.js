@@ -28,4 +28,4 @@ const typeConstraints = [
 
 export default getDefaultExport(
     "bool", boolTryParse, boolFunctions, 
-    options, typeConstraints);
+    options, typeConstraints, true);

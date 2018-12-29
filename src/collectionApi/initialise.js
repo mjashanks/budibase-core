@@ -37,7 +37,7 @@ const ensureCollectionIsInitialised = async (app, node, parentKey) => {
                 joinKey(
                     parentKey,
                     "allids",
-                    childRecord.collectionChildId.toString())
+                    childRecord.recordNodeId.toString())
             );
         }
     }

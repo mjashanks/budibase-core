@@ -46,12 +46,12 @@ describe("collectionApi > initialiseAll", () => {
     });
 
     it("should create allids folders", async () => {
-        const {collectionApi} = 
+        const {collectionApi, appHeirarchy} = 
             await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
 
         await collectionApi.initialiseAll();
 
-        const allIdsTypeFolder = "/customers/allids/0";
+        const allIdsTypeFolder = "/customers/allids/" + appHeirarchy.customerRecord.recordNodeId;
         const allIdsFolder = "/customers/allids";
         expect(await collectionApi._store.exists(allIdsTypeFolder)).toBeTruthy();
         expect(await collectionApi._store.exists(allIdsFolder)).toBeTruthy();
@@ -148,7 +148,7 @@ describe("collectionApi > allids", () => {
             const customer = await recordApi.getNew(
                 appHeirarchy.customersCollection.nodeKey(), "customer");
             customer.surname = "thedog";   
-            const id = `0-${c}${customer.id().replace("0-","")}`;
+            const id = `${appHeirarchy.customerRecord.recordNodeId}-${c}${customer.id().replace("0-","")}`;
             customer.id = () => id;
             await recordApi.save(customer); 
         }        

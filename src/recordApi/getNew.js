@@ -22,7 +22,7 @@ const _getNew = (app, collectionKey, recordTypeName) => {
         mapValues(getNewFieldValue)
     ]);
 
-    record.id = constant(`${recordNode.collectionChildId}-${generate()}`);
+    record.id = constant(`${recordNode.recordNodeId}-${generate()}`);
     record.key = constant(joinKey(collectionKey, record.id()));
     record.isNew = constant(true);
     record.type = constant(recordTypeName);
