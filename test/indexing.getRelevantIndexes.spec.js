@@ -49,9 +49,44 @@ describe("getRelevantIndexes", () => {
             some(indexes.collections, c => c.path === key);
         
         expect(indexExists("/customers/default")).toBeTruthy();
-        expect(indexExists("/customers/customersBySurname")).toBeTruthy();
         expect(indexExists("/customers/deceased")).toBeTruthy();
+        expect(indexExists("/customers/customersBySurname")).toBeTruthy();
         expect(indexExists("/customers/invoices")).toBeTruthy();
+    });
+
+    it("should ignore index when allowedRecordNodeIds does not contain record's node id", async () => {
+        const {recordApi, 
+                appHeirarchy} = await setupAppheirarchy(
+            basicAppHeirarchyCreator_WithFields_AndIndexes);
+        
+        const customer = recordApi.getNew("/customers", "customer");
+        const invoice = recordApi.getNew(joinKey(customer.key(), "invoices"), "invoice");
+
+        const indexes = getRelevantHeirarchalIndexes(
+            appHeirarchy.root, invoice);
+        
+        const indexExists = key => 
+            some(indexes.collections, c => c.path === key);
+
+        expect(indexExists("/customers/customersBySurname")).toBeFalsy();
+    });
+
+    it("should include index when allowedRecordNodeIds contains record's node id", async () => {
+        const {recordApi, 
+                appHeirarchy} = await setupAppheirarchy(
+            basicAppHeirarchyCreator_WithFields_AndIndexes);
+        
+        const customer = recordApi.getNew("/customers", "customer");
+
+        const indexes = getRelevantHeirarchalIndexes(
+            appHeirarchy.root, customer);
+
+        expect(indexes.collections.length).toBe(4);
+        
+        const indexExists = key => 
+            some(indexes.collections, c => c.path === key);
+
+        expect(indexExists("/customers/customersBySurname")).toBeTruthy();
     });
 
     it("should get 2 default indexes when 2 collections nested deep", async () => {
@@ -64,7 +99,7 @@ describe("getRelevantIndexes", () => {
         const indexes = getRelevantHeirarchalIndexes(
             appHeirarchy.root, invoice);
 
-        expect(indexes.collections.length).toBe(6);
+        expect(indexes.collections.length).toBe(5);
         expect(some(indexes.collections, i => i.path === "/customers/default")).toBeTruthy();
         expect(some(indexes.collections, i => i.path === `/customers/${nodeid}-1234/invoices/default`)).toBeTruthy();
     });

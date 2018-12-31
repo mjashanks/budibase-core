@@ -178,7 +178,7 @@ export const withFields = (heirarchy, templateApi) => {
 }
 
 export const withIndexes = (heirarchy, templateApi) => {
-    const {root, customersCollection,
+    const {root, customersCollection, customerRecord,
         invoicesCollection} = heirarchy;
     const deceasedCustomersIndex = getNewIndexTemplate(customersCollection);
     deceasedCustomersIndex.name = "deceased";
@@ -200,6 +200,7 @@ export const withIndexes = (heirarchy, templateApi) => {
     customersBySurnameIndex.name = "customersBySurname";
     customersBySurnameIndex.map = "return {...record};"
     customersBySurnameIndex.filter = "";
+    customersBySurnameIndex.allowedRecordNodeIds = [customerRecord.recordNodeId];
     customersBySurnameIndex.getShardName = "return !record.surname ? 'null' : record.surname.substring(0,1);"
     
     const customersDefaultIndex = customersCollection.indexes[0];

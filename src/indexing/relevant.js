@@ -1,16 +1,17 @@
 import {joinKey, splitKey, 
     isNothing, $, isSomething} from "../common";
 import {orderBy, constant} from "lodash";
-import {reduce, find, 
+import {reduce, find, includes, 
         filter, each, map} from "lodash/fp";
 import {getFlattenedHierarchy, isIndex, 
-        isCollection, getNode,
+        isCollection, getNode, getRecordNodeId,
         getExactNodeForPath} from "../templateApi/heirarchy";
 
 export const getRelevantHeirarchalIndexes = (appHeirarchy, record) => {
 
     const key = record.key();
     const pathParts = splitKey(key);
+    const recordNodeId = getRecordNodeId(key);
 
     const flatHeirarchy = 
         orderBy(getFlattenedHierarchy(appHeirarchy),
@@ -33,11 +34,16 @@ export const getRelevantHeirarchalIndexes = (appHeirarchy, record) => {
             
             if(!isCollection(nodeMatch) || nodeMatch.indexes.length === 0)
                 return acc;
+            
+            const indexes = $(nodeMatch.indexes, [
+                filter(i => i.allowedRecordNodeIds.length === 0
+                         || includes(recordNodeId)(i.allowedRecordNodeIds))
+            ]);
 
             each(v => 
                 acc.nodesAndPaths.push(
                     makeindexNodeKeyAndPath_ForCollectionIndex(v, currentPath)))
-            (nodeMatch.indexes);
+            (indexes);
 
             return acc;             
         }, {lastPath:"", nodesAndPaths:[]})

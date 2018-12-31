@@ -1,4 +1,4 @@
-import {find, constant, map,
+import {find, constant, map, last, first, split,
         take, union, includes} from "lodash/fp";
 import {$, switchCase, isNothing, isSomething,
     defaultCase, splitKey, isNonEmptyString,
@@ -114,6 +114,14 @@ export const findField = (recordNode, fieldName) =>
 export const isAncestor = decendant => ancestor =>
     isKeyAncestorOf(ancestor.nodeKey())(decendant);
     
+export const getRecordNodeId = recordKey =>
+    $(recordKey, [
+        splitKey,
+        last,
+        split("-"),
+        first,
+        parseInt
+    ]);
     
 export const isRecord = node => isSomething(node) && node.type === "record";
 export const isCollection = node => isSomething(node) && node.type === "collection";
