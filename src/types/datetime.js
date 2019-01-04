@@ -50,4 +50,5 @@ export default getDefaultExport(
     dateFunctions,
     options, 
     typeConstraints,
-    new Date(1984,4,1));
+    new Date(1984,4,1),
+    date => JSON.stringify(date).replace(new RegExp("\"", 'g'), ""));

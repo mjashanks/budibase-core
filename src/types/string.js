@@ -47,4 +47,5 @@ export default getDefaultExport(
     stringFunctions,
     options, 
     typeConstraints,
-    "abcde");
+    "abcde",
+    str => str);

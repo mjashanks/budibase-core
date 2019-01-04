@@ -49,18 +49,20 @@
     "babel-preset-env": "^1.6.1",
     "cross-env": "^5.1.4",
     "jest": "^22.4.3",
+    "readable-stream": "^3.1.1",
     "regenerator-runtime": "^0.11.1",
     "rimraf": "^2.6.2",
     "rollup": "^0.66.6",
     "rollup-plugin-local-resolve": "^1.0.7"
   },
   "dependencies": {
-    "@azure/storage-blob": "^10.1.0-preview",
     "@nx-js/compiler-util": "^2.0.0",
     "date-fns": "^1.29.0",
     "lodash": "^4.17.11",
     "papaparse": "^4.3.7",
-    "shortid": "^2.2.8"
+    "safe-buffer": "^5.1.2",
+    "shortid": "^2.2.8",
+    "string_decoder": "^1.2.0"
   },
   "devEngines": {
     "node": ">=7.x",

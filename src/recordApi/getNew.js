@@ -17,20 +17,22 @@ const _getNew = (app, collectionKey, recordTypeName) => {
     const recordNode = find(c => c.name === recordTypeName)
                            (collectionNode.children);
 
-    const record = $(recordNode.fields, [
-        keyBy("name"),
-        mapValues(getNewFieldValue)
-    ]);
-
-    record.id = constant(`${recordNode.recordNodeId}-${generate()}`);
-    record.key = constant(joinKey(collectionKey, record.id()));
-    record.isNew = constant(true);
-    record.type = constant(recordTypeName);
-    return record;
+    return constructRecord(recordNode, getNewFieldValue, collectionKey);
 };
 
 export const getNewChild = (app) => 
         (recordKey, collectionName, recordTypeName) => 
     getNew(app)(joinKey(recordKey, collectionName), recordTypeName);
 
+export const constructRecord = (recordNode, getFieldValue, collectionKey) => {
+    const record = $(recordNode.fields, [
+        keyBy("name"),
+        mapValues(getFieldValue)
+    ]);
 
+    record.id = constant(`${recordNode.recordNodeId}-${generate()}`);
+    record.key = constant(joinKey(collectionKey, record.id()));
+    record.isNew = constant(true);
+    record.type = constant(recordNode.name);
+    return record;
+};

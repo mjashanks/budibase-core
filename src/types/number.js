@@ -56,4 +56,5 @@ export default getDefaultExport(
     numberFunctions, 
     options, 
     typeConstraints,
-    1);
+    1,
+    num => num.toString());

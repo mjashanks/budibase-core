@@ -1,8 +1,9 @@
 import {assign, keys, merge, has} from "lodash";
-import { map, union} from "lodash/fp";
+import { map, isString, isNumber, 
+        isBoolean, isDate, 
+        isObject, isArray} from "lodash/fp";
 import {$} from "../common";
 import {parsedSuccess} from "./typeHelpers";
-
 import string from "./string";
 import bool from "./bool";
 import number from "./number";
@@ -32,10 +33,13 @@ const allTypes = () => {
 
 export const all = allTypes();
 
-const getType = typeName =>  {
+export const getType = typeName =>  {
     if(!has(all, typeName)) throw new Error("Do not recognise type " + typeName);
     return all[typeName];
 };
+
+export const getSampleFieldValue = field =>
+    getType(field.type).sampleValue;
 
 export const getNewFieldValue = field => 
     getType(field.type).getNew(field);
@@ -53,3 +57,15 @@ export const getDefaultOptions = type =>
 
 export const validateTypeConstraints = (field, record, context) => 
     getType(field.type).validateTypeConstraints(field, record, context);
+
+export const detectType = value => {
+    if(isString(value)) return string;
+    if(isBoolean(value)) return bool;
+    if(isNumber(value)) return number;
+    if(isDate(value)) return datetime;
+    if(isArray(value)) return array(detectType(value[0]));
+    if(isObject(value) 
+       && has(value, "key")
+       && has(value, "value")) return reference;
+    throw new Error("cannot determine type: " + JSON.stringify(value));
+}

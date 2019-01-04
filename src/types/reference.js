@@ -57,4 +57,5 @@ export default getDefaultExport(
     referenceFunctions,
     options, 
     typeConstraints,
-    {key:"key", value:"value"});
+    {key:"key", value:"value"},
+    JSON.stringify);

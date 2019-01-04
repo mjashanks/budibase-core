@@ -164,6 +164,7 @@ export const getNewIndexTemplate = parent =>
                    ? "reference" 
                    : "heirarchal",
         getShardName: "",
+        getSortKey: "record.id()",
         aggregateSets: [],
         allowedRecordNodeIds: []
     });

@@ -1,53 +1,26 @@
-import Papa from "papaparse";
-import {find, pull, merge, isString} from "lodash";
-import {readIndex} from "./read";
 import {getIndexedDataKey} from "./sharding";
-// refactor write and read
-export const writeIndex = async (datastore, indexedData, 
-                                indexedDataKey) => {
-    const indexContents = Papa.unparse(indexedData);
+import {getIndexWriter} from "./serializer";
 
-    if(await datastore.exists(indexedDataKey)) {
-        await datastore.updateFile(
-            indexedDataKey, 
-            indexContents);
-    } else {
-        await datastore.createFile(
-            indexedDataKey, 
-            indexContents);
-    }
-};
+export const add = async (heirarchy, store, mappedRecord, indexKey, indexNode) => 
+    (await getWriter(heirarchy, store, indexKey, indexNode, mappedRecord))
+        .addItem(mappedRecord);
 
-const compareKey = mappedRecord => i => i.key === mappedRecord.key; 
+export const remove = async (heirarchy, store, mappedRecord, indexKey, indexNode)  => 
+    (await getWriter(heirarchy, store, indexKey, indexNode, mappedRecord))
+            .removeItem(mappedRecord.key);
 
+export const update = async (heirarchy, store, mappedRecord, indexKey, indexNode) => 
+    (await getWriter(heirarchy, store, indexKey, indexNode, mappedRecord))
+            .updateItem(mappedRecord);
 
-export const add = async (store, mappedRecord, indexKey, indexNode) => {
+const getWriter = async (heirarchy, store, indexKey, indexNode, mappedRecord) => {
     const indexedDataKey = getIndexedDataKey(indexNode, indexKey, mappedRecord);
-    const indexedData = await readIndex(store, indexNode, indexedDataKey);
-    indexedData.push(mappedRecord);
-    await writeIndex(store, indexedData, indexedDataKey);
-};
+    const readableStream = await store.readableFileStream(indexedDataKey);
+    const writableStream = await store.writableFileStream(indexedDataKey);
 
-export const remove = async (store, mappedRecord, indexKey, indexNode)  => {
-    const indexedDataKey = getIndexedDataKey(indexNode, indexKey, mappedRecord);
-    const indexedData = await readIndex(store, indexNode, indexedDataKey);
-    // using pull to mutate on purpose, so we dont have a copy of the array
-    // (which may be large)
-    pull(indexedData, 
-         find(indexedData, compareKey(mappedRecord))
+    return getIndexWriter(
+        heirarchy, indexNode, 
+        () => readableStream.read(),
+        (buffer) => writableStream.write(buffer)
     );
-
-    await writeIndex(store, indexedData, indexedDataKey);
-};
-
-export const update = async (store, mappedRecord, indexKey, indexNode) => {
-    const indexedDataKey = getIndexedDataKey(indexNode, indexKey, mappedRecord);
-    const indexedData = await readIndex(store, indexNode, indexedDataKey);
-
-    merge(
-        find(indexedData, compareKey(mappedRecord)),
-        mappedRecord
-    );
-
-    await writeIndex(store, indexedData, indexedDataKey);
 };

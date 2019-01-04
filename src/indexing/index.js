@@ -24,16 +24,16 @@ const reindexFor = async (datastore, appHeirarchy, record, forAction) =>  {
     );
 
     for(let i of getIndexNodesToApply(heirarchal.collections)) {
-        await forAction(datastore, i.mappedRecord.result, i.path, i.indexNode);
+        await forAction(appHeirarchy, datastore, i.mappedRecord.result, i.path, i.indexNode);
     }
 
     // this can definately be done in parallel (as can be in js)
     for(let i of getIndexNodesToApply(heirarchal.globalIndexes)) {
-        await forAction(datastore, i.mappedRecord.result, i.path, i.indexNode);
+        await forAction(appHeirarchy, datastore, i.mappedRecord.result, i.path, i.indexNode);
     }
 
     for(let i of getIndexNodesToApply(reverseRef)) {
-        await forAction(datastore, i.mappedRecord.result, i.path, i.indexNode);
+        await forAction(appHeirarchy, datastore, i.mappedRecord.result, i.path, i.indexNode);
     }
 } 
 
@@ -141,15 +141,15 @@ const reindexForUpdate = (datastore, appHeirarchy) =>
 
     for(let i of filteredOut_toRemove) {
         // be sure to remove from old index path, in case shard key changed
-        await remove(datastore, i.old.mappedRecord.result, i.old.path, i.new.indexNode);
+        await remove(appHeirarchy, datastore, i.old.mappedRecord.result, i.old.path, i.new.indexNode);
     }
 
     for(let i of filteredIn_toAdd) {
-        await add(datastore, i.new.mappedRecord.result, i.new.path, i.new.indexNode);
+        await add(appHeirarchy, datastore, i.new.mappedRecord.result, i.new.path, i.new.indexNode);
     }
 
     for(let i of changed) {
-        await update(datastore, i.new.mappedRecord.result, i.new.path, i.new.indexNode);
+        await update(appHeirarchy, datastore, i.new.mappedRecord.result, i.new.path, i.new.indexNode);
     }
 }
 

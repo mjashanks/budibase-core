@@ -1,5 +1,5 @@
 import {find, constant, map, last, first, split,
-        take, union, includes} from "lodash/fp";
+        take, union, includes, filter, some} from "lodash/fp";
 import {$, switchCase, isNothing, isSomething,
     defaultCase, splitKey, isNonEmptyString,
     joinKey} from "../common";
@@ -114,6 +114,9 @@ export const findField = (recordNode, fieldName) =>
 export const isAncestor = decendant => ancestor =>
     isKeyAncestorOf(ancestor.nodeKey())(decendant);
     
+export const isDecendant = ancestor => decendant =>
+    isAncestor(decendant)(ancestor);
+
 export const getRecordNodeId = recordKey =>
     $(recordKey, [
         splitKey,
@@ -122,6 +125,38 @@ export const getRecordNodeId = recordKey =>
         first,
         parseInt
     ]);
+
+export const getAllowedRecordNodesForIndex = (appHeirarchy, indexNode) => {
+    const recordNodes = $(appHeirarchy, [
+        getFlattenedHierarchy,
+        filter(isRecord)
+    ]);
+
+    const recordNodeIsAllowed = recordNode =>
+        indexNode.allowedRecordNodeIds.length === 0
+        || includes(recordNode.recordNodeId)(indexNode.allowedRecordNodeIds);
+
+    if(isGlobalIndex(indexNode)) {
+        return $(recordNodes, [
+            filter(recordNodeIsAllowed)
+        ]);
+    }
+
+    if(isCollectionIndex(indexNode)) {
+        return $(recordNodes, [
+            filter(isDecendant(indexNode.parent())),
+            filter(recordNodeIsAllowed)
+        ]);
+    }
+
+    if(isReferenceIndex(indexNode)) {
+        return $(recordNodes, [
+            filter(n => some(fieldReversesReferenceToIndex(indexNode))
+                        (n.fields))
+        ]);
+    }
+
+};
     
 export const isRecord = node => isSomething(node) && node.type === "record";
 export const isCollection = node => isSomething(node) && node.type === "collection";
@@ -132,6 +167,10 @@ export const isRoot = node => isSomething(node) && node.isRoot();
 export const isDecendantOfARecord = hasMatchingAncestor(isRecord)
 export const isGlobalIndex = node => 
     isIndex(node) && isRoot(node.parent()); 
+export const isReferenceIndex = node =>
+    isIndex(node) && isRecord(node.parent());
+export const isCollectionIndex = node => 
+    isIndex(node) && isCollection(node.parent());
 export const isTopLevelCollection = node => 
     isCollection(node)
     && !isDecendantOfARecord(node);

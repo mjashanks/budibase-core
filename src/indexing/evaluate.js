@@ -1,5 +1,6 @@
 import {compileExpression, compileCode} from "@nx-js/compiler-util";
-import {isUndefined, keys, has, clone} from "lodash";
+import {isUndefined, keys, has, 
+        clone, isFunction} from "lodash";
 import {defineError} from "../common";
 
 export const filterEval = "FILTER_EVALUATE";
@@ -49,8 +50,13 @@ export const mapRecord = (record, index) => {
         () => compiledMap(context),
         mapEval);
 
-    for(let k of keys(mapped)) {
-        mapped[k] = isUndefined(mapped[k]) ? null : mapped[k];
+    const mappedKeys = keys(mapped);
+    for(let i = 0; i < mappedKeys.length; i++) {
+        const key = mappedKeys[i];
+        mapped[key] = isUndefined(mapped[key]) ? null : mapped[key];
+        if(isFunction(mapped[key])) {
+            delete mapped[key];
+        }
     }
 
     mapped.key = has(recordClone, "key") 

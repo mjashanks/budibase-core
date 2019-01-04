@@ -1,7 +1,6 @@
-import {dirIndex, getDirFromKey, $, 
-        getFileFromKey, awEx,
-        splitKey} from "../common";
-import {isUndefined, filter, has, last} from "lodash";
+import {isUndefined, has} from "lodash";
+import {Readable, Writable} from "readable-stream";
+import { Buffer } from "safe-buffer";
 
 const folderMarker = "-FOLDER-";
 const isFolder = val => val === folderMarker;
@@ -15,6 +14,27 @@ export const updateFile = data => async (path, content) => {
     if(!await exists(data)(path)) throw new Error("cannot update " + path + " - does not exist"); 
     data[path] = content;
 }
+
+export const writableFileStream = data => async (path) => {
+    if(!await exists(data)(path)) throw new Error("cannot write stream to " + path + " - does not exist"); 
+    const stream = Writable();
+    stream._write = (chunk, encoding, done) => {
+        data[path] = [...data[path], ...chunk];
+        done();
+    };
+    return stream;
+};
+
+export const readableFileStream = data => async (path) => {
+    if(!await exists(data)(path)) throw new Error("cannot read stream from " + path + " - does not exist"); 
+    const s = new Readable();
+    s._read = () => {
+        s.push(Buffer.from(data[path]));
+        s.push(null);
+    }; 
+    return s;
+};
+
 export const loadFile = data => async (path) => {
     const result = data[path];
     if(isUndefined(result)) throw new Error("Load failed - path " + path + " does not exist");
@@ -46,6 +66,8 @@ export default data => {
         deleteFile : deleteFile(data),
         createFolder: createFolder(data),
         deleteFolder: deleteFolder(data),
+        readableFileStream: readableFileStream(data),
+        writableFileStream: writableFileStream(data),
         datastoreType : "memory",
         datastoreDescription: "",
         data 

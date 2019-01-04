@@ -1,7 +1,7 @@
 import path from "path";
 import {getAppApis, getRecordApi, 
     getCollectionApi, getIndexApi}  from "../src";
-import memory from "../src/appInitialise/memory";
+import memory from "./memory";
 import {setupDatastore} from "../src/appInitialise";
 import {configFolder, fieldDefinitions, 
     templateDefinitions,

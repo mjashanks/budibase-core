@@ -1,14 +1,20 @@
-import Papa from "papaparse";
-import {isSomething, getHashCode, 
+import { getHashCode, 
     joinKey} from "../common";
 import {getActualKeyOfParent, 
          isGlobalIndex} from "../templateApi/heirarchy";
 import {createIndexFile} from "../indexing/sharding";
+import {getIndexReader, CONTINUE_READING_RECORDS} from "./serializer";
 
-export const readIndex = async(datastore, index, indexedDataKey) => {
-    let file;
-    try{
-        file = await datastore.loadFile(indexedDataKey);
+export const readIndex = async(heirarchy, datastore, index, indexedDataKey) => {
+    try {
+        const readableStream = await datastore.readableFileStream(indexedDataKey);
+        const read = getIndexReader(heirarchy, indexNode, () => readableStream.read());
+        const records = [];
+        read(item => {
+            records.push(item);
+            return CONTINUE_READING_RECORDS;
+        });
+        return records;
     } catch(_) {
         await createIndexFile(datastore)(
             indexedDataKey, 
@@ -16,9 +22,6 @@ export const readIndex = async(datastore, index, indexedDataKey) => {
         );
         return [];
     }
-    return Papa.parse(
-        isSomething(file) ? file : "",
-        {header:true}).data;
 };
 
 export const getIndexedDataKey_fromIndexKey = (indexKey, record) => {

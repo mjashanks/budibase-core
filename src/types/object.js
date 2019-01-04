@@ -47,4 +47,5 @@ export default (typeName, definition,allTypes, defaultOptions, typeConstraints, 
        objectFunctions(definition,allTypes),
        defaultOptions,
        typeConstraints,
-       sampleValue);
+       sampleValue,
+       JSON.stringify);

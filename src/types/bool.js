@@ -28,4 +28,4 @@ const typeConstraints = [
 
 export default getDefaultExport(
     "bool", boolTryParse, boolFunctions, 
-    options, typeConstraints, true);
+    options, typeConstraints, true, JSON.stringify);

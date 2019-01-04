@@ -46,5 +46,6 @@ export default type =>
         arrayFunctions(type),
         options,
         typeConstraints,
-        [type.sampleValue]
+        [type.sampleValue],
+        JSON.stringify
         );
