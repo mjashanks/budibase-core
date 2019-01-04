@@ -28,7 +28,7 @@ export const getMemoryTemplateApi = () => {
 }
 
 // TODO: subscribe actions
-const appFromTempalteApi = async templateApi => ({
+export const appFromTempalteApi = async templateApi => ({
     heirarchy:(await templateApi.getApplicationDefinition()).heirarchy, 
     datastore:templateApi._storeHandle,
     publish:templateApi._eventAggregator.publish,
