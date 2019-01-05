@@ -3,15 +3,53 @@ import {setupAppheirarchy} from "./specHelpers";
 import {find} from "lodash";
 
 describe("indexSchemGenerator", () => {
-    it("should return mapped columns of single type", async () => {
+
+    it("should return mapped columns of single type, when accepts all in collection of one type", async () => {
         const {appHeirarchy} = await setup(false);
-        const schema = generateSchema(appHeirarchy, appHeirarchy.petsDefaultIndex);
+        const schema = generateSchema(appHeirarchy.root, appHeirarchy.petsDefaultIndex);
         schemaHasFieldOfType(schema, "key", "string");
         schemaHasFieldOfType(schema, "sortKey", "string");
         schemaHasFieldOfType(schema, "name", "string");
         schemaHasFieldOfType(schema, "dob", "datetime");
         schemaHasFieldOfType(schema, "isAlive", "bool");
-    })
+        expect(schema.length).toBe(5);
+    });
+
+    it("should return mapped columns of two types, when accepts all in collection or two typs", async () => {
+        const {appHeirarchy} = await setup(true);
+        const schema = generateSchema(appHeirarchy.root, appHeirarchy.petsDefaultIndex);
+        schemaHasFieldOfType(schema, "key", "string");
+        schemaHasFieldOfType(schema, "sortKey", "string");
+        schemaHasFieldOfType(schema, "name", "string");
+        schemaHasFieldOfType(schema, "dob", "datetime");
+        schemaHasFieldOfType(schema, "isAlive", "bool");
+        schemaHasFieldOfType(schema, "noOfGills", "number");
+        expect(schema.length).toBe(7);
+    });
+
+    it("should return mapped columns of one types, when accepts only onw of two types", async () => {
+        const {appHeirarchy} = await setup(true);
+        const schema = generateSchema(appHeirarchy.root, appHeirarchy.fishOnlyIndex);
+        schemaHasFieldOfType(schema, "key", "string");
+        schemaHasFieldOfType(schema, "sortKey", "string");
+        schemaHasFieldOfType(schema, "name", "string");
+        schemaHasFieldOfType(schema, "isAlive", "bool");
+        schemaHasFieldOfType(schema, "noOfGills", "number");
+        expect(schema.length).toBe(5);
+    });
+
+    it("should return mapped columns type, for reverse reference index", async () => {
+        const {appHeirarchy} = await setup(true);
+        const schema = generateSchema(appHeirarchy.root, appHeirarchy.dogFriends);
+        schemaHasFieldOfType(schema, "key", "string");
+        schemaHasFieldOfType(schema, "sortKey", "string");
+        schemaHasFieldOfType(schema, "name", "string");
+        schemaHasFieldOfType(schema, "isAlive", "bool");
+        schemaHasFieldOfType(schema, "dob", "datetime");
+        schemaHasFieldOfType(schema, "favouriteFish", "reference");
+        expect(schema.length).toBe(6);
+    });
+
 });
 
 const schemaHasFieldOfType = (schema, fieldname, type) => {
@@ -37,6 +75,7 @@ const createApp = (includeFish) => (templateApi) => {
         const field = templateApi.getNewField(type);
         field.name = name;
         templateApi.addField(recordNode, field);
+        return field;
     };
 
     const addDogField = addField(dogRecord);      
@@ -44,6 +83,7 @@ const createApp = (includeFish) => (templateApi) => {
     addDogField("dob", "datetime");
     addDogField("isAlive", "bool");
 
+    let fishStuff = {};
     if(includeFish) {
         const fishRecord = templateApi.getNewRecordTemplate(pets);
         const addFishField = addField(fishRecord);
@@ -51,11 +91,23 @@ const createApp = (includeFish) => (templateApi) => {
         addFishField("name", "string");
         addFishField("isAlive", "bool");
         addFishField("noOfGills", "number");
-        root.fishRecord = fishRecord;
+        fishStuff.fishRecord = fishRecord;
+        const fishOnlyIndex = templateApi.getNewIndexTemplate(pets);
+        fishOnlyIndex.name = "fishOnly";
+        fishOnlyIndex.allowedRecordNodeIds = [fishRecord.recordNodeId];
+        fishStuff.fishOnlyIndex = fishOnlyIndex;
+
+        const dogFriends = templateApi.getNewIndexTemplate(dogRecord);
+        dogFriends.name = "dogFriends";
+        fishStuff.dogFriends = dogFriends;
+
+        const favFishField = addDogField("favouriteFish", "reference");
+        favFishField.typeOptions.indexNodeKey = fishOnlyIndex.nodeKey();
+        favFishField.typeOptions.reverseIndexNodeKey = dogFriends.nodeKey();
     }
 
     return ({
         pets, petsDefaultIndex: pets.indexes[0],
-        dogRecord, root
+        dogRecord, root, ...fishStuff
     })
 };

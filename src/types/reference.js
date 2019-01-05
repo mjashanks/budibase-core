@@ -35,7 +35,11 @@ const options = {
     },
     displayValue: {
         defaultValue: "", 
-        nullAllowed: false}
+        nullAllowed: false},
+    reverseIndexNodeKey: {
+        defaultValue: null,
+        nullAllowed: true
+    }
 };
 
 const isEmptyString = s => 
