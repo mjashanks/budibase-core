@@ -16,7 +16,7 @@ export const updateFile = data => async (path, content) => {
 }
 
 export const writableFileStream = data => async (path) => {
-    if(!await exists(data)(path)) throw new Error("cannot write stream to " + path + " - does not exist"); 
+    //if(!await exists(data)(path)) throw new Error("cannot write stream to " + path + " - does not exist"); 
     const stream = Writable();
     stream._write = (chunk, encoding, done) => {
         data[path] = [...data[path], ...chunk];
@@ -26,7 +26,8 @@ export const writableFileStream = data => async (path) => {
 };
 
 export const readableFileStream = data => async (path) => {
-    if(!await exists(data)(path)) throw new Error("cannot read stream from " + path + " - does not exist"); 
+    if(!await exists(data)(path)) 
+        throw new Error("cannot read stream from " + path + " - does not exist"); 
     const s = new Readable();
     s._read = () => {
         s.push(Buffer.from(data[path]));

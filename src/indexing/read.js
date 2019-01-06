@@ -5,21 +5,25 @@ import {getActualKeyOfParent,
 import {createIndexFile} from "../indexing/sharding";
 import {getIndexReader, CONTINUE_READING_RECORDS} from "./serializer";
 
-export const readIndex = async(heirarchy, datastore, index, indexedDataKey) => {
+export const readIndex = async (heirarchy, datastore, index, indexedDataKey) => {
     try {
         const readableStream = await datastore.readableFileStream(indexedDataKey);
-        const read = getIndexReader(heirarchy, indexNode, () => readableStream.read());
+        const read = getIndexReader(heirarchy, index, () => readableStream.read());
         const records = [];
         read(item => {
             records.push(item);
             return CONTINUE_READING_RECORDS;
         });
         return records;
-    } catch(_) {
-        await createIndexFile(datastore)(
-            indexedDataKey, 
-            index
-        );
+    } catch(e) {
+        if(await datastore.exists(indexedDataKey)) {
+            throw e;
+        } else {
+            await createIndexFile(datastore)(
+                indexedDataKey, 
+                index
+            );
+        }
         return [];
     }
 };

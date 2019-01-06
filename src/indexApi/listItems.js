@@ -33,6 +33,7 @@ const _listItems = async (app, indexKey, rangeStartParams, rangeEndParams) => {
         return flatten(items);
     } else {
         return await readIndex(
+            app.heirarchy,
             app.datastore, 
             indexNode,
             getUnshardedIndexDataKey(indexKey)

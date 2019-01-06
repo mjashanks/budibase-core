@@ -127,7 +127,8 @@ const buildReverseReferenceIndex = async (app, indexNode) => {
                     );
 
                     const indexedData = await readIndex(
-                        app.datastore, indexNode, indexedDataKey);
+                        app.heirarchy, app.datastore, 
+                        indexNode, indexedDataKey);
                     applyToIndex(record, indexNode, indexedData);
                     await writeIndex(
                         app.datastore, indexedData, indexedDataKey)
@@ -220,7 +221,8 @@ const applyToIndex = (record, indexNode, indexedData) => {
         indexedData.push(result.result);
 };
 
-const reloadIndexedDataIfRequired = async (datastore,
+const reloadIndexedDataIfRequired = async (heirarchy,
+                                           datastore,
                                            indexNode, 
                                            indexKey, 
                                            record,
@@ -241,6 +243,7 @@ const reloadIndexedDataIfRequired = async (datastore,
         currentIndexedDataKey);
     
     const indexedData = await readIndex(
+        heirarchy,
         datastore,
         indexNode,
         indexedDataKey
@@ -274,8 +277,8 @@ const applyAllDecendantRecords =
             // if index is sharded, we may need to get a different
             // shard than the current one
             const newIndexedData =  await reloadIndexedDataIfRequired(
-                app.datastore, indexNode, indexKey, record,
-                currentIndexedData, currentIndexedDataKey
+                app.heirarchy, app.datastore, indexNode, indexKey, 
+                record, currentIndexedData, currentIndexedDataKey
             );
 
             currentIndexedData = newIndexedData.indexedData;

@@ -121,7 +121,7 @@ const read = (getNextInputBytes, schema) => (onGetItem, onGetText) => {
                 status = onGetItem(
                     deserializeRow(schema, rowText)
                 );
-                currentRowText = "";
+                rowText = "";
             }
         }
         text = readInput();
@@ -142,7 +142,8 @@ const newOutputWriter = (flushBoundary, flush) => {
                 Buffer.from(text, "utf8")
             ]);
         
-        if(currentBuffer.length > 0 &&
+        if(currentBuffer !== null
+            &&currentBuffer.length > 0 &&
             (currentBuffer.length > flushBoundary
              || !text)) {
 
@@ -184,11 +185,12 @@ const deserializeRow = (schema, rowText) => {
     let isEscaped = false;
     const item = {};
 
-    setCurrentProp = () => {
+    const setCurrentProp = () => {
         const currentProp = schema[currentPropIndex];
+        const type = getType(currentProp.type);
         const value = currentValueText === ""
-                      ? currentProp.type.getDefaultValue()
-                      : currentProp.type.safeParseValue(
+                      ? type.getDefaultValue()
+                      : type.safeParseValue(
                           currentValueText);
         item[currentProp.name] = value;
     };
@@ -231,11 +233,12 @@ const serializeItem = (schema, item)  => {
     let rowText = ""
 
     for(let prop of schema) {
+        const type = getType(prop.type);
         const value = has(prop.name)(item)
                       ? item[prop.name]
-                      : prop.type.getDefaultValue()
+                      : type.getDefaultValue()
         
-        const valStr = prop.type.stringify(value);
+        const valStr = type.stringify(value);
 
         for(let i = 0; i < valStr.length; i++) {
             const currentChar = valStr[i];

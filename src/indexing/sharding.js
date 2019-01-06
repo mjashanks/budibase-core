@@ -77,8 +77,6 @@ export const getUnshardedIndexDataKey = indexKey =>
 export const getIndexFolderKey = indexKey => indexKey;
 
 export const createIndexFile = (datastore) => async (indexedDataKey, index) => {
-    const dummyMapped = mapRecord({}, index);
-    const indexCsv_headerOnly = unparse([keys(dummyMapped)]);
     if(isShardedIndex(index)) {
         const indexKey = getParentKey(indexedDataKey);
         const shardMap = await getShardMap(datastore, indexKey);
@@ -87,7 +85,7 @@ export const createIndexFile = (datastore) => async (indexedDataKey, index) => {
         );
         await writeShardMap(datastore, indexKey, shardMap);
     }
-    await datastore.createFile(indexedDataKey, indexCsv_headerOnly);
+    await datastore.createFile(indexedDataKey, "");
 };
 
 export const shardNameFromKey = key => 

@@ -85,7 +85,7 @@ describe("recordApi > create > reindex", () => {
         
         expect(isArray(invoices)).toBeTruthy();
         expect(invoices.length).toBe(1);
-        expect(invoices[0].totalIncVat).toBe("10.5");
+        expect(invoices[0].totalIncVat).toBe(10.5);
 
     });
 

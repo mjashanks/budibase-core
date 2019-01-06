@@ -15,9 +15,21 @@ export const update = async (heirarchy, store, mappedRecord, indexKey, indexNode
 
 const getWriter = async (heirarchy, store, indexKey, indexNode, mappedRecord) => {
     const indexedDataKey = getIndexedDataKey(indexNode, indexKey, mappedRecord);
-    const readableStream = await store.readableFileStream(indexedDataKey);
-    const writableStream = await store.writableFileStream(indexedDataKey);
 
+    let readableStream = null;
+    try {
+        readableStream = await store.readableFileStream(indexedDataKey);
+    } catch(e) {
+        if(await store.exists(indexedDataKey)) {
+            throw e;
+        } else {
+            await store.createFile(indexedDataKey);
+            readableStream = await store.readableFileStream(indexedDataKey);
+        }
+    }
+
+    const writableStream = await store.writableFileStream(indexedDataKey);
+    
     return getIndexWriter(
         heirarchy, indexNode, 
         () => readableStream.read(),

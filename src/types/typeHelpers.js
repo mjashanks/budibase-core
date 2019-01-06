@@ -79,7 +79,8 @@ export const getDefaultExport = (name, tryParse, functions, options, validationR
     getDefaultOptions : () => getDefaultOptions(cloneDeep(options)), 
     validateTypeConstraints : validateTypeConstraints(validationRules, options),
     sampleValue,
-    stringify,
+    stringify: val => val === null || val === undefined 
+                      ? "" : stringify(val),
     getDefaultValue: functions.default
 });
 
