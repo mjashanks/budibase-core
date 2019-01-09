@@ -45,6 +45,14 @@ describe("heirarchy node creation", () => {
         expect(collection.children[0]).toBe(record);
     });
 
+    it("> getNewrecordTemplate > should add itself to collections's default index allowedNodeIds", async () => {
+        const templateApi = await getMemoryTemplateApi();
+        const root = templateApi.getNewRootLevel();
+        const collection = templateApi.getNewCollectionTemplate(root);
+        const record  = templateApi.getNewRecordTemplate(collection);
+        expect(collection.indexes[0].allowedRecordNodeIds).toEqual([record.recordNodeId]);
+    });
+
     it("> getNewrecordTemplate > should add itself to root's children", async () => {
         const templateApi = await getMemoryTemplateApi();
         const root = templateApi.getNewRootLevel();

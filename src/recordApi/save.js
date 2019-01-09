@@ -45,7 +45,7 @@ const _save = async (app,indexingApi, record, context) => {
         app.publish(events.recordApi.save.onRecordCreated, {
             record:recordClone
         });
-        await indexingApi.reindexForCreate(recordClone);
+        await indexingApi.reindexForCreate(cloneDeep(record));
     }
     else {
         const loadRecord = load(app);
@@ -59,7 +59,7 @@ const _save = async (app,indexingApi, record, context) => {
             new:returnedClone
         });
         
-        await indexingApi.reindexForUpdate(oldRecord, recordClone);
+        await indexingApi.reindexForUpdate(oldRecord, cloneDeep(record));
     }
    
     return returnedClone;

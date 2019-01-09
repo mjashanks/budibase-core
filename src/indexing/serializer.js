@@ -1,5 +1,5 @@
 import {generateSchema} from "./indexSchemaCreator";
-import { has, isUndefined } from "lodash/fp";
+import { has, isString } from "lodash/fp";
 import { Buffer } from "safe-buffer";
 import {StringDecoder} from "string_decoder";
 import {getType} from "../types";
@@ -26,7 +26,6 @@ export const getIndexReader = (heirarchy, indexNode, getNextInputBytes) =>
         getNextInputBytes, 
         generateSchema(heirarchy, indexNode)
     );
-
 
 const addItem = (getNextInputBytes, flushOutputBuffer, schema) => (item) => {
     const write = newOutputWriter(BUFFER_MAX_BYTES, flushOutputBuffer);
@@ -57,19 +56,26 @@ const addItem = (getNextInputBytes, flushOutputBuffer, schema) => (item) => {
 
 const removeItem = (getNextInputBytes, flushOutputBuffer, schema) => (itemKey) => {
     const write = newOutputWriter(BUFFER_MAX_BYTES, flushOutputBuffer);
+    let hasWritten = false;
     read(getNextInputBytes, schema)(
         indexedItem => {
             if(indexedItem.key !== itemKey) {
                 write(
                     serializeItem(schema, indexedItem)
                 );
+                hasWritten = true;
                 return CONTINUE_READING_RECORDS;
             } else {
                 return READ_REMAINING_TEXT;
             }
         },
-        text => write(text)
+        text => {
+            hasWritten = true;
+            write(text);
+        }
     );
+    if(!hasWritten) 
+        write("");
     write();
 };
 
@@ -107,6 +113,7 @@ const read = (getNextInputBytes, schema) => (onGetItem, onGetText) => {
 
         if(status === READ_REMAINING_TEXT) {
             onGetText(text);
+            hasContent = true;
             continue;
         }
 
@@ -115,6 +122,7 @@ const read = (getNextInputBytes, schema) => (onGetItem, onGetText) => {
         }
 
         let rowText = "";
+        let currentCharIndex=0;
         for(let currentChar of text) {
             rowText += currentChar;
             if(currentChar === "\r") {
@@ -122,8 +130,17 @@ const read = (getNextInputBytes, schema) => (onGetItem, onGetText) => {
                     deserializeRow(schema, rowText)
                 );
                 rowText = "";
+                if(status === READ_REMAINING_TEXT) {
+                    break;
+                }
             }
+            currentCharIndex++;
         }
+
+        if(currentCharIndex < text.length -1) {
+            onGetText(text.substring(currentCharIndex + 1));
+        }
+
         text = readInput();
     }
 };
@@ -134,18 +151,17 @@ const newOutputWriter = (flushBoundary, flush) => {
 
     return (text) => {
 
-        if(!!text && currentBuffer === null)
+        if(isString(text) && currentBuffer === null)
             currentBuffer = Buffer.from(text, "utf8");
-        else if(!!text)
+        else if(isString(text))
             currentBuffer = Buffer.concat([
                 currentBuffer,
                 Buffer.from(text, "utf8")
             ]);
         
-        if(currentBuffer !== null
-            &&currentBuffer.length > 0 &&
+        if(currentBuffer !== null &&
             (currentBuffer.length > flushBoundary
-             || !text)) {
+             || !isString(text))) {
 
             flush(currentBuffer);
             currentBuffer = null;

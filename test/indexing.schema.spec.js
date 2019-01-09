@@ -9,10 +9,13 @@ describe("indexSchemGenerator", () => {
         const schema = generateSchema(appHeirarchy.root, appHeirarchy.petsDefaultIndex);
         schemaHasFieldOfType(schema, "key", "string");
         schemaHasFieldOfType(schema, "sortKey", "string");
+        schemaHasFieldOfType(schema, "id", "string");
+        schemaHasFieldOfType(schema, "type", "string");
+        schemaHasFieldOfType(schema, "isNew", "bool");
         schemaHasFieldOfType(schema, "name", "string");
         schemaHasFieldOfType(schema, "dob", "datetime");
         schemaHasFieldOfType(schema, "isAlive", "bool");
-        expect(schema.length).toBe(5);
+        expect(schema.length).toBe(8);
     });
 
     it("should return mapped columns of two types, when accepts all in collection or two typs", async () => {
@@ -20,11 +23,15 @@ describe("indexSchemGenerator", () => {
         const schema = generateSchema(appHeirarchy.root, appHeirarchy.petsDefaultIndex);
         schemaHasFieldOfType(schema, "key", "string");
         schemaHasFieldOfType(schema, "sortKey", "string");
+        schemaHasFieldOfType(schema, "id", "string");
+        schemaHasFieldOfType(schema, "type", "string");
+        schemaHasFieldOfType(schema, "isNew", "bool");
         schemaHasFieldOfType(schema, "name", "string");
         schemaHasFieldOfType(schema, "dob", "datetime");
         schemaHasFieldOfType(schema, "isAlive", "bool");
         schemaHasFieldOfType(schema, "noOfGills", "number");
-        expect(schema.length).toBe(7);
+        schemaHasFieldOfType(schema, "favouriteFish", "reference");
+        expect(schema.length).toBe(10);
     });
 
     it("should return mapped columns of one types, when accepts only onw of two types", async () => {
@@ -32,10 +39,13 @@ describe("indexSchemGenerator", () => {
         const schema = generateSchema(appHeirarchy.root, appHeirarchy.fishOnlyIndex);
         schemaHasFieldOfType(schema, "key", "string");
         schemaHasFieldOfType(schema, "sortKey", "string");
+        schemaHasFieldOfType(schema, "id", "string");
+        schemaHasFieldOfType(schema, "type", "string");
+        schemaHasFieldOfType(schema, "isNew", "bool");
         schemaHasFieldOfType(schema, "name", "string");
         schemaHasFieldOfType(schema, "isAlive", "bool");
         schemaHasFieldOfType(schema, "noOfGills", "number");
-        expect(schema.length).toBe(5);
+        expect(schema.length).toBe(8);
     });
 
     it("should return mapped columns type, for reverse reference index", async () => {
@@ -43,11 +53,14 @@ describe("indexSchemGenerator", () => {
         const schema = generateSchema(appHeirarchy.root, appHeirarchy.dogFriends);
         schemaHasFieldOfType(schema, "key", "string");
         schemaHasFieldOfType(schema, "sortKey", "string");
+        schemaHasFieldOfType(schema, "id", "string");
+        schemaHasFieldOfType(schema, "type", "string");
+        schemaHasFieldOfType(schema, "isNew", "bool");
         schemaHasFieldOfType(schema, "name", "string");
         schemaHasFieldOfType(schema, "isAlive", "bool");
         schemaHasFieldOfType(schema, "dob", "datetime");
         schemaHasFieldOfType(schema, "favouriteFish", "reference");
-        expect(schema.length).toBe(6);
+        expect(schema.length).toBe(9);
     });
 
 });

@@ -5,7 +5,7 @@ import {deleteCollection} from "../collectionApi/delete";
 import {getExactNodeForPath, 
         getFlattenedHierarchy, getNode,
         fieldReversesReferenceToNode} from "../templateApi/heirarchy";
-import {map, flatten, filter} from "lodash/fp";
+import {map, flatten, filter, cloneDeep} from "lodash/fp";
 import { getIndexedDataKey_fromIndexKey } from "../indexing/read";
 import {deleteIndex} from "../indexApi/delete";
 
@@ -32,7 +32,7 @@ const _deleteRecord = async (app, indexingApi, key) => {
     await app.datastore.deleteFile(
         getRecordFileName(key));
     
-    await indexingApi.reindexForDelete(record);
+    await indexingApi.reindexForDelete(cloneDeep(record));
     await app.datastore.deleteFolder(key);
     await deleteIndexes(app, key)
 };

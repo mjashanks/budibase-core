@@ -19,6 +19,8 @@ export const writableFileStream = data => async (path) => {
     //if(!await exists(data)(path)) throw new Error("cannot write stream to " + path + " - does not exist"); 
     const stream = Writable();
     stream._write = (chunk, encoding, done) => {
+        data[path] = data[path] === undefined 
+                     ? [] : data[path];
         data[path] = [...data[path], ...chunk];
         done();
     };
@@ -34,6 +36,13 @@ export const readableFileStream = data => async (path) => {
         s.push(null);
     }; 
     return s;
+};
+
+export const renameFile = data => async (oldKey, newKey) => {
+    if(!await exists(data)(oldKey)) throw new Error("cannot rename path: " + oldKey + " ... does not exist");
+    if(await exists(data)(newKey)) throw new Error("cannot rename path: " + newKey + " ... already exists");    
+    data[newKey] = data[oldKey];
+    delete data[oldKey];
 };
 
 export const loadFile = data => async (path) => {
@@ -54,7 +63,8 @@ export const createFolder = data => async (path) => {
 }
 export const deleteFolder = data => async (path) => {
     if(!await exists(data)(path)) throw new Error("Cannot delete folder, path " + path + " does not exist");
-    if(!isFolder(data[path])) throw new Error("DeleteFolder: Path " + path + " is not a folder");
+    if(!isFolder(data[path])) 
+        throw new Error("DeleteFolder: Path " + path + " is not a folder");
     delete data[path];
 } 
 
@@ -69,6 +79,7 @@ export default data => {
         deleteFolder: deleteFolder(data),
         readableFileStream: readableFileStream(data),
         writableFileStream: writableFileStream(data),
+        renameFile: renameFile(data),
         datastoreType : "memory",
         datastoreDescription: "",
         data 

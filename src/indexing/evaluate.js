@@ -38,17 +38,22 @@ export const passesFilter = (record, index) => {
 };
 
 export const mapRecord = (record, index) => {
-    const recordClone = clone(record)
+    const recordClone = clone(record);
+    recordClone.isNew = record.isNew();
+    recordClone.key = record.key();
+    recordClone.id = record.id();
+    recordClone.type = record.type();
     const context = {record:recordClone};
-    if(!index.map) return recordClone;
 
+    const map = index.map ? index.map : "return {...record};";
+    
     const compiledMap = defineError(
-        () => compileMap(index),
+        () => compileCode(map),
         mapCompile);
 
     const mapped = defineError(
         () => compiledMap(context),
-        mapEval);
+        mapEval);    
 
     const mappedKeys = keys(mapped);
     for(let i = 0; i < mappedKeys.length; i++) {
@@ -59,9 +64,8 @@ export const mapRecord = (record, index) => {
         }
     }
 
-    mapped.key = has(recordClone, "key") 
-                ? recordClone.key()
-                : "";
+    mapped.key = record.key();
+    mapped.sortKey = compileCode(index.getSortKey)(context);
 
     return mapped;
 };

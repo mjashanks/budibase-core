@@ -1,6 +1,6 @@
 import {switchCase, defaultCase, joinKey, 
     $, isNothing, isSomething} from "../common";
-import {each, constant, filter} from "lodash";
+import {each, constant, filter, find} from "lodash";
 import {isCollection, isIndex, isRoot
     , isRecord, isAggregateSet, getFlattenedHierarchy} from "./heirarchy";
 import {validateAll} from "./validate";
@@ -79,6 +79,15 @@ const addToParent = obj => {
             parent.aggregateSets.push(obj);
         else
             parent.children.push(obj);
+
+        if(isCollection(parent) && isRecord(obj)) {
+            const defaultIndex = find(
+                parent.indexes, 
+                i => i.name === "default");
+            if(!!defaultIndex) {
+                defaultIndex.allowedRecordNodeIds.push(obj.recordNodeId);
+            } 
+        }
     }
     return obj;
 };
@@ -164,7 +173,7 @@ export const getNewIndexTemplate = parent =>
                    ? "reference" 
                    : "heirarchal",
         getShardName: "",
-        getSortKey: "record.id()",
+        getSortKey: "record.id",
         aggregateSets: [],
         allowedRecordNodeIds: []
     });

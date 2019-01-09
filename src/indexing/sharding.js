@@ -3,7 +3,7 @@ import {getActualKeyOfParent, isGlobalIndex,
         getExactNodeForPath} from "../templateApi/heirarchy";
 import {joinKey, isNonEmptyString, splitKey, $} from "../common";
 import {compileCode} from "@nx-js/compiler-util";
-import {filter, keys, map, last} from "lodash/fp";
+import {filter, includes, map, last} from "lodash/fp";
 import {mapRecord} from "./evaluate";
 import {unparse} from "papaparse";
 
@@ -48,6 +48,15 @@ export const getShardKeysInRange = async (app, indexKey, startRecord=null, endRe
         map(k => joinKey(indexKey, k + ".csv"))
     ]);
 };
+
+export const ensureShardNameIsInShardMap = async (store, indexKey, indexedDataKey) => {
+    const map = await getShardMap(store, indexKey);
+    const shardName = shardNameFromKey(indexedDataKey);
+    if(!includes(shardName)(map)) {
+        map.push(shardName);
+        await writeShardMap(store, indexKey, map);
+    }
+}
 
 export const getShardMap = async (datastore, indexKey) => {
     const shardMapKey = getShardMapKey(indexKey);

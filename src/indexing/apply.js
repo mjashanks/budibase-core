@@ -1,20 +1,29 @@
-import {getIndexedDataKey} from "./sharding";
+import {getIndexedDataKey, ensureShardNameIsInShardMap} from "./sharding";
 import {getIndexWriter} from "./serializer";
+import { isShardedIndex } from "../templateApi/heirarchy";
 
-export const add = async (heirarchy, store, mappedRecord, indexKey, indexNode) => 
-    (await getWriter(heirarchy, store, indexKey, indexNode, mappedRecord))
-        .addItem(mappedRecord);
-
-export const remove = async (heirarchy, store, mappedRecord, indexKey, indexNode)  => 
-    (await getWriter(heirarchy, store, indexKey, indexNode, mappedRecord))
-            .removeItem(mappedRecord.key);
-
-export const update = async (heirarchy, store, mappedRecord, indexKey, indexNode) => 
-    (await getWriter(heirarchy, store, indexKey, indexNode, mappedRecord))
-            .updateItem(mappedRecord);
-
-const getWriter = async (heirarchy, store, indexKey, indexNode, mappedRecord) => {
+export const add = async (heirarchy, store, mappedRecord, indexKey, indexNode) => {
     const indexedDataKey = getIndexedDataKey(indexNode, indexKey, mappedRecord);
+    (await getWriter(heirarchy, store, indexKey, indexedDataKey, indexNode))
+        .addItem(mappedRecord);
+    await swapTempFileIn(store, indexedDataKey);
+}
+
+export const remove = async (heirarchy, store, mappedRecord, indexKey, indexNode)  => {
+    const indexedDataKey = getIndexedDataKey(indexNode, indexKey, mappedRecord);
+    const writer = await getWriter(heirarchy, store, indexKey, indexedDataKey, indexNode);
+    writer.removeItem(mappedRecord.key);
+    await swapTempFileIn(store, indexedDataKey);
+};
+
+export const update = async (heirarchy, store, mappedRecord, indexKey, indexNode) => {
+    const indexedDataKey = getIndexedDataKey(indexNode, indexKey, mappedRecord);
+    (await getWriter(heirarchy, store, indexKey, indexedDataKey, indexNode))
+            .updateItem(mappedRecord);
+    await swapTempFileIn(store, indexedDataKey);
+}
+
+const getWriter = async (heirarchy, store, indexKey, indexedDataKey, indexNode) => {
 
     let readableStream = null;
     try {
@@ -23,12 +32,16 @@ const getWriter = async (heirarchy, store, indexKey, indexNode, mappedRecord) =>
         if(await store.exists(indexedDataKey)) {
             throw e;
         } else {
-            await store.createFile(indexedDataKey);
+            await store.createFile(indexedDataKey, "");
             readableStream = await store.readableFileStream(indexedDataKey);
         }
     }
 
-    const writableStream = await store.writableFileStream(indexedDataKey);
+    if(isShardedIndex(indexNode)) {
+        await ensureShardNameIsInShardMap(store, indexKey, indexedDataKey);
+    }
+
+    const writableStream = await store.writableFileStream(indexedDataKey + ".temp");
     
     return getIndexWriter(
         heirarchy, indexNode, 
@@ -36,3 +49,9 @@ const getWriter = async (heirarchy, store, indexKey, indexNode, mappedRecord) =>
         (buffer) => writableStream.write(buffer)
     );
 };
+
+const swapTempFileIn = async (store, indexedDataKey) => {
+    const tempFile = indexedDataKey + ".temp";
+    await store.deleteFile(indexedDataKey);
+    await store.renameFile(tempFile, indexedDataKey);
+} ;
