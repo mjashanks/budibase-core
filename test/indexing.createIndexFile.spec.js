@@ -5,7 +5,7 @@ import {includes} from "lodash";
 
 describe("indexing.createIndexFile", () => {
 
-    it("should create a document with a csv header row, with fields based on index map function", async () => {
+    it("should create an empty document <indexkey>.csv", async () => {
         const datastore = getMemoryStore();
         const indexing = getIndexing({datastore}); // appheirarchy not used
 
@@ -14,13 +14,8 @@ describe("indexing.createIndexFile", () => {
         await indexing.createIndexFile(indexKey, index);
 
         const savedIndex = await datastore.loadFile(indexKey);
-        const headers = savedIndex.split(",");
-
-        expect(headers.length).toBe(3); // mapped fields, plus key
-
-        expect(includes(headers, "name")).toBeTruthy();
-        expect(includes(headers, "age")).toBeTruthy();
-        expect(includes(headers, "key")).toBeTruthy();
+        
+        expect(savedIndex).toBe("");
     });
 
 });

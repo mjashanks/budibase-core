@@ -89,7 +89,7 @@ describe("getRelevantIndexes", () => {
         expect(indexExists("/customers/customersBySurname")).toBeTruthy();
     });
 
-    it("should get 2 default indexes when 2 collections nested deep", async () => {
+    it("should get default index and relevant parent index when record is 2 nested collections deep", async () => {
         const {recordApi, appHeirarchy} = await setupAppheirarchy(
         basicAppHeirarchyCreator_WithFields_AndIndexes);
 
@@ -99,8 +99,8 @@ describe("getRelevantIndexes", () => {
         const indexes = getRelevantHeirarchalIndexes(
             appHeirarchy.root, invoice);
 
-        expect(indexes.collections.length).toBe(5);
-        expect(some(indexes.collections, i => i.path === "/customers/default")).toBeTruthy();
+        expect(indexes.collections.length).toBe(4);
+        expect(some(indexes.collections, i => i.path === "/customers/invoices")).toBeTruthy();
         expect(some(indexes.collections, i => i.path === `/customers/${nodeid}-1234/invoices/default`)).toBeTruthy();
     });
 

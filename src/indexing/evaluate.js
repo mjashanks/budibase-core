@@ -65,7 +65,9 @@ export const mapRecord = (record, index) => {
     }
 
     mapped.key = record.key();
-    mapped.sortKey = compileCode(index.getSortKey)(context);
+    mapped.sortKey = index.getSortKey 
+                     ? compileCode(index.getSortKey)(context) 
+                     : record.id();
 
     return mapped;
 };

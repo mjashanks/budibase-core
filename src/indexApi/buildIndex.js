@@ -3,15 +3,16 @@ import {isGlobalIndex, getFlattenedHierarchy
     ,getNodeByKeyOrNodeKey,getNode, isTopLevelCollection,
     isIndex, isCollection, isRecord,
     fieldReversesReferenceToIndex} from "../templateApi/heirarchy";
-import {find, filter, some} from "lodash/fp";
+import {find, filter, some, map, join} from "lodash/fp";
 import {joinKey, apiWrapper, events, $} from "../common";
 import {load} from "../recordApi/load";
 import {evaluate} from "../indexing/evaluate";
-import {writeIndex} from "../indexing/apply";
 import {initialiseIndex} from "../collectionApi/initialise";
-import {getIndexedDataKey_fromIndexKey, readIndex} from "../indexing/read";
+import {readIndex} from "../indexing/read";
 import {deleteIndex} from "../indexApi/delete";
 import {getIndexedDataKey} from "../indexing/sharding";
+import {serializeItem} from "../indexing/serializer";
+import {generateSchema} from "../indexing/indexSchemaCreator";
 
 /*
 GlobalIndex:
@@ -131,7 +132,8 @@ const buildReverseReferenceIndex = async (app, indexNode) => {
                         indexNode, indexedDataKey);
                     applyToIndex(record, indexNode, indexedData);
                     await writeIndex(
-                        app.datastore, indexedData, indexedDataKey)
+                        app, indexedData, 
+                        indexedDataKey, indexNode)
                 }
             }
             referencingIdIterator = await iterateReferencingNodes();
@@ -221,8 +223,7 @@ const applyToIndex = (record, indexNode, indexedData) => {
         indexedData.push(result.result);
 };
 
-const reloadIndexedDataIfRequired = async (heirarchy,
-                                           datastore,
+const reloadIndexedDataIfRequired = async (app,
                                            indexNode, 
                                            indexKey, 
                                            record,
@@ -238,13 +239,14 @@ const reloadIndexedDataIfRequired = async (heirarchy,
                 indexedDataKey:currentIndexedDataKey};
     
     await writeIndex(
-        datastore, 
+        app, 
         currentIndexedData, 
-        currentIndexedDataKey);
+        currentIndexedDataKey,
+        indexNode);
     
     const indexedData = await readIndex(
-        heirarchy,
-        datastore,
+        app.heirarchy,
+        app.datastore,
         indexNode,
         indexedDataKey
     );
@@ -277,8 +279,8 @@ const applyAllDecendantRecords =
             // if index is sharded, we may need to get a different
             // shard than the current one
             const newIndexedData =  await reloadIndexedDataIfRequired(
-                app.heirarchy, app.datastore, indexNode, indexKey, 
-                record, currentIndexedData, currentIndexedDataKey
+                app, indexNode, indexKey, record,
+                currentIndexedData, currentIndexedDataKey
             );
 
             currentIndexedData = newIndexedData.indexedData;
@@ -310,12 +312,26 @@ const applyAllDecendantRecords =
 
     if(!inRecursion) {
         await writeIndex(
-            app.datastore,
+            app,
             currentIndexedData, 
-            currentIndexedDataKey);
+            currentIndexedDataKey,
+            indexNode);
     }
 };
 
+const writeIndex = async (app, indexedData, indexedDataKey, indexNode) => {
+    const schema = generateSchema(app.heirarchy, indexNode);
+    const data = $(indexedData, [
+        map(i => serializeItem(schema,i)),
+        join("")
+    ]); 
+    
+    try{
+        await app.datastore.deleteFile(indexedDataKey);
+    } catch(_) {}
+
+    await app.datastore.createFile(indexedDataKey, data);
+};
 
 
 export default buildIndex;

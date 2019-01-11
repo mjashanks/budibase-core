@@ -186,14 +186,6 @@ const newInputReader = (getNextInputBytes) => {
     };
 };
 
-const itemSeserializer = (heirarchy, indexNode) => {
-    const schema = generateSchema(heirarchy, indexNode);
-    return  ({
-        deserializeRow: deserializeRow(schema),
-        serializeItem: serializeRow(schema)
-    });
-};
-
 const deserializeRow = (schema, rowText) => {
     let currentPropIndex = 0;
     let currentCharIndex = 0;
@@ -244,7 +236,7 @@ const deserializeRow = (schema, rowText) => {
     return item;
 };
 
-const serializeItem = (schema, item)  => {
+export const serializeItem = (schema, item)  => {
 
     let rowText = ""
 

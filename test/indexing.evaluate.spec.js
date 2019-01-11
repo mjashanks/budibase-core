@@ -1,9 +1,16 @@
 import evaluate from "../src/indexing/evaluate";
-import {constant} from "lodash";
+import {constant, merge} from "lodash";
 
 const getRecord = obj => {
-    obj.key = constant("abcd1234"); 
-    return obj;
+    const def = {
+        key : constant("abcd1234"),
+        type : constant("test"),
+        isNew : constant(false),
+        id : constant("1234")
+    }
+    
+    const newObj = merge(def, obj);
+    return newObj;
 };
 
 describe("index evaluation", () => {
@@ -11,14 +18,14 @@ describe("index evaluation", () => {
     it("should filter out when object does not pass filter", () => {
         
         const index = {
-            filter : "record.type === 'customer'",
+            filter : "record.type() === 'customer'",
             fields: {
                 type : {type:"string"}
             }
         };
 
         const record = getRecord({
-            type : "not a customer"
+            type : constant("not a customer")
         });
 
         const result = evaluate(record)(index);
@@ -30,14 +37,14 @@ describe("index evaluation", () => {
     it("should always include key with the record", () => {
         
         const index = {
-            filter : "record.type === 'customer'",
+            filter : "record.type() === 'customer'",
             fields: {
                 type : {type:"string"}
             }
         };
 
         const record = getRecord({
-            type : "customer"
+            type : constant("customer")
         });
 
         const key = record.key();
@@ -45,13 +52,13 @@ describe("index evaluation", () => {
         const result = evaluate(record)(index);
         expect(result.isError).toBe(false);
         expect(result.passedFilter).toBe(true);
-        expect(result.result.key()).toBe(key);
+        expect(result.result.key).toBe(key);
 
     });
 
     it("should map when filter test is passed", () => {
         const index = {
-            filter : "record.type === 'customer'",
+            filter : "record.type() === 'customer'",
             map: "return {newName: record.name + 'by', email: record.email }",
             fields: {
                 newName : {type:"string"},
@@ -59,7 +66,7 @@ describe("index evaluation", () => {
             }
         };
         const record = getRecord({
-            type : "customer",
+            type : constant("customer"),
             name: "bob",
             email: "bob@budibase.com"
         });
@@ -93,14 +100,14 @@ describe("index evaluation", () => {
 
     it("should return all declared fields when no map supplied", () => {
         const index = {
-            filter : "record.type === 'customer'",
+            filter : "record.type() === 'customer'",
             fields : {
                 type: {type:"string"},
                 name: {type:"string"}
             }
         };
         const record = getRecord({
-            type : "customer",
+            type : constant("customer"),
             name: "bob"
         });
         const result = evaluate(record)(index);
