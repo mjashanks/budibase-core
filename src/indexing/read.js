@@ -1,31 +1,39 @@
 import { getHashCode, 
-    joinKey} from "../common";
+    joinKey, isNonEmptyString,
+    $} from "../common";
 import {getActualKeyOfParent, 
          isGlobalIndex} from "../templateApi/heirarchy";
 import {createIndexFile} from "../indexing/sharding";
 import {getIndexReader, CONTINUE_READING_RECORDS} from "./serializer";
+import {has} from "lodash/fp";
+import {compileExpression, compileCode} from "@nx-js/compiler-util";
 
 export const readIndex = async (heirarchy, datastore, index, indexedDataKey) => {
-    try {
-        const readableStream = await datastore.readableFileStream(indexedDataKey);
-        const read = getIndexReader(heirarchy, index, () => readableStream.read());
-        const records = [];
-        read(item => {
+    const records = [];
+    const doRead = iterateIndex(
+        item => {
             records.push(item);
             return CONTINUE_READING_RECORDS;
-        });
-        return records;
-    } catch(e) {
-        if(await datastore.exists(indexedDataKey)) {
-            throw e;
-        } else {
-            await createIndexFile(datastore)(
-                indexedDataKey, 
-                index
+        },
+        () => records
+    )
+
+    return await doRead(heirarchy, datastore, index, indexedDataKey);
+};
+
+export const getAggregates = async (heirarchy, datastore, index, indexedDataKey) => {
+    const aggregateResult = {}
+    const doRead = iterateIndex(
+        item => {
+            applyItemToAggregateResult(
+                index, aggregateResult, item
             );
-        }
-        return [];
-    }
+            return CONTINUE_READING_RECORDS;
+        },
+        () => aggregateResult
+    );
+
+    return await doRead(heirarchy, datastore, index, indexedDataKey);
 };
 
 export const getIndexedDataKey_fromIndexKey = (indexKey, record) => {
@@ -56,4 +64,84 @@ export const getIndexedDataKey = (decendantKey, indexNode) => {
         indexedDataParentKey,
         indexName
     );
+}
+
+const applyItemToAggregateResult = (indexNode, result, item) => {
+    
+    const getInitialAggregateResult = () => ({
+        sum: 0, mean: 0, max: 0, min: 0
+    });
+
+    const applyAggregateResult = (agg, existing, count) => {
+        const value = compileCode(agg.aggregatedValue)
+                                 ({record:item});
+        existing.sum = existing.sum + value;
+        existing.max = existing.max > value 
+                       ? existing.max 
+                       : value;
+        existing.min = existing.min < value 
+                       ? existing.min
+                       : value;
+        existing.mean = existing.sum / count;
+        return existing;
+    };
+
+    for(let aggGroup of indexNode.aggregateGroups) {  
+
+        if(!has(aggGroup.name)(result)) {
+            result[aggGroup.name] = {}
+        };
+
+        const thisGroupResult = result[aggGroup.name];
+
+        if(isNonEmptyString(aggGroup.condition)) {
+            if(!compileExpression(aggGroup)
+                                 ({record:item})) {
+                continue;
+            }
+        }
+
+        const group = isNonEmptyString(aggGroup.groupBy)
+                      ? compileCode(aggGroup.groupBy)
+                                   ({record:item})
+                      : "all";
+
+        if(!has(group)(thisGroupResult)) {
+            thisGroupResult[group] = {count:0};
+            for(let agg of aggGroup.aggregates) {
+                thisGroupResult[group][agg.name] = 
+                    getInitialAggregateResult();
+            } 
+        }
+
+        thisGroupResult[group].count = 
+            thisGroupResult[group].count++;
+
+        for(let agg of aggGroup.aggregates) {
+            const existingValues = thisGroupResult[group][agg.name];
+            thisGroupResult[group][agg.name] = 
+                applyAggregateResult(
+                    agg, existingValues,
+                    thisGroupResult[group].count);
+        }
+    }
+};
+
+const iterateIndex = (onGetItem, getFinalResult) => async (heirarchy, datastore, index, indexedDataKey) => {
+    try {
+        const readableStream = await datastore.readableFileStream(indexedDataKey);
+        const read = getIndexReader(heirarchy, index, () => readableStream.read());
+        read(onGetItem);
+        return getFinalResult();
+    } catch(e) {
+        if(await datastore.exists(indexedDataKey)) {
+            throw e;
+        } else {
+            await createIndexFile(datastore)(
+                indexedDataKey, 
+                index
+            );
+        }
+        return [];
+    }
 }

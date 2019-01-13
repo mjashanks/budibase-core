@@ -1,7 +1,7 @@
-import {$, isSomething, switchCase
-        ,anyTrue, isNonEmptyArray
+import {$, isSomething, switchCase, isEmpty
+        ,anyTrue, isNonEmptyArray, executesWithoutException
         , isNonEmptyString, defaultCase} from "../common";
-import {isCollection, isRecord, isRoot, isAggregateSet,
+import {isCollection, isRecord, isRoot, isaggregateGroup,
         isIndex, getFlattenedHierarchy} from "./heirarchy";
 import {filter, union, constant, 
         map, flatten, every, uniqBy,
@@ -22,7 +22,7 @@ const commonRules = [
     makerule("name", "node name is not set", 
          node => stringNotEmpty(node.name)),
     makerule("type", "node type not recognised",
-        anyTrue(isRecord, isCollection, isRoot, isIndex, isAggregateSet ))
+        anyTrue(isRecord, isCollection, isRoot, isIndex, isaggregateGroup ))
 ];
 
 const recordRules = [
@@ -37,9 +37,11 @@ const recordRules = [
 ];
 
 
-const aggregateSetRules = [
-    makerule("aggregateFunctions", "no functions have been added",
-        node => isNonEmptyArray(node.aggregateFunctions))
+const aggregateGroupRules = [
+    makerule("condition", "condition does not compile",
+        a => isEmpty(a.condition)
+             || executesWithoutException(
+                    () => compileExpression(a.condition))),
 ]
 
 const collectionRules = [
@@ -61,9 +63,9 @@ const getRuleSet = node =>
                       commonRules, 
                       indexRuleSet)],
 
-        [isAggregateSet, ruleSet(
+        [isaggregateGroup, ruleSet(
                             commonRules,
-                            aggregateSetRules)],
+                            aggregateGroupRules)],
 
         [defaultCase, ruleSet(commonRules, [])]
     )(node);
@@ -97,9 +99,9 @@ export const validateAll = appHeirarchy => {
     ]);
 
     const aggregateErrors = $(flattened, [
-        filter(isAggregateSet),
+        filter(isaggregateGroup),
         map(s => validateAllAggregates(
-                    s.aggregateFunctions)),
+                    s.aggregates)),
         flatten
     ]);
 

@@ -17,8 +17,8 @@ export const getFlattenedHierarchy = (appHeirarchy, useCached=true) => {
             (!currentNode.indexes
             || currentNode.indexes.length === 0)
             && 
-            (!currentNode.aggregateSets
-            || currentNode.aggregateSets.length === 0)){
+            (!currentNode.aggregateGroups
+            || currentNode.aggregateGroups.length === 0)){
             return flattened;
         }
 
@@ -28,7 +28,7 @@ export const getFlattenedHierarchy = (appHeirarchy, useCached=true) => {
         const children = $([], [
             unionIfAny(currentNode.children),
             unionIfAny(currentNode.indexes),
-            unionIfAny(currentNode.aggregateSets)
+            unionIfAny(currentNode.aggregateGroups)
         ]);
 
         for(let child of children) {
@@ -161,7 +161,7 @@ export const getAllowedRecordNodesForIndex = (appHeirarchy, indexNode) => {
 export const isRecord = node => isSomething(node) && node.type === "record";
 export const isCollection = node => isSomething(node) && node.type === "collection";
 export const isIndex = node => isSomething(node) && node.type === "index";
-export const isAggregateSet = node => isSomething(node) && node.type === "aggregateset"
+export const isaggregateGroup = node => isSomething(node) && node.type === "aggregateGroup"
 export const isShardedIndex = node => isIndex(node) && isNonEmptyString(node.getShardName);
 export const isRoot = node => isSomething(node) && node.isRoot();
 export const isDecendantOfARecord = hasMatchingAncestor(isRecord)

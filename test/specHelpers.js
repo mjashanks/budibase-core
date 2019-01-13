@@ -204,9 +204,9 @@ export const withIndexes = (heirarchy, templateApi) => {
     customersBySurnameIndex.getShardName = "return !record.surname ? 'null' : record.surname.substring(0,1);"
     
     const customersDefaultIndex = customersCollection.indexes[0];
-    const customersNoGroupAggregateSet = templateApi.getNewAggregateSetTemplate(customersDefaultIndex);
-    customersNoGroupAggregateSet.name = "Customers Summary";
-    const allCustomersAgeFunctions = templateApi.getNewAggregateFunctionTemplate(customersNoGroupAggregateSet);
+    const customersNoGroupaggregateGroup = templateApi.getNewAggregateGroupTemplate(customersDefaultIndex);
+    customersNoGroupaggregateGroup.name = "Customers Summary";
+    const allCustomersAgeFunctions = templateApi.getNewAggregateTemplate(customersNoGroupaggregateGroup);
     allCustomersAgeFunctions.functions = ["count","max","min","sum","mean"];
     allCustomersAgeFunctions.aggregatedValue = "return record.age";
     allCustomersAgeFunctions.name = "all customers - age breakdown";
@@ -219,7 +219,7 @@ export const withIndexes = (heirarchy, templateApi) => {
 
     heirarchy.customersDefaultIndex = customersDefaultIndex;
     heirarchy.allCustomersAgeFunctions = allCustomersAgeFunctions;
-    heirarchy.customersNoGroupAggregateSet = customersNoGroupAggregateSet;
+    heirarchy.customersNoGroupaggregateGroup = customersNoGroupaggregateGroup;
     heirarchy.invoicesByOutstandingIndex = invoicesByOutstandingIndex;
     heirarchy.customersBySurnameIndex = customersBySurnameIndex;
     heirarchy.outstandingInvoicesIndex = outstandingInvoicesIndex;

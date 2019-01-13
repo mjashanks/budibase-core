@@ -2,14 +2,14 @@ import {switchCase, defaultCase, joinKey,
     $, isNothing, isSomething} from "../common";
 import {each, constant, filter, find} from "lodash";
 import {isCollection, isIndex, isRoot
-    , isRecord, isAggregateSet, getFlattenedHierarchy} from "./heirarchy";
+    , isRecord, isaggregateGroup, getFlattenedHierarchy} from "./heirarchy";
 import {validateAll} from "./validate";
 
 export const createNodeErrors = {
     indexCannotBeParent : "Index template cannot be a parent",
     allNonRootNodesMustHaveParent: "Only the root node may have no parent",
     indexParentMustBeCollectionOrRoot: "An index may only have a collection or root as a parent",
-    aggregateParentMustBeAnIndex: "aggregateSet parent must be an index"
+    aggregateParentMustBeAnIndex: "aggregateGroup parent must be an index"
 };
 
 const pathRegxMaker = (node) => () => 
@@ -45,7 +45,7 @@ const validate = parent => node => {
         throw new Error(createNodeErrors.indexParentMustBeCollectionOrRoot);
     }
 
-    if(isAggregateSet(node) 
+    if(isaggregateGroup(node) 
         && isSomething(parent) 
         && !isIndex(parent)) {
         throw new Error(createNodeErrors.aggregateParentMustBeAnIndex);
@@ -75,8 +75,8 @@ const addToParent = obj => {
             // Q: why are indexes not children ?
             // A: because they cannot have children of their own.
             parent.indexes.push(obj);
-        else if(isAggregateSet(obj))
-            parent.aggregateSets.push(obj);
+        else if(isaggregateGroup(obj))
+            parent.aggregateGroups.push(obj);
         else
             parent.children.push(obj);
 
@@ -118,8 +118,8 @@ export const constructHeirarchy = (node, parent) => {
         each(node.indexes, 
             child => constructHeirarchy(child, node));
     }
-    if(node.aggregateSets) {
-        each(node.aggregateSets, 
+    if(node.aggregateGroups) {
+        each(node.aggregateGroups, 
             child => constructHeirarchy(child, node));
     }
     if(node.children && node.children.length > 0) {
@@ -174,33 +174,30 @@ export const getNewIndexTemplate = parent =>
                    : "heirarchal",
         getShardName: "",
         getSortKey: "record.id",
-        aggregateSets: [],
+        aggregateGroups: [],
         allowedRecordNodeIds: []
     });
 
-export const getNewAggregateSetTemplate = index => 
+export const getNewAggregateGroupTemplate = index => 
     constructNode(index, {
         name: "",
-        type:"aggregateset",
+        type:"aggregateGroup",
         groupBy: "",
-        aggregateFunctions: []
+        aggregates: [],
+        condition: ""
     });
 
-export const getNewAggregateFunctionTemplate = set => {
-    const functions = {
+export const getNewAggregateTemplate = set => {
+    const aggregatedValue = {
         name: "",
-        condition: "",
-        functions: [],
-        aggregatedValue: "",
-        maxValueHistoryCount: 100,
-        minValueHistoryCount: 100
+        aggregatedValue: ""
     };
-    set.aggregateFunctions.push(functions);
-    return functions;
-}
+    set.aggregates.push(aggregatedValue);
+    return aggregatedValue;
+};
 
 export default {
     getNewRootLevel, getNewRecordTemplate,  
     getNewIndexTemplate, getNewCollectionTemplate, createNodeErrors,
-    constructHeirarchy, getNewAggregateSetTemplate,
-    getNewAggregateFunctionTemplate};
+    constructHeirarchy, getNewAggregateGroupTemplate,
+    getNewAggregateTemplate};

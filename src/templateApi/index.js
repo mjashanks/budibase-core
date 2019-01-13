@@ -4,8 +4,8 @@ import {map} from "lodash/fp";
 import {getNewCollectionTemplate, getNewRootLevel, 
         getNewRecordTemplate, getNewIndexTemplate,
         createNodeErrors, constructHeirarchy,
-        getNewAggregateSetTemplate,
-        getNewAggregateFunctionTemplate} 
+        getNewAggregateGroupTemplate,
+        getNewAggregateTemplate} 
         from "./createNodes";
 import {getNewField, validateField, 
         addField, fieldErrors} from "./fields";
@@ -84,8 +84,8 @@ const api = datastore => ({
     getNewField, validateField, addField, fieldErrors,
     getNewRecordValidationRule, commonRecordValidationRules, 
     addRecordValidationRule, createAction, createTrigger, validateActions,
-    validateTrigger, addNewReferenceIndex, getNewAggregateSetTemplate,
-    getNewAggregateFunctionTemplate,
+    validateTrigger, addNewReferenceIndex, getNewAggregateGroupTemplate,
+    getNewAggregateTemplate,
     _storeHandle : datastore
 });
 

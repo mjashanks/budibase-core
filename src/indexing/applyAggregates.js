@@ -1,20 +1,20 @@
-import {allowedAggregateFunctions} from "../templateApi/validateAggregate";
+import {allowedaggregates} from "../templateApi/validateAggregate";
 import {joinKey} from "../common";
 import {compileExpression, compileCode} from "@nx-js/compiler-util";
 import {includes} from "lodash/fp";
 
 export const add = async (store, mappedRecord, indexKey, indexNode) => {
-    const applyAggregateForAdd = async aggSetNode => {
-        const aggSetData = await datastore.readJson(
-            joinKey(indexKey, aggSetNode.name)
+    const applyAggregateForAdd = async aggGroupNode => {
+        const aggGroupData = await datastore.readJson(
+            joinKey(indexKey, aggGroupNode.name)
         );
-        for(let aggFunc of aggSetNode.aggregateFunctions) {
+        for(let agg of aggGroupNode.aggregates) {
 
         }
     };
 
-    for(let aggSetNode of indexNode.aggregateSets) {
-        await applyAggregateForAdd(aggSetNode);
+    for(let aggGroupNode of indexNode.aggregateGroups) {
+        await applyAggregateForAdd(aggGroupNode);
     }
 };
 
@@ -24,27 +24,27 @@ export const remove = async (store, mappedRecord, indexKey, indexNode) => {
 export const update = async (store, mappedRecord, indexKey, indexNode) => {
 };
 
-const applyAggregateFunctionForAdd = (aggSetData, aggFunc) => {
+const applyaggregateForAdd = (aggGroupData, agg) => {
 
 };
 
 
 
-const applyFunctions = (data, aggFunc, record) => {
+const applyFunctions = (data, agg, record) => {
     
     const appliedFunctions = [];
 
     const getAggValue = funcName => {
         if(funcName === "count") return 0; // doesnt matter for count
-        return compileCode(aggFunc.aggregatedValue)({record});
+        return compileCode(agg.aggregatedValue)({record});
     };
 
     const run = (funcName, calcNewResult) => {
         if(includes(funcName)(appliedFunctions)) return;
-        if(compileExpression(aggFunc.condition)({record:record}) === true) {
+        if(compileExpression(agg.condition)({record:record}) === true) {
             const aggValue = getAggValue(funcName);
-            data[aggFunc.name][funcName] = calcNewResult(
-                data[aggFunc.name], 
+            data[agg.name][funcName] = calcNewResult(
+                data[agg.name], 
                 aggValue
             );
         }

@@ -122,7 +122,7 @@ describe("heirarchy node creation", () => {
         index.name = "naughty-customers";
         expect(index.pathRegx()).toBe("/naughty-customers");
         expect(index.parent()).toBe(root);
-        expect(index.aggregateSets).toEqual([]);
+        expect(index.aggregateGroups).toEqual([]);
     });
 
     it("> getNewIndexTemplate > should add itself to roots indexes", async () => {
@@ -162,21 +162,21 @@ describe("heirarchy node creation", () => {
         expect(collection.children.length).toBe(1);
     });
 
-    it("> getNewAggregateSetTemplate > should throw exception when non index supplied as parent", async () => {
+    it("> getNewAggregateGroupTemplate > should throw exception when non index supplied as parent", async () => {
         const templateApi = await getMemoryTemplateApi();
         const root = templateApi.getNewRootLevel();
-        expect(() => templateApi.getNewAggregateSetTemplate(root))
+        expect(() => templateApi.getNewAggregateGroupTemplate(root))
         .toThrow();
     });
 
-    it("> getNewAggregateSetTemplate > should add itself to index aggregateSets", async () => {
+    it("> getNewAggregateGroupTemplate > should add itself to index aggregateGroups", async () => {
         const templateApi = await getMemoryTemplateApi();
         const root = templateApi.getNewRootLevel();
         const collection = templateApi.getNewCollectionTemplate(root);
         const index = templateApi.getNewIndexTemplate(collection);
-        const aggregateSet = templateApi.getNewAggregateSetTemplate(index);
-        expect(index.aggregateSets.length).toBe(1);
-        expect(index.aggregateSets[0]).toBe(aggregateSet);
-        expect(aggregateSet.parent()).toBe(index);
+        const aggregateGroup = templateApi.getNewAggregateGroupTemplate(index);
+        expect(index.aggregateGroups.length).toBe(1);
+        expect(index.aggregateGroups[0]).toBe(aggregateGroup);
+        expect(aggregateGroup.parent()).toBe(index);
     });
 });

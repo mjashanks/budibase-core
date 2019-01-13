@@ -12,7 +12,7 @@ export const listItems = app => async (indexKey, rangeStartParams=null, rangeEnd
     apiWrapper(
         app,
         events.indexApi.listItems, 
-        {indexKey},
+        {indexKey, rangeStartParams, rangeEndParams},
         _listItems, app, indexKey, rangeStartParams, rangeEndParams);
 
 const _listItems = async (app, indexKey, rangeStartParams, rangeEndParams) => {
