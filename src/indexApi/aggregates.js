@@ -28,7 +28,7 @@ const _aggregates = async (app, indexKey, rangeStartParams, rangeEndParams) => {
         );
         let aggregateResult = null;
         for(let k of shardKeys) {
-            const shardResult = items.push(await getAggregates(app.heirarchy, app.datastore, indexNode, k));
+            const shardResult = await getAggregates(app.heirarchy, app.datastore, indexNode, k);
             if(aggregateResult === null) {
                 aggregateResult = shardResult;
             } else {
@@ -55,8 +55,9 @@ const mergeShardAggregate = (totals, shard) => {
     const mergeGrouping = (tot, shr) => {
         tot.count = tot.count + shr.count;
         for(let aggName in tot) {
-            const totagg = tot[aggname];
-            const shragg = shr[aggname];
+            if(aggName === "count") continue;
+            const totagg = tot[aggName];
+            const shragg = shr[aggName];
             totagg.sum = totagg.sum + shragg.sum;  
             totagg.max = totagg.max > shragg.max
                          ? totagg.max
@@ -64,8 +65,9 @@ const mergeShardAggregate = (totals, shard) => {
             totagg.min = totagg.min < shragg.min
                          ? totagg.min
                          : shragg.min;
-            totagg.mean = totagg.sum / count;
+            totagg.mean = totagg.sum / tot.count;
         }
+        return tot;
     }
 
     for(let aggGroupDef in totals) {

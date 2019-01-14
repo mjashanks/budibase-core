@@ -1,11 +1,11 @@
-import { getHashCode, 
+import { getHashCode,
     joinKey, isNonEmptyString,
     $} from "../common";
 import {getActualKeyOfParent, 
          isGlobalIndex} from "../templateApi/heirarchy";
 import {createIndexFile} from "../indexing/sharding";
 import {getIndexReader, CONTINUE_READING_RECORDS} from "./serializer";
-import {has} from "lodash/fp";
+import {has, isNumber} from "lodash/fp";
 import {compileExpression, compileCode} from "@nx-js/compiler-util";
 
 export const readIndex = async (heirarchy, datastore, index, indexedDataKey) => {
@@ -69,19 +69,22 @@ export const getIndexedDataKey = (decendantKey, indexNode) => {
 const applyItemToAggregateResult = (indexNode, result, item) => {
     
     const getInitialAggregateResult = () => ({
-        sum: 0, mean: 0, max: 0, min: 0
+        sum: 0, mean: null, max: null, min: null
     });
 
     const applyAggregateResult = (agg, existing, count) => {
         const value = compileCode(agg.aggregatedValue)
                                  ({record:item});
+        
+        if(!isNumber(value)) return existing;
+
         existing.sum = existing.sum + value;
-        existing.max = existing.max > value 
-                       ? existing.max 
-                       : value;
-        existing.min = existing.min < value 
-                       ? existing.min
-                       : value;
+        existing.max = value > existing.max || existing.max === null
+                       ? value 
+                       : existing.max;
+        existing.min = value < existing.min || existing.min === null
+                       ? value
+                       : existing.min;
         existing.mean = existing.sum / count;
         return existing;
     };
@@ -95,17 +98,20 @@ const applyItemToAggregateResult = (indexNode, result, item) => {
         const thisGroupResult = result[aggGroup.name];
 
         if(isNonEmptyString(aggGroup.condition)) {
-            if(!compileExpression(aggGroup)
+            if(!compileExpression(aggGroup.condition)
                                  ({record:item})) {
                 continue;
             }
         }
 
-        const group = isNonEmptyString(aggGroup.groupBy)
+        let group = isNonEmptyString(aggGroup.groupBy)
                       ? compileCode(aggGroup.groupBy)
                                    ({record:item})
                       : "all";
-
+        if(!isNonEmptyString(group)) {
+            group = "(none)";
+        }
+        
         if(!has(group)(thisGroupResult)) {
             thisGroupResult[group] = {count:0};
             for(let agg of aggGroup.aggregates) {
@@ -114,8 +120,7 @@ const applyItemToAggregateResult = (indexNode, result, item) => {
             } 
         }
 
-        thisGroupResult[group].count = 
-            thisGroupResult[group].count++;
+        thisGroupResult[group].count++;
 
         for(let agg of aggGroup.aggregates) {
             const existingValues = thisGroupResult[group][agg.name];

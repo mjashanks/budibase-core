@@ -142,6 +142,8 @@ export const withFields = (heirarchy, templateApi) => {
     newInvoiceField("totalIncVat", "number");
     newInvoiceField("createdDate", "datetime");
     newInvoiceField("paidAmount", "number");
+    newInvoiceField("invoiceType", "string");
+    newInvoiceField("isWrittenOff", "bool");
 
     const newPartnerField = getNewFieldAndAdd(templateApi, partnerRecord);
     newPartnerField("businessName", "string");
@@ -194,7 +196,31 @@ export const withIndexes = (heirarchy, templateApi) => {
     const outstandingInvoicesIndex = getNewIndexTemplate(root);
     outstandingInvoicesIndex.name = "Outstanding Invoices";
     outstandingInvoicesIndex.filter = "record.type() === 'invoice' && record.paidAmount < record.totalIncVat";
-    outstandingInvoicesIndex.map = "return record;";
+    outstandingInvoicesIndex.map = "return {...record};";
+
+    const allInvoicesAggregateGroup = templateApi.getNewAggregateGroupTemplate(outstandingInvoicesIndex);
+    allInvoicesAggregateGroup.name = "all_invoices";
+
+    const allInvoicesByType = templateApi.getNewAggregateGroupTemplate(outstandingInvoicesIndex);
+    allInvoicesByType.groupBy = "return record.invoiceType";
+    allInvoicesByType.name = "all_invoices_by_type";
+    
+    const allInvoicesTotalAmountAggregate = templateApi.getNewAggregateTemplate(allInvoicesByType);
+    allInvoicesTotalAmountAggregate.name = "totalIncVat";
+    allInvoicesTotalAmountAggregate.aggregatedValue = "return record.totalIncVat";
+
+    const allInvoicesPaidAmountAggregate = templateApi.getNewAggregateTemplate(allInvoicesByType);
+    allInvoicesPaidAmountAggregate.name = "paidAmount";
+    allInvoicesPaidAmountAggregate.aggregatedValue = "return record.paidAmount";
+
+    const writtenOffInvoicesByType = templateApi.getNewAggregateGroupTemplate(outstandingInvoicesIndex);
+    writtenOffInvoicesByType.groupBy = "return record.invoiceType";
+    writtenOffInvoicesByType.name = "written_off";
+    writtenOffInvoicesByType.condition = "record.isWrittenOff === true";
+
+    const writtenOffInvoicesTotalAmountAggregate = templateApi.getNewAggregateTemplate(writtenOffInvoicesByType);
+    writtenOffInvoicesTotalAmountAggregate.name = "totalIncVat";
+    writtenOffInvoicesTotalAmountAggregate.aggregatedValue = "return record.totalIncVat";
 
     const customersBySurnameIndex = templateApi.getNewIndexTemplate(customersCollection);
     customersBySurnameIndex.name = "customersBySurname";
@@ -207,7 +233,6 @@ export const withIndexes = (heirarchy, templateApi) => {
     const customersNoGroupaggregateGroup = templateApi.getNewAggregateGroupTemplate(customersDefaultIndex);
     customersNoGroupaggregateGroup.name = "Customers Summary";
     const allCustomersAgeFunctions = templateApi.getNewAggregateTemplate(customersNoGroupaggregateGroup);
-    allCustomersAgeFunctions.functions = ["count","max","min","sum","mean"];
     allCustomersAgeFunctions.aggregatedValue = "return record.age";
     allCustomersAgeFunctions.name = "all customers - age breakdown";
     
@@ -217,6 +242,17 @@ export const withIndexes = (heirarchy, templateApi) => {
     invoicesByOutstandingIndex.filter = "";
     invoicesByOutstandingIndex.getShardName = "return (record.totalIncVat > record.paidAmount ? 'outstanding' : 'paid');"
 
+    const allInvoicesByType_Sharded = templateApi.getNewAggregateGroupTemplate(invoicesByOutstandingIndex);
+    allInvoicesByType_Sharded.groupBy = "return record.invoiceType";
+    allInvoicesByType_Sharded.name = "all_invoices_by_type";
+
+    const allInvoicesTotalAmountAggregate_Sharded = templateApi.getNewAggregateTemplate(allInvoicesByType_Sharded);
+    allInvoicesTotalAmountAggregate_Sharded.name = "totalIncVat";
+    allInvoicesTotalAmountAggregate_Sharded.aggregatedValue = "return record.totalIncVat";
+
+    heirarchy.allInvoicesByType = allInvoicesByType;
+    heirarchy.allInvoicesTotalAmountAggregate = allInvoicesTotalAmountAggregate;
+    heirarchy.allInvoicesPaidAmountAggregate = allInvoicesPaidAmountAggregate;
     heirarchy.customersDefaultIndex = customersDefaultIndex;
     heirarchy.allCustomersAgeFunctions = allCustomersAgeFunctions;
     heirarchy.customersNoGroupaggregateGroup = customersNoGroupaggregateGroup;

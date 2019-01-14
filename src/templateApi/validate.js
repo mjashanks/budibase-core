@@ -1,11 +1,11 @@
-import {$, isSomething, switchCase, isEmpty
+import {$, isSomething, switchCase
         ,anyTrue, isNonEmptyArray, executesWithoutException
         , isNonEmptyString, defaultCase} from "../common";
 import {isCollection, isRecord, isRoot, isaggregateGroup,
         isIndex, getFlattenedHierarchy} from "./heirarchy";
 import {filter, union, constant, 
         map, flatten, every, uniqBy,
-        some, includes, countBy} from "lodash/fp";
+        some, includes, isEmpty} from "lodash/fp";
 import {has} from "lodash";
 import {eventsList} from "../common/events";
 import {compileExpression, compileCode} from "@nx-js/compiler-util";
