@@ -17,18 +17,18 @@ describe("indexApi > listItems", () => {
         await recordApi.save(record2);
 
         const items_L_shard = await indexApi.listItems(
-            "/customers/customersBySurname", 
-            {surname:"L"},
-            {surname:"L"}
-        );
+            "/customers/customersBySurname", {
+            rangeStartParams: {surname:"L"},
+            rangeEndParams: {surname:"L"}
+        });
         expect(items_L_shard.length).toBe(1);
         expect(items_L_shard[0].key).toBe(record1.key());
 
         const items_Z_shard = await indexApi.listItems(
-            "/customers/customersBySurname", 
-            {surname:"Z"},
-            {surname:"Z"}
-        );
+            "/customers/customersBySurname", {
+            rangeStartParams: {surname:"Z"},
+            rangeEndParams: {surname:"Z"}
+        });
         expect(items_Z_shard.length).toBe(1);
         expect(items_Z_shard[0].key).toBe(record2.key());
 
@@ -48,10 +48,10 @@ describe("indexApi > listItems", () => {
         await recordApi.save(record2);
 
         const items_L_shard = await indexApi.listItems(
-            "/customers/customersBySurname", 
-            {surname:"K"},
-            {surname:"M"}
-        );
+            "/customers/customersBySurname", {
+            rangeStartParams: {surname:"K"},
+            rangeEndParams: {surname:"M"}
+        });
         expect(items_L_shard.length).toBe(1);
         expect(items_L_shard[0].key).toBe(record1.key());
 
@@ -71,10 +71,10 @@ describe("indexApi > listItems", () => {
         await recordApi.save(record2);
 
         const items_L_shard = await indexApi.listItems(
-            "/customers/customersBySurname", 
-            {surname:"K"},
-            {surname:"Z"}
-        );
+            "/customers/customersBySurname", {
+            rangeStartParams: {surname:"K"},
+            rangeEndParams: {surname:"Z"}
+        });
         expect(items_L_shard.length).toBe(2);
         expect(items_L_shard[0].key).toBe(record1.key());
 

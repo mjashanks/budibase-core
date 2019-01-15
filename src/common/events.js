@@ -21,7 +21,8 @@ const _events = {
     indexApi : {
         buildIndex: common(),
         listItems: common(),
-        delete: common()
+        delete: common(),
+        aggregates: common(),
     },
     collectionApi: {
         getAllowedRecordTypes: common(),

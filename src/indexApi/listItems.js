@@ -5,17 +5,26 @@ import {getUnshardedIndexDataKey,
     getShardKeysInRange} from "../indexing/sharding";
 import {getExactNodeForPath, isIndex, 
     isShardedIndex} from "../templateApi/heirarchy";
-import {flatten} from "lodash/fp";
+import {flatten, merge} from "lodash/fp";
 
 
-export const listItems = app => async (indexKey, rangeStartParams=null, rangeEndParams=null) => 
+export const listItems = app => async (indexKey, options) => 
     apiWrapper(
         app,
         events.indexApi.listItems, 
-        {indexKey, rangeStartParams, rangeEndParams},
-        _listItems, app, indexKey, rangeStartParams, rangeEndParams);
+        {indexKey, options},
+        _listItems, app, indexKey, options);
 
-const _listItems = async (app, indexKey, rangeStartParams, rangeEndParams) => {
+const defaultOptions = {rangeStartParams:null, rangeEndParams:null, searchPhrase:null};
+
+const _listItems = async (app, indexKey, options=defaultOptions) => { 
+    
+    let {searchPhrase, rangeStartParams, rangeEndParams}= 
+        $({}, [
+            merge(options),
+            merge(defaultOptions)
+        ]);
+
     indexKey = safeKey(indexKey);
     const indexNode = getExactNodeForPath(app.heirarchy)(indexKey);
 

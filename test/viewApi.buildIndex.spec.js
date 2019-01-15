@@ -383,7 +383,10 @@ describe("buildIndex > sharded index", () => {
         expect(some(indexItems, i => i.key === invoice2.key())).toBeTruthy();
 
         const outstandingRange = {totalIncVat:1, paidAmount:0};
-        const outstandingItems = await indexApi.listItems(indexKey, outstandingRange, outstandingRange);
+        const outstandingItems = await indexApi.listItems(indexKey, {
+            rangeStartParams: outstandingRange, 
+            rangeEndParams: outstandingRange
+        });
         expect(outstandingItems.length).toBe(1);
 
     });
