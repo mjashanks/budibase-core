@@ -3,13 +3,40 @@ import { getHashCode,
 import {getActualKeyOfParent, 
          isGlobalIndex} from "../templateApi/heirarchy";
 import {createIndexFile} from "../indexing/sharding";
+import {generateSchema} from "../indexing/indexSchemaCreator";
 import {getIndexReader, CONTINUE_READING_RECORDS} from "./serializer";
+import lunr from "lunr";
 
 export const readIndex = async (heirarchy, datastore, index, indexedDataKey) => {
     const records = [];
     const doRead = iterateIndex(
         item => {
             records.push(item);
+            return CONTINUE_READING_RECORDS;
+        },
+        () => records
+    )
+
+    return await doRead(heirarchy, datastore, index, indexedDataKey);
+};
+
+export const searchIndex = async (heirarchy, datastore, index, indexedDataKey, searchPhrase) => {
+    const records = [];
+    const schema = generateSchema(heirarchy, index);
+    const doRead = iterateIndex(
+        item => {
+            const idx = lunr(function () {
+                this.ref('key');
+                for(let field of schema) {
+                    this.field(field.name);
+                } 
+                this.add(item);
+            });
+            const searchResults = idx.search(searchPhrase);
+            if(searchResults.length === 1) {
+                item._searchResult = searchResults[0];
+                records.push(item);
+            }
             return CONTINUE_READING_RECORDS;
         },
         () => records

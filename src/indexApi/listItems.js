@@ -1,6 +1,6 @@
 import {safeKey, apiWrapper, $,
-    events} from "../common";
-import {readIndex} from "../indexing/read";
+    events, isNonEmptyString} from "../common";
+import {readIndex, searchIndex} from "../indexing/read";
 import {getUnshardedIndexDataKey, 
     getShardKeysInRange} from "../indexing/sharding";
 import {getExactNodeForPath, isIndex, 
@@ -25,6 +25,20 @@ const _listItems = async (app, indexKey, options=defaultOptions) => {
             merge(defaultOptions)
         ]);
 
+    const getItems = async (key) =>
+         isNonEmptyString(searchPhrase)
+         ? await searchIndex(
+             app.heirarchy, 
+             app.datastore, 
+             indexNode, 
+             key, 
+             searchPhrase)
+         : await readIndex(
+             app.heirarchy, 
+             app.datastore, 
+             indexNode, 
+             key);
+
     indexKey = safeKey(indexKey);
     const indexNode = getExactNodeForPath(app.heirarchy)(indexKey);
 
@@ -37,14 +51,11 @@ const _listItems = async (app, indexKey, options=defaultOptions) => {
         );
         const items = [];
         for(let k of shardKeys) {
-            items.push(await readIndex(app.heirarchy, app.datastore, indexNode, k));
+            items.push(await getItems(k));
         }
         return flatten(items);
     } else {
-        return await readIndex(
-            app.heirarchy,
-            app.datastore, 
-            indexNode,
+        return await getItems(
             getUnshardedIndexDataKey(indexKey)
         );
     }    
