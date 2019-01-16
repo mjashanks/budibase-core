@@ -566,3 +566,30 @@ describe("recordApi > update > reindex", () => {
     });
 
 });
+
+describe("referenced object changed", async () => {
+
+    it("should update the reference", async () => {
+
+        const {recordApi, indexApi} = 
+        await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+
+        const partner1 = recordApi.getNew("/partners", "partner");
+        partner1.businessName = "ACME inc";
+        const savedPartner = await recordApi.save(partner1);
+
+        const customer = recordApi.getNew("/customers", "customer");
+        customer.surname = "Ledog";
+        customer.partner = {
+            key: partner1.key(), value: partner1.businessName
+        };
+        await recordApi.save(customer);
+        savedPartner.businessName = "A.C.M.E Inc";
+        await recordApi.save(savedPartner);
+
+        const updatedCustomer = await recordApi.load(customer.key());
+
+        expect(updatedCustomer.partner.value).toBe(savedPartner.businessName);
+    });
+
+});
