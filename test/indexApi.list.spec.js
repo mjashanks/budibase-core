@@ -80,4 +80,63 @@ describe("indexApi > listItems", () => {
 
     });
 
+    it("should filter items by given search phrase", async () => {
+        const {recordApi,
+            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+            
+            const record1 = recordApi.getNew("/customers", "customer");
+            record1.surname = "Ledog";
+            await recordApi.save(record1);
+    
+            const record2 = recordApi.getNew("/customers", "customer");
+            record2.surname = "Zeecat";
+            await recordApi.save(record2);
+
+            const results = await indexApi.listItems("/customers/default",{searchPhrase:"*cat"});
+            expect(results.length).toBe(1);
+            expect(results[0].surname).toBe("Zeecat");
+    });
+
+    it("should filter items by given search phrase, accross sharded whole index", async () => {
+        const {recordApi,
+            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+            
+            const record1 = recordApi.getNew("/customers", "customer");
+            record1.surname = "Ledog";
+            await recordApi.save(record1);
+    
+            const record2 = recordApi.getNew("/customers", "customer");
+            record2.surname = "Zeecat";
+            await recordApi.save(record2);
+
+            const results = await indexApi.listItems("/customers/customersBySurname",{searchPhrase:"*cat"});
+            expect(results.length).toBe(1);
+            expect(results[0].surname).toBe("Zeecat");
+    });
+
+    it("should filter items by given search phrase, in single shard ", async () => {
+        const {recordApi,
+            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+            
+            const record1 = recordApi.getNew("/customers", "customer");
+            record1.surname = "Lecat";
+            await recordApi.save(record1);
+    
+            const record2 = recordApi.getNew("/customers", "customer");
+            record2.surname = "Zeecat";
+            await recordApi.save(record2);
+
+            const record3 = recordApi.getNew("/customers", "customer");
+            record3.surname = "Zeedog";
+            await recordApi.save(record3);
+
+            const results = await indexApi.listItems("/customers/customersBySurname",{
+                searchPhrase:"*cat",
+                rangeStartParams: {surname:"Z"},
+                rangeEndParams: {surname:"Z"}
+            });
+            expect(results.length).toBe(1);
+            expect(results[0].surname).toBe("Zeecat");
+    });
+
 });
