@@ -16,14 +16,13 @@ const hasStringValue = (ob, path) =>
     has(ob, path) 
     && isString(ob[path]);
 
-const isKeyValue = v => 
+const isObjectWithKey = v => 
     isObjectLike(v) 
-    && hasStringValue(v, "key")
-    && hasStringValue(v, "value");
+    && hasStringValue(v, "key");
 
 const referenceTryParse = v =>
     switchCase(
-        [isKeyValue, parsedSuccess],
+        [isObjectWithKey, parsedSuccess],
         [isNull, () => parsedSuccess(referenceNothing())],
         [defaultCase, parsedFailed]
     )(v);
@@ -36,18 +35,22 @@ const options = {
     displayValue: {
         defaultValue: "", 
         nullAllowed: false},
-    reverseIndexNodeKey: {
-        defaultValue: null,
-        nullAllowed: true
+    reverseIndex: {
+        defaultValue: {
+            map: "return {key: record.key()}",
+            filter: "",
+            name: ""
+        },
+        nullAllowed: false
     }
 };
 
 const isEmptyString = s => 
     isString(s) && isEmpty(s);
 
-const ensureReferenceExists = (val, opts, context) => 
+const ensureReferenceExists = async (val, opts, context) => 
     isEmptyString(val.key) 
-    || context.referenceExists(opts, val.key);
+    || await context.referenceExists(opts, val.key);
 
 const typeConstraints = [
     makerule(

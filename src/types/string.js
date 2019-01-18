@@ -33,9 +33,9 @@ const options = {
 };
 
 const typeConstraints = [
-    makerule((val,opts) => val === null || opts.maxLength === null || val.length <= opts.maxLength, 
+    makerule(async (val,opts) => val === null || opts.maxLength === null || val.length <= opts.maxLength, 
              (val,opts) => `value exceeds maximum length of ${opts.maxLength}`),
-    makerule((val, opts) => val === null  
+    makerule(async (val, opts) => val === null  
                            || opts.allowDeclaredValuesOnly === false 
                            || includes(opts.values, val),
              (val,opts) => `"${val}" does not exist in the list of allowed values`) 

@@ -1,5 +1,5 @@
 import {setupAppheirarchy, stubEventHandler,
-    basicAppHeirarchyCreator_WithFields, getNewFieldAndAdd,
+    basicAppHeirarchyCreator_WithFields, basicAppHeirarchyCreator_WithFields_AndIndexes,
     heirarchyFactory, withFields} from "./specHelpers";
 import {find} from "lodash";
 import {addHours} from "date-fns";
@@ -17,7 +17,7 @@ describe("recordApi > validate", () => {
         record.age = "nine";
         record.createddate = "blah";
 
-        const validationResult = recordApi.validate(record);
+        const validationResult = await recordApi.validate(record);
         
         expect(validationResult.isValid).toBe(false); 
         expect(validationResult.errors.length).toBe(3);
@@ -38,7 +38,7 @@ describe("recordApi > validate", () => {
     
         record.surname = "";
 
-        const validationResult = recordApi.validate(record);
+        const validationResult = await recordApi.validate(record);
 
         expect(validationResult.isValid).toBe(false);
         expect(validationResult.errors.length).toBe(1);
@@ -58,7 +58,7 @@ describe("recordApi > validate", () => {
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "more than 5 chars";
         
-        const validationResult = recordApi.validate(record);
+        const validationResult = await recordApi.validate(record);
         expect(validationResult.isValid).toBe(false);
         expect(validationResult.errors.length).toBe(1);
     });
@@ -78,7 +78,7 @@ describe("recordApi > validate", () => {
         const tooOldRecord = recordApi.getNew("/customers", "customer");
         tooOldRecord.age = 11
         
-        const tooOldResult = recordApi.validate(tooOldRecord);
+        const tooOldResult = await recordApi.validate(tooOldRecord);
         expect(tooOldResult.isValid).toBe(false);
         expect(tooOldResult.errors.length).toBe(1);
 
@@ -97,7 +97,7 @@ describe("recordApi > validate", () => {
         const tooYoungRecord = recordApi.getNew("/customers", "customer");
         tooYoungRecord.age = 3
         
-        const tooYoungResult = recordApi.validate(tooYoungRecord);
+        const tooYoungResult = await recordApi.validate(tooYoungRecord);
         expect(tooYoungResult.isValid).toBe(false);
         expect(tooYoungResult.errors.length).toBe(1);
     });
@@ -115,7 +115,7 @@ describe("recordApi > validate", () => {
         const record = recordApi.getNew("/customers", "customer");
         record.age = 3.123
         
-        const validationResult = recordApi.validate(record);
+        const validationResult = await recordApi.validate(record);
         expect(validationResult.isValid).toBe(false);
         expect(validationResult.errors.length).toBe(1);
     });
@@ -134,7 +134,7 @@ describe("recordApi > validate", () => {
         const record = recordApi.getNew("/customers", "customer");
         record.createddate = addHours(new Date(), 1);
         
-        const result = recordApi.validate(record);
+        const result = await recordApi.validate(record);
         expect(result.isValid).toBe(false);
         expect(result.errors.length).toBe(1);
 
@@ -154,7 +154,7 @@ describe("recordApi > validate", () => {
         const record = recordApi.getNew("/customers", "customer");
         record.createddate = addHours(new Date(), 1);
         
-        const result = recordApi.validate(record);
+        const result = await recordApi.validate(record);
         expect(result.isValid).toBe(false);
         expect(result.errors.length).toBe(1);
     });
@@ -174,7 +174,7 @@ describe("recordApi > validate", () => {
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "zeecat";
         
-        const result = recordApi.validate(record);
+        const result = await recordApi.validate(record);
         expect(result.isValid).toBe(false);
         expect(result.errors.length).toBe(1);
     });
@@ -194,7 +194,7 @@ describe("recordApi > validate", () => {
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "thedog";
         
-        const result = recordApi.validate(record);
+        const result = await recordApi.validate(record);
         expect(result.isValid).toBe(true);
         expect(result.errors.length).toBe(0);
     });
@@ -214,9 +214,25 @@ describe("recordApi > validate", () => {
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "zeecat";
         
-        const result = recordApi.validate(record);
+        const result = await recordApi.validate(record);
         expect(result.isValid).toBe(true);
         expect(result.errors.length).toBe(0);
+    });
+
+    it("should return error when reference field does not exist in options index", async () => {
+        const {recordApi, appHeirarchy} = 
+            await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+
+        const partner = recordApi.getNew("/partners", "partner");
+        partner.businessName = "ACME Inc";
+        await recordApi.save(partner);
+
+        const customer = recordApi.getNew("/customers", "customer");
+        customer.partner = {key: "incorrect key", name: partner.businessName};
+        const result = await await recordApi.validate(customer);
+        expect(result.isValid).toBe(false);
+        expect(result.errors.length).toBe(1);
+
     });
 
     it("should publish invalid events", async () => {

@@ -40,7 +40,7 @@ export const typeFunctions = specificFunctions =>
     }, specificFunctions);
 
 export const validateTypeConstraints = (validationRules, options) => 
-(field, record, context) => {
+async (field, record, context) => {
     const safeTypeOptions = $(field.typeOptions, [
         keys,
         reduce((defaultOpts, opt) => {
@@ -54,16 +54,19 @@ export const validateTypeConstraints = (validationRules, options) =>
         }, {})
     ]);
     const fieldValue = record[field.name];
-    const validateRule = r => 
-        !r.isValid(fieldValue, safeTypeOptions, context) 
+    const validateRule = async r => 
+        ! await r.isValid(fieldValue, safeTypeOptions, context) 
         ? r.getMessage(fieldValue, safeTypeOptions) 
         : "";
 
-    return $(validationRules, [
-        map(validateRule),
-        filter(isNotEmpty)
-    ]);
-}
+    const errors = [];
+    for(let r of validationRules) {
+        const err = await validateRule(r);
+        if(isNotEmpty) errors.push(err);
+    }
+
+    return errors;
+};
 
 const getDefaultOptions = mapValues(v => v.defaultValue)
 

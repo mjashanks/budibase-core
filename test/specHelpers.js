@@ -119,8 +119,8 @@ export const withFields = (heirarchy, templateApi) => {
     newCustomerField("createddate", "datetime");
     newCustomerField("age", "number");
     const customerPartnerField = newCustomerField("partner", "reference");
-    customerPartnerField.typeOptions.indexNodeKey = "/partners/default";
-    customerPartnerField.typeOptions.displayValue = "businessName";
+    customerPartnerField.typeOptions.indexNodeKey = "/partners/partnersReference";
+    customerPartnerField.typeOptions.displayValue = "name";
     customerPartnerField.typeOptions.reverseIndexNodeKey = joinKey(
         partnerRecord.nodeKey(), "partnerCustomers" );
 

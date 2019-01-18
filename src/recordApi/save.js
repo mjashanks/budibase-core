@@ -22,7 +22,7 @@ export const save = (app,indexingApi) => async (record, context) =>
 const _save = async (app,indexingApi, record, context) => {
     const recordClone = cloneDeep(record);
 
-    const validationResult = validate(app)
+    const validationResult = await validate(app)
                                      (recordClone, context);
     if(!validationResult.isValid) {
         app.publish(events.recordApi.save.onInvalid, 

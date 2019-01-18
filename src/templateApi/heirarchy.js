@@ -174,6 +174,9 @@ export const isCollectionIndex = node =>
 export const isTopLevelCollection = node => 
     isCollection(node)
     && !isDecendantOfARecord(node);
+export const isTopLevelCollectionIndex = node => 
+    isTopLevelCollection(node.parent())
+    && isIndex(node); 
 
 export const fieldReversesReferenceToNode = node => field => 
     field.type === "reference"

@@ -1,7 +1,8 @@
 import {getExactNodeForPath} from "../templateApi/heirarchy";
 import {validateFieldParse, validateTypeConstraints} from "../types";
-import {map, reduce, filter, isEmpty, flatten} from "lodash/fp";
-import {$, isNothing} from "../common";
+import {map, reduce, filter, 
+    isEmpty, flatten, each} from "lodash/fp";
+import {$, isNothing, isNonEmptyString} from "../common";
 import {compileExpression} from "@nx-js/compiler-util";
 import _ from "lodash";
 import {getContext} from "./getContext";
@@ -21,14 +22,17 @@ const validateAllFieldParse = (record, recordNode) =>
         }, [])
     ]);
 
-const validateAllTypeConstraints = (record, recordNode, context) => 
-    $(recordNode.fields, [
-        map(f => 
-            $(validateTypeConstraints(f, record, context), [
-                map(m => ({message:m, fields:[f.name]}))
-            ])),
-        flatten
-    ]);
+const validateAllTypeConstraints = async (record, recordNode, context) => {
+    const errors = [];
+    for(let field of recordNode.fields) {
+        $(await validateTypeConstraints(field, record, context), [
+            filter(isNonEmptyString),
+            map(m => ({message:m, fields:[field.name]})),
+            each(e => errors.push(e))
+        ]);
+    }
+    return errors;
+};
 
 const runRecordValidationRules = (record, recordNode) => {
 
@@ -50,7 +54,7 @@ const runRecordValidationRules = (record, recordNode) => {
     ]);
 }
 
-export const validate = app => (record, context) => {
+export const validate = app => async (record, context) => {
     context = isNothing(context) 
               ? getContext(app)(record.key())
               : context;
@@ -63,7 +67,7 @@ export const validate = app => (record, context) => {
         return ({isValid:false, errors:fieldParseFails});
 
     const recordValidationRuleFails = runRecordValidationRules(record, recordNode);
-    const typeContraintFails = validateAllTypeConstraints(record, recordNode, context);
+    const typeContraintFails = await validateAllTypeConstraints(record, recordNode, context);
 
     if(isEmpty(fieldParseFails) 
        && isEmpty(recordValidationRuleFails)

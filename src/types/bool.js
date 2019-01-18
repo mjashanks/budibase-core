@@ -22,7 +22,7 @@ const options = {
 };
 
 const typeConstraints = [
-    makerule((val,opts) => opts.allowNulls === true || val !== null, 
+    makerule(async (val,opts) => opts.allowNulls === true || val !== null, 
              (val,opts) => "field cannot be null")
 ]; 
 
