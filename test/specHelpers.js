@@ -96,7 +96,7 @@ export const withFields = (heirarchy, templateApi) => {
     const {customerRecord, invoiceRecord, 
         partnerInvoiceRecord, chargeRecord,
         partnerRecord, partnersCollection, 
-        settingsRecord, chargesCollection,
+        settingsRecord, partnerInvoicesCollection,
         customersCollection} = heirarchy;
 
     getNewFieldAndAdd(templateApi, settingsRecord)("appName", "string", "");
@@ -162,7 +162,7 @@ export const withFields = (heirarchy, templateApi) => {
     );
     chargePartnerInvoiceField.typeOptions.displayValue = "createdDate";
     chargePartnerInvoiceField.typeOptions.indexNodeKey = joinKey(
-        chargesCollection.nodeKey(), "default");
+        partnerInvoicesCollection.nodeKey(), "default");
     
     const partnerChargesReverseIndex = templateApi.getNewIndexTemplate(partnerInvoiceRecord);
     partnerChargesReverseIndex.name = "partnerCharges";
