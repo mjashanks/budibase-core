@@ -84,9 +84,10 @@ const createApp = (includeFish) => (templateApi) => {
     const dogRecord = templateApi.getNewRecordTemplate(pets);
     dogRecord.name = "dog";
 
-    const addField = (recordNode) => (name, type) => {
+    const addField = (recordNode) => (name, type, typeOptions) => {
         const field = templateApi.getNewField(type);
         field.name = name;
+        if(typeOptions) field.typeOptions = typeOptions;
         templateApi.addField(recordNode, field);
         return field;
     };
@@ -114,9 +115,11 @@ const createApp = (includeFish) => (templateApi) => {
         dogFriends.name = "dogFriends";
         fishStuff.dogFriends = dogFriends;
 
-        const favFishField = addDogField("favouriteFish", "reference");
-        favFishField.typeOptions.indexNodeKey = fishOnlyIndex.nodeKey();
-        favFishField.typeOptions.reverseIndexNodeKey = dogFriends.nodeKey();
+        const favFishField = addDogField("favouriteFish", "reference", {
+            indexNodeKey : fishOnlyIndex.nodeKey(),
+            reverseIndexNodeKey : dogFriends.nodeKey(),
+            displayValue : "name"
+        });
     }
 
     return ({

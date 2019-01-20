@@ -118,11 +118,12 @@ export const withFields = (heirarchy, templateApi) => {
     newCustomerField("isalive", "bool", "true");
     newCustomerField("createddate", "datetime");
     newCustomerField("age", "number");
-    const customerPartnerField = newCustomerField("partner", "reference");
-    customerPartnerField.typeOptions.indexNodeKey = "/partners/partnersReference";
-    customerPartnerField.typeOptions.displayValue = "name";
-    customerPartnerField.typeOptions.reverseIndexNodeKey = joinKey(
-        partnerRecord.nodeKey(), "partnerCustomers" );
+    const customerPartnerField = newCustomerField("partner", "reference", undefined, {
+        indexNodeKey : "/partners/partnersReference",
+        displayValue : "name",
+        reverseIndexNodeKey : joinKey(
+            partnerRecord.nodeKey(), "partnerCustomers" )
+    });
 
     const referredToCustomersReverseIndex = templateApi.getNewIndexTemplate(customerRecord);
     referredToCustomersReverseIndex.name = "referredToCustomers";
@@ -130,11 +131,12 @@ export const withFields = (heirarchy, templateApi) => {
     referredToCustomersReverseIndex.getShardName = "return !record.surname ? 'null' : record.surname.substring(0,1);"
     heirarchy.referredToCustomersReverseIndex = referredToCustomersReverseIndex;
 
-    const customerReferredByField = newCustomerField("referredBy", "reference");
-    customerReferredByField.typeOptions.indexNodeKey = "/customers/default";
-    customerReferredByField.typeOptions.displayValue = "surname";
-    customerReferredByField.typeOptions.reverseIndexNodeKey = joinKey(
-        customerRecord.nodeKey(), "referredToCustomers");
+    const customerReferredByField = newCustomerField("referredBy", "reference", undefined, {
+        indexNodeKey : "/customers/default",
+        displayValue : "surname",
+        reverseIndexNodeKey : joinKey(
+            customerRecord.nodeKey(), "referredToCustomers")
+    });
     heirarchy.customerReferredByField = customerReferredByField;
 
     const newInvoiceField = getNewFieldAndAdd(templateApi, invoiceRecord);
@@ -158,13 +160,14 @@ export const withFields = (heirarchy, templateApi) => {
     const newChargeField = getNewFieldAndAdd(templateApi, chargeRecord);
     newChargeField("amount", "number");
     
-    const chargePartnerInvoiceField = newChargeField("partnerInvoice", "reference");
-    chargePartnerInvoiceField.typeOptions.reverseIndexNodeKey = joinKey(
-        partnerInvoiceRecord.nodeKey(), "partnerCharges"
-    );
-    chargePartnerInvoiceField.typeOptions.displayValue = "createdDate";
-    chargePartnerInvoiceField.typeOptions.indexNodeKey = joinKey(
-        partnerInvoicesCollection.nodeKey(), "default");
+    const chargePartnerInvoiceField = newChargeField("partnerInvoice", "reference", undefined, {
+        reverseIndexNodeKey : joinKey(
+            partnerInvoiceRecord.nodeKey(), "partnerCharges"
+        ),
+        displayValue : "createdDate",
+        indexNodeKey : joinKey(
+            partnerInvoicesCollection.nodeKey(), "default")
+    });
     
     const partnerChargesReverseIndex = templateApi.getNewIndexTemplate(partnerInvoiceRecord);
     partnerChargesReverseIndex.name = "partnerCharges";
@@ -176,9 +179,11 @@ export const withFields = (heirarchy, templateApi) => {
     customersReferenceIndex.map = "return {name:record.surname}";
     customersReferenceIndex.filter = "record.isalive === true";
 
-    const invoiceCustomerField = newInvoiceField("customer", "reference");
-    invoiceCustomerField.typeOptions.indexNodeKey = "/customersReference";
-    invoiceCustomerField.typeOptions.displayValue = "name";
+    const invoiceCustomerField = newInvoiceField("customer", "reference", undefined, {
+        indexNodeKey : "/customersReference",
+        reverseIndexNodeKey : "melt",
+        displayValue : "name"
+    });
 }
 
 export const withIndexes = (heirarchy, templateApi) => {
@@ -288,10 +293,12 @@ export const setupAppheirarchy = async creator => {
     });
 };
 
-export const getNewFieldAndAdd = (templateApi, record) => (name, type, initial) => {
+export const getNewFieldAndAdd = (templateApi, record) => (name, type, initial, typeOptions) => {
     const field = templateApi.getNewField(type);
     field.name = name;
     field.getInitialValue = !initial ? "default" : initial;
+    if(!!typeOptions) 
+        field.typeOptions = typeOptions;
     templateApi.addField(record, field);
     return field;
 };
