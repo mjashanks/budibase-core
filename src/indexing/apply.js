@@ -50,8 +50,19 @@ const getWriter = async (heirarchy, store, indexKey, indexedDataKey, indexNode) 
     );
 };
 
-const swapTempFileIn = async (store, indexedDataKey) => {
+const swapTempFileIn = async (store, indexedDataKey, isRetry=false) => {
     const tempFile = indexedDataKey + ".temp";
-    await store.deleteFile(indexedDataKey);
-    await store.renameFile(tempFile, indexedDataKey);
+    try {
+        await store.deleteFile(indexedDataKey);
+    } catch(e) {
+        // ignore failure, incase it has not been created yet
+    }
+    try {
+        await store.renameFile(tempFile, indexedDataKey);
+    } catch(e) {
+        // retrying in case delete failure was for some other reason
+        if(!isRetry) {
+            await swapTempFileIn(store, indexedDataKey, true);
+        }
+    }
 } ;
