@@ -7,6 +7,7 @@ import {isUndefined, isNaN, isNull,
 import {events} from "./events";
 import {apiWrapper} from "./apiWrapper";
 import {some} from "lodash/fp";
+
 // this is the combinator function
 export const $$ = (...funcs) => arg => 
     flow(funcs)(arg)
@@ -177,8 +178,8 @@ export const awEx = async promise => {
 
 export const isSafeInteger = n => 
     isInteger(n) 
-    && n <= number.MAX_SAFE_INTEGER
-    && n >= 0-number.MAX_SAFE_INTEGER;
+    && n <= Number.MAX_SAFE_INTEGER
+    && n >= 0-Number.MAX_SAFE_INTEGER;
 
 export const toDateOrNull = s => isNull(s) ? null 
                                 : isDate(s) ? s : new Date(s); 

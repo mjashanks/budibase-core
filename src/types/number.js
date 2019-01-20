@@ -23,13 +23,13 @@ const numberTryParse =
 
 const options = {
     maxValue: {
-        defaultValue: Number.MAX_VALUE,
+        defaultValue: Number.MAX_SAFE_INTEGER,
         isValid: isSafeInteger,
         requirementDescription: "must be a valid integer",
         parse: toNumberOrNull
     },
     minValue: {
-        defaultValue: 0-Number.MAX_VALUE,
+        defaultValue: 0-Number.MAX_SAFE_INTEGER,
         isValid: isSafeInteger,
         requirementDescription: "must be a valid integer",
         parse: toNumberOrNull

@@ -48,20 +48,20 @@ const typeOptionsRules = field => {
     const def = optName => 
         type.optionDefinitions[optName];
 
-    $(field.typeOptions, [
+    return $(field.typeOptions, [
         keys,
-        filter(o => isSomething(def(o) 
-                    && isSomething(def(o.isValid)))),
+        filter(o => isSomething(def(o)) 
+                    && isSomething(def(o).isValid)),
         map(o => makerule(
             `typeOptions.${o}`,
             `${def(o).requirementDescription}`,
-            opt => def(o).isValid(opt)
+            field => def(o).isValid(field.typeOptions[o])
         ))
     ]);
 }
 
 export const validateField = (allFields) => (field) =>
-    applyRuleSet(...[fieldRules(allFields), typeOptionsRules(field)])(field);
+    applyRuleSet([...fieldRules(allFields), ...typeOptionsRules(field)])(field);
 
 export const validateAllFields = (recordNode) => 
     $(recordNode.fields, [

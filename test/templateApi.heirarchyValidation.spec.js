@@ -4,6 +4,7 @@ import {some} from "lodash";
 import {getNewField, addField} from "../src/templateApi/fields";
 import {getNewRecordValidationRule, commonRecordValidationRules,
     addRecordValidationRule} from "../src/templateApi/recordValidationRules";
+import { findField } from "../src/templateApi/heirarchy";
 
 const createValidHeirarchy = () => {
     const root = createNodes.getNewRootLevel();
@@ -32,7 +33,25 @@ const createValidHeirarchy = () => {
     const surnameField = getNewField("string");
     surnameField.name = "surname";
     surnameField.label = "surname";
+    const isaliveField = getNewField("bool");
+    isaliveField.name = "isalive";
+    const createddateField = getNewField("datetime");
+    createddateField.name = "createddate";
+    const ageField = getNewField("number");
+    ageField.name = "age";
+    const partnerField = getNewField("reference");
+    partnerField.name = "partner";
+    partnerField.typeOptions.indexNodeKey = "l";
+    partnerField.typeOptions.reverseIndexNodeKey = "l";
+    partnerField.typeOptions.displayValue = "l";
+    const otherNamesField = getNewField("array<string>");
+    otherNamesField.name = "othernames";
     addField(customerRecord, surnameField);
+    addField(customerRecord, isaliveField);
+    addField(customerRecord, createddateField);
+    addField(customerRecord, ageField);
+    addField(customerRecord, partnerField);
+    addField(customerRecord, otherNamesField);
     addRecordValidationRule(customerRecord)
             (commonRecordValidationRules.fieldNotEmpty("surname"));
 
@@ -197,6 +216,179 @@ describe("heirarchy validation", () => {
         heirarchy.allCustomersOwedFunctions.condition = "record.owed > 0;";
         const validationResult = validateAll(heirarchy.root);
         expect(validationResult.length).toBe(0);
+    });
+
+    it("field.typeOptions > string > should return error when maxLength <= 0", () => {
+        const heirarchy = createValidHeirarchy();
+        const invalidField = findField(heirarchy.customerRecord, "surname");
+        invalidField.typeOptions.maxLength = -1;
+        let validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.maxLength", invalidField);
+
+        invalidField.typeOptions.maxLength = 0;
+        validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.maxLength", invalidField);
+
+        invalidField.typeOptions.maxLength = 1;
+        validationResult = validateAll(heirarchy.root);
+        validationResult.length === 0;
+    });
+
+    it("field.typeOptions > string > should return error allowDeclaredValues only is not a bool", () => {
+        const heirarchy = createValidHeirarchy();
+        const invalidField = findField(heirarchy.customerRecord, "surname");
+        invalidField.typeOptions.allowDeclaredValuesOnly = null;
+        let validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.allowDeclaredValuesOnly", invalidField);
+
+        invalidField.typeOptions.allowDeclaredValuesOnly = "";
+        validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.allowDeclaredValuesOnly", invalidField);
+
+    });
+
+    it("field.typeOptions > string > should return error when values contains non-string", () => {
+        const heirarchy = createValidHeirarchy();
+        const invalidField = findField(heirarchy.customerRecord, "surname");
+        invalidField.typeOptions.values = [1];
+        const validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.values", invalidField);
+    });
+
+    it("field.typeOptions > bool > should return error when allowNulls is not a bool", () => {
+        const heirarchy = createValidHeirarchy();
+        const invalidField = findField(heirarchy.customerRecord, "isalive");
+        invalidField.typeOptions.allowNulls = "1";
+        let validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.allowNulls", invalidField);
+
+        invalidField.typeOptions.allowNulls = null;
+        validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.allowNulls", invalidField);
+    });
+
+    it("field.typeOptions > datetime > should return error when maxValue is not a date", () => {
+        const heirarchy = createValidHeirarchy();
+        const invalidField = findField(heirarchy.customerRecord, "createddate");
+        invalidField.typeOptions.maxValue = "1";
+        let validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.maxValue", invalidField);
+
+        invalidField.typeOptions.maxValue = null;
+        validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.maxValue", invalidField);
+    });
+
+    it("field.typeOptions > datetime > should return error when minValue is not a date", () => {
+        const heirarchy = createValidHeirarchy();
+        const invalidField = findField(heirarchy.customerRecord, "createddate");
+        invalidField.typeOptions.minValue = "1";
+        let validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.minValue", invalidField);
+
+        invalidField.typeOptions.minValue = null;
+        validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.minValue", invalidField);
+    });
+
+    it("field.typeOptions > number > should return error when minValue is not an integer", () => {
+        const heirarchy = createValidHeirarchy();
+        const invalidField = findField(heirarchy.customerRecord, "age");
+        invalidField.typeOptions.minValue = "hello";
+        let validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.minValue", invalidField);
+
+        invalidField.typeOptions.minValue = null;
+        validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.minValue", invalidField);
+
+        invalidField.typeOptions.minValue = 1.1;
+        validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.minValue", invalidField);
+    });
+
+    it("field.typeOptions > number > should return error when maxValue is not an integer", () => {
+        const heirarchy = createValidHeirarchy();
+        const invalidField = findField(heirarchy.customerRecord, "age");
+        invalidField.typeOptions.maxValue = "hello";
+        let validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.maxValue", invalidField);
+
+        invalidField.typeOptions.maxValue = null;
+        validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.maxValue", invalidField);
+
+        invalidField.typeOptions.maxValue = 1.1;
+        validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.maxValue", invalidField);
+    });
+
+    it("field.typeOptions > number > should return error when decimal places is not a positive integer", () => {
+        const heirarchy = createValidHeirarchy();
+        const invalidField = findField(heirarchy.customerRecord, "age");
+        invalidField.typeOptions.decimalPlaces = "hello";
+        let validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.decimalPlaces", invalidField);
+
+        invalidField.typeOptions.decimalPlaces = null;
+        validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.decimalPlaces", invalidField);
+
+        invalidField.typeOptions.decimalPlaces = -1;
+        validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.decimalPlaces", invalidField);
+
+        invalidField.typeOptions.decimalPlaces = 1.1;
+        validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.decimalPlaces", invalidField);
+    });
+
+    it("field.typeOptions > reference > should return error when indexNodeKey is not a compmleted string", () => {
+        const heirarchy = createValidHeirarchy();
+        const invalidField = findField(heirarchy.customerRecord, "partner");
+        invalidField.typeOptions.indexNodeKey = null;
+        let validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.indexNodeKey", invalidField);
+
+        invalidField.typeOptions.indexNodeKey = "";
+        validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.indexNodeKey", invalidField);
+
+        invalidField.typeOptions.indexNodeKey = 1;
+        validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.indexNodeKey", invalidField);
+    });
+
+    it("field.typeOptions > reference > should return error when reverseIndexNodeKey is not a compmleted string", () => {
+        const heirarchy = createValidHeirarchy();
+        const invalidField = findField(heirarchy.customerRecord, "partner");
+        invalidField.typeOptions.reverseIndexNodeKey = null;
+        let validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.reverseIndexNodeKey", invalidField);
+
+        invalidField.typeOptions.reverseIndexNodeKey = "";
+        validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.reverseIndexNodeKey", invalidField);
+
+        invalidField.typeOptions.reverseIndexNodeKey = 1;
+        validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.reverseIndexNodeKey", invalidField);
+    });
+
+    it("field.typeOptions > reference > should return error when displayValue is not a compmleted string", () => {
+        const heirarchy = createValidHeirarchy();
+        const invalidField = findField(heirarchy.customerRecord, "partner");
+        invalidField.typeOptions.displayValue = null;
+        let validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.displayValue", invalidField);
+
+        invalidField.typeOptions.displayValue = "";
+        validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.displayValue", invalidField);
+
+        invalidField.typeOptions.displayValue = 1;
+        validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.displayValue", invalidField);
     });
 
 });
