@@ -79,7 +79,7 @@ const initialiseReverseReferenceIndexes = async (app, record) => {
         map(f => {
             const n = getNode(
                     app.heirarchy,
-                    f.typeOptions.reverseIndexNodeKey);
+                    f.typeOptions.reverseIndexNodeKeys);
             return n;
             })
     ]);

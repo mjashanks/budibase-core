@@ -3,7 +3,8 @@ import {typeFunctions, makerule,
     parsedFailed} from "./typeHelpers";
 import {isString, isObjectLike, 
     isNull, has, isEmpty} from "lodash";
-import {switchCase, defaultCase, isNonEmptyString} from "../common";
+import {switchCase, defaultCase, 
+    isNonEmptyString, isArrayOfString} from "../common";
 import {uniqueIndexName} from "../indexing/read";
 
 const referenceNothing = () => ({key:"",value:""});
@@ -40,10 +41,10 @@ const options = {
         requirementDescription: "must be a non-empty string",
         parse: s=>s
     },
-    reverseIndexNodeKey: {
+    reverseIndexNodeKeys: {
         defaultValue: null,
-        isValid : isNonEmptyString,
-        requirementDescription: "must be a non-empty string",
+        isValid : v => isArrayOfString(v) && v.length > 0,
+        requirementDescription: "must be a non-empty array of strings",
         parse: s=>s
     }
 };

@@ -68,13 +68,13 @@ export const getRelevantReverseReferenceIndexes = (appHeirarchy, record) =>
         getExactNodeForPath(appHeirarchy),
         n => n.fields,
         filter(f => f.type === "reference"
-                    && isSomething(f.typeOptions.reverseIndexNodeKey)
+                    && isSomething(f.typeOptions.reverseIndexNodeKeys)
                     && isSomething(record[f.name])
                     && record[f.name].key),
         map(f => {
             const revIndexNode = getNode(
                                     appHeirarchy,
-                                    f.typeOptions.reverseIndexNodeKey
+                                    f.typeOptions.reverseIndexNodeKeys
                                 );
             const indexPath = joinKey(
                 record[f.name].key, revIndexNode.name);

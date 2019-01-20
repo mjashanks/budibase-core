@@ -42,7 +42,7 @@ const createValidHeirarchy = () => {
     const partnerField = getNewField("reference");
     partnerField.name = "partner";
     partnerField.typeOptions.indexNodeKey = "l";
-    partnerField.typeOptions.reverseIndexNodeKey = "l";
+    partnerField.typeOptions.reverseIndexNodeKeys = "l";
     partnerField.typeOptions.displayValue = "l";
     const otherNamesField = getNewField("array<string>");
     otherNamesField.name = "othernames";
@@ -359,20 +359,20 @@ describe("heirarchy validation", () => {
         expectInvalidField(validationResult, "typeOptions.indexNodeKey", invalidField);
     });
 
-    it("field.typeOptions > reference > should return error when reverseIndexNodeKey is not a compmleted string", () => {
+    it("field.typeOptions > reference > should return error when reverseIndexNodeKeys is not a compmleted string", () => {
         const heirarchy = createValidHeirarchy();
         const invalidField = findField(heirarchy.customerRecord, "partner");
-        invalidField.typeOptions.reverseIndexNodeKey = null;
+        invalidField.typeOptions.reverseIndexNodeKeys = null;
         let validationResult = validateAll(heirarchy.root);
-        expectInvalidField(validationResult, "typeOptions.reverseIndexNodeKey", invalidField);
+        expectInvalidField(validationResult, "typeOptions.reverseIndexNodeKeys", invalidField);
 
-        invalidField.typeOptions.reverseIndexNodeKey = "";
+        invalidField.typeOptions.reverseIndexNodeKeys = "";
         validationResult = validateAll(heirarchy.root);
-        expectInvalidField(validationResult, "typeOptions.reverseIndexNodeKey", invalidField);
+        expectInvalidField(validationResult, "typeOptions.reverseIndexNodeKeys", invalidField);
 
-        invalidField.typeOptions.reverseIndexNodeKey = 1;
+        invalidField.typeOptions.reverseIndexNodeKeys = 1;
         validationResult = validateAll(heirarchy.root);
-        expectInvalidField(validationResult, "typeOptions.reverseIndexNodeKey", invalidField);
+        expectInvalidField(validationResult, "typeOptions.reverseIndexNodeKeys", invalidField);
     });
 
     it("field.typeOptions > reference > should return error when displayValue is not a compmleted string", () => {

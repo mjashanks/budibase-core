@@ -3,7 +3,7 @@ import {typeFunctions,
 import {constant, isString, isArray, 
     isNull, includes, isBoolean} from "lodash";
 import {switchCase, defaultCase, toBoolOrNull, toNumberOrNull,
-    isSafeInteger, all} from "../common";
+    isSafeInteger, isArrayOfString} from "../common";
 
 const stringFunctions = typeFunctions({
     default: constant(null)
@@ -15,10 +15,6 @@ const stringTryParse =
         [isNull, parsedSuccess],
         [defaultCase, v => parsedSuccess(v.toString())]
     );
-
-const isArrayOfString = opts => 
-    isArray(opts) && all(isString)(opts);
-
 
 const options = {
     maxLength: {

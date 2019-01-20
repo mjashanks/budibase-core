@@ -121,8 +121,8 @@ export const withFields = (heirarchy, templateApi) => {
     const customerPartnerField = newCustomerField("partner", "reference", undefined, {
         indexNodeKey : "/partners/partnersReference",
         displayValue : "name",
-        reverseIndexNodeKey : joinKey(
-            partnerRecord.nodeKey(), "partnerCustomers" )
+        reverseIndexNodeKeys : [joinKey(
+            partnerRecord.nodeKey(), "partnerCustomers" )]
     });
 
     const referredToCustomersReverseIndex = templateApi.getNewIndexTemplate(customerRecord);
@@ -134,8 +134,8 @@ export const withFields = (heirarchy, templateApi) => {
     const customerReferredByField = newCustomerField("referredBy", "reference", undefined, {
         indexNodeKey : "/customers/default",
         displayValue : "surname",
-        reverseIndexNodeKey : joinKey(
-            customerRecord.nodeKey(), "referredToCustomers")
+        reverseIndexNodeKeys : [joinKey(
+            customerRecord.nodeKey(), "referredToCustomers")]
     });
     heirarchy.customerReferredByField = customerReferredByField;
 
@@ -161,9 +161,9 @@ export const withFields = (heirarchy, templateApi) => {
     newChargeField("amount", "number");
     
     const chargePartnerInvoiceField = newChargeField("partnerInvoice", "reference", undefined, {
-        reverseIndexNodeKey : joinKey(
+        reverseIndexNodeKeys : [joinKey(
             partnerInvoiceRecord.nodeKey(), "partnerCharges"
-        ),
+        )],
         displayValue : "createdDate",
         indexNodeKey : joinKey(
             partnerInvoicesCollection.nodeKey(), "default")
@@ -181,7 +181,7 @@ export const withFields = (heirarchy, templateApi) => {
 
     const invoiceCustomerField = newInvoiceField("customer", "reference", undefined, {
         indexNodeKey : "/customersReference",
-        reverseIndexNodeKey : "melt",
+        reverseIndexNodeKeys : ["melt"],
         displayValue : "name"
     });
 }

@@ -188,6 +188,9 @@ export const toBoolOrNull = s => isNull(s) ? null
 export const toNumberOrNull = s => isNull(s) ? null 
                                    : toNumber(s);
 
+export const isArrayOfString = opts => 
+    isArray(opts) && all(isString)(opts);
+
 export {events} from "./events";
 export {apiWrapper} from "./apiWrapper";
 
@@ -206,6 +209,7 @@ export default {
     isOneOf, memberMatches, defineError, anyTrue, isNonEmptyArray,
     causesException, executesWithoutException, none, getHashCode,
     awEx, apiWrapper, events, isNothingOrEmpty, isSafeInteger,
-    toNumber, toDate: toDateOrNull, toBool: toBoolOrNull
+    toNumber, toDate: toDateOrNull, toBool: toBoolOrNull,
+    isArrayOfString
 };
 
