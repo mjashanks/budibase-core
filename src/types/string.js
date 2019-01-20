@@ -1,7 +1,9 @@
-import {getSafeFieldParser, typeFunctions, getNewValue, 
+import {typeFunctions,  
     makerule, parsedSuccess, getDefaultExport} from "./typeHelpers";
-import {constant, isString, isNull, includes} from "lodash";
-import {switchCase, defaultCase} from "../common";
+import {constant, isString, isArray, 
+    isNull, includes, isBoolean} from "lodash";
+import {switchCase, defaultCase, toBoolOrNull, toNumberOrNull,
+    isSafeInteger, all} from "../common";
 
 const stringFunctions = typeFunctions({
     default: constant(null)
@@ -14,21 +16,28 @@ const stringTryParse =
         [defaultCase, v => parsedSuccess(v.toString())]
     );
 
+const isArrayOfString = opts => 
+    isArray(opts) && all(isString)(opts);
+
+
 const options = {
     maxLength: {
         defaultValue: null, 
-        nullAllowed: true,
-        valueIfNull: null
+        isValid: n => n === null || isSafeInteger(n) && n > 0,
+        requirementDescription: "must be null (no limit) or a greater than zero integer",
+        parse: toNumberOrNull
     },
     values: {
         defaultValue: null,
-        nullAllowed: true,
-        valueIfNull: []
+        isValid: v => v === null || (isArrayOfString(v) && v.length > 0 && v.length < 10000),
+        requirementDescription: "must be null (no values) or an arry of at least one string",
+        parse: s=>s
     },
     allowDeclaredValuesOnly: {
         defaultValue: false,
-        nullAllowed: true,
-        valueIfNull: false
+        isValid: isBoolean,
+        requirementDescription: "must be true or false",
+        parse: toBoolOrNull
     }
 };
 

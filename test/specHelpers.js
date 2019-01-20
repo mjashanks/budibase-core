@@ -139,7 +139,8 @@ export const withFields = (heirarchy, templateApi) => {
 
     const newInvoiceField = getNewFieldAndAdd(templateApi, invoiceRecord);
 
-    newInvoiceField("totalIncVat", "number");
+    const invoiceTotalIncVatField = newInvoiceField("totalIncVat", "number");
+    invoiceTotalIncVatField.typeOptions.decimalPlaces = 2;
     newInvoiceField("createdDate", "datetime");
     newInvoiceField("paidAmount", "number");
     newInvoiceField("invoiceType", "string");
@@ -149,7 +150,8 @@ export const withFields = (heirarchy, templateApi) => {
     newPartnerField("businessName", "string");
 
     const newPartnerInvoiceField = getNewFieldAndAdd(templateApi, partnerInvoiceRecord);
-    newPartnerInvoiceField("totalIncVat", "number");
+    const partnerInvoiceTotalIncVatVield = newPartnerInvoiceField("totalIncVat", "number");
+    partnerInvoiceTotalIncVatVield.typeOptions.decimalPlaces = 2;
     newPartnerInvoiceField("createdDate", "datetime");
     newPartnerInvoiceField("paidAmount", "number");
 

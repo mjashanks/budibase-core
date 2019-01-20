@@ -2,7 +2,7 @@ import {getSafeFieldParser, typeFunctions,
     makerule, parsedFailed, parsedSuccess,
     getDefaultExport} from "./typeHelpers";
 import {constant, isBoolean, isNull} from "lodash";
-import {switchCase, defaultCase, isOneOf} from "../common";
+import {switchCase, defaultCase, isOneOf, toBoolOrNull} from "../common";
 
 const boolFunctions = typeFunctions({
     default: constant(null)
@@ -18,7 +18,12 @@ const boolTryParse =
     );
 
 const options = {
-    allowNulls: {defaultValue: true, nullAllowed: false}
+    allowNulls: {
+        defaultValue: true, 
+        isValid: isBoolean,
+        requirementDescription: "must be a true or false",
+        parse: toBoolOrNull
+    }
 };
 
 const typeConstraints = [

@@ -39,30 +39,18 @@ export const typeFunctions = specificFunctions =>
         null: constant(null)
     }, specificFunctions);
 
-export const validateTypeConstraints = (validationRules, options) => 
+export const validateTypeConstraints = (validationRules) => 
 async (field, record, context) => {
-    const safeTypeOptions = $(field.typeOptions, [
-        keys,
-        reduce((defaultOpts, opt) => {
-            const actualValue = field.typeOptions[opt];
-            const safeVal = 
-                isNull(field.typeOptions[opt])  
-                ? options[opt].valueIfNull
-                : actualValue;
-            defaultOpts[opt] = safeVal; 
-            return defaultOpts;
-        }, {})
-    ]);
     const fieldValue = record[field.name];
     const validateRule = async r => 
-        ! await r.isValid(fieldValue, safeTypeOptions, context) 
-        ? r.getMessage(fieldValue, safeTypeOptions) 
+        ! await r.isValid(fieldValue, field.typeOptions, context) 
+        ? r.getMessage(fieldValue, field.typeOptions) 
         : "";
 
     const errors = [];
     for(let r of validationRules) {
         const err = await validateRule(r);
-        if(isNotEmpty) errors.push(err);
+        if(isNotEmpty(err)) errors.push(err);
     }
 
     return errors;
@@ -80,7 +68,8 @@ export const getDefaultExport = (name, tryParse, functions, options, validationR
     tryParse, 
     name,
     getDefaultOptions : () => getDefaultOptions(cloneDeep(options)), 
-    validateTypeConstraints : validateTypeConstraints(validationRules, options),
+    optionDefinitions: options,
+    validateTypeConstraints : validateTypeConstraints(validationRules),
     sampleValue,
     stringify: val => val === null || val === undefined 
                       ? "" : stringify(val),

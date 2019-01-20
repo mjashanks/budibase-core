@@ -1,13 +1,14 @@
 import {makerule, typeFunctions, getNewValue
     , parsedFailed, parsedSuccess, getDefaultExport} from "./typeHelpers";
 import {constant, isNumber, isString, isNull} from "lodash";
-import {switchCase, defaultCase} from "../common";
+import {switchCase, defaultCase, toNumberOrNull,
+    isSafeInteger} from "../common";
 
 const numberFunctions = typeFunctions({
     default: constant(null)
 });
 
-const parseStringToNumber = s => {
+const parseStringtoNumberOrNull = s => {
     const num = Number(s);
     return isNaN(num) ? parsedFailed(s) : parsedSuccess(num); 
 };
@@ -15,24 +16,30 @@ const parseStringToNumber = s => {
 const numberTryParse = 
     switchCase(
         [isNumber, parsedSuccess],
-        [isString, parseStringToNumber],
+        [isString, parseStringtoNumberOrNull],
         [isNull, parsedSuccess],
         [defaultCase, parsedFailed]
     );
 
 const options = {
     maxValue: {
-        defaultValue: null,
-        nullAllowed: true, 
-        valueIfNull: Number.MAX_VALUE },
+        defaultValue: Number.MAX_VALUE,
+        isValid: isSafeInteger,
+        requirementDescription: "must be a valid integer",
+        parse: toNumberOrNull
+    },
     minValue: {
-        defaultValue: null, 
-        nullAllowed: true, 
-        valueIfNull: 0-Number.MAX_VALUE},
+        defaultValue: 0-Number.MAX_VALUE,
+        isValid: isSafeInteger,
+        requirementDescription: "must be a valid integer",
+        parse: toNumberOrNull
+    },
     decimalPlaces: {
-        defaultValue: null, 
-        nullAllowed: true, 
-        valueIfNull: 2}
+        defaultValue: 0,
+        isValid: n => isSafeInteger(n) && n >= 0,
+        requirementDescription: "must be a positive integer",
+        parse: toNumberOrNull
+    }
 };
 
 const getDecimalPlaces = val => {

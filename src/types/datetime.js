@@ -1,7 +1,7 @@
 import {makerule, typeFunctions, getNewValue
         , parsedFailed, parsedSuccess, getDefaultExport} from "./typeHelpers";
 import {constant, isDate, isString, isNull} from "lodash";
-import {switchCase, defaultCase, $, handleErrorWith} from "../common";
+import {switchCase, defaultCase, $, toDateOrNull} from "../common";
 
 const dateFunctions = typeFunctions({
     default: constant(null),
@@ -28,13 +28,17 @@ const dateTryParse =
 
 const options = {
     maxValue: {
-        defaultValue: null,
-        nullAllowed: true, 
-        valueIfNull: new Date(8640000000000000)},
+        defaultValue: new Date(8640000000000000),
+        isValid: isDate,
+        requirementDescription: "must be a valid date",
+        parse: toDateOrNull
+    },
     minValue: {
-        defaultValue: null, 
-        nullAllowed: false, 
-        valueIfNull: new Date(-8640000000000000)}
+        defaultValue: new Date(-8640000000000000), 
+        isValid: isDate,
+        requirementDescription: "must be a valid date",
+        parse: toDateOrNull
+    }
 };
 
 const typeConstraints = [

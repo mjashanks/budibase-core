@@ -3,7 +3,7 @@ import {switchCase, defaultCase, joinKey,
 import {each, constant, filter, find} from "lodash";
 import {isCollection, isIndex, isRoot
     , isRecord, isaggregateGroup, getFlattenedHierarchy} from "./heirarchy";
-import {validateAll} from "./validate";
+import {all} from "../types";
 
 export const createNodeErrors = {
     indexCannotBeParent : "Index template cannot be a parent",
@@ -125,6 +125,14 @@ export const constructHeirarchy = (node, parent) => {
     if(node.children && node.children.length > 0) {
         each(node.children, 
             child => constructHeirarchy(child, node));
+    }
+    if(node.fields) {
+        each(node.fields, 
+            f => each(f.typeOptions, (val, key) => 
+                    f.typeOptions[key] = all[f.type]
+                                         .optionDefinitions[key]
+                                         .parse(val))
+        );
     }
     return node;
 };

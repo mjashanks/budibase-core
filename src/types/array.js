@@ -1,8 +1,9 @@
 import {typeFunctions, makerule,
     parsedFailed, getDefaultExport, parsedSuccess} from "./typeHelpers";
 import {constant, isArray} from "lodash";
-import {map, every} from "lodash/fp";
-import {switchCase, defaultCase, $$} from "../common";
+import {map} from "lodash/fp";
+import {switchCase, defaultCase, toNumberOrNull,
+    $$, isSafeInteger} from "../common";
 
 const arrayFunctions = type => typeFunctions({
    default: constant([])
@@ -21,15 +22,20 @@ const arrayTryParse = type =>
 
 const typeName = type => `array<${type}>`;
 
+
 const options = {
     maxLength: {
-        defaultValue: null, 
-        nullAllowed: true, 
-        valueIfNull: Number.MAX_SAFE_INTEGER},
+        defaultValue: 10000,
+        isValid: isSafeInteger,
+        requirementDescription: "must be a positive integer",
+        parse: toNumberOrNull
+    },
     minLength: {
-        defaultValue: null, 
-        nullAllowed: true, 
-        valueIfNull: 0}
+        defaultValue: 0,
+        isValid : n => isSafeInteger(n) && n >= 0,
+        requirementDescription: "must be a positive integer",
+        parse: toNumberOrNull
+    }
 };
 
 const typeConstraints = [

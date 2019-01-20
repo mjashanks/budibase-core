@@ -3,7 +3,7 @@ import {isUndefined, isNaN, isNull,
     tail, findIndex, startsWith, join,
     dropRight, flow, takeRight, trim, 
     split, includes, replace, isArray,
-    isString} from "lodash";
+    isString, isInteger, isDate, toNumber} from "lodash";
 import {events} from "./events";
 import {apiWrapper} from "./apiWrapper";
 import {some} from "lodash/fp";
@@ -77,6 +77,9 @@ export const mapIfSomethingOrBlank = (mapFunc) =>
 
 export const none = predicate => collection => 
     !some(predicate)(collection); 
+
+export const all = predicate => collection => 
+    none(v => !predicate(v))(collection); 
     
 export const isNotEmpty = ob => !isEmpty(ob);
 export const isAsync = (fn) => fn.constructor.name === 'AsyncFunction';
@@ -172,6 +175,18 @@ export const awEx = async promise => {
     }
 }
 
+export const isSafeInteger = n => 
+    isInteger(n) 
+    && n <= number.MAX_SAFE_INTEGER
+    && n >= 0-number.MAX_SAFE_INTEGER;
+
+export const toDateOrNull = s => isNull(s) ? null 
+                                : isDate(s) ? s : new Date(s); 
+export const toBoolOrNull = s => isNull(s) ? null
+                                : s === "true" || s === true;
+export const toNumberOrNull = s => isNull(s) ? null 
+                                   : toNumber(s);
+
 export {events} from "./events";
 export {apiWrapper} from "./apiWrapper";
 
@@ -186,9 +201,10 @@ export default {
     tryAwaitOr, tryAwaitOrIgnore, dirIndex, keySep,
     $, $$, getDirFomKey, getFileFromKey, splitKey,
     somethingOrDefault, getIndexKeyFromFileKey, joinKey,
-    somethingOrGetDefault, appDefinitionFile, isValue,
+    somethingOrGetDefault, appDefinitionFile, isValue, all,
     isOneOf, memberMatches, defineError, anyTrue, isNonEmptyArray,
     causesException, executesWithoutException, none, getHashCode,
-    awEx, apiWrapper, events, isNothingOrEmpty
+    awEx, apiWrapper, events, isNothingOrEmpty, isSafeInteger,
+    toNumber, toDate: toDateOrNull, toBool: toBoolOrNull
 };
 

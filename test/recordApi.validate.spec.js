@@ -152,7 +152,7 @@ describe("recordApi > validate", () => {
 
         
         const record = recordApi.getNew("/customers", "customer");
-        record.createddate = addHours(new Date(), 1);
+        record.createddate = new Date();
         
         const result = await recordApi.validate(record);
         expect(result.isValid).toBe(false);

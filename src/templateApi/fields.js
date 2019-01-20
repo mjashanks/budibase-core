@@ -1,9 +1,9 @@
-import {has, keys} from "lodash";
-import {some, map, 
+import {some, map, filter, keys,
         countBy, flatten} from "lodash/fp";
 import {isSomething, $, 
         isNonEmptyString, 
-        isNothingOrEmpty} from "../common";
+        isNothingOrEmpty,
+        isNothing} from "../common";
 import {all, getDefaultOptions} from "../types";
 import {applyRuleSet, makerule} from "./validationCommon";
 
@@ -38,11 +38,30 @@ const fieldRules = (allFields) => [
              countBy("name")(allFields)[f.name] === 1),
     makerule("type", "type is unknown",
         f => isNothingOrEmpty(f.type) 
-             || some(t => f.type === t)(allowedTypes()))
+             || some(t => f.type === t)(allowedTypes())),
 ];
 
+const typeOptionsRules = field => {
+    const type = all[field.type];
+    if(isNothing(type)) return [];
+
+    const def = optName => 
+        type.optionDefinitions[optName];
+
+    $(field.typeOptions, [
+        keys,
+        filter(o => isSomething(def(o) 
+                    && isSomething(def(o.isValid)))),
+        map(o => makerule(
+            `typeOptions.${o}`,
+            `${def(o).requirementDescription}`,
+            opt => def(o).isValid(opt)
+        ))
+    ]);
+}
+
 export const validateField = (allFields) => (field) =>
-    applyRuleSet(fieldRules(allFields))(field);
+    applyRuleSet(...[fieldRules(allFields), typeOptionsRules(field)])(field);
 
 export const validateAllFields = (recordNode) => 
     $(recordNode.fields, [

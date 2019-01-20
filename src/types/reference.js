@@ -3,7 +3,7 @@ import {typeFunctions, makerule,
     parsedFailed} from "./typeHelpers";
 import {isString, isObjectLike, 
     isNull, has, isEmpty} from "lodash";
-import {switchCase, defaultCase} from "../common";
+import {switchCase, defaultCase, isNonEmptyString} from "../common";
 import {uniqueIndexName} from "../indexing/read";
 
 const referenceNothing = () => ({key:"",value:""});
@@ -30,18 +30,21 @@ const referenceTryParse = v =>
 const options = {
     indexNodeKey: {
         defaultValue: null,
-        nullAllowed: false
+        isValid : isNonEmptyString ,
+        requirementDescription: "must be a non-empty string",
+        parse: s=>s
     },
     displayValue: {
         defaultValue: "", 
-        nullAllowed: false},
-    reverseIndex: {
-        defaultValue: {
-            map: "return {key: record.key()}",
-            filter: "",
-            name: ""
-        },
-        nullAllowed: false
+        isValid : isNonEmptyString,
+        requirementDescription: "must be a non-empty string",
+        parse: s=>s
+    },
+    reverseIndexNodeKey: {
+        defaultValue: null,
+        isValid : isNonEmptyString,
+        requirementDescription: "must be a non-empty string",
+        parse: s=>s
     }
 };
 
