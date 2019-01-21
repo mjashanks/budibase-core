@@ -14,7 +14,6 @@ import {getNewRecordValidationRule, commonRecordValidationRules,
 import {createAction, createTrigger} from "./createActions";
 import {validateTriggers, validateTrigger, 
         validateActions, validateAll} from "./validate";
-import {addNewReferenceIndex} from "./indexes";
 
 const api = datastore => ({
     
@@ -84,7 +83,7 @@ const api = datastore => ({
     getNewField, validateField, addField, fieldErrors,
     getNewRecordValidationRule, commonRecordValidationRules, 
     addRecordValidationRule, createAction, createTrigger, validateActions,
-    validateTrigger, addNewReferenceIndex, getNewAggregateGroupTemplate,
+    validateTrigger, getNewAggregateGroupTemplate,
     getNewAggregateTemplate,
     _storeHandle : datastore
 });

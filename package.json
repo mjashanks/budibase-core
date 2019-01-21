@@ -60,7 +60,6 @@
     "date-fns": "^1.29.0",
     "lodash": "^4.17.11",
     "lunr": "^2.3.5",
-    "papaparse": "^4.3.7",
     "safe-buffer": "^5.1.2",
     "shortid": "^2.2.8",
     "string_decoder": "^1.2.0"
