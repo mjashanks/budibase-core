@@ -589,7 +589,7 @@ describe("referenced object changed", async () => {
 
         const updatedCustomer = await recordApi.load(customer.key());
 
-        expect(updatedCustomer.partner.value).toBe(savedPartner.businessName);
+        expect(updatedCustomer.partner.name).toBe(savedPartner.businessName);
     });
 
 });

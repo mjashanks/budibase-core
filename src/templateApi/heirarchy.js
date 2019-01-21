@@ -42,6 +42,9 @@ export const getFlattenedHierarchy = (appHeirarchy, useCached=true) => {
 
 };
 
+export const getLastPartInKey = key => 
+    last(splitKey(key));
+
 export const getNodesInPath = appHeirarchy => key => 
     $(appHeirarchy, [
         getFlattenedHierarchy,
