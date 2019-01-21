@@ -141,6 +141,5 @@ describe("getRelevantIndexes", () => {
         expect(indexes.length).toBe(1);
         expect(indexes[0].path)
         .toBe(joinKey(referredByCustomer.key(), appHeirarchy.referredToCustomersReverseIndex.name));
-
     });
 });

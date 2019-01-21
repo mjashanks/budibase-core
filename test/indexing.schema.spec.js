@@ -117,9 +117,10 @@ const createApp = (includeFish) => (templateApi) => {
 
         const favFishField = addDogField("favouriteFish", "reference", {
             indexNodeKey : fishOnlyIndex.nodeKey(),
-            reverseIndexNodeKeys : dogFriends.nodeKey(),
+            reverseIndexNodeKeys : [dogFriends.nodeKey()],
             displayValue : "name"
         });
+        fishStuff.favFishField = favFishField;
     }
 
     return ({

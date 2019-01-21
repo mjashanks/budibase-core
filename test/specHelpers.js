@@ -97,7 +97,7 @@ export const withFields = (heirarchy, templateApi) => {
         partnerInvoiceRecord, chargeRecord,
         partnerRecord, partnersCollection, 
         settingsRecord, partnerInvoicesCollection,
-        customersCollection} = heirarchy;
+        invoicesCollection} = heirarchy;
 
     getNewFieldAndAdd(templateApi, settingsRecord)("appName", "string", "");
     
@@ -181,7 +181,7 @@ export const withFields = (heirarchy, templateApi) => {
 
     const invoiceCustomerField = newInvoiceField("customer", "reference", undefined, {
         indexNodeKey : "/customersReference",
-        reverseIndexNodeKeys : ["melt"],
+        reverseIndexNodeKeys : [invoicesCollection.indexes[0].nodeKey()],
         displayValue : "name"
     });
 }

@@ -1,12 +1,10 @@
 import {cloneDeep, constant, 
-        flatten, map, filter,
-        includes} from "lodash/fp";
+        flatten, map, filter} from "lodash/fp";
 import {initialiseChildCollections,
     initialiseIndex} from "../collectionApi/initialise";
 import {validate} from "./validate";
 import {load, getRecordFileName} from "./load";
-import {apiWrapper, events, 
-        $, isSomething} from "../common";
+import {apiWrapper, events, $} from "../common";
 import { getFlattenedHierarchy, 
         getExactNodeForPath, isRecord,
         getNode, fieldReversesReferenceToNode} from "../templateApi/heirarchy";
@@ -76,12 +74,13 @@ const initialiseReverseReferenceIndexes = async (app, record) => {
         map(n => n.fields),
         flatten,
         filter(fieldReversesReferenceToNode(recordNode)),
-        map(f => {
-            const n = getNode(
-                    app.heirarchy,
-                    f.typeOptions.reverseIndexNodeKeys);
-            return n;
-            })
+        map(f => $(f.typeOptions.reverseIndexNodeKeys, [
+                    map(n => getNode(
+                                app.heirarchy,
+                                n))
+                ])
+        ),
+        flatten
     ]);
 
     for(let indexNode of indexNodes) {

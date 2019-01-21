@@ -42,7 +42,7 @@ const createValidHeirarchy = () => {
     const partnerField = getNewField("reference");
     partnerField.name = "partner";
     partnerField.typeOptions.indexNodeKey = "l";
-    partnerField.typeOptions.reverseIndexNodeKeys = "l";
+    partnerField.typeOptions.reverseIndexNodeKeys = ["l"];
     partnerField.typeOptions.displayValue = "l";
     const otherNamesField = getNewField("array<string>");
     otherNamesField.name = "othernames";
@@ -359,7 +359,7 @@ describe("heirarchy validation", () => {
         expectInvalidField(validationResult, "typeOptions.indexNodeKey", invalidField);
     });
 
-    it("field.typeOptions > reference > should return error when reverseIndexNodeKeys is not a compmleted string", () => {
+    it("field.typeOptions > reference > should return error when reverseIndexNodeKeys is not a string array of >0 length", () => {
         const heirarchy = createValidHeirarchy();
         const invalidField = findField(heirarchy.customerRecord, "partner");
         invalidField.typeOptions.reverseIndexNodeKeys = null;
@@ -370,9 +370,17 @@ describe("heirarchy validation", () => {
         validationResult = validateAll(heirarchy.root);
         expectInvalidField(validationResult, "typeOptions.reverseIndexNodeKeys", invalidField);
 
-        invalidField.typeOptions.reverseIndexNodeKeys = 1;
+        invalidField.typeOptions.reverseIndexNodeKeys = [];
         validationResult = validateAll(heirarchy.root);
         expectInvalidField(validationResult, "typeOptions.reverseIndexNodeKeys", invalidField);
+
+        invalidField.typeOptions.reverseIndexNodeKeys = "/not/an/array";
+        validationResult = validateAll(heirarchy.root);
+        expectInvalidField(validationResult, "typeOptions.reverseIndexNodeKeys", invalidField);
+
+        invalidField.typeOptions.reverseIndexNodeKeys = ["/some/key/here"];
+        validationResult = validateAll(heirarchy.root);
+        expect(validationResult.length).toBe(0);
     });
 
     it("field.typeOptions > reference > should return error when displayValue is not a compmleted string", () => {

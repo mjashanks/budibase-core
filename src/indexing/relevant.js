@@ -1,7 +1,7 @@
-import {joinKey, splitKey, 
+import {joinKey, splitKey, isNonEmptyString,
     isNothing, $, isSomething} from "../common";
 import {orderBy, constant} from "lodash";
-import {reduce, find, includes, 
+import {reduce, find, includes, flatten,
         filter, each, map} from "lodash/fp";
 import {getFlattenedHierarchy, isIndex, 
         isCollection, getNode, getRecordNodeId,
@@ -68,18 +68,16 @@ export const getRelevantReverseReferenceIndexes = (appHeirarchy, record) =>
         getExactNodeForPath(appHeirarchy),
         n => n.fields,
         filter(f => f.type === "reference"
-                    && isSomething(f.typeOptions.reverseIndexNodeKeys)
                     && isSomething(record[f.name])
-                    && record[f.name].key),
-        map(f => {
-            const revIndexNode = getNode(
-                                    appHeirarchy,
-                                    f.typeOptions.reverseIndexNodeKeys
-                                );
-            const indexPath = joinKey(
-                record[f.name].key, revIndexNode.name);
-            return makeIndexNodeAndPath(revIndexNode, indexPath);
-        }),
+                    && isNonEmptyString(record[f.name].key)),
+        map(f => $(f.typeOptions.reverseIndexNodeKeys,[
+                    map(n => ({recordNode: getNode(appHeirarchy,n),
+                             field:f}))
+                 ])),
+        flatten,
+        map(n => makeIndexNodeAndPath(
+            n.recordNode, 
+            joinKey(record[n.field.name].key, n.recordNode.name))),
     ]);
 
 const makeIndexNodeAndPath = (indexNode, path) => ({indexNode, path});

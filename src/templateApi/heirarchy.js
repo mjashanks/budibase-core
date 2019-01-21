@@ -1,4 +1,4 @@
-import {find, constant, map, last, first, split,
+import {find, constant, map, last, first, split, intersection,
         take, union, includes, filter, some} from "lodash/fp";
 import {$, switchCase, isNothing, isSomething,
     defaultCase, splitKey, isNonEmptyString,
@@ -180,12 +180,13 @@ export const isTopLevelCollectionIndex = node =>
 
 export const fieldReversesReferenceToNode = node => field => 
     field.type === "reference"
-    && isSomething(field.typeOptions.reverseIndexNodeKeys)
-    && includes(field.typeOptions.reverseIndexNodeKeys)
-            (map(i => i.nodeKey())(node.indexes));
+    && intersection(field.typeOptions.reverseIndexNodeKeys)
+                   (map(i => i.nodeKey())(node.indexes))
+                   .length > 0;
 
 export const fieldReversesReferenceToIndex = indexNode => field => 
     field.type === "reference"
-    && isSomething(field.typeOptions.reverseIndexNodeKeys)
-    && field.typeOptions.reverseIndexNodeKeys === indexNode.nodeKey();
+    && intersection(field.typeOptions.reverseIndexNodeKeys)
+        ([indexNode.nodeKey()])
+        .length > 0;
             

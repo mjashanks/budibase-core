@@ -46,9 +46,13 @@ const deleteIndexes = async (app, key) => {
         flatten,
         filter(isSomething),
         filter(fieldReversesReferenceToNode(node)),
-        map(f => getNode(
-            app.heirarchy,
-            f.typeOptions.reverseIndexNodeKeys)),
+        map(f => $(f.typeOptions.reverseIndexNodeKeys, [
+                    map(n => getNode(
+                                app.heirarchy,
+                                n))
+                ])
+        ),
+        flatten,
         map(n => joinKey(key, n.name))
     ]);
 
