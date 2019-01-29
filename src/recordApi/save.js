@@ -63,10 +63,6 @@ const _save = async (app,indexingApi, record, context, skipValidation=false) => 
         });
         
         await indexingApi.reindexForUpdate(oldRecord, cloneDeep(record));
-        await maintainReferentialIntegrity(
-            app, indexingApi,  
-            oldRecord, record
-        );
     }
    
     return returnedClone;
