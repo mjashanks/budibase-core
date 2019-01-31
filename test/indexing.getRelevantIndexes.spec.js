@@ -46,7 +46,7 @@ describe("getRelevantIndexes", () => {
         expect(indexes.collections.length).toBe(4);
         
         const indexExists = key => 
-            some(indexes.collections, c => c.path === key);
+            some(indexes.collections, c => c.indexKey === key);
         
         expect(indexExists("/customers/default")).toBeTruthy();
         expect(indexExists("/customers/deceased")).toBeTruthy();
@@ -66,7 +66,7 @@ describe("getRelevantIndexes", () => {
             appHeirarchy.root, invoice);
         
         const indexExists = key => 
-            some(indexes.collections, c => c.path === key);
+            some(indexes.collections, c => c.indexKey === key);
 
         expect(indexExists("/customers/customersBySurname")).toBeFalsy();
     });
@@ -84,7 +84,7 @@ describe("getRelevantIndexes", () => {
         expect(indexes.collections.length).toBe(4);
         
         const indexExists = key => 
-            some(indexes.collections, c => c.path === key);
+            some(indexes.collections, c => c.indexKey === key);
 
         expect(indexExists("/customers/customersBySurname")).toBeTruthy();
     });
@@ -100,8 +100,8 @@ describe("getRelevantIndexes", () => {
             appHeirarchy.root, invoice);
 
         expect(indexes.collections.length).toBe(4);
-        expect(some(indexes.collections, i => i.path === "/customers/invoices")).toBeTruthy();
-        expect(some(indexes.collections, i => i.path === `/customers/${nodeid}-1234/invoices/default`)).toBeTruthy();
+        expect(some(indexes.collections, i => i.indexKey === "/customers/invoices")).toBeTruthy();
+        expect(some(indexes.collections, i => i.indexKey === `/customers/${nodeid}-1234/invoices/default`)).toBeTruthy();
     });
 
     it("should get reverseReferenceIndex accross heirarchy branches", async () => {
@@ -120,7 +120,7 @@ describe("getRelevantIndexes", () => {
         const indexes = getRelevantReverseReferenceIndexes(
             appHeirarchy.root, customer);
         expect(indexes.length).toBe(1);
-        expect(indexes[0].path)
+        expect(indexes[0].indexKey)
         .toBe(joinKey(partner.key(), appHeirarchy.partnerCustomersReverseIndex.name));
 
 
@@ -139,7 +139,7 @@ describe("getRelevantIndexes", () => {
         const indexes = getRelevantReverseReferenceIndexes(
             appHeirarchy.root, referredToCustomer);
         expect(indexes.length).toBe(1);
-        expect(indexes[0].path)
+        expect(indexes[0].indexKey)
         .toBe(joinKey(referredByCustomer.key(), appHeirarchy.referredToCustomersReverseIndex.name));
     });
 });

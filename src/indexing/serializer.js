@@ -1,8 +1,9 @@
 import {generateSchema} from "./indexSchemaCreator";
-import { has, isString } from "lodash/fp";
+import { has, isString, difference } from "lodash/fp";
 import { Buffer } from "safe-buffer";
 import {StringDecoder} from "string_decoder";
 import {getType} from "../types";
+import { isSomething } from "../common";
 
 export const BUFFER_MAX_BYTES = 524288; // 0.5Mb
 
@@ -15,9 +16,7 @@ export const getIndexWriter = (heirarchy, indexNode, getNextInputBytes, flushOut
 
     return ({
         read: read(getNextInputBytes, schema),
-        addItem: addItem(getNextInputBytes, flushOutputBuffer, schema),
-        removeItem: removeItem(getNextInputBytes, flushOutputBuffer, schema),
-        updateItem: updateItem(getNextInputBytes, flushOutputBuffer, schema)
+        updateIndex: updateIndex(getNextInputBytes, flushOutputBuffer, schema)
     });
 };
 
@@ -27,80 +26,41 @@ export const getIndexReader = (heirarchy, indexNode, getNextInputBytes) =>
         generateSchema(heirarchy, indexNode)
     );
 
-const addItem = (getNextInputBytes, flushOutputBuffer, schema) => (item) => {
+const updateIndex = (getNextInputBytes, flushOutputBuffer, schema) => (itemsToWrite, keysToRemove) => {
     const write = newOutputWriter(BUFFER_MAX_BYTES, flushOutputBuffer);
-    let hasWritten = false;
-    const serializedItem = serializeItem(schema, item);
+    const writtenItems = []; 
     read(getNextInputBytes, schema)(
         indexedItem => {
-            let status = CONTINUE_READING_RECORDS;
-            if(indexedItem.sortKey > item.sortKey) {
-                write(serializedItem);
-                hasWritten = true;
-                status = READ_REMAINING_TEXT;
-            }
-
-            write(
-                serializeItem(schema, indexedItem)
-            );
-
-            return status;            
-        },
-        text => write(text));
-
-    if(!hasWritten)
-        write(serializedItem);
-
-    write();
-};
-
-const removeItem = (getNextInputBytes, flushOutputBuffer, schema) => (itemKey) => {
-    const write = newOutputWriter(BUFFER_MAX_BYTES, flushOutputBuffer);
-    let hasWritten = false;
-    read(getNextInputBytes, schema)(
-        indexedItem => {
-            if(indexedItem.key !== itemKey) {
-                write(
-                    serializeItem(schema, indexedItem)
-                );
-                hasWritten = true;
+            const updated = find(i => indexedItem.key === i.key)(itemsToWrite);
+            const removed = find(k => indexedItem.key === k)(keysToRemove);
+            
+            if(isSomething(removed)) 
                 return CONTINUE_READING_RECORDS;
-            } else {
-                return READ_REMAINING_TEXT;
-            }
-        },
-        text => {
-            hasWritten = true;
-            write(text);
-        }
-    );
-    if(!hasWritten) 
-        write("");
-    write();
-};
 
-const updateItem = (getNextInputBytes, flushOutputBuffer, schema) => (item) => {
-    const write = newOutputWriter(BUFFER_MAX_BYTES, flushOutputBuffer);
-    let hasWritten = false;
-    const serializedItem =  serializeItem(schema, item);
-    read(getNextInputBytes, schema)(
-        indexedItem => {
-            if(indexedItem.key === item.key) {
+            if(isSomething(updated)) {
+                const serializedItem =  serializeItem(schema, item);
                 write(serializedItem);
-                hasWritten = true;
-                return READ_REMAINING_TEXT;
+                writtenItems.push(item);
             } else {
-               write(
-                   serializeItem(schema, item)
-               );
-               return CONTINUE_READING_RECORDS;
-            }
+                write(
+                    serializeItem(schema, updated)
+                );
+            } 
+
+            return CONTINUE_READING_RECORDS;
+
         },
         text => write(text)
     );
-    
-    if(!hasWritten)
-        write(serializedItem);
+
+    if(writtenItems.length !== itemsToWrite.length) {
+        const toAdd = difference(itemsToWrite, writtenItems);
+        for(let added of toAdd) {
+            write(
+                serializeItem(schema, added)
+            );
+        }
+    }
 
     write();
 };

@@ -1,6 +1,6 @@
-import {idSep, TRANSACTIONS_FOLDER, DELETE_RECORD_TRANSACTION,
-        CREATE_RECORD_TRANSACTION, getTransactionId, 
-        UPDATE_RECORD_TRANSACTION} from "./create";
+import {idSep, TRANSACTIONS_FOLDER, isUpdate,
+        isCreate, getTransactionId, 
+        isDelete} from "./create";
 import {joinKey, tryAwaitOrIgnore, $, none} from "../common";
 import {generate} from "shortid";
 import {map, filter, groupBy, 
@@ -16,16 +16,12 @@ const lockKey = joinKey(TRANSACTIONS_FOLDER, LOCK_FILENAME);
 const isOfType = trans => typ => 
     trans.transactionType === typ;
 
-const isUpdate = isOfType(UPDATE_RECORD_TRANSACTION);
-const isDelete = isOfType(DELETE_RECORD_TRANSACTION);
-const isCreate = isOfType(CREATE_RECORD_TRANSACTION);
-
 export const retrieve = async app => {
     const lockid = await getLock(app.datastore);
 
-    if(isNolock(lockid)) return;
+    if(isNolock(lockid)) return [];
 
-    const transactionFiles = await datastore.listItems(
+    const transactionFiles = await datastore.listFiles(
         TRANSACTIONS_FOLDER
     );
 

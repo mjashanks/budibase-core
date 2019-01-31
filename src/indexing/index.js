@@ -3,11 +3,66 @@ import {getRelevantHeirarchalIndexes,
 import {evaluate} from "./evaluate";
 import {removeFromAllIds, addToAllIds} from "./allIds";
 import {$$, $} from "../common";
-import {filter, map, keys, 
+import {filter, map, keys, flatten,
         isEqual, pull} from "lodash/fp";
 import {union, differenceBy, intersectionBy} from "lodash";
 import {add, update, remove} from "./apply";
 import {createIndexFile, getIndexedDataKey} from "./sharding";
+import {isUpdate, isCreate, isDelete} from "../transactions/create";
+import {getIndexedDataKey} from "../indexing/sharding";
+import { getFlattenedHierarchy } from "../templateApi/heirarchy";
+
+const transactionsByShard = (heirarchy, transactions) => {
+
+
+    const heirarchal = getRelevantHeirarchalIndexes(appHeirarchy, record);
+    const reverseRef = getRelevantReverseReferenceIndexes(appHeirarchy, record);
+
+}  
+
+const getCreateTransactionsByShard = (heirarchy, transactions) => {
+    const createTransactions = $(transactions, [filter(isCreate)]);
+
+    const getIndexNodesToApply = (t,indexes) => $(indexes, [
+        map(n => ({mappedRecord:evaluateRecord(n.indexNode), 
+                    indexNode:n.indexNode, 
+                    indexKey:n.indexKey,
+                    indexShardKey:getIndexedDataKey(
+                        n.indexNode,
+                        n.indexKey,
+                        evaluate(t.record))
+                })),
+        filter(n => n.mappedRecord.passedFilter)
+    ]);
+
+    const allToApply = [];
+
+    for(let t of createTransactions) {
+        const heirarchal = 
+            getRelevantHeirarchalIndexes(heirarchy, t.record);
+        const reverseRef = 
+            getRelevantReverseReferenceIndexes(heirarchy, t.record);
+        
+        allToApply.push(
+            getIndexNodesToApply(t, heirarchal.collections)
+        );
+        allToApply.push(
+            getIndexNodesToApply(t, heirarchal.globalIndexes)
+        );
+        allToApply.push(
+            getIndexNodesToApply(t, reverseRef)
+        );
+    }
+
+    return flatten(allToApply);
+}
+
+
+/*********************************
+ * 
+ * ORGINAL BELOW HERE
+ * 
+**********************************/
 
 const reindexFor = async (datastore, appHeirarchy, record, forAction) =>  {
 

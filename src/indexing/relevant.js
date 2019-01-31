@@ -10,7 +10,7 @@ import {getFlattenedHierarchy, isIndex,
 export const getRelevantHeirarchalIndexes = (appHeirarchy, record) => {
 
     const key = record.key();
-    const pathParts = splitKey(key);
+    const keyParts = splitKey(key);
     const recordNodeId = getRecordNodeId(key);
 
     const flatHeirarchy = 
@@ -18,15 +18,15 @@ export const getRelevantHeirarchalIndexes = (appHeirarchy, record) => {
                 [node => node.pathRegx().length],
                 ["desc"]);
 
-    const makeindexNodeKeyAndPath_ForCollectionIndex = (indexNode, path) => 
-        makeIndexNodeAndPath(indexNode, joinKey(path, indexNode.name));
+    const makeindexNodeAndKey_ForCollectionIndex = (indexNode, indexKey) => 
+        makeIndexNodeAndKey(indexNode, joinKey(indexKey, indexNode.name));
 
     const traverseHeirarchyCollectionIndexesInPath = () => 
         reduce((acc, part) => {
-            const currentPath = joinKey(acc.lastPath, part);
-            acc.lastPath = currentPath;
+            const currentIndexKey = joinKey(acc.lastIndexKey, part);
+            acc.lastIndexKey = currentIndexKey;
             const testPathRegx = p => 
-                new RegExp(`${p.pathRegx()}$`).test(currentPath);
+                new RegExp(`${p.pathRegx()}$`).test(currentIndexKey);
             const nodeMatch = find(testPathRegx)(flatHeirarchy)               
 
             if(isNothing(nodeMatch)) 
@@ -41,20 +41,20 @@ export const getRelevantHeirarchalIndexes = (appHeirarchy, record) => {
             ]);
 
             each(v => 
-                acc.nodesAndPaths.push(
-                    makeindexNodeKeyAndPath_ForCollectionIndex(v, currentPath)))
+                acc.nodesAndKeys.push(
+                    makeindexNodeAndKey_ForCollectionIndex(v, currentIndexKey)))
             (indexes);
 
             return acc;             
-        }, {lastPath:"", nodesAndPaths:[]})
-        (pathParts).nodesAndPaths;
+        }, {lastIndexKey:"", nodesAndKeys:[]})
+        (keyParts).nodesAndKeys;
     
     const getGlobalIndexes = () => 
         // returns indexes that are direct children of root
         // and therefor apply globally
         $(appHeirarchy.indexes, [
             filter(isIndex),
-            map(c => makeIndexNodeAndPath(c, c.nodeKey()))
+            map(c => makeIndexNodeAndKey(c, c.nodeKey()))
         ]);
     
     return ({
@@ -75,11 +75,11 @@ export const getRelevantReverseReferenceIndexes = (appHeirarchy, record) =>
                              field:f}))
                  ])),
         flatten,
-        map(n => makeIndexNodeAndPath(
+        map(n => makeIndexNodeAndKey(
             n.recordNode, 
             joinKey(record[n.field.name].key, n.recordNode.name))),
     ]);
 
-const makeIndexNodeAndPath = (indexNode, path) => ({indexNode, path});
+const makeIndexNodeAndKey = (indexNode, indexKey) => ({indexNode, indexKey});
 
 export default getRelevantHeirarchalIndexes;

@@ -22,6 +22,10 @@ export const TRANSACTIONS_FOLDER = ".transactions"
 export const getTransactionId = (recordId, transactionType, uniqueId) => 
     `${recordId}${idSep}${transactionType}${idSep}${uniqueId}`
 
+export const isUpdate = isOfType(UPDATE_RECORD_TRANSACTION);
+export const isDelete = isOfType(DELETE_RECORD_TRANSACTION);
+export const isCreate = isOfType(CREATE_RECORD_TRANSACTION);
+
 const transaction = async (datastore, transactionType, data) => {
 
     const recordId = transactionType === CREATE_RECORD_TRANSACTION
