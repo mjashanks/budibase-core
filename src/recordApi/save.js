@@ -10,6 +10,8 @@ import { getFlattenedHierarchy, getLastPartInKey,
         getNode, fieldReversesReferenceToNode} from "../templateApi/heirarchy";
 import {mapRecord} from "../indexing/evaluate";
 import {listItems} from "../indexApi/listItems";
+import {transactionForCreateRecord,
+    transactionForUpdateRecord} from "../transactions/create";
 
 export const save = (app,indexingApi) => async (record, context) => 
     apiWrapper(
@@ -34,36 +36,34 @@ const _save = async (app,indexingApi, record, context, skipValidation=false) => 
     }
 
     const returnedClone = cloneDeep(record);
-    returnedClone.isNew = constant(false);
 
     recordClone.type = record.type();
-    if(recordClone.isNew()) {
-        await app.datastore.createFolder(recordClone.key())
+    if(recordClone.isNew) {
+        await app.datastore.createFolder(recordClone.key)
         await app.datastore.createJson(
-            getRecordFileName(recordClone.key()), 
+            getRecordFileName(recordClone.key), 
             recordClone
         );
         await initialiseReverseReferenceIndexes(app, record);
-        await initialiseChildCollections(app, recordClone.key());
+        await initialiseChildCollections(app, recordClone.key);
         app.publish(events.recordApi.save.onRecordCreated, {
             record:recordClone
         });
-        await indexingApi.reindexForCreate(cloneDeep(record));
     }
     else {
         const loadRecord = load(app);
-        const oldRecord = await loadRecord(recordClone.key());
+        const oldRecord = await loadRecord(recordClone.key);
         await app.datastore.updateJson(
-            getRecordFileName(recordClone.key()), 
+            getRecordFileName(recordClone.key), 
             recordClone);
         
         app.publish(events.recordApi.save.onRecordUpdated, {
             old:oldRecord,
             new:returnedClone
         });
-        
-        await indexingApi.reindexForUpdate(oldRecord, cloneDeep(record));
     }
+
+    await app.cleanupTransactions();
    
     return returnedClone;
 };
@@ -71,7 +71,7 @@ const _save = async (app,indexingApi, record, context, skipValidation=false) => 
 const initialiseReverseReferenceIndexes = async (app, record) => {
 
     const recordNode = getExactNodeForPath(app.heirarchy)
-                                          (record.key());
+                                          (record.key);
 
     const indexNodes = 
         $(fieldsThatReferenceThisRecord(app, recordNode), [
@@ -86,7 +86,7 @@ const initialiseReverseReferenceIndexes = async (app, record) => {
 
     for(let indexNode of indexNodes) {
         await initialiseIndex(
-            app, record.key(), indexNode
+            app, record.key, indexNode
         );
     }
 }
@@ -103,7 +103,7 @@ const maintainReferentialIntegrity =
         - Update referencingRecord.fieldName to new value 
         - Save
     */
-    const recordNode = getExactNodeForPath(app.heirarchy)(newRecord.key());
+    const recordNode = getExactNodeForPath(app.heirarchy)(newRecord.key);
     const referenceFields = fieldsThatReferenceThisRecord(
         app, recordNode);
     
@@ -121,7 +121,7 @@ const maintainReferentialIntegrity =
             reverseIndexKeys: 
                 $(n.field.typeOptions.reverseIndexNodeKeys,[
                     map(k => joinKey(
-                        newRecord.key(),
+                        newRecord.key,
                         getLastPartInKey(k)))
                 ])  
         })),
@@ -136,7 +136,7 @@ const maintainReferentialIntegrity =
             for(let key of map(r => r.key)(rows)) {
                 const record = 
                     await load(app)(key);
-                if(record[update.field.name].key === newRecord.key()) {
+                if(record[update.field.name].key === newRecord.key) {
                     record[update.field.name] = update.new;
                     await _save(app, indexingApi, record, undefined, true);
                 }

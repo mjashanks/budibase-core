@@ -8,14 +8,14 @@ export const CREATE_RECORD_TRANSACTION = "create";
 export const UPDATE_RECORD_TRANSACTION = "update";
 export const DELETE_RECORD_TRANSACTION = "delete";
 
-export const transactionForCreateRecord = (app, record) => 
-    transaction(app.datastore, CREATE_RECORD_TRANSACTION, {record});
+export const transactionForCreateRecord = async (app, record) => 
+    await transaction(app.datastore, CREATE_RECORD_TRANSACTION, {record});
 
-export const transactionForUpdateRecord = (app, oldRecord, newRecord) => 
-    transaction(app.datastore, UPDATE_RECORD_TRANSACTION, {oldRecord, newRecord});
+export const transactionForUpdateRecord = async (app, oldRecord, newRecord) => 
+    await transaction(app.datastore, UPDATE_RECORD_TRANSACTION, {oldRecord, newRecord});
 
-export const transactionForDeleteRecord = (app, key) => 
-    transaction(app.datastore, DELETE_RECORD_TRANSACTION, {key});
+export const transactionForDeleteRecord = async (app, record) => 
+    await transaction(app.datastore, DELETE_RECORD_TRANSACTION, {record});
 
 export const idSep = "$";
 export const TRANSACTIONS_FOLDER = ".transactions"

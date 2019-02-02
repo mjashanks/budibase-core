@@ -30,9 +30,9 @@ export const constructRecord = (recordNode, getFieldValue, collectionKey) => {
         mapValues(getFieldValue)
     ]);
 
-    record.id = constant(`${recordNode.recordNodeId}-${generate()}`);
-    record.key = constant(joinKey(collectionKey, record.id()));
-    record.isNew = constant(true);
-    record.type = constant(recordNode.name);
+    record.id = `${recordNode.recordNodeId}-${generate()}`;
+    record.key = joinKey(collectionKey, record.id);
+    record.isNew = true;
+    record.type = recordNode.name;
     return record;
 };

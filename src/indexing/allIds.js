@@ -95,7 +95,7 @@ const getShardFile = async (datastore, allIdsKey) => {
 export const addToAllIds = (appHeirarchy, datastore) => async record => {
     const allIdsKey = getAllIdsShardKey(
         appHeirarchy,
-        getParentKey(record.key()),
+        getParentKey(record.key),
         record.id()
     );
 
@@ -220,7 +220,7 @@ export const removeFromAllIds = (appHeirarchy,datastore) =>
                                 async (record) => {
     const shardKey = getAllIdsShardKey(
         appHeirarchy,
-        getParentKey(record.key()),
+        getParentKey(record.key),
         record.id()
     );
     const allIds = await getAllIdsFromShard(datastore, shardKey);

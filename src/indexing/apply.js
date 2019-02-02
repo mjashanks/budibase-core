@@ -2,22 +2,14 @@ import {getIndexedDataKey, ensureShardNameIsInShardMap} from "./sharding";
 import {getIndexWriter} from "./serializer";
 import { isShardedIndex } from "../templateApi/heirarchy";
 
-export const add = async (heirarchy, store, mappedRecords, indexKey, indexNode, indexedDataKey) => {
-    (await getWriter(heirarchy, store, indexKey, indexedDataKey, indexNode))
-        .updateOrAddItems(mappedRecords);
-    await swapTempFileIn(store, indexedDataKey);
-}
 
-export const remove = async (heirarchy, store, mappedRecordKeys, indexKey, indexNode, indexedDataKey)  => {
-    const writer = await getWriter(heirarchy, store, indexKey, indexedDataKey, indexNode);
-    writer.removeItems(mappedRecordKeys);
-    await swapTempFileIn(store, indexedDataKey);
-};
+export const applyToShard = async (heirarchy, store, indexKey, 
+        indexNode, indexShardKey, recordsToWrite, keysToRemove) => {
 
-export const update = async (heirarchy, store, mappedRecords, indexKey, indexNode, indexedDataKey) => {
-    (await getWriter(heirarchy, store, indexKey, indexedDataKey, indexNode))
-            .updateOrAddItems(mappedRecords);
-    await swapTempFileIn(store, indexedDataKey);
+    (await getWriter(heirarchy, store, indexKey, indexShardKey, indexNode))
+            .updateOrAddItems(recordsToWrite, keysToRemove);
+    await swapTempFileIn(store, indexedDataKey); 
+
 }
 
 const getWriter = async (heirarchy, store, indexKey, indexedDataKey, indexNode) => {

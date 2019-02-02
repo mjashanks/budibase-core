@@ -4,8 +4,10 @@ import getIndexApi from "./indexApi";
 import getTemplateApi from "./templateApi";
 import {setupDatastore, createEventAggregator} from "./appInitialise";
 import {initialiseActions} from "./actions"
+import {isSomething} from "./common";
+import {cleanup} from "./transactions/cleanup";
 
-export const getAppApis = async (store, behaviourSources = {}) => {
+export const getAppApis = async (store, behaviourSources = {}, cleanupTransactions = null) => {
 
     store = setupDatastore(store);
     const templateApi = getTemplateApi(store);
@@ -24,6 +26,11 @@ export const getAppApis = async (store, behaviourSources = {}) => {
         datastore:store, 
         publish:eventAggregator.publish
     };
+
+    app.cleanupTransactions = isSomething(cleanupTransactions) 
+                              ? cleanupTransactions
+                              : async () => cleanup(app);
+
     const recordApi = getRecordApi(app);
     const collectionApi = getCollectionApi(app);
     const indexApi = getIndexApi(app);

@@ -40,7 +40,7 @@ export const passesFilter = (record, index) => {
 export const mapRecord = (record, index) => {
     const recordClone = clone(record);
     recordClone.isNew = record.isNew();
-    recordClone.key = record.key();
+    recordClone.key = record.key;
     recordClone.id = record.id();
     recordClone.type = record.type();
     const context = {record:recordClone};
@@ -64,7 +64,7 @@ export const mapRecord = (record, index) => {
         }
     }
 
-    mapped.key = record.key();
+    mapped.key = record.key;
     mapped.sortKey = index.getSortKey 
                      ? compileCode(index.getSortKey)(context) 
                      : record.id();

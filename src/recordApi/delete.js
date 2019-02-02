@@ -8,6 +8,7 @@ import {getExactNodeForPath,
 import {map, flatten, filter, cloneDeep} from "lodash/fp";
 import { getIndexedDataKey_fromIndexKey } from "../indexing/read";
 import {deleteIndex} from "../indexApi/delete";
+import {transactionForDeleteRecord} from "../transactions/create";
 
 export const deleteRecord = (app, indexingApi) => async (key) => 
     apiWrapper(
@@ -21,6 +22,9 @@ const _deleteRecord = async (app, indexingApi, key) => {
     key = safeKey(key);
     const node = getExactNodeForPath(app.heirarchy)(key);
     
+    const record = await load(app)(key);
+    await transactionForDeleteRecord(record);
+    
     for(let collection of node.children) {
         const collectionKey = joinKey(
             key, collection.name
@@ -28,11 +32,11 @@ const _deleteRecord = async (app, indexingApi, key) => {
         await deleteCollection(app)(collectionKey);
     }
 
-    const record = await load(app)(key);
+    
     await app.datastore.deleteFile(
         getRecordFileName(key));
     
-    await indexingApi.reindexForDelete(cloneDeep(record));
+    await app.cleanupTransactions();
     await app.datastore.deleteFolder(key);
     await deleteIndexes(app, key)
 };

@@ -3,34 +3,211 @@ import {getRelevantHeirarchalIndexes,
 import {evaluate} from "./evaluate";
 import {removeFromAllIds, addToAllIds} from "./allIds";
 import {$$, $} from "../common";
-import {filter, map, keys, flatten,
-        isEqual, pull} from "lodash/fp";
+import {filter, map, isUndefined, flatten,
+        isEqual, pull, keys} from "lodash/fp";
 import {union, differenceBy, intersectionBy} from "lodash";
 import {add, update, remove} from "./apply";
 import {createIndexFile, getIndexedDataKey} from "./sharding";
-import {isUpdate, isCreate, isDelete} from "../transactions/create";
+import {isUpdate, isCreate, isDelete, transactionForCreateRecord} from "../transactions/create";
 import {getIndexedDataKey} from "../indexing/sharding";
-import { getFlattenedHierarchy } from "../templateApi/heirarchy";
+import { applyToShard } from "./apply";
 
-const transactionsByShard = (heirarchy, transactions) => {
+export const executeTransactions = async app => transactions => {
+    const recordsByShard = mappedRecordsByIndexShard(app.heirarchy, transactions);
+    await Promise.all(
+        $(recordsByShard, [
+            keys,
+            map(k => applyToShard(
+                app.heirarchy, app.datastore,
+                recordsByShard[k].indexKey,
+                recordsByShard[k].indexNode,
+                k,
+                recordsByShard[k].writes,
+                recordsByShard[k].removes
+            ))
+    ]));
+}
+
+const mappedRecordsByIndexShard = (heirarchy, transactions) => {
+
+    const updates = getUpdateTransactionsByShard(
+        heirarchy, transactions);
+    const created = getCreateTransactionsByShard(
+        heirarchy, transactions
+    );
+    const deletes = getDeleteTransactionsByShard(
+        heirarchy, transactions
+    );
+    
+    const toRemove = [
+        ...deletes,
+        ...updates.toRemove
+    ];
+
+    const toWrite = [
+        ...created,
+        ...updates.toWrite
+    ];
 
 
-    const heirarchal = getRelevantHeirarchalIndexes(appHeirarchy, record);
-    const reverseRef = getRelevantReverseReferenceIndexes(appHeirarchy, record);
+    const transByShard = {};
 
+    const initialiseShard = t => {
+        if(isUndefined(transByShard[t.indexShardKey]))
+            transByShard[t.indexShardKey] = {
+                writes:[], 
+                removes:[],
+                indexKey:t.indexKey,
+                indexNodeKey:t.indexNodeKey
+            };
+    }
+
+    for(let trans of toWrite) {
+        initialiseShard(trans);        
+        transByShard[trans.indexShardKey].writes.push(trans.record);
+    }
+
+    for(let trans of toRemove) {
+        initialiseShard(trans);        
+        transByShard[trans.indexShardKey].removed.push(trans.record.key);
+    }
+
+    return transByShard;
 }  
 
-const getCreateTransactionsByShard = (heirarchy, transactions) => {
-    const createTransactions = $(transactions, [filter(isCreate)]);
+const getUpdateTransactionsByShard = (heirarchy, transactions) => {
+    const updateTransactions = $(transactions, [filter(isUpdate)]);
+
+    const evaluateIndex = (record, indexNodeAndPath) => 
+        ({mappedRecord:evaluate(record)(indexNodeAndPath.indexNode), 
+        indexNode:indexNodeAndPath.indexNode, 
+        indexKey:indexNodeAndPath.indexKey,
+        indexShardKey:getIndexedDataKey(
+            n.indexNode,
+            n.indexKey,
+            evaluate(t.record)(n.indexNode))
+        });
+
+    const getIndexNodesToApply = (indexFilter) => (t,indexes) => 
+        $(indexes, [
+            map(n => ({
+                old:evaluateIndex(t.oldRecord, n),
+                new:evaluateIndex(t.newRecord, n)})),
+            filter(indexFilter)
+        ]);
+
+    const toRemoveFilter = (n, isUnreferenced) => 
+        n.old.mappedRecord.passedFilter === true
+        && (n.new.mappedRecord.passedFilter === false
+            || isUnreferenced);
+
+    const toAddFilter = (n, isNewlyReferenced) => 
+        (n.old.mappedRecord.passedFilter === false
+        || isNewlyReferenced)
+        && n.new.mappedRecord.passedFilter === true;
+
+    const toUpdateFilter = n => 
+        n.new.mappedRecord.passedFilter === true
+        && n.old.mappedRecord.passedFilter === true
+        && !isEqual(n.old.mappedRecord.result, 
+                    n.new.mappedRecord.result);
+
+    const toRemove = [];
+    const toWrite = [];
+
+    for(let t of updateTransactions) {
+        const heirarchal = getRelevantHeirarchalIndexes(
+            heirarchy, t.newRecord);
+
+        const referenceChanges = diffReverseRefForUpdate(
+            heirarchy, t.oldRecord, t.newRecord);
+
+        // old records to remove (filtered out)
+        const filteredOut_toRemove =
+            union(
+                getIndexNodesToApply(toRemoveFilter)(t, heirarchal.collections),
+                getIndexNodesToApply(toRemoveFilter)(t, heirarchal.globalIndexes),
+                // still referenced - check filter
+                getIndexNodesToApply(toRemoveFilter)(t, referenceChanges.notChanged),
+                // un referenced - remove if in there already
+                getIndexNodesToApply(n => toRemoveFilter(n,true))
+                                    (t, referenceChanges.unReferenced)
+            );
+
+        // new records to add (filtered in)
+        const filteredIn_toAdd =
+            union(
+                getIndexNodesToApply(toAddFilter)(t, heirarchal.collections),
+                getIndexNodesToApply(toAddFilter)(t, heirarchal.globalIndexes),
+                // newly referenced - check filter
+                getIndexNodesToApply(n => toAddFilter(n,true))
+                                    (t, referenceChanges.newlyReferenced),
+                // reference unchanged - rerun filter in case something else changed
+                getIndexNodesToApply(toAddFilter)(t, referenceChanges.notChanged),
+            );
+
+        const changed = 
+            union(
+                getIndexNodesToApply(toUpdateFilter)(t, heirarchal.collections),
+                getIndexNodesToApply(toUpdateFilter)(t, heirarchal.globalIndexes),
+                // still referenced - recheck filter
+                getIndexNodesToApply(toUpdateFilter)(t, referenceChanges.notChanged),
+            );
+
+        // for changed - if shard key has changed, we need to  
+        // remove from old and add to new
+        const indexedDataKeyForResult = res => 
+            getIndexedDataKey(
+                res.indexNode, res.indexKey, res.mappedRecord.result
+            );
+        
+        const shardKeyChanged = $(changed,[
+            filter(c => indexedDataKeyForResult(c.old) !== indexedDataKeyForResult(c.new))
+        ]);
+
+        for(let res of shardKeyChanged) {
+            pull(res)(changed);
+            filteredOut_toRemove.push(res);
+            filteredIn_toAdd.push(res);
+        }
+
+        toRemove.push(
+            $(filteredOut_toRemove,[
+                map(i => i.old)
+            ])
+        );
+
+        toWrite.push(
+            $(filteredIn_toAdd, [
+                map(i => i.new)
+            ])
+        );
+
+        toWrite.push(
+            $(changed, [
+                map(i => i.new)
+            ])
+        );
+    }
+
+    return ({
+        toRemove: flatten(toRemove),
+        toWrite: flatten(toWrite)
+    });
+    
+};
+
+const get_Create_Delete_TransactionsByShard = pred => (heirarchy, transactions) => {
+    const createTransactions = $(transactions, [filter(pred)]);
 
     const getIndexNodesToApply = (t,indexes) => $(indexes, [
-        map(n => ({mappedRecord:evaluateRecord(n.indexNode), 
+        map(n => ({mappedRecord:evaluate(t.record)(n.indexNode), 
                     indexNode:n.indexNode, 
                     indexKey:n.indexKey,
                     indexShardKey:getIndexedDataKey(
                         n.indexNode,
                         n.indexKey,
-                        evaluate(t.record))
+                        evaluate(t.record)(n.indexNode))
                 })),
         filter(n => n.mappedRecord.passedFilter)
     ]);
@@ -57,191 +234,15 @@ const getCreateTransactionsByShard = (heirarchy, transactions) => {
     return flatten(allToApply);
 }
 
+const getDeleteTransactionsByShard = 
+    get_Create_Delete_TransactionsByShard(isDelete);
 
-/*********************************
- * 
- * ORGINAL BELOW HERE
- * 
-**********************************/
+const getCreateTransactionsByShard = 
+    get_Create_Delete_TransactionsByShard(isCreate);
 
-const reindexFor = async (datastore, appHeirarchy, record, forAction) =>  {
-
-    const heirarchal = getRelevantHeirarchalIndexes(appHeirarchy, record);
-    const reverseRef = getRelevantReverseReferenceIndexes(appHeirarchy, record);
-
-    const evaluateRecord = evaluate(record);
-
-    const getIndexNodesToApply = $$(
-        map(n => ({mappedRecord:evaluateRecord(n.indexNode), 
-                    indexNode:n.indexNode, 
-                    path:n.path})),
-        filter(n => n.mappedRecord.passedFilter)
-    );
-
-    for(let i of getIndexNodesToApply(heirarchal.collections)) {
-        await forAction(appHeirarchy, datastore, i.mappedRecord.result, i.path, i.indexNode);
-    }
-
-    // this can definately be done in parallel (as can be in js)
-    for(let i of getIndexNodesToApply(heirarchal.globalIndexes)) {
-        await forAction(appHeirarchy, datastore, i.mappedRecord.result, i.path, i.indexNode);
-    }
-
-    for(let i of getIndexNodesToApply(reverseRef)) {
-        await forAction(appHeirarchy, datastore, i.mappedRecord.result, i.path, i.indexNode);
-    }
-} 
-
-const reindexForCreate = (datastore, appHeirarchy) =>  
-                         async createdRecord => 
-{
-    await addToAllIds(appHeirarchy, datastore)(createdRecord);
-    return await reindexFor(datastore, appHeirarchy, createdRecord, add);
-}
-
-const reindexForDelete = (datastore, appHeirarchy) => 
-                         async deletedRecord => 
-{
-    await removeFromAllIds(appHeirarchy, datastore)(deletedRecord);
-    return await reindexFor(datastore, appHeirarchy, deletedRecord, remove);
-}
-
-
-const reindexForUpdate = (datastore, appHeirarchy) => 
-                         async (oldRecord, newRecord) => {
-
-    const heirarchal = getRelevantHeirarchalIndexes(appHeirarchy, newRecord);
-
-    const referenceChanges = diffReverseRefForUpdate(
-        appHeirarchy, oldRecord, newRecord
-    );
-
-    const evaluateIndex = (record, indexNodeAndPath) => 
-        ({mappedRecord:evaluate(record)(indexNodeAndPath.indexNode), 
-        indexNode:indexNodeAndPath.indexNode, 
-        path:indexNodeAndPath.path});
-
-    const getIndexNodesToApply = indexFilter => $$(
-        map(n => ({
-            old:evaluateIndex(oldRecord, n),
-            new:evaluateIndex(newRecord, n)})),
-        filter(indexFilter)
-    );
-
-    const toRemoveFilter = (n, isUnreferenced) => 
-        n.old.mappedRecord.passedFilter === true
-        && (n.new.mappedRecord.passedFilter === false
-            || isUnreferenced);
-
-    const toAddFilter = (n, isNewlyReferenced) => 
-        (n.old.mappedRecord.passedFilter === false
-        || isNewlyReferenced)
-        && n.new.mappedRecord.passedFilter === true;
-
-    const toUpdateFilter = n => 
-        n.new.mappedRecord.passedFilter === true
-        && n.old.mappedRecord.passedFilter === true
-        && !isEqual(n.old.mappedRecord.result, 
-                    n.new.mappedRecord.result);
-        
-
-    // old records to remove (filtered out)
-    const filteredOut_toRemove =
-        union(
-            getIndexNodesToApply(toRemoveFilter)(heirarchal.collections),
-            getIndexNodesToApply(toRemoveFilter)(heirarchal.globalIndexes),
-            // still referenced - check filter
-            getIndexNodesToApply(toRemoveFilter)(referenceChanges.notChanged),
-            // un referenced - remove if in there already
-            getIndexNodesToApply(n => toRemoveFilter(n,true))
-                                (referenceChanges.unReferenced)
-        );
-
-    // new records to add (filtered in)
-    const filteredIn_toAdd =
-        union(
-            getIndexNodesToApply(toAddFilter)(heirarchal.collections),
-            getIndexNodesToApply(toAddFilter)(heirarchal.globalIndexes),
-            // newly referenced - check filter
-            getIndexNodesToApply(n => toAddFilter(n,true))
-                                (referenceChanges.newlyReferenced),
-            // reference unchanged - rerun filter in case something else changed
-            getIndexNodesToApply(toAddFilter)(referenceChanges.notChanged),
-        );
-
-    const changed = 
-        union(
-            getIndexNodesToApply(toUpdateFilter)(heirarchal.collections),
-            getIndexNodesToApply(toUpdateFilter)(heirarchal.globalIndexes),
-            // still referenced - recheck filter
-            getIndexNodesToApply(toUpdateFilter)(referenceChanges.notChanged),
-        );
-
-    // for changed - if shard key has changed, we need to  
-    // remove from old and add to new
-    const indexedDataKeyForResult = res => 
-        getIndexedDataKey(
-            res.indexNode, res.path, res.mappedRecord.result
-        );
-
-    const shardKeyChanged = $(changed,[
-        filter(c => indexedDataKeyForResult(c.old) !== indexedDataKeyForResult(c.new))
-    ]);
-
-    for(let res of shardKeyChanged) {
-        pull(res)(changed);
-        filteredOut_toRemove.push(res);
-        filteredIn_toAdd.push(res);
-    }
-
-    for(let i of filteredOut_toRemove) {
-        // be sure to remove from old index path, in case shard key changed
-        await remove(appHeirarchy, datastore, i.old.mappedRecord.result, i.old.path, i.new.indexNode);
-    }
-
-    for(let i of filteredIn_toAdd) {
-        await add(appHeirarchy, datastore, i.new.mappedRecord.result, i.new.path, i.new.indexNode);
-    }
-
-    for(let i of changed) {
-        await update(appHeirarchy, datastore, i.new.mappedRecord.result, i.new.path, i.new.indexNode);
-    }
-}
-
-const diffReverseRefForUpdate = (appHeirarchy, oldRecord, newRecord) => {
-    const oldIndexes = getRelevantReverseReferenceIndexes(
-        appHeirarchy, oldRecord
-    );
-    const newIndexes = getRelevantReverseReferenceIndexes(
-        appHeirarchy, newRecord
-    );
-
-    const unReferenced = differenceBy(
-        oldIndexes, newIndexes,
-        i => i.path
-    );
-
-    const newlyReferenced = differenceBy(
-        newIndexes, oldIndexes,
-        i => i.path
-    );
-
-    const notChanged =  intersectionBy(
-        newIndexes, oldIndexes,
-        i => i.path
-    );
-
-    return  {
-        unReferenced,
-        newlyReferenced,
-        notChanged
-    };
-}
 
 export default (app) => ({
-    reindexForCreate : reindexForCreate(app.datastore, app.heirarchy), 
-    reindexForDelete : reindexForDelete(app.datastore, app.heirarchy), 
-    reindexForUpdate : reindexForUpdate(app.datastore, app.heirarchy), 
+    executeTransactions: executeTransactions(app),
     createIndexFile : createIndexFile(app.datastore)
 });
 

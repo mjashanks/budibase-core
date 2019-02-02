@@ -56,10 +56,10 @@ const _load = async (app, key, keyStack=[]) => {
         }
     }
 
-    loadedRecord.isNew = constant(false);
-    loadedRecord.key = constant(key);
+    loadedRecord.isNew = false;
+    loadedRecord.key = key;
     loadedRecord.id = $(key, [splitKey, last, constant]);
-    loadedRecord.type = constant(type);
+    loadedRecord.type = type;
     return loadedRecord;
 };
 
