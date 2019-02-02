@@ -11,7 +11,7 @@ const isNolock = id => id === NO_LOCK;
 const timeoutMilliseconds =  30 * 1000;
 const maxLockRetries = 1;
 const LOCK_FILENAME = "lock";
-const lockKey = joinKey(TRANSACTIONS_FOLDER, LOCK_FILENAME);
+export const lockKey = joinKey(TRANSACTIONS_FOLDER, LOCK_FILENAME);
 
 const isOfType = trans => typ => 
     trans.transactionType === typ;
@@ -21,7 +21,7 @@ export const retrieve = async app => {
 
     if(isNolock(lockid)) return [];
 
-    const transactionFiles = await datastore.listFiles(
+    const transactionFiles = await datastore.getFolderContents(
         TRANSACTIONS_FOLDER
     );
 
@@ -86,17 +86,21 @@ export const retrieve = async app => {
                     (dedupedTransactions))
     ]);
 
-    for(let deleteMe of duplicates) {
-        await app.datastore.deleteFile(
-            joinKey(
-                TRANSACTIONS_FOLDER,
-                getTransactionId(
-                    deleteMe.recordId,
-                    deleteMe.transactionType,
-                    deleteMe.uniqueId)
-            ));
-    }
+    
+    const deletePromises = 
+        map(t => app.datastore.deleteFile(
+                joinKey(
+                    TRANSACTIONS_FOLDER,
+                    getTransactionId(
+                        t.recordId,
+                        t.transactionType,
+                        t.uniqueId)
+                )
+            )
+        )(duplicates);
 
+    await Promise.all(deletePromises);
+    
     return dedupedTransactions;
 };
 

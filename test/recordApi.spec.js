@@ -15,7 +15,7 @@ describe("recordApi > getNew", () => {
 
         expect(record.key).toBeDefined();
         expect(isFunction(record.key)).toBeTruthy();
-        expect(record.key()).toBe(`/customers/${record.id()}`);
+        expect(record.key).toBe(`/customers/${record.id}`);
     });
 
     it("should create object with all declared fields, using default values", async () => {
@@ -57,7 +57,7 @@ describe("recordApi > getNew", () => {
 
         expect(record.isNew).toBeDefined();
         expect(isFunction(record.isNew)).toBeTruthy();
-        expect(record.isNew()).toBeTruthy();
+        expect(record.isNew).toBeTruthy();
     });
 
     it("should add a function 'type' returns type", async () => {
@@ -66,7 +66,7 @@ describe("recordApi > getNew", () => {
 
         expect(record.type).toBeDefined();
         expect(isFunction(record.type)).toBeTruthy();
-        expect(record.type()).toBe("customer");
+        expect(record.type).toBe("customer");
     });
 });
 
@@ -83,7 +83,7 @@ describe('recordApi > save then load', () => {
 
         await recordApi.save(record);
 
-        const saved = await recordApi.load(record.key());
+        const saved = await recordApi.load(record.key);
 
         expect(saved.surname).toBe(record.surname);
         expect(saved.isalive).toBe(record.isalive);
@@ -101,7 +101,7 @@ describe('recordApi > save then load', () => {
 
         await recordApi.save(record);
 
-        const saved = await recordApi.load(record.key());
+        const saved = await recordApi.load(record.key);
 
         expect(saved.surname).toBe(null);
         expect(saved.isalive).toBe(true);
@@ -119,10 +119,10 @@ describe('recordApi > save then load', () => {
 
         await recordApi.save(record);
 
-        const saved = await recordApi.load(record.key());
+        const saved = await recordApi.load(record.key);
 
         expect(saved.isNew).toBeDefined();
-        expect(saved.isNew()).toBe(false);
+        expect(saved.isNew).toBe(false);
     });
 
     it('loaded record id() and key() should work', async () => {
@@ -134,13 +134,13 @@ describe('recordApi > save then load', () => {
 
         await recordApi.save(record);
 
-        const saved = await recordApi.load(record.key());
+        const saved = await recordApi.load(record.key);
 
         expect(saved.id).toBeDefined();
-        expect(saved.id()).toBe(record.id());
+        expect(saved.id).toBe(record.id);
 
         expect(saved.key).toBeDefined();
-        expect(saved.key()).toBe(saved.key());
+        expect(saved.key).toBe(saved.key);
     });
 
     
@@ -153,10 +153,10 @@ describe('recordApi > save then load', () => {
 
         await recordApi.save(record);
 
-        const saved = await recordApi.load(record.key());
+        const saved = await recordApi.load(record.key);
 
         expect(isFunction(saved.type)).toBeTruthy()
-        expect(saved.type()).toBe("customer");
+        expect(saved.type).toBe("customer");
     });
 
     it('update existing should update field', async () => {
@@ -170,11 +170,11 @@ describe('recordApi > save then load', () => {
 
         await recordApi.save(record);
 
-        const saved = await recordApi.load(record.key());
+        const saved = await recordApi.load(record.key);
 
         saved.surname = "Zeedog";
         await recordApi.save(saved);
-        const savedAgain = await recordApi.load(saved.key());
+        const savedAgain = await recordApi.load(saved.key);
         expect(savedAgain.surname).toBe(saved.surname); 
     });
 });
@@ -187,7 +187,7 @@ describe("save", () => {
         record.surname = "Ledog";
 
         const savedRecord = await recordApi.save(record);
-        expect(savedRecord.isNew()).toBe(false);
+        expect(savedRecord.isNew).toBe(false);
     });
 
     it("should publish onbegin and oncomplete events", async () => {
@@ -206,9 +206,9 @@ describe("save", () => {
         expect(onBegin.length).toBe(1);
         expect(onComplete.length).toBe(1);
         expect(onBegin[0].context.record).toBeDefined();
-        expect(onBegin[0].context.record.key()).toBe(record.key());
+        expect(onBegin[0].context.record.key).toBe(record.key);
         expect(onComplete[0].context.record).toBeDefined();
-        expect(onComplete[0].context.record.key()).toBe(record.key());
+        expect(onComplete[0].context.record.key).toBe(record.key);
 
     });
 
@@ -225,7 +225,7 @@ describe("save", () => {
         const onCreate = handler.getEvents(events.recordApi.save.onRecordCreated);
         expect(onCreate.length).toBe(1);
         expect(onCreate[0].context.record).toBeDefined();
-        expect(onCreate[0].context.record.key()).toBe(record.key());
+        expect(onCreate[0].context.record.key).toBe(record.key);
 
         savedRecord.surname = "Zeecat";
         await recordApi.save(savedRecord);
@@ -233,10 +233,10 @@ describe("save", () => {
         const onUpdate = handler.getEvents(events.recordApi.save.onRecordUpdated);
         expect(onUpdate.length).toBe(1);
         expect(onUpdate[0].context.old).toBeDefined();
-        expect(onUpdate[0].context.old.key()).toBe(record.key());
+        expect(onUpdate[0].context.old.key).toBe(record.key);
         expect(onUpdate[0].context.old.surname).toBe("Ledog");
         expect(onUpdate[0].context.new).toBeDefined();
-        expect(onUpdate[0].context.new.key()).toBe(record.key());
+        expect(onUpdate[0].context.new.key).toBe(record.key);
         expect(onUpdate[0].context.new.surname).toBe("Zeecat");
 
     });
@@ -247,9 +247,9 @@ describe("save", () => {
         record.surname = "Ledog";
 
         const savedRecord = await recordApi.save(record);
-        expect(await recordApi._storeHandle.exists(`${record.key()}/invoices/default/index.csv`)).toBeTruthy()
-        expect(await recordApi._storeHandle.exists(`${record.key()}/invoices/default`)).toBeTruthy()
-        expect(await recordApi._storeHandle.exists(`${record.key()}/invoices`)).toBeTruthy()
+        expect(await recordApi._storeHandle.exists(`${record.key}/invoices/default/index.csv`)).toBeTruthy()
+        expect(await recordApi._storeHandle.exists(`${record.key}/invoices/default`)).toBeTruthy()
+        expect(await recordApi._storeHandle.exists(`${record.key}/invoices`)).toBeTruthy()
     });
 
     it("should create index folder and shardMap for sharded reverse reference index", async () => {
@@ -258,8 +258,8 @@ describe("save", () => {
         record.surname = "Ledog";
 
         await recordApi.save(record);
-        expect(await recordApi._storeHandle.exists(`${record.key()}/referredToCustomers/shardMap.json`)).toBeTruthy();
-        expect(await recordApi._storeHandle.exists(`${record.key()}/referredToCustomers`)).toBeTruthy();
+        expect(await recordApi._storeHandle.exists(`${record.key}/referredToCustomers/shardMap.json`)).toBeTruthy();
+        expect(await recordApi._storeHandle.exists(`${record.key}/referredToCustomers`)).toBeTruthy();
     });
 
     it("should create folder for record", async () => {
@@ -268,8 +268,8 @@ describe("save", () => {
         record.surname = "Ledog";
 
         const savedRecord = await recordApi.save(record);
-        expect(await recordApi._storeHandle.exists(`${record.key()}`)).toBeTruthy();
-        expect(await recordApi._storeHandle.exists(`${record.key()}/record.json`)).toBeTruthy();
+        expect(await recordApi._storeHandle.exists(`${record.key}`)).toBeTruthy();
+        expect(await recordApi._storeHandle.exists(`${record.key}/record.json`)).toBeTruthy();
     });
 
     it("should create allids file", async () => {
@@ -279,7 +279,7 @@ describe("save", () => {
 
         await recordApi.save(record);
 
-        const allIdsPath = `/customers/allids/${appHeirarchy.customerRecord.recordNodeId}/${record.id()[2]}`;
+        const allIdsPath = `/customers/allids/${appHeirarchy.customerRecord.recordNodeId}/${record.id[2]}`;
         expect(await recordApi._storeHandle.exists(allIdsPath)).toBeTruthy();
         
     });

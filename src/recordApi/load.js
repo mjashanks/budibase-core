@@ -59,7 +59,7 @@ const _load = async (app, key, keyStack=[]) => {
     loadedRecord.isNew = false;
     loadedRecord.key = key;
     loadedRecord.id = $(key, [splitKey, last, constant]);
-    loadedRecord.type = type;
+    loadedRecord.type = recordNode.name;
     return loadedRecord;
 };
 

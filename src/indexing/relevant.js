@@ -9,7 +9,7 @@ import {getFlattenedHierarchy, isIndex,
 
 export const getRelevantHeirarchalIndexes = (appHeirarchy, record) => {
 
-    const key = record.key();
+    const key = record.key;
     const keyParts = splitKey(key);
     const recordNodeId = getRecordNodeId(key);
 
@@ -64,7 +64,7 @@ export const getRelevantHeirarchalIndexes = (appHeirarchy, record) => {
 };
 
 export const getRelevantReverseReferenceIndexes = (appHeirarchy, record) => 
-    $(record.key(), [
+    $(record.key, [
         getExactNodeForPath(appHeirarchy),
         n => n.fields,
         filter(f => f.type === "reference"

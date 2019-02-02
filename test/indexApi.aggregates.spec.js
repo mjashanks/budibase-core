@@ -112,7 +112,7 @@ const setup = async () => {
     await recordApi.save(customer);
 
     const createInvoice = async (totalAmount=10, paidAmount=0, type="Important", writtenOff=false) => {
-        const invoice = recordApi.getNew(`/customers/${customer.id()}/invoices`, "invoice");
+        const invoice = recordApi.getNew(`/customers/${customer.id}/invoices`, "invoice");
         invoice.totalIncVat = totalAmount;
         invoice.paidAmount = paidAmount;
         invoice.invoiceType = type;
@@ -120,7 +120,7 @@ const setup = async () => {
         return await recordApi.save(invoice);
     };
 
-    const invoicesByOutstandingKey = `/customers/${customer.id()}/invoices/invoicesByOutstanding`;
+    const invoicesByOutstandingKey = `/customers/${customer.id}/invoices/invoicesByOutstanding`;
 
     return {createInvoice, indexApi, invoicesByOutstandingKey};
 }

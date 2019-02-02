@@ -18,7 +18,7 @@ describe("buildIndex > Global index", () => {
         await recordApi.save(customer);
 
         const outstandingInvoice = recordApi.getNewChild(
-            customer.key(),
+            customer.key,
             "invoices",
             "invoice"
         );
@@ -29,7 +29,7 @@ describe("buildIndex > Global index", () => {
         await recordApi.save(outstandingInvoice);
 
         const paidInvoice = recordApi.getNewChild(
-            customer.key(),
+            customer.key,
             "invoices",
             "invoice"
         );
@@ -46,7 +46,7 @@ describe("buildIndex > Global index", () => {
         const indexItems = await indexApi.listItems(indexKey);
 
         expect(indexItems.length).toBe(1);
-        expect(indexItems[0].key).toBe(outstandingInvoice.key());
+        expect(indexItems[0].key).toBe(outstandingInvoice.key);
     });
 
     it("should index records from 2 seperate tree branches", async () => {
@@ -63,7 +63,7 @@ describe("buildIndex > Global index", () => {
         await recordApi.save(customer);
 
         const invoice = recordApi.getNewChild(
-            customer.key(),
+            customer.key,
             "invoices",
             "invoice"
         );
@@ -82,7 +82,7 @@ describe("buildIndex > Global index", () => {
         await recordApi.save(partner);
 
         const partnerInvoice = recordApi.getNewChild(
-            partner.key(),
+            partner.key,
             "invoices",
             "invoice"
         );
@@ -99,8 +99,8 @@ describe("buildIndex > Global index", () => {
         const indexItems = await indexApi.listItems(indexKey);
 
         expect(indexItems.length).toBe(2);
-        expect(indexItems[0].key).toBe(invoice.key());
-        expect(indexItems[1].key).toBe(partnerInvoice.key());
+        expect(indexItems[0].key).toBe(invoice.key);
+        expect(indexItems[1].key).toBe(partnerInvoice.key);
 
     });
 
@@ -122,7 +122,7 @@ describe("buildIndex > TopLevelCollection", () => {
         await recordApi.save(customer);
 
         const invoice = recordApi.getNewChild(
-            customer.key(),
+            customer.key,
             "invoices",
             "invoice"
         );
@@ -139,7 +139,7 @@ describe("buildIndex > TopLevelCollection", () => {
         const indexItems = await indexApi.listItems(indexKey);
 
         expect(indexItems.length).toBe(1);
-        expect(indexItems[0].key).toBe(invoice.key());
+        expect(indexItems[0].key).toBe(invoice.key);
 
     });
 
@@ -157,7 +157,7 @@ describe("buildIndex > TopLevelCollection", () => {
         await recordApi.save(partner);
 
         const invoice = recordApi.getNewChild(
-            partner.key(),
+            partner.key,
             "invoices",
             "invoice"
         );
@@ -196,7 +196,7 @@ describe("buildIndex > nested collection", () => {
         await recordApi.save(customer);
 
         const invoice = recordApi.getNewChild(
-            customer.key(),
+            customer.key,
             "invoices",
             "invoice"
         );
@@ -206,7 +206,7 @@ describe("buildIndex > nested collection", () => {
 
         await recordApi.save(invoice);
 
-        const indexKey = joinKey(customer.key(), "invoices", "default");
+        const indexKey = joinKey(customer.key, "invoices", "default");
         await indexApi.delete(indexKey);
 
         await indexApi.buildIndex(
@@ -214,7 +214,7 @@ describe("buildIndex > nested collection", () => {
         const indexItems = await indexApi.listItems(indexKey);
 
         expect(indexItems.length).toBe(1);
-        expect(indexItems[0].key).toBe(invoice.key());
+        expect(indexItems[0].key).toBe(invoice.key);
 
     });
 
@@ -233,7 +233,7 @@ describe("buildIndex > nested collection", () => {
         await recordApi.save(customer);
 
         const invoice = recordApi.getNewChild(
-            customer.key(),
+            customer.key,
             "invoices",
             "invoice"
         );
@@ -252,7 +252,7 @@ describe("buildIndex > nested collection", () => {
         await recordApi.save(customer2);
 
         const invoice2 = recordApi.getNewChild(
-            customer2.key(),
+            customer2.key,
             "invoices",
             "invoice"
         );
@@ -262,7 +262,7 @@ describe("buildIndex > nested collection", () => {
 
         await recordApi.save(invoice2);
 
-        const indexKey = joinKey(customer.key(), "invoices", "default");
+        const indexKey = joinKey(customer.key, "invoices", "default");
         await indexApi.delete(indexKey);
 
         await indexApi.buildIndex(
@@ -270,8 +270,8 @@ describe("buildIndex > nested collection", () => {
         const indexItems = await indexApi.listItems(indexKey);
 
         expect(indexItems.length).toBe(2);
-        expect(some(indexItems, i => i.key === invoice.key())).toBeTruthy();
-        expect(some(indexItems, i => i.key === invoice2.key())).toBeTruthy();
+        expect(some(indexItems, i => i.key === invoice.key)).toBeTruthy();
+        expect(some(indexItems, i => i.key === invoice2.key)).toBeTruthy();
 
     });
 
@@ -302,7 +302,7 @@ describe("buildIndex > sharded index", () => {
         const indexItems = await indexApi.listItems(indexKey);
 
         expect(indexItems.length).toBe(1);
-        expect(indexItems[0].key).toBe(customer.key());
+        expect(indexItems[0].key).toBe(customer.key);
 
     });
 
@@ -333,8 +333,8 @@ describe("buildIndex > sharded index", () => {
         const indexItems = await indexApi.listItems(indexKey);
 
         expect(indexItems.length).toBe(2);
-        expect(some(indexItems, i => i.key === customer1.key())).toBeTruthy();
-        expect(some(indexItems, i => i.key === customer2.key())).toBeTruthy();
+        expect(some(indexItems, i => i.key === customer1.key)).toBeTruthy();
+        expect(some(indexItems, i => i.key === customer2.key)).toBeTruthy();
 
     });
 
@@ -350,7 +350,7 @@ describe("buildIndex > sharded index", () => {
         await recordApi.save(customer);
 
         const invoiceCollectionKey = joinKey(
-            customer.key(), "invoices");
+            customer.key, "invoices");
 
         const invoice1 = recordApi.getNew(
             invoiceCollectionKey,
@@ -379,8 +379,8 @@ describe("buildIndex > sharded index", () => {
         const indexItems = await indexApi.listItems(indexKey);
 
         expect(indexItems.length).toBe(2);
-        expect(some(indexItems, i => i.key === invoice1.key())).toBeTruthy();
-        expect(some(indexItems, i => i.key === invoice2.key())).toBeTruthy();
+        expect(some(indexItems, i => i.key === invoice1.key)).toBeTruthy();
+        expect(some(indexItems, i => i.key === invoice2.key)).toBeTruthy();
 
         const outstandingRange = {totalIncVat:1, paidAmount:0};
         const outstandingItems = await indexApi.listItems(indexKey, {
@@ -404,13 +404,13 @@ describe("buildIndex > sharded index", () => {
         const referencingCustomer = recordApi.getNew("/customers", "customer");
         referencingCustomer.surname = "Ledog";
         referencingCustomer.referredBy = {
-            key: referencedCustomer.key(), value: referencedCustomer.surname
+            key: referencedCustomer.key, value: referencedCustomer.surname
         };
         referencingCustomer.isalive = true;
 
         await recordApi.save(referencingCustomer);
 
-        const indexKey = joinKey(referencedCustomer.key(), "referredToCustomers");
+        const indexKey = joinKey(referencedCustomer.key, "referredToCustomers");
 
         await indexApi.delete(indexKey);
 
@@ -420,7 +420,7 @@ describe("buildIndex > sharded index", () => {
         const indexItems = await indexApi.listItems(indexKey);
 
         expect(indexItems.length).toBe(1);
-        expect(some(indexItems, i => i.key === referencingCustomer.key())).toBeTruthy();
+        expect(some(indexItems, i => i.key === referencingCustomer.key)).toBeTruthy();
     });
 
 });
@@ -440,13 +440,13 @@ describe("buildIndex > reverse reference index", () => {
         const customer = recordApi.getNew("/customers", "customer");
         customer.surname = "Ledog";
         customer.partner = {
-            key: partner1.key(), value: partner1.businessName
+            key: partner1.key, value: partner1.businessName
         };
         customer.isalive = true;
 
         await recordApi.save(customer);
 
-        const indexKey = joinKey(partner1.key(), "partnerCustomers");
+        const indexKey = joinKey(partner1.key, "partnerCustomers");
 
         await indexApi.delete(indexKey);
 
@@ -455,7 +455,7 @@ describe("buildIndex > reverse reference index", () => {
         const indexItems = await indexApi.listItems(indexKey);
 
         expect(indexItems.length).toBe(1);
-        expect(some(indexItems, i => i.key === customer.key())).toBeTruthy();
+        expect(some(indexItems, i => i.key === customer.key)).toBeTruthy();
     });
 
     it("should build multiple records into an index, when referencing same record", async () => {
@@ -471,7 +471,7 @@ describe("buildIndex > reverse reference index", () => {
         const customer1 = recordApi.getNew("/customers", "customer");
         customer1.surname = "Ledog";
         customer1.partner = {
-            key: partner1.key(), value: partner1.businessName
+            key: partner1.key, value: partner1.businessName
         };
         customer1.isalive = true;
 
@@ -480,13 +480,13 @@ describe("buildIndex > reverse reference index", () => {
         const customer2 = recordApi.getNew("/customers", "customer");
         customer2.surname = "Zeecat";
         customer2.partner = {
-            key: partner1.key(), value: partner1.businessName
+            key: partner1.key, value: partner1.businessName
         };
         customer2.isalive = true;
 
         await recordApi.save(customer2);
 
-        const indexKey = joinKey(partner1.key(), "partnerCustomers");
+        const indexKey = joinKey(partner1.key, "partnerCustomers");
 
         await indexApi.delete(indexKey);
 
@@ -495,8 +495,8 @@ describe("buildIndex > reverse reference index", () => {
         const indexItems = await indexApi.listItems(indexKey);
 
         expect(indexItems.length).toBe(2);
-        expect(some(indexItems, i => i.key === customer1.key())).toBeTruthy();
-        expect(some(indexItems, i => i.key === customer2.key())).toBeTruthy();
+        expect(some(indexItems, i => i.key === customer1.key)).toBeTruthy();
+        expect(some(indexItems, i => i.key === customer2.key)).toBeTruthy();
     });
 
 
@@ -517,7 +517,7 @@ describe("buildIndex > reverse reference index", () => {
         const customer1 = recordApi.getNew("/customers", "customer");
         customer1.surname = "Ledog";
         customer1.partner = {
-            key: partner1.key(), value: partner1.businessName
+            key: partner1.key, value: partner1.businessName
         };
         customer1.isalive = true;
 
@@ -526,14 +526,14 @@ describe("buildIndex > reverse reference index", () => {
         const customer2 = recordApi.getNew("/customers", "customer");
         customer2.surname = "Zeecat";
         customer2.partner = {
-            key: partner2.key(), value: partner1.businessName
+            key: partner2.key, value: partner1.businessName
         };
         customer2.isalive = true;
 
         await recordApi.save(customer2);
 
-        const indexKey1 = joinKey(partner1.key(), "partnerCustomers");
-        const indexKey2 = joinKey(partner2.key(), "partnerCustomers");
+        const indexKey1 = joinKey(partner1.key, "partnerCustomers");
+        const indexKey2 = joinKey(partner2.key, "partnerCustomers");
 
         await indexApi.delete(indexKey1);
 
@@ -545,12 +545,12 @@ describe("buildIndex > reverse reference index", () => {
         const indexItems1 = await indexApi.listItems(indexKey1);
 
         expect(indexItems1.length).toBe(1);
-        expect(some(indexItems1, i => i.key === customer1.key())).toBeTruthy();
+        expect(some(indexItems1, i => i.key === customer1.key)).toBeTruthy();
 
         const indexItems2 = await indexApi.listItems(indexKey2);
 
         expect(indexItems2.length).toBe(1);
-        expect(some(indexItems2, i => i.key === customer2.key())).toBeTruthy();
+        expect(some(indexItems2, i => i.key === customer2.key)).toBeTruthy();
     });
 
     it.skip("should build record into index, when referencing and referenced records are in multiple nested collections", async () => {
@@ -563,7 +563,7 @@ describe("buildIndex > reverse reference index", () => {
         //  "/partners/<id>/invoices/default"
         // 
         // To work as intended, we would need to somehow find the index by:
-        //  - customer.partner.key() + /invoices/default
+        //  - customer.partner.key + /invoices/default
         // bearing in mind that the customer is an ancestor.
 
         const {recordApi, indexApi, appHeirarchy} = 
@@ -576,7 +576,7 @@ describe("buildIndex > reverse reference index", () => {
         await recordApi.save(partner);
 
         const partnerInvoice = recordApi.getNew(
-            joinKey(partner.key(), "invoices"), "invoice"
+            joinKey(partner.key, "invoices"), "invoice"
         );
         await recordApi.save(partnerInvoice);
  
@@ -586,20 +586,20 @@ describe("buildIndex > reverse reference index", () => {
         await recordApi.save(customer);
 
         const customerInvoice = recordApi.getNew(
-            joinKey(customer.key(), "invoices"), "invoice"
+            joinKey(customer.key, "invoices"), "invoice"
         );
         await recordApi.save(customerInvoice);
 
         const charge = recordApi.getNew(
-            joinKey(customerInvoice.key(), "charges"), "charge"
+            joinKey(customerInvoice.key, "charges"), "charge"
         );
         charge.partnerInvoice = {
-            key: partnerInvoice.key(), createdDate: "something"
+            key: partnerInvoice.key, createdDate: "something"
         };
         await recordApi.save(charge);
 
 
-        const indexKey = joinKey(partnerInvoice.key(), "partnerCharges");
+        const indexKey = joinKey(partnerInvoice.key, "partnerCharges");
 
         await indexApi.delete(indexKey);
 
@@ -609,7 +609,7 @@ describe("buildIndex > reverse reference index", () => {
         const indexItems = await indexApi.listItems(indexKey);
 
         expect(indexItems.length).toBe(1);
-        expect(some(indexItems, i => i.key === charge.key())).toBeTruthy();
+        expect(some(indexItems, i => i.key === charge.key)).toBeTruthy();
     });
 
 });

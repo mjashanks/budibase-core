@@ -18,12 +18,11 @@ export const save = (app,indexingApi) => async (record, context) =>
         app,
         events.recordApi.save, 
         {record},
-        _save, app,indexingApi, record, context, false);
+        _save, app, record, context, false);
 
 
-const _save = async (app,indexingApi, record, context, skipValidation=false) => {
+const _save = async (app, record, context, skipValidation=false) => {
     const recordClone = cloneDeep(record);
-
     if(!skipValidation) {
         const validationResult = await validate(app)
                                         (recordClone, context);
@@ -37,7 +36,6 @@ const _save = async (app,indexingApi, record, context, skipValidation=false) => 
 
     const returnedClone = cloneDeep(record);
 
-    recordClone.type = record.type();
     if(recordClone.isNew) {
         await app.datastore.createFolder(recordClone.key)
         await app.datastore.createJson(

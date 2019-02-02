@@ -5,6 +5,7 @@ import {$, allTrue, joinKey} from "../common";
 import {filter} from "lodash/fp";
 import getIndexing from "../indexing";
 import {getShardMapKey, getUnshardedIndexDataKey} from "../indexing/sharding";
+import {TRANSACTIONS_FOLDER} from "../transactions/create";
 
 export const initialiseIndex = async (app, parentKey, index) => {
     const indexKey = joinKey(parentKey, index.name);
@@ -79,6 +80,8 @@ export const initialiseAll = app => async () => {
         if(!await app.datastore.exists(index.nodeKey()))
             await initialiseIndex(app, "", index);
     }
+
+    await app.datastore.createFolder(TRANSACTIONS_FOLDER);
 };
 
 export const initialiseChildCollections = async (app, recordKey) => {

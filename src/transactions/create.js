@@ -29,9 +29,9 @@ export const isCreate = isOfType(CREATE_RECORD_TRANSACTION);
 const transaction = async (datastore, transactionType, data) => {
 
     const recordId = transactionType === CREATE_RECORD_TRANSACTION
-                     ? data.record.id()
+                     ? data.record.id
                      : transactionType === UPDATE_RECORD_TRANSACTION
-                     ? data.newRecord.id()
+                     ? data.newRecord.id
                      : transactionType === DELETE_RECORD_TRANSACTION 
                      ? getLastPartInKey(data.key) 
                      : "really this should not happen";

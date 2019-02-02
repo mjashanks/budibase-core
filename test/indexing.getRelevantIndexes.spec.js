@@ -60,7 +60,7 @@ describe("getRelevantIndexes", () => {
             basicAppHeirarchyCreator_WithFields_AndIndexes);
         
         const customer = recordApi.getNew("/customers", "customer");
-        const invoice = recordApi.getNew(joinKey(customer.key(), "invoices"), "invoice");
+        const invoice = recordApi.getNew(joinKey(customer.key, "invoices"), "invoice");
 
         const indexes = getRelevantHeirarchalIndexes(
             appHeirarchy.root, invoice);
@@ -113,7 +113,7 @@ describe("getRelevantIndexes", () => {
         //await recordApi.save(partner);
 
         const customer = recordApi.getNew("/customers", "customer");
-        customer.partner = {key:partner.key(), value:partner.businessName};
+        customer.partner = {key:partner.key, value:partner.businessName};
         //await recordApi.save(customer);
         
         
@@ -121,7 +121,7 @@ describe("getRelevantIndexes", () => {
             appHeirarchy.root, customer);
         expect(indexes.length).toBe(1);
         expect(indexes[0].indexKey)
-        .toBe(joinKey(partner.key(), appHeirarchy.partnerCustomersReverseIndex.name));
+        .toBe(joinKey(partner.key, appHeirarchy.partnerCustomersReverseIndex.name));
 
 
     });
@@ -134,12 +134,12 @@ describe("getRelevantIndexes", () => {
         referredByCustomer.surname = "ledog";
 
         const referredToCustomer = recordApi.getNew("/customers", "customer");
-        referredToCustomer.referredBy = {key:referredByCustomer.key(), value:"ledog"};        
+        referredToCustomer.referredBy = {key:referredByCustomer.key, value:"ledog"};        
         
         const indexes = getRelevantReverseReferenceIndexes(
             appHeirarchy.root, referredToCustomer);
         expect(indexes.length).toBe(1);
         expect(indexes[0].indexKey)
-        .toBe(joinKey(referredByCustomer.key(), appHeirarchy.referredToCustomersReverseIndex.name));
+        .toBe(joinKey(referredByCustomer.key, appHeirarchy.referredToCustomersReverseIndex.name));
     });
 });

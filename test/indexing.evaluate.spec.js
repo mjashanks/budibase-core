@@ -18,7 +18,7 @@ describe("index evaluation", () => {
     it("should filter out when object does not pass filter", () => {
         
         const index = {
-            filter : "record.type() === 'customer'",
+            filter : "record.type === 'customer'",
             fields: {
                 type : {type:"string"}
             }
@@ -37,7 +37,7 @@ describe("index evaluation", () => {
     it("should always include key with the record", () => {
         
         const index = {
-            filter : "record.type() === 'customer'",
+            filter : "record.type === 'customer'",
             fields: {
                 type : {type:"string"}
             }
@@ -47,7 +47,7 @@ describe("index evaluation", () => {
             type : constant("customer")
         });
 
-        const key = record.key();
+        const key = record.key;
 
         const result = evaluate(record)(index);
         expect(result.isError).toBe(false);
@@ -58,7 +58,7 @@ describe("index evaluation", () => {
 
     it("should map when filter test is passed", () => {
         const index = {
-            filter : "record.type() === 'customer'",
+            filter : "record.type === 'customer'",
             map: "return {newName: record.name + 'by', email: record.email }",
             fields: {
                 newName : {type:"string"},
@@ -100,7 +100,7 @@ describe("index evaluation", () => {
 
     it("should return all declared fields when no map supplied", () => {
         const index = {
-            filter : "record.type() === 'customer'",
+            filter : "record.type === 'customer'",
             fields : {
                 type: {type:"string"},
                 name: {type:"string"}

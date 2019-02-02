@@ -11,11 +11,11 @@ describe("recordApi > delete", () => {
         record.surname = "Ledog";
     
         await recordApi.save(record);
-        await recordApi.delete(record.key());
+        await recordApi.delete(record.key);
 
         const remainingKeys = $(recordApi._storeHandle.data, [
             keys,
-            filter(k => k.startsWith(record.key()))
+            filter(k => k.startsWith(record.key))
         ]);
         
         expect(remainingKeys).toEqual([]);
@@ -30,14 +30,14 @@ describe("recordApi > delete", () => {
     
         await recordApi.save(record);
 
-        const invoice = recordApi.getNew(`${record.key()}/invoices`, "invoice");
+        const invoice = recordApi.getNew(`${record.key}/invoices`, "invoice");
         await recordApi.save(invoice);
 
-        await recordApi.delete(record.key());
+        await recordApi.delete(record.key);
 
         const remainingKeys = $(recordApi._storeHandle.data, [
             keys,
-            filter(k => k.startsWith(record.key()))
+            filter(k => k.startsWith(record.key))
         ]);
         
         expect(remainingKeys).toEqual([]);

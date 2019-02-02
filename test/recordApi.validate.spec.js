@@ -261,7 +261,7 @@ describe("recordApi > validate", () => {
         );
         expect(onInvalid.length).toBe(1);
         expect(onInvalid[0].context.record).toBeDefined();
-        expect(onInvalid[0].context.record.key()).toBe(record.key());
+        expect(onInvalid[0].context.record.key).toBe(record.key);
         expect(onInvalid[0].context.validationResult).toBeDefined();
     });
 

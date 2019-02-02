@@ -1,12 +1,27 @@
 import {isUndefined, has} from "lodash";
+import {take} from "lodash/fp";
 import {Readable, Writable} from "readable-stream";
 import { Buffer } from "safe-buffer";
+import {splitKey, joinKey, $} from "../src/common"; 
 
-const folderMarker = "-FOLDER-";
-const isFolder = val => val === folderMarker;
+const folderMarker = "OH-YES-ITSA-FOLDER-";
+const isFolder = val => val.includes(folderMarker);
+
+const getParentFolderKey = key => 
+    $(key, [
+        splitKey,
+        take((splitKey(key).length - 1)),
+        joinKey,
+    ]);
+
+const getParentFolder = (data,key) => 
+    JSON.parse(data[getParentFolderKey(key)]);
 
 export const createFile = data => async (path, content) => {
     if(await exists(data)(path)) throw new Error(path + " already exists");
+    const parentFolder = getParentFolder(data, path);
+    parentFolder.items.push(path);
+    data[getParentFolderKey(key)] = JSON.stringify(parentFolder);
     data[path] = content;
 };
 export const updateFile = data => async (path, content) => {
@@ -55,11 +70,14 @@ export const deleteFile = data => async (path) => {
     if(!await exists(data)(path)) 
         throw new Error("Cannot delete file, path " + path + " does not exist");
     if(isFolder(data[path])) throw new Error("DeleteFile: Path " + path + " is a folder, not a file");
+    const parentFolder = getParentFolder(data, path);
+    parentFolder.items = parentFolder.items.filter(i => i !== path);
+    data[getParentFolderKey(path)] = JSON.stringify(parentFolder);
     delete data[path];
 }
 export const createFolder = data => async (path) => {
     if(await exists(data)(path)) throw new Error("Cannot create folder, path " + path + " already exists");
-    data[path] = folderMarker; // does nothing really
+    data[path] = JSON.stringify({folderMarker, items:[]});
 }
 export const deleteFolder = data => async (path) => {
     if(!await exists(data)(path)) throw new Error("Cannot delete folder, path " + path + " does not exist");
@@ -67,6 +85,14 @@ export const deleteFolder = data => async (path) => {
         throw new Error("DeleteFolder: Path " + path + " is not a folder");
     delete data[path];
 } 
+
+export const getFolderContents = data => async (folderPath) => { 
+    if(!isFolder(folderPath)) 
+        throw new Error("Not a folder: " + folderPath);
+    if(!await exists(data)(folderPath))
+        throw new Error("Folder does not exist: " + folderPath);
+    return JSON.stringify(data[folderPath]).items;
+};
 
 export default data => {
     return {
@@ -80,6 +106,7 @@ export default data => {
         readableFileStream: readableFileStream(data),
         writableFileStream: writableFileStream(data),
         renameFile: renameFile(data),
+        getFolderContents: getFolderContents(data),
         datastoreType : "memory",
         datastoreDescription: "",
         data 

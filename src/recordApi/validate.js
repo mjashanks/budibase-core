@@ -56,10 +56,10 @@ const runRecordValidationRules = (record, recordNode) => {
 
 export const validate = app => async (record, context) => {
     context = isNothing(context) 
-              ? getContext(app)(record.key())
+              ? getContext(app)(record.key)
               : context;
 
-    const recordNode = getExactNodeForPath(app.heirarchy)(record.key());
+    const recordNode = getExactNodeForPath(app.heirarchy)(record.key);
     const fieldParseFails =  validateAllFieldParse(record, recordNode);
     
     // non parsing would cause further issues - exit here

@@ -24,7 +24,7 @@ describe("recordApi > create > reindex", () => {
         expect(items.length).toBe(1);
         expect(items[0].surname).toBe("Ledog");
         expect(items[0].key).toBeDefined();
-        expect(items[0].key).toEqual(record.key());
+        expect(items[0].key).toEqual(record.key);
     });
 
     it("should add to index with filter, when record created and passes filter", async () => {
@@ -45,7 +45,7 @@ describe("recordApi > create > reindex", () => {
         expect(items.length).toBe(1);
         expect(items[0].surname).toBe("Ledog");
         expect(items[0].key).toBeDefined();
-        expect(items[0].key).toEqual(record.key());
+        expect(items[0].key).toEqual(record.key);
     });
 
     it("should not add to index with filter, when record created and fails filter", async () => {
@@ -74,7 +74,7 @@ describe("recordApi > create > reindex", () => {
         const customer = recordApi.getNew("/customers", "customer");
         await recordApi.save(customer);
         
-        const invoicesCollectionKey = joinKey(customer.key(), "invoices");
+        const invoicesCollectionKey = joinKey(customer.key, "invoices");
         const invoice = recordApi.getNew(invoicesCollectionKey, "invoice");
         invoice.totalIncVat = 10.5;
         invoice.createdDate = new Date();
@@ -124,12 +124,12 @@ describe("recordApi > create > reindex", () => {
         referredCustomer.isalive = true,
         referredCustomer.createdDate = new Date();
         referredCustomer.referredBy = {
-            key:referredByCustomer.key(), 
+            key:referredByCustomer.key, 
             value:referredByCustomer.surname};
         await recordApi.save(referredCustomer);
 
         const customersReferredTo = await indexApi.listItems(
-            joinKey(referredByCustomer.key(), "referredToCustomers")
+            joinKey(referredByCustomer.key, "referredToCustomers")
         );
 
         expect(isArray(customersReferredTo)).toBeTruthy();
@@ -154,10 +154,10 @@ describe("recordApi > create > reindex", () => {
 
         expect(items.length).toBe(2);
         expect(items[0].surname).toBe("Ledog");
-        expect(items[0].key).toEqual(record1.key());
+        expect(items[0].key).toEqual(record1.key);
 
         expect(items[1].surname).toBe("Zeecat");
-        expect(items[1].key).toEqual(record2.key());
+        expect(items[1].key).toEqual(record2.key);
     });
 
 });
@@ -175,7 +175,7 @@ describe("recordApi > delete > reindex", () => {
         record.createddate = new Date();
 
         await recordApi.save(record);
-        await recordApi.delete(record.key());
+        await recordApi.delete(record.key);
 
         const itemsAfterDelete= await collectionApi.listRecords("/customers/default");
         expect(itemsAfterDelete.length).toBe(0);
@@ -194,7 +194,7 @@ describe("recordApi > delete > reindex", () => {
         record2.surname = "Zeecat";
         await recordApi.save(record2);
 
-        await recordApi.delete(record1.key());
+        await recordApi.delete(record1.key);
 
         const itemsAfterDelete= await collectionApi.listRecords("/customers/customersBySurname");
         expect(itemsAfterDelete.length).toBe(1);
@@ -215,12 +215,12 @@ describe("recordApi > delete > reindex", () => {
         record.age = 9;
         record.createddate = new Date();
         record.referredBy = {
-            key: referredBy.key(),
+            key: referredBy.key,
             value: referredBy.surname
         };
 
         await recordApi.save(record);
-        await recordApi.delete(record.key());
+        await recordApi.delete(record.key);
 
         const itemsAfterDelete= await collectionApi.listRecords("/customers/default");
         expect(itemsAfterDelete.length).toBe(1);
@@ -230,7 +230,7 @@ describe("recordApi > delete > reindex", () => {
         expect(deceasedItemsAfterDelete.length).toBe(0);
 
         const referredToItemsAfterDelete = 
-            await collectionApi.listRecords(`${referredBy.key()}/referredToCustomers`);
+            await collectionApi.listRecords(`${referredBy.key}/referredToCustomers`);
         expect(referredToItemsAfterDelete.length).toBe(0);
 
     });
@@ -255,7 +255,7 @@ describe("recordApi > delete > reindex", () => {
 
         await recordApi.save(otherRecord);
 
-        await recordApi.delete(record.key());
+        await recordApi.delete(record.key);
 
         const itemsAfterDelete= await collectionApi.listRecords("/customers/default");
         expect(itemsAfterDelete.length).toBe(1);
@@ -277,7 +277,7 @@ describe("recordApi > delete > reindex", () => {
         customer.isalive = true,
         customer.createdDate = new Date();
         await recordApi.save(customer);
-        await recordApi.delete(customer.key());
+        await recordApi.delete(customer.key);
         const customers = await indexApi.listItems("/customersReference");
 
         expect(isArray(customers)).toBeTruthy();
@@ -299,7 +299,7 @@ describe("recordApi > update > reindex", () => {
 
         await recordApi.save(record);
 
-        const loadedRecord = await recordApi.load(record.key());
+        const loadedRecord = await recordApi.load(record.key);
         loadedRecord.surname = "Zeedog";
         await recordApi.save(loadedRecord);
 
@@ -316,7 +316,7 @@ describe("recordApi > update > reindex", () => {
         record.surname = "Ledog";
         await recordApi.save(record);
 
-        const loadedRecord = await recordApi.load(record.key());
+        const loadedRecord = await recordApi.load(record.key);
         loadedRecord.surname = "Zeedog";
         await recordApi.save(loadedRecord);
 
@@ -346,7 +346,7 @@ describe("recordApi > update > reindex", () => {
 
         await recordApi.save(otherRecord);
 
-        const loadedRecord = await recordApi.load(record.key());
+        const loadedRecord = await recordApi.load(record.key);
         loadedRecord.surname = "Zeedog";
         await recordApi.save(loadedRecord);
 
@@ -372,7 +372,7 @@ describe("recordApi > update > reindex", () => {
         customer.createdDate = new Date();
         await recordApi.save(customer);
 
-        const loadedCustomer = await recordApi.load(customer.key());
+        const loadedCustomer = await recordApi.load(customer.key);
         loadedCustomer.surname = "Zeecat";
         await recordApi.save(loadedCustomer);
 
@@ -397,23 +397,23 @@ describe("recordApi > update > reindex", () => {
         const customer = recordApi.getNew("/customers", "customer");
         customer.surname = "Ledog";
         customer.partner = {
-            key: partner1.key(), value: partner1.businessName
+            key: partner1.key, value: partner1.businessName
         };
 
         const customerSaved = await recordApi.save(customer);
 
         customerSaved.partner = {
-            key: partner2.key(), value: partner2.businessName
+            key: partner2.key, value: partner2.businessName
         };
 
         await recordApi.save(customerSaved);
 
         const partner1Customer = 
-            await indexApi.listItems(`${partner1.key()}/partnerCustomers`);
+            await indexApi.listItems(`${partner1.key}/partnerCustomers`);
         expect(partner1Customer.length).toBe(0);
 
         const partner2Customer = 
-            await indexApi.listItems(`${partner2.key()}/partnerCustomers`);
+            await indexApi.listItems(`${partner2.key}/partnerCustomers`);
         expect(partner2Customer.length).toBe(1);
     });
 
@@ -428,7 +428,7 @@ describe("recordApi > update > reindex", () => {
         const customer = recordApi.getNew("/customers", "customer");
         customer.surname = "Ledog";
         customer.partner = {
-            key: partner1.key(), value: partner1.businessName
+            key: partner1.key, value: partner1.businessName
         };
 
         const customerSaved = await recordApi.save(customer);
@@ -440,7 +440,7 @@ describe("recordApi > update > reindex", () => {
         await recordApi.save(customerSaved);
 
         const partner1Customer = 
-            await indexApi.listItems(`${partner1.key()}/partnerCustomers`);
+            await indexApi.listItems(`${partner1.key}/partnerCustomers`);
         expect(partner1Customer.length).toBe(0);
     });
 
@@ -455,7 +455,7 @@ describe("recordApi > update > reindex", () => {
         const customer = recordApi.getNew("/customers", "customer");
         customer.surname = "Ledog";
         customer.partner = {
-            key: partner1.key(), value: partner1.businessName
+            key: partner1.key, value: partner1.businessName
         };
 
         const customerSaved = await recordApi.save(customer);
@@ -465,7 +465,7 @@ describe("recordApi > update > reindex", () => {
         await recordApi.save(customerSaved);
 
         const partner1Customer = 
-            await indexApi.listItems(`${partner1.key()}/partnerCustomers`);
+            await indexApi.listItems(`${partner1.key}/partnerCustomers`);
         expect(partner1Customer.length).toBe(0);
     });
 
@@ -480,14 +480,14 @@ describe("recordApi > update > reindex", () => {
         const customer = recordApi.getNew("/customers", "customer");
         customer.surname = "Ledog";
         customer.partner = {
-            key: partner1.key(), value: partner1.businessName
+            key: partner1.key, value: partner1.businessName
         };
         customer.isalive = false;
 
         await recordApi.save(customer);
 
         const partner1Customer = 
-            await indexApi.listItems(`${partner1.key()}/partnerCustomers`);
+            await indexApi.listItems(`${partner1.key}/partnerCustomers`);
         expect(partner1Customer.length).toBe(0);
     });
 
@@ -507,24 +507,24 @@ describe("recordApi > update > reindex", () => {
         const customer = recordApi.getNew("/customers", "customer");
         customer.surname = "Ledog";
         customer.partner = {
-            key: partner1.key(), value: partner1.businessName
+            key: partner1.key, value: partner1.businessName
         };
 
         const customerSaved = await recordApi.save(customer);
 
         customerSaved.partner = {
-            key: partner2.key(), value: partner2.businessName
+            key: partner2.key, value: partner2.businessName
         };
         customerSaved.isalive = false;
 
         await recordApi.save(customerSaved);
 
         const partner1Customer = 
-            await indexApi.listItems(`${partner1.key()}/partnerCustomers`);
+            await indexApi.listItems(`${partner1.key}/partnerCustomers`);
         expect(partner1Customer.length).toBe(0);
 
         const partner2Customer = 
-            await indexApi.listItems(`${partner2.key()}/partnerCustomers`);
+            await indexApi.listItems(`${partner2.key}/partnerCustomers`);
         expect(partner2Customer.length).toBe(0);
     });
 
@@ -543,25 +543,25 @@ describe("recordApi > update > reindex", () => {
         const customer = recordApi.getNew("/customers", "customer");
         customer.surname = "Ledog";
         customer.partner = {
-            key: partner1.key(), value: partner1.businessName
+            key: partner1.key, value: partner1.businessName
         };
         customer.isalive = false;
 
         const customerSaved = await recordApi.save(customer);
 
         customerSaved.partner = {
-            key: partner2.key(), value: partner2.businessName
+            key: partner2.key, value: partner2.businessName
         };
         customerSaved.isalive = true;
 
         await recordApi.save(customerSaved);
 
         const partner1Customer = 
-            await indexApi.listItems(`${partner1.key()}/partnerCustomers`);
+            await indexApi.listItems(`${partner1.key}/partnerCustomers`);
         expect(partner1Customer.length).toBe(0);
 
         const partner2Customer = 
-            await indexApi.listItems(`${partner2.key()}/partnerCustomers`);
+            await indexApi.listItems(`${partner2.key}/partnerCustomers`);
         expect(partner2Customer.length).toBe(1);
     });
 
@@ -581,13 +581,13 @@ describe("referenced object changed", async () => {
         const customer = recordApi.getNew("/customers", "customer");
         customer.surname = "Ledog";
         customer.partner = {
-            key: partner1.key(), value: partner1.businessName
+            key: partner1.key, value: partner1.businessName
         };
         await recordApi.save(customer);
         savedPartner.businessName = "A.C.M.E Inc";
         await recordApi.save(savedPartner);
 
-        const updatedCustomer = await recordApi.load(customer.key());
+        const updatedCustomer = await recordApi.load(customer.key);
 
         expect(updatedCustomer.partner.name).toBe(savedPartner.businessName);
     });

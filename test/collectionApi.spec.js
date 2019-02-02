@@ -100,8 +100,8 @@ describe("collectionApi > allids", () => {
         }
 
         expect(allIds.length).toBe(2);
-        expect(includes(allIds, customer1.id())).toBeTruthy();
-        expect(includes(allIds, customer2.id())).toBeTruthy();
+        expect(includes(allIds, customer1.id)).toBeTruthy();
+        expect(includes(allIds, customer2.id)).toBeTruthy();
         
     });
 
@@ -121,7 +121,7 @@ describe("collectionApi > allids", () => {
         
         await recordApi.save(customer2);
         
-        await recordApi.delete(customer1.key());
+        await recordApi.delete(customer1.key);
 
         const allIdsIterator = await collectionApi.getAllIdsIterator("/customers");
         let allIds = [];
@@ -133,7 +133,7 @@ describe("collectionApi > allids", () => {
         }
 
         expect(allIds.length).toBe(1);
-        expect(includes(allIds, customer2.id())).toBeTruthy();
+        expect(includes(allIds, customer2.id)).toBeTruthy();
         
     });
 
@@ -148,7 +148,7 @@ describe("collectionApi > allids", () => {
             const customer = await recordApi.getNew(
                 appHeirarchy.customersCollection.nodeKey(), "customer");
             customer.surname = "thedog";   
-            const id = `${appHeirarchy.customerRecord.recordNodeId}-${c}${customer.id().replace("0-","")}`;
+            const id = `${appHeirarchy.customerRecord.recordNodeId}-${c}${customer.id.replace("0-","")}`;
             customer.id = () => id;
             await recordApi.save(customer); 
         }        
@@ -176,7 +176,7 @@ describe("collectionApi > allids", () => {
         await recordApi.save(customer);
         
         const invoiceCollectionKey = joinKey(
-            customer.key(), "invoices"
+            customer.key, "invoices"
         );
 
         const invoice = await recordApi.getNew(
@@ -196,7 +196,7 @@ describe("collectionApi > allids", () => {
         }
 
         expect(allIds.length).toBe(1);
-        expect(includes(allIds, invoice.id())).toBeTruthy();
+        expect(includes(allIds, invoice.id)).toBeTruthy();
         
     });
 
@@ -211,7 +211,7 @@ describe("collectionApi > allids", () => {
         await recordApi.save(customer);
         
         const invoiceCollectionKey = joinKey(
-            customer.key(), "invoices"
+            customer.key, "invoices"
         );
 
         const invoice = await recordApi.getNew(
@@ -220,7 +220,7 @@ describe("collectionApi > allids", () => {
         await recordApi.save(invoice);
 
         const chargeCollectionKey = joinKey(
-            invoice.key(), "charges"
+            invoice.key, "charges"
         );
 
         const charge = await recordApi.getNew(
@@ -240,7 +240,7 @@ describe("collectionApi > allids", () => {
         }
 
         expect(allIds.length).toBe(1);
-        expect(includes(allIds, charge.id())).toBeTruthy();
+        expect(includes(allIds, charge.id)).toBeTruthy();
     });
 
 });

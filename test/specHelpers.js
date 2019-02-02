@@ -198,11 +198,11 @@ export const withIndexes = (heirarchy, templateApi) => {
     const customerInvoicesIndex = getNewIndexTemplate(customersCollection);
     customerInvoicesIndex.name = "invoices";
     customerInvoicesIndex.map = "return record;";
-    customerInvoicesIndex.filter = "record.type() === 'invoice'";
+    customerInvoicesIndex.filter = "record.type === 'invoice'";
 
     const outstandingInvoicesIndex = getNewIndexTemplate(root);
     outstandingInvoicesIndex.name = "Outstanding Invoices";
-    outstandingInvoicesIndex.filter = "record.type() === 'invoice' && record.paidAmount < record.totalIncVat";
+    outstandingInvoicesIndex.filter = "record.type === 'invoice' && record.paidAmount < record.totalIncVat";
     outstandingInvoicesIndex.map = "return {...record};";
 
     const allInvoicesAggregateGroup = templateApi.getNewAggregateGroupTemplate(outstandingInvoicesIndex);
@@ -341,7 +341,7 @@ export const createValidActionsAndTriggers = () => {
     timeCustomerSaveTrigger.actionName = "measureCallTime";
     timeCustomerSaveTrigger.eventName = "recordApi:save:onComplete";
     timeCustomerSaveTrigger.optionsCreator = "return 999;";
-    timeCustomerSaveTrigger.condition = "context.record.type() === 'customer'";
+    timeCustomerSaveTrigger.condition = "context.record.type === 'customer'";
 
     const allActions = [logMessage, measureCallTime, sendEmail];
     const allTriggers = [logOnErrorTrigger, timeCustomerSaveTrigger];

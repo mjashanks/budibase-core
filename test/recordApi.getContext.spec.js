@@ -15,13 +15,13 @@ describe("recordApi > getContext", () => {
         customer.isalive = true;
         await recordApi.save(customer);
 
-        const invoiceCollectionKey = joinKey(customer.key(), "invoices");
+        const invoiceCollectionKey = joinKey(customer.key, "invoices");
         const invoice = recordApi.getNew(invoiceCollectionKey, "invoice");
         
-        const context = await recordApi.getContext(invoice.key());
+        const context = await recordApi.getContext(invoice.key);
 
         expect(isFunction(context.referenceExists)).toBeTruthy();
-        const result = await context.referenceExists("customer", customer.key());
+        const result = await context.referenceExists("customer", customer.key);
         expect(result).toBe(true);
     });
 
@@ -35,10 +35,10 @@ describe("recordApi > getContext", () => {
         customer.isalive = true;
         await recordApi.save(customer);
 
-        const invoiceCollectionKey = joinKey(customer.key(), "invoices");
+        const invoiceCollectionKey = joinKey(customer.key, "invoices");
         const invoice = recordApi.getNew(invoiceCollectionKey, "invoice");
         
-        const context = await recordApi.getContext(invoice.key());
+        const context = await recordApi.getContext(invoice.key);
 
         const result = await context.referenceExists("customer", "not a key");
         expect(result).toBe(false);
@@ -55,15 +55,15 @@ describe("recordApi > getContext", () => {
         customer.isalive = true;
         await recordApi.save(customer);
 
-        const invoiceCollectionKey = joinKey(customer.key(), "invoices");
+        const invoiceCollectionKey = joinKey(customer.key, "invoices");
         const invoice = recordApi.getNew(invoiceCollectionKey, "invoice");
         
-        const context = await recordApi.getContext(invoice.key());
+        const context = await recordApi.getContext(invoice.key);
 
         expect(isFunction(context.referenceOptions)).toBeTruthy();
         const result = await context.referenceOptions("customer");
         expect(isArray(result)).toBeTruthy();
-        expect(result[0].key).toBe(customer.key());
+        expect(result[0].key).toBe(customer.key);
         expect(result[0].value).toBe(customer.surname);
 
     });
@@ -79,10 +79,10 @@ describe("recordApi > getContext", () => {
         customer.isalive = false;
         await recordApi.save(customer);
 
-        const invoiceCollectionKey = joinKey(customer.key(), "invoices");
+        const invoiceCollectionKey = joinKey(customer.key, "invoices");
         const invoice = recordApi.getNew(invoiceCollectionKey, "invoice");
         
-        const context = await recordApi.getContext(invoice.key());
+        const context = await recordApi.getContext(invoice.key);
 
         expect(isFunction(context.referenceOptions)).toBeTruthy();
         const result = await context.referenceOptions("customer");

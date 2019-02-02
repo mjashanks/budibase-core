@@ -14,7 +14,7 @@ describe("collectionApi > delete", () => {
         record2.surname = "Zeecat";
         await recordApi.save(record2);
 
-        const childRecord = recordApi.getNew(`${record1.key()}/invoices`, "invoice");
+        const childRecord = recordApi.getNew(`${record1.key}/invoices`, "invoice");
 
         await recordApi.save(childRecord);
 
