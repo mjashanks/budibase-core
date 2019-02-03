@@ -1,18 +1,15 @@
 import {getRelevantHeirarchalIndexes,
     getRelevantReverseReferenceIndexes} from "./relevant";
 import {evaluate} from "./evaluate";
-import {removeFromAllIds, addToAllIds} from "./allIds";
 import {$$, $} from "../common";
 import {filter, map, isUndefined, flatten,
         isEqual, pull, keys} from "lodash/fp";
-import {union, differenceBy, intersectionBy} from "lodash";
-import {add, update, remove} from "./apply";
+import {union} from "lodash";
 import {createIndexFile, getIndexedDataKey} from "./sharding";
-import {isUpdate, isCreate, isDelete, transactionForCreateRecord} from "../transactions/create";
-import {getIndexedDataKey} from "../indexing/sharding";
+import {isUpdate, isCreate, isDelete} from "../transactions/create";
 import { applyToShard } from "./apply";
 
-export const executeTransactions = async app => transactions => {
+export const executeTransactions =  app => async transactions => {
     const recordsByShard = mappedRecordsByIndexShard(app.heirarchy, transactions);
     await Promise.all(
         $(recordsByShard, [

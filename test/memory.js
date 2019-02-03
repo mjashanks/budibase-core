@@ -14,14 +14,18 @@ const getParentFolderKey = key =>
         joinKey,
     ]);
 
-const getParentFolder = (data,key) => 
-    JSON.parse(data[getParentFolderKey(key)]);
+const getParentFolder = (data,key) => {
+    const parentKey = getParentFolderKey(key);
+    if(data[parentKey] === undefined)
+        throw new Error("Parent folder for " + key + " does not exist (" + parentKey + ")");
+    return JSON.parse(data[parentKey]);
+}
 
 export const createFile = data => async (path, content) => {
     if(await exists(data)(path)) throw new Error(path + " already exists");
     const parentFolder = getParentFolder(data, path);
     parentFolder.items.push(path);
-    data[getParentFolderKey(key)] = JSON.stringify(parentFolder);
+    data[getParentFolderKey(path)] = JSON.stringify(parentFolder);
     data[path] = content;
 };
 export const updateFile = data => async (path, content) => {

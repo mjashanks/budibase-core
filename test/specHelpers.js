@@ -12,6 +12,7 @@ import {createEventAggregator} from "../src/appInitialise/eventAggregator";
 import {filter} from "lodash/fp";
 import {createBehaviourSources} from "../src/actions/buildBehaviourSource";
 import {createAction, createTrigger} from "../src/templateApi/createActions";
+import {cleanup} from "../src/transactions/cleanup";
 
 const exp = module.exports;
 
@@ -28,12 +29,14 @@ export const getMemoryTemplateApi = () => {
 }
 
 // TODO: subscribe actions
-export const appFromTempalteApi = async templateApi => ({
-    heirarchy:(await templateApi.getApplicationDefinition()).heirarchy, 
+export const appFromTempalteApi = async templateApi => {
+    const app = {heirarchy:(await templateApi.getApplicationDefinition()).heirarchy, 
     datastore:templateApi._storeHandle,
     publish:templateApi._eventAggregator.publish,
-    _eventAggregator: templateApi._eventAggregator // not normally available to the apis
-});
+    _eventAggregator: templateApi._eventAggregator}; // not normally available to the apis,
+    app.cleanupTransactions = async () => await cleanup(app)
+    return app;
+};
 
 export const getRecordApiFromTemplateApi = async templateApi => 
     getRecordApi(await appFromTempalteApi(templateApi));

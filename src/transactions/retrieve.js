@@ -11,10 +11,8 @@ const isNolock = id => id === NO_LOCK;
 const timeoutMilliseconds =  30 * 1000;
 const maxLockRetries = 1;
 const LOCK_FILENAME = "lock";
-export const lockKey = joinKey(TRANSACTIONS_FOLDER, LOCK_FILENAME);
 
-const isOfType = trans => typ => 
-    trans.transactionType === typ;
+export const lockKey = joinKey(TRANSACTIONS_FOLDER, LOCK_FILENAME);
 
 export const retrieve = async app => {
     const lockid = await getLock(app.datastore);

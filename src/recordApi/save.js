@@ -10,6 +10,7 @@ import { getFlattenedHierarchy, getLastPartInKey,
         getNode, fieldReversesReferenceToNode} from "../templateApi/heirarchy";
 import {mapRecord} from "../indexing/evaluate";
 import {listItems} from "../indexApi/listItems";
+import {addToAllIds} from "../indexing/allIds";
 import {transactionForCreateRecord,
     transactionForUpdateRecord} from "../transactions/create";
 
@@ -37,6 +38,10 @@ const _save = async (app, record, context, skipValidation=false) => {
     const returnedClone = cloneDeep(record);
 
     if(recordClone.isNew) {
+        await addToAllIds(app.heirarchy, app.datastore)(recordClone);
+        const transaction = await transactionForCreateRecord(
+            app, recordClone);
+        recordClone.transactionId = transaction.id;
         await app.datastore.createFolder(recordClone.key)
         await app.datastore.createJson(
             getRecordFileName(recordClone.key), 
@@ -51,6 +56,9 @@ const _save = async (app, record, context, skipValidation=false) => {
     else {
         const loadRecord = load(app);
         const oldRecord = await loadRecord(recordClone.key);
+        const transaction = await transactionForUpdateRecord(
+            app, oldRecord, recordClone);
+        recordClone.transactionId = transaction.id;
         await app.datastore.updateJson(
             getRecordFileName(recordClone.key), 
             recordClone);
@@ -63,7 +71,7 @@ const _save = async (app, record, context, skipValidation=false) => {
 
     await app.cleanupTransactions();
    
-    return returnedClone;
+    return returnedClone.transactionId = recordClone.transactionId;
 };
 
 const initialiseReverseReferenceIndexes = async (app, record) => {

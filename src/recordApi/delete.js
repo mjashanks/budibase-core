@@ -5,10 +5,10 @@ import {deleteCollection} from "../collectionApi/delete";
 import {getExactNodeForPath, 
         getFlattenedHierarchy, getNode,
         fieldReversesReferenceToNode} from "../templateApi/heirarchy";
-import {map, flatten, filter, cloneDeep} from "lodash/fp";
-import { getIndexedDataKey_fromIndexKey } from "../indexing/read";
+import {map, flatten, filter} from "lodash/fp";
 import {deleteIndex} from "../indexApi/delete";
 import {transactionForDeleteRecord} from "../transactions/create";
+import {removeFromAllIds} from "../indexing/allIds";
 
 export const deleteRecord = (app, indexingApi) => async (key) => 
     apiWrapper(
@@ -24,6 +24,7 @@ const _deleteRecord = async (app, indexingApi, key) => {
     
     const record = await load(app)(key);
     await transactionForDeleteRecord(record);
+
     
     for(let collection of node.children) {
         const collectionKey = joinKey(
@@ -35,6 +36,7 @@ const _deleteRecord = async (app, indexingApi, key) => {
     
     await app.datastore.deleteFile(
         getRecordFileName(key));
+    await removeFromAllIds(app.heirarchy, app.datastore)(record);
     
     await app.cleanupTransactions();
     await app.datastore.deleteFolder(key);

@@ -1,8 +1,10 @@
 import {generate} from "shortid";
-import {joinKey} from "../common";
+import {joinKey, keySep} from "../common";
 import {getLastPartInKey} from "../templateApi/heirarchy";
 import {split} from "lodash/fp";
 
+const isOfType = trans => typ => 
+    trans.transactionType === typ;
 
 export const CREATE_RECORD_TRANSACTION = "create";
 export const UPDATE_RECORD_TRANSACTION = "update";
@@ -18,9 +20,9 @@ export const transactionForDeleteRecord = async (app, record) =>
     await transaction(app.datastore, DELETE_RECORD_TRANSACTION, {record});
 
 export const idSep = "$";
-export const TRANSACTIONS_FOLDER = ".transactions"
+export const TRANSACTIONS_FOLDER = keySep + ".transactions";
 export const getTransactionId = (recordId, transactionType, uniqueId) => 
-    `${recordId}${idSep}${transactionType}${idSep}${uniqueId}`
+    `${recordId}${idSep}${transactionType}${idSep}${uniqueId}`;
 
 export const isUpdate = isOfType(UPDATE_RECORD_TRANSACTION);
 export const isDelete = isOfType(DELETE_RECORD_TRANSACTION);
