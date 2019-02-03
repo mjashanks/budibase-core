@@ -7,7 +7,7 @@ import {switchCase, defaultCase,
     isNonEmptyString, isArrayOfString} from "../common";
 import {uniqueIndexName} from "../indexing/read";
 
-const referenceNothing = () => ({key:"",value:""});
+const referenceNothing = () => ({key:""});
 
 const referenceFunctions = typeFunctions({
     default: referenceNothing 

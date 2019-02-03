@@ -23,7 +23,7 @@ const _deleteRecord = async (app, indexingApi, key) => {
     const node = getExactNodeForPath(app.heirarchy)(key);
     
     const record = await load(app)(key);
-    await transactionForDeleteRecord(record);
+    await transactionForDeleteRecord(app, record);
 
     
     for(let collection of node.children) {

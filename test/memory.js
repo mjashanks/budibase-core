@@ -3,6 +3,7 @@ import {take} from "lodash/fp";
 import {Readable, Writable} from "readable-stream";
 import { Buffer } from "safe-buffer";
 import {splitKey, joinKey, $} from "../src/common"; 
+import {getLastPartInKey} from "../src/templateApi/heirarchy";
 
 const folderMarker = "OH-YES-ITSA-FOLDER-";
 const isFolder = val => val.includes(folderMarker);
@@ -24,7 +25,8 @@ const getParentFolder = (data,key) => {
 export const createFile = data => async (path, content) => {
     if(await exists(data)(path)) throw new Error(path + " already exists");
     const parentFolder = getParentFolder(data, path);
-    parentFolder.items.push(path);
+    parentFolder.items.push(
+        getLastPartInKey(path));
     data[getParentFolderKey(path)] = JSON.stringify(parentFolder);
     data[path] = content;
 };
@@ -75,7 +77,7 @@ export const deleteFile = data => async (path) => {
         throw new Error("Cannot delete file, path " + path + " does not exist");
     if(isFolder(data[path])) throw new Error("DeleteFile: Path " + path + " is a folder, not a file");
     const parentFolder = getParentFolder(data, path);
-    parentFolder.items = parentFolder.items.filter(i => i !== path);
+    parentFolder.items = parentFolder.items.filter(i => i !== getLastPartInKey(path));
     data[getParentFolderKey(path)] = JSON.stringify(parentFolder);
     delete data[path];
 }
@@ -91,11 +93,11 @@ export const deleteFolder = data => async (path) => {
 } 
 
 export const getFolderContents = data => async (folderPath) => { 
-    if(!isFolder(folderPath)) 
+    if(!isFolder(data[folderPath])) 
         throw new Error("Not a folder: " + folderPath);
     if(!await exists(data)(folderPath))
         throw new Error("Folder does not exist: " + folderPath);
-    return JSON.stringify(data[folderPath]).items;
+    return JSON.parse(data[folderPath]).items;
 };
 
 export default data => {

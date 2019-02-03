@@ -34,7 +34,7 @@ export const appFromTempalteApi = async templateApi => {
     datastore:templateApi._storeHandle,
     publish:templateApi._eventAggregator.publish,
     _eventAggregator: templateApi._eventAggregator}; // not normally available to the apis,
-    app.cleanupTransactions = async () => await cleanup(app)
+    app.cleanupTransactions = async () => await cleanup(app);
     return app;
 };
 

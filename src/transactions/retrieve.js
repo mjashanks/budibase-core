@@ -3,7 +3,7 @@ import {idSep, TRANSACTIONS_FOLDER, isUpdate,
         isDelete} from "./create";
 import {joinKey, tryAwaitOrIgnore, $, none} from "../common";
 import {generate} from "shortid";
-import {map, filter, groupBy, 
+import {map, filter, groupBy, split,
     some, find} from "lodash/fp";
 
 const NO_LOCK = "no lock";
@@ -11,6 +11,8 @@ const isNolock = id => id === NO_LOCK;
 const timeoutMilliseconds =  30 * 1000;
 const maxLockRetries = 1;
 const LOCK_FILENAME = "lock";
+const LOCK_FILE_KEY = joinKey(
+    TRANSACTIONS_FOLDER, LOCK_FILENAME);
 
 export const lockKey = joinKey(TRANSACTIONS_FOLDER, LOCK_FILENAME);
 
@@ -19,7 +21,7 @@ export const retrieve = async app => {
 
     if(isNolock(lockid)) return [];
 
-    const transactionFiles = await datastore.getFolderContents(
+    const transactionFiles = await app.datastore.getFolderContents(
         TRANSACTIONS_FOLDER
     );
 
@@ -54,9 +56,10 @@ export const retrieve = async app => {
         return null;
     };
 
-    for(let transIdsForRecord in transactionIdsByRecord) {
+    for(let recordId in transactionIdsByRecord) {
+        const transIdsForRecord = transactionIdsByRecord[recordId];
         if(transIdsForRecord.length === 1) {
-            dedupedTransactions.push(transIdsForRecord);
+            dedupedTransactions.push(transIdsForRecord[0]);
             continue;
         }
         if(some(isDelete)(transIdsForRecord)) {
@@ -84,16 +87,15 @@ export const retrieve = async app => {
                     (dedupedTransactions))
     ]);
 
-    
     const deletePromises = 
         map(t => app.datastore.deleteFile(
-                joinKey(
-                    TRANSACTIONS_FOLDER,
-                    getTransactionId(
-                        t.recordId,
-                        t.transactionType,
-                        t.uniqueId)
-                )
+                    joinKey(
+                        TRANSACTIONS_FOLDER,
+                        getTransactionId(
+                            t.recordId,
+                            t.transactionType,
+                            t.uniqueId)
+                    )
             )
         )(duplicates);
 
