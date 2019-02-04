@@ -3,7 +3,7 @@ import {joinKey, keySep} from "../common";
 import {getLastPartInKey} from "../templateApi/heirarchy";
 import {split} from "lodash/fp";
 
-const isOfType = trans => typ => 
+const isOfType = typ => trans => 
     trans.transactionType === typ;
 
 export const CREATE_RECORD_TRANSACTION = "create";
@@ -11,13 +11,19 @@ export const UPDATE_RECORD_TRANSACTION = "update";
 export const DELETE_RECORD_TRANSACTION = "delete";
 
 export const transactionForCreateRecord = async (app, record) => 
-    await transaction(app.datastore, CREATE_RECORD_TRANSACTION, {record});
+    await transaction(
+        app.datastore, CREATE_RECORD_TRANSACTION, 
+        record.key, {record});
 
 export const transactionForUpdateRecord = async (app, oldRecord, newRecord) => 
-    await transaction(app.datastore, UPDATE_RECORD_TRANSACTION, {oldRecord, newRecord});
+    await transaction(
+        app.datastore, UPDATE_RECORD_TRANSACTION, 
+        newRecord.key, {oldRecord, record:newRecord});
 
 export const transactionForDeleteRecord = async (app, record) => 
-    await transaction(app.datastore, DELETE_RECORD_TRANSACTION, {record});
+    await transaction(
+        app.datastore, DELETE_RECORD_TRANSACTION, 
+        record.key, {record});
 
 export const idSep = "$";
 export const TRANSACTIONS_FOLDER = keySep + ".transactions";
@@ -28,25 +34,26 @@ export const isUpdate = isOfType(UPDATE_RECORD_TRANSACTION);
 export const isDelete = isOfType(DELETE_RECORD_TRANSACTION);
 export const isCreate = isOfType(CREATE_RECORD_TRANSACTION);
 
-const transaction = async (datastore, transactionType, data) => {
+const transaction = async (datastore, transactionType, recordKey, data) => {
 
     const recordId = transactionType === CREATE_RECORD_TRANSACTION
                      ? data.record.id
                      : transactionType === UPDATE_RECORD_TRANSACTION
-                     ? data.newRecord.id
+                     ? data.record.id
                      : transactionType === DELETE_RECORD_TRANSACTION 
                      ? getLastPartInKey(data.key) 
                      : "really this should not happen";
 
-    
+    const uniqueId = generate();
     const id = getTransactionId(
-        recordId, transactionType,generate()
+        recordId, transactionType, uniqueId
     );
 
     const key = joinKey(TRANSACTIONS_FOLDER, id);
 
     const trans = {
         transactionType,
+        recordKey,
         ...data,
         id
     };

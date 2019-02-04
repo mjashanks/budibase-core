@@ -5,6 +5,7 @@ import {joinKey, tryAwaitOrIgnore, $, none} from "../common";
 import {generate} from "shortid";
 import {map, filter, groupBy, split,
     some, find} from "lodash/fp";
+import {load} from "../recordApi/load";
 
 const NO_LOCK = "no lock";
 const isNolock = id => id === NO_LOCK;
@@ -36,20 +37,48 @@ export const retrieve = async app => {
 
     const dedupedTransactions = [];
 
+    const verify = async t => {
+        
+        if(t.verified === true) return t;
+        
+        const id = getTransactionId(
+            t.recordId,
+            t.transactionType,
+            t.uniqueId);
+        
+        const transaction = await app.datastore.loadJson(
+            joinKey(TRANSACTIONS_FOLDER, id)
+        );
+
+        if(isDelete(t)) {
+            t.record = transaction.record;
+            t.verified = true;
+            return t;
+        }
+        
+        const rec = await load(app)(
+            transaction.recordKey
+        );
+        if(rec.transactionId === id) {
+            t.record = rec;
+            if(!!transaction.oldRecord) 
+                t.oldRecord = transaction.oldRecord;
+            t.verified = true;
+        } else {
+            t.verified = false;
+        }
+
+        return t;
+    }
+
     const pickOne = async (trans, forType) => {
         if(filter(forType)(trans).length === 1) {
-            return find(forType)(trans)
+            const t = await verify(trans[0]);
+            return (t.verified === true ? t : null);
         } else {
             for(let t of filter(forType)(trans)) {
-                const id = getTransactionId(
-                    t.recordId,
-                    t.transactionType,
-                    t.uniqueId);
-                const transaction = await app.datastore.loadJson(id);
-                const rec = await app.datastore.loadJson(
-                    transaction.newRecord.key
-                );
-                if(rec.transactionId === id) 
+                t = await verify(t);
+                if(t.verified === true)
                     return t;
             }
         }
@@ -59,13 +88,13 @@ export const retrieve = async app => {
     for(let recordId in transactionIdsByRecord) {
         const transIdsForRecord = transactionIdsByRecord[recordId];
         if(transIdsForRecord.length === 1) {
-            dedupedTransactions.push(transIdsForRecord[0]);
+            const t = await verify(transIdsForRecord[0]);
+            dedupedTransactions.push(t);
             continue;
         }
         if(some(isDelete)(transIdsForRecord)) {
-            dedupedTransactions.push(
-                find(isDelete)(transIdsForRecord)
-            );
+            const t = await verify(find(isDelete)(transIdsForRecord));
+            dedupedTransactions.push(t);
             continue;
         }
         if(some(isUpdate)(transIdsForRecord)) {
@@ -86,6 +115,8 @@ export const retrieve = async app => {
         filter(t => none(ddt => ddt.uniqueId === t.uniqueId)
                     (dedupedTransactions))
     ]);
+
+    
 
     const deletePromises = 
         map(t => app.datastore.deleteFile(

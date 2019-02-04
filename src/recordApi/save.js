@@ -35,8 +35,6 @@ const _save = async (app, record, context, skipValidation=false) => {
         }
     }
 
-    const returnedClone = cloneDeep(record);
-
     if(recordClone.isNew) {
         await addToAllIds(app.heirarchy, app.datastore)(recordClone);
         const transaction = await transactionForCreateRecord(
@@ -71,7 +69,9 @@ const _save = async (app, record, context, skipValidation=false) => {
 
     await app.cleanupTransactions();
    
-    return returnedClone.transactionId = recordClone.transactionId;
+    const returnedClone = cloneDeep(recordClone);
+    returnedClone.isNew = false;
+    return returnedClone;
 };
 
 const initialiseReverseReferenceIndexes = async (app, record) => {

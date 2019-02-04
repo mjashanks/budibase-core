@@ -7,8 +7,8 @@ export const applyToShard = async (heirarchy, store, indexKey,
         indexNode, indexShardKey, recordsToWrite, keysToRemove) => {
 
     (await getWriter(heirarchy, store, indexKey, indexShardKey, indexNode))
-            .updateOrAddItems(recordsToWrite, keysToRemove);
-    await swapTempFileIn(store, indexedDataKey); 
+            .updateIndex(recordsToWrite, keysToRemove);
+    await swapTempFileIn(store, indexShardKey); 
 
 }
 

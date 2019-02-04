@@ -55,18 +55,21 @@ const mappedRecordsByIndexShard = (heirarchy, transactions) => {
                 writes:[], 
                 removes:[],
                 indexKey:t.indexKey,
-                indexNodeKey:t.indexNodeKey
+                indexNodeKey:t.indexNodeKey,
+                indexNode:t.indexNode
             };
     }
 
     for(let trans of toWrite) {
         initialiseShard(trans);        
-        transByShard[trans.indexShardKey].writes.push(trans.record);
+        transByShard[trans.indexShardKey].writes.push(
+            trans.mappedRecord.result);
     }
 
     for(let trans of toRemove) {
         initialiseShard(trans);        
-        transByShard[trans.indexShardKey].removed.push(trans.record.key);
+        transByShard[trans.indexShardKey].removes.push(
+            trans.mappedRecord.result.key);
     }
 
     return transByShard;
@@ -75,15 +78,17 @@ const mappedRecordsByIndexShard = (heirarchy, transactions) => {
 const getUpdateTransactionsByShard = (heirarchy, transactions) => {
     const updateTransactions = $(transactions, [filter(isUpdate)]);
 
-    const evaluateIndex = (record, indexNodeAndPath) => 
-        ({mappedRecord:evaluate(record)(indexNodeAndPath.indexNode), 
+    const evaluateIndex = (record, indexNodeAndPath) => {
+        const mappedRecord = evaluate(record)(indexNodeAndPath.indexNode);
+        ({mappedRecord:mappedRecord, 
         indexNode:indexNodeAndPath.indexNode, 
         indexKey:indexNodeAndPath.indexKey,
         indexShardKey:getIndexedDataKey(
             n.indexNode,
             n.indexKey,
-            evaluate(t.record)(n.indexNode))
+            evaluate(mappedRecord.result)(n.indexNode))
         });
+    }
 
     const getIndexNodesToApply = (indexFilter) => (t,indexes) => 
         $(indexes, [
@@ -197,17 +202,21 @@ const getUpdateTransactionsByShard = (heirarchy, transactions) => {
 const get_Create_Delete_TransactionsByShard = pred => (heirarchy, transactions) => {
     const createTransactions = $(transactions, [filter(pred)]);
 
-    const getIndexNodesToApply = (t,indexes) => $(indexes, [
-        map(n => ({mappedRecord:evaluate(t.record)(n.indexNode), 
-                    indexNode:n.indexNode, 
-                    indexKey:n.indexKey,
-                    indexShardKey:getIndexedDataKey(
-                        n.indexNode,
-                        n.indexKey,
-                        evaluate(t.record)(n.indexNode))
-                })),
-        filter(n => n.mappedRecord.passedFilter)
-    ]);
+    const getIndexNodesToApply = (t,indexes) => 
+        $(indexes, [
+            map(n => { 
+                const mappedRecord = evaluate(t.record)(n.indexNode);
+                return ({mappedRecord, 
+                        indexNode:n.indexNode, 
+                        indexKey:n.indexKey,
+                        indexShardKey:getIndexedDataKey(
+                            n.indexNode,
+                            n.indexKey,
+                            mappedRecord.result)
+                    });
+                }),
+            filter(n => n.mappedRecord.passedFilter)
+        ]);
 
     const allToApply = [];
 

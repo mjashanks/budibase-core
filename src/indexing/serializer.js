@@ -1,5 +1,5 @@
 import {generateSchema} from "./indexSchemaCreator";
-import { has, isString, difference } from "lodash/fp";
+import { has, isString, difference, find } from "lodash/fp";
 import { Buffer } from "safe-buffer";
 import {StringDecoder} from "string_decoder";
 import {getType} from "../types";

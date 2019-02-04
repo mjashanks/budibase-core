@@ -3,10 +3,10 @@ import {constant, merge} from "lodash";
 
 const getRecord = obj => {
     const def = {
-        key : constant("abcd1234"),
-        type : constant("test"),
-        isNew : constant(false),
-        id : constant("1234")
+        key : "abcd1234",
+        type : "test",
+        isNew : false,
+        id : "1234"
     }
     
     const newObj = merge(def, obj);
@@ -25,7 +25,7 @@ describe("index evaluation", () => {
         };
 
         const record = getRecord({
-            type : constant("not a customer")
+            type : "not a customer"
         });
 
         const result = evaluate(record)(index);
@@ -44,7 +44,7 @@ describe("index evaluation", () => {
         };
 
         const record = getRecord({
-            type : constant("customer")
+            type : "customer"
         });
 
         const key = record.key;
@@ -66,7 +66,7 @@ describe("index evaluation", () => {
             }
         };
         const record = getRecord({
-            type : constant("customer"),
+            type : "customer",
             name: "bob",
             email: "bob@budibase.com"
         });
@@ -107,7 +107,7 @@ describe("index evaluation", () => {
             }
         };
         const record = getRecord({
-            type : constant("customer"),
+            type : "customer",
             name: "bob"
         });
         const result = evaluate(record)(index);
