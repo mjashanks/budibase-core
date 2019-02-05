@@ -7,15 +7,15 @@ import getIndexingApi from "../indexing";
 import {deleteIndex} from "../indexApi/delete";
 import {includes} from "lodash/fp";
 
-export const deleteCollection = (app) => async key => 
+export const deleteCollection = (app, disableCleanup=false) => async key => 
     apiWrapper(
         app,
         events.collectionApi.delete, 
         {key},
-        _delete, app, key);
+        _delete, app, key, disableCleanup);
 
 
-const _delete = async (app, key) => {
+const _delete = async (app, key, disableCleanup) => {
     key = safeKey(key);
     const node = getExactNodeForPath(app.heirarchy)(key);
     
@@ -23,6 +23,8 @@ const _delete = async (app, key) => {
     await deleteIndexes(app,node, key);
     await deleteAllIdsFolders(app, node, key);
     await deleteCollectionFolder(app, key);
+    if(!disableCleanup)
+        await app.cleanupTransactions();
 };
 
 const deleteCollectionFolder = async (app, key) =>
@@ -77,7 +79,7 @@ const deleteRecords = async (app, key) => {
 
         if(ids.result.collectionKey === key) {
             for(let id of ids.result.ids) {
-                await deleteRecord(app, indexingApi)
+                await deleteRecord(app, true)
                                 (joinKey(key, id));
                 await deleteAllIdsShard(id);
             }       

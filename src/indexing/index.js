@@ -2,8 +2,8 @@ import {getRelevantHeirarchalIndexes,
     getRelevantReverseReferenceIndexes} from "./relevant";
 import {evaluate} from "./evaluate";
 import {$$, $} from "../common";
-import {filter, map, isUndefined, flatten,
-        isEqual, pull, keys} from "lodash/fp";
+import {filter, map, isUndefined, flatten, intersectionBy,
+        isEqual, pull, keys, differenceBy, difference} from "lodash/fp";
 import {union} from "lodash";
 import {createIndexFile, getIndexedDataKey} from "./sharding";
 import {isUpdate, isCreate, isDelete} from "../transactions/create";
@@ -80,13 +80,13 @@ const getUpdateTransactionsByShard = (heirarchy, transactions) => {
 
     const evaluateIndex = (record, indexNodeAndPath) => {
         const mappedRecord = evaluate(record)(indexNodeAndPath.indexNode);
-        ({mappedRecord:mappedRecord, 
+        return ({mappedRecord:mappedRecord, 
         indexNode:indexNodeAndPath.indexNode, 
         indexKey:indexNodeAndPath.indexKey,
         indexShardKey:getIndexedDataKey(
-            n.indexNode,
-            n.indexKey,
-            evaluate(mappedRecord.result)(n.indexNode))
+            indexNodeAndPath.indexNode,
+            indexNodeAndPath.indexKey,
+            mappedRecord.result)
         });
     }
 
@@ -94,7 +94,7 @@ const getUpdateTransactionsByShard = (heirarchy, transactions) => {
         $(indexes, [
             map(n => ({
                 old:evaluateIndex(t.oldRecord, n),
-                new:evaluateIndex(t.newRecord, n)})),
+                new:evaluateIndex(t.record, n)})),
             filter(indexFilter)
         ]);
 
@@ -119,10 +119,10 @@ const getUpdateTransactionsByShard = (heirarchy, transactions) => {
 
     for(let t of updateTransactions) {
         const heirarchal = getRelevantHeirarchalIndexes(
-            heirarchy, t.newRecord);
+            heirarchy, t.record);
 
         const referenceChanges = diffReverseRefForUpdate(
-            heirarchy, t.oldRecord, t.newRecord);
+            heirarchy, t.oldRecord, t.record);
 
         // old records to remove (filtered out)
         const filteredOut_toRemove =
@@ -155,17 +155,14 @@ const getUpdateTransactionsByShard = (heirarchy, transactions) => {
                 // still referenced - recheck filter
                 getIndexNodesToApply(toUpdateFilter)(t, referenceChanges.notChanged),
             );
-
-        // for changed - if shard key has changed, we need to  
-        // remove from old and add to new
-        const indexedDataKeyForResult = res => 
-            getIndexedDataKey(
-                res.indexNode, res.indexKey, res.mappedRecord.result
-            );
         
         const shardKeyChanged = $(changed,[
-            filter(c => indexedDataKeyForResult(c.old) !== indexedDataKeyForResult(c.new))
+            filter(c => c.old.indexShardKey !== c.new.indexShardKey)
         ]);
+
+        const changedInSameShard = $(shardKeyChanged, [
+            difference(changed)
+        ])
 
         for(let res of shardKeyChanged) {
             pull(res)(changed);
@@ -186,7 +183,7 @@ const getUpdateTransactionsByShard = (heirarchy, transactions) => {
         );
 
         toWrite.push(
-            $(changed, [
+            $(changedInSameShard, [
                 map(i => i.new)
             ])
         );
@@ -246,7 +243,36 @@ const getDeleteTransactionsByShard =
 const getCreateTransactionsByShard = 
     get_Create_Delete_TransactionsByShard(isCreate);
 
+const diffReverseRefForUpdate = (appHeirarchy, oldRecord, newRecord) => {
+    const oldIndexes = getRelevantReverseReferenceIndexes(
+        appHeirarchy, oldRecord
+    );
+    const newIndexes = getRelevantReverseReferenceIndexes(
+        appHeirarchy, newRecord
+    );
 
+    const unReferenced = differenceBy(
+        i => i.indexKey,
+        oldIndexes, newIndexes
+    );
+
+    const newlyReferenced = differenceBy(
+        i => i.indexKey,
+        newIndexes, oldIndexes
+    );
+
+    const notChanged =  intersectionBy(
+        i => i.indexKey,
+        newIndexes, oldIndexes
+    );
+
+    return  {
+        unReferenced,
+        newlyReferenced,
+        notChanged
+    };
+}
+    
 export default (app) => ({
     executeTransactions: executeTransactions(app),
     createIndexFile : createIndexFile(app.datastore)

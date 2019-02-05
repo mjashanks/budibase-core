@@ -198,6 +198,7 @@ describe("recordApi > delete > reindex", () => {
 
         const itemsAfterDelete= await collectionApi.listRecords("/customers/customersBySurname");
         expect(itemsAfterDelete.length).toBe(1);
+        expect(itemsAfterDelete[0].surname).toBe("Zeecat");
     });
 
     it("should remove from all indexes", async () => {
@@ -224,6 +225,7 @@ describe("recordApi > delete > reindex", () => {
 
         const itemsAfterDelete= await collectionApi.listRecords("/customers/default");
         expect(itemsAfterDelete.length).toBe(1);
+        expect(itemsAfterDelete[0].surname).toBe("Zeecat");
 
         const deceasedItemsAfterDelete=
             await collectionApi.listRecords("/customers/deceased");

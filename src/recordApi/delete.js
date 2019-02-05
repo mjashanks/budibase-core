@@ -10,15 +10,15 @@ import {deleteIndex} from "../indexApi/delete";
 import {transactionForDeleteRecord} from "../transactions/create";
 import {removeFromAllIds} from "../indexing/allIds";
 
-export const deleteRecord = (app, indexingApi) => async (key) => 
+export const deleteRecord = (app, disableCleanup=false) => async (key) => 
     apiWrapper(
         app,
         events.recordApi.delete, 
         {key},
-        _deleteRecord, app, indexingApi, key);
+        _deleteRecord, app, key, disableCleanup);
 
 // called deleteRecord because delete is a keyword
-const _deleteRecord = async (app, indexingApi, key) => { 
+const _deleteRecord = async (app, key, disableCleanup) => { 
     key = safeKey(key);
     const node = getExactNodeForPath(app.heirarchy)(key);
     
@@ -30,7 +30,7 @@ const _deleteRecord = async (app, indexingApi, key) => {
         const collectionKey = joinKey(
             key, collection.name
         );
-        await deleteCollection(app)(collectionKey);
+        await deleteCollection(app, true)(collectionKey);
     }
 
     
@@ -38,7 +38,9 @@ const _deleteRecord = async (app, indexingApi, key) => {
         getRecordFileName(key));
     await removeFromAllIds(app.heirarchy, app.datastore)(record);
     
-    await app.cleanupTransactions();
+    if(!disableCleanup)
+        await app.cleanupTransactions();
+        
     await app.datastore.deleteFolder(key);
     await deleteIndexes(app, key)
 };

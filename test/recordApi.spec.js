@@ -2,7 +2,8 @@ import {setupAppheirarchy, basicAppHeirarchyCreator,
     basicAppHeirarchyCreator_WithFields, getNewFieldAndAdd,
     stubEventHandler} from "./specHelpers";
 import {isFunction} from "lodash";
-import {events} from "../src/common";
+import {events, isNonEmptyString} from "../src/common";
+import { isBoolean } from "util";
 
 describe("recordApi > getNew", () => {
 
@@ -11,10 +12,10 @@ describe("recordApi > getNew", () => {
         const record = recordApi.getNew("/customers", "customer");
 
         expect(record.id).toBeDefined();
-        expect(isFunction(record.id)).toBeTruthy();
+        expect(isNonEmptyString(record.id)).toBeTruthy();
 
         expect(record.key).toBeDefined();
-        expect(isFunction(record.key)).toBeTruthy();
+        expect(isNonEmptyString(record.key)).toBeTruthy();
         expect(record.key).toBe(`/customers/${record.id}`);
     });
 
@@ -56,7 +57,7 @@ describe("recordApi > getNew", () => {
         const record = recordApi.getNew("/customers", "customer");
 
         expect(record.isNew).toBeDefined();
-        expect(isFunction(record.isNew)).toBeTruthy();
+        expect(isBoolean(record.isNew)).toBeTruthy();
         expect(record.isNew).toBeTruthy();
     });
 
@@ -65,7 +66,7 @@ describe("recordApi > getNew", () => {
         const record = recordApi.getNew("/customers", "customer");
 
         expect(record.type).toBeDefined();
-        expect(isFunction(record.type)).toBeTruthy();
+        expect(isNonEmptyString(record.type)).toBeTruthy();
         expect(record.type).toBe("customer");
     });
 });
@@ -155,7 +156,7 @@ describe('recordApi > save then load', () => {
 
         const saved = await recordApi.load(record.key);
 
-        expect(isFunction(saved.type)).toBeTruthy()
+        expect(isNonEmptyString(saved.type)).toBeTruthy()
         expect(saved.type).toBe("customer");
     });
 

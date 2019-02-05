@@ -7,7 +7,7 @@ const getField = type => {
     return field;
 };
 
-const nothingReference = {key:"",value:""};
+const nothingReference = {key:""};
 
 describe("types > getNew", () => {
 
@@ -30,7 +30,7 @@ describe("types > getNew", () => {
     it("datetime should return null when fields getInitialValue is 'default'",
     defaultAlwaysNull("datetime"));
 
-    it("reference should return {key:'',value:''} when fields getInitialValue is 'default'", () => {
+    it("reference should return {key:''} when fields getInitialValue is 'default'", () => {
         const field = getField("reference");
         field.getInitialValue = "default";
         const value = getNewFieldValue(field);
@@ -101,7 +101,7 @@ describe("types > getNew", () => {
         test_getNewFieldValue("array<reference>", "", [])();
     });
 
-    it("reference should {key:'', value:''} when function not recognised", () => {
+    it("reference should {key:''} when function not recognised", () => {
         test_getNewFieldValue("reference", "blah", nothingReference)();
     });
 });

@@ -13,7 +13,7 @@ const api = app => {
         getNewChild: getNewChild(app),
         save: save(app, indexingApi), 
         load: load(app, indexingApi), 
-        delete: deleteRecord(app, indexingApi),
+        delete: deleteRecord(app, false),
         validate: validate(app),
         getContext: getContext(app),
         _storeHandle : app.datastore

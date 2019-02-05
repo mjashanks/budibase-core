@@ -1,7 +1,7 @@
 import {getFlattenedHierarchy, hasNoMatchingAncestors, 
     isRecord, isCollection, isShardedIndex, 
     getExactNodeForPath, isGlobalIndex} from "../templateApi/heirarchy";
-import {$, allTrue, joinKey} from "../common";
+import {$, allTrue, joinKey, tryAwaitOrIgnore} from "../common";
 import {filter} from "lodash/fp";
 import getIndexing from "../indexing";
 import {getShardMapKey, getUnshardedIndexDataKey} from "../indexing/sharding";
@@ -81,7 +81,11 @@ export const initialiseAll = app => async () => {
             await initialiseIndex(app, "", index);
     }
 
-    await app.datastore.createFolder(TRANSACTIONS_FOLDER);
+    
+    try {
+        await app.datastore.createFolder(TRANSACTIONS_FOLDER);
+    }catch(_){};
+
 };
 
 export const initialiseChildCollections = async (app, recordKey) => {

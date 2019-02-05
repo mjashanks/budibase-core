@@ -38,12 +38,12 @@ const updateIndex = (getNextInputBytes, flushOutputBuffer, schema) => (itemsToWr
                 return CONTINUE_READING_RECORDS;
 
             if(isSomething(updated)) {
-                const serializedItem =  serializeItem(schema, item);
+                const serializedItem =  serializeItem(schema, updated);
                 write(serializedItem);
-                writtenItems.push(item);
+                writtenItems.push(updated);
             } else {
                 write(
-                    serializeItem(schema, updated)
+                    serializeItem(schema, indexedItem)
                 );
             } 
 

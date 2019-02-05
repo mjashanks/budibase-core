@@ -6,13 +6,17 @@ import { isShardedIndex } from "../templateApi/heirarchy";
 export const applyToShard = async (heirarchy, store, indexKey, 
         indexNode, indexShardKey, recordsToWrite, keysToRemove) => {
 
-    (await getWriter(heirarchy, store, indexKey, indexShardKey, indexNode))
-            .updateIndex(recordsToWrite, keysToRemove);
+    const createIfNotExists = recordsToWrite.length > 0; 
+    const writer = await getWriter(heirarchy, store, indexKey, indexShardKey, indexNode, createIfNotExists);
+    if(writer === SHARD_DELETED) return;
+    
+    writer.updateIndex(recordsToWrite, keysToRemove);
     await swapTempFileIn(store, indexShardKey); 
 
 }
 
-const getWriter = async (heirarchy, store, indexKey, indexedDataKey, indexNode) => {
+const SHARD_DELETED = "SHARD_DELETED";
+const getWriter = async (heirarchy, store, indexKey, indexedDataKey, indexNode, createIfNotExists) => {
 
     let readableStream = null;
     try {
@@ -21,7 +25,10 @@ const getWriter = async (heirarchy, store, indexKey, indexedDataKey, indexNode) 
         if(await store.exists(indexedDataKey)) {
             throw e;
         } else {
-            await store.createFile(indexedDataKey, "");
+            if(createIfNotExists)
+                await store.createFile(indexedDataKey, "");
+            else
+                return SHARD_DELETED;
             readableStream = await store.readableFileStream(indexedDataKey);
         }
     }

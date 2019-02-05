@@ -63,7 +63,7 @@ const _save = async (app, record, context, skipValidation=false) => {
         
         app.publish(events.recordApi.save.onRecordUpdated, {
             old:oldRecord,
-            new:returnedClone
+            new:recordClone
         });
     }
 

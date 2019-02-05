@@ -16,14 +16,14 @@ describe("getRelevantIndexes", () => {
         const heirarchalIndexesByPath = getRelevantHeirarchalIndexes(
             appHeirarchy.root, {
                 appName:"hello", 
-                key: () => "/settings"
+                key: "/settings"
             }
         );
 
         const reverseReferenceIndexesByPath = getRelevantReverseReferenceIndexes(
             appHeirarchy.root, {
                 appName:"hello", 
-                key: () => "/settings"
+                key: "/settings"
             }
         );
 

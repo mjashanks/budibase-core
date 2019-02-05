@@ -5,7 +5,7 @@ import {isIndex, isShardedIndex,
 import {getAllShardKeys, getShardMapKey,
         getUnshardedIndexDataKey} from "../indexing/sharding";
 
-export const deleteIndex = app => async indexKey => 
+export const deleteIndex = (app) => async indexKey => 
     apiWrapper(
         app,
         events.indexApi.delete, 
