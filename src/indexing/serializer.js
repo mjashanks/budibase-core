@@ -60,6 +60,9 @@ const updateIndex = (getNextInputBytes, flushOutputBuffer, schema) => (itemsToWr
                 serializeItem(schema, added)
             );
         }
+    } else if(writtenItems.length === 0) {
+        // potentially are no records
+        write("");
     }
 
     write();

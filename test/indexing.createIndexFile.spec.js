@@ -11,6 +11,7 @@ describe("indexing.createIndexFile", () => {
 
         const index = {map : "return {name: record.name, age: record.age}", filter:""};
         const indexKey = `/customers/hello`;
+        await datastore.createFolder("/customers");
         await indexing.createIndexFile(indexKey, index);
 
         const savedIndex = await datastore.loadFile(indexKey);

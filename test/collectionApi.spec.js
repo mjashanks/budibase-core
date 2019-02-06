@@ -149,7 +149,7 @@ describe("collectionApi > allids", () => {
                 appHeirarchy.customersCollection.nodeKey(), "customer");
             customer.surname = "thedog";   
             const id = `${appHeirarchy.customerRecord.recordNodeId}-${c}${customer.id.replace("0-","")}`;
-            customer.id = () => id;
+            customer.id = id;
             await recordApi.save(customer); 
         }        
 
