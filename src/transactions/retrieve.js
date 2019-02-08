@@ -1,7 +1,8 @@
 import {idSep, TRANSACTIONS_FOLDER, isUpdate,
         isCreate, getTransactionId, 
-        isDelete} from "./create";
+        isDelete, isBuildIndexFolder} from "./create";
 import {joinKey, tryAwaitOrIgnore, $, none} from "../common";
+import {getLastPartInKey, getNodeFromNodeKeyHash} from "../templateApi/heirarchy";
 import {generate} from "shortid";
 import {map, filter, groupBy, split,
     some, find} from "lodash/fp";
@@ -25,6 +26,73 @@ export const retrieve = async app => {
     const transactionFiles = await app.datastore.getFolderContents(
         TRANSACTIONS_FOLDER
     );
+
+    let transactions = [];
+
+    if(some(isBuildIndexFolder)(transactionFiles)) {
+        const buildIndexFolder = find(isBuildIndexFolder)(transactionFiles);
+
+        transactions = await retrieveBuildIndexTransactions(
+            app, 
+            joinKey(TRANSACTIONS_FOLDER,buildIndexFolder)
+        );
+    }
+
+    if(transactions.length > 0) return transactions;
+    
+    return await retrieveStandardTransactions(
+        app, transactionFiles
+    );  
+
+};
+
+const retrieveBuildIndexTransactions = async (app, buildIndexFolder) => {
+
+    const childFolders = await app.datastore.getFolderContents(buildIndexFolder);
+    if(childFolders.length === 0) {
+        // cleanup
+        await app.datastore.deleteFolder(buildIndexFolder);
+        return [];    
+    }
+
+    const getTransactionFiles = async (childFolderIndex=0) => {
+        if(childFolderIndex >= childFolders.length) return [];
+
+        const childFolderKey = joinKey(buildIndexFolder, childFolders[childFolderIndex]);
+        const files = await datastore.getFolderContents(
+            childFolderKey
+        );
+
+        if(files.length === 0) {
+            await app.datastore.deleteFolder(childFolderKey);
+            return await getTransactionFiles(childFolderIndex+1);
+        }
+
+        return files;        
+    }
+
+    const transactionFiles = await getTransactionFiles();
+
+    if(transactionFiles.length === 0) return [];
+
+    const transactions = $(transactionFiles, [
+        map(parseTransactionId)
+    ]);
+
+    for(let t of transactions) {
+        t.record = await load(app)(t.recordKey);
+    }
+
+    transactions.indexNode = $(buildIndexFolder, [
+        getLastPartInKey,
+        getNodeFromNodeKeyHash
+    ]);
+
+    return transactions;
+}
+
+const retrieveStandardTransactions = async (app, transactionFiles) => {
+    
 
     const transactionIds = $(transactionFiles, [
         filter(f => f !== LOCK_FILENAME),
@@ -133,7 +201,7 @@ export const retrieve = async app => {
     await Promise.all(deletePromises);
     
     return dedupedTransactions;
-};
+}
 
 
 const getLock = async (datastore, retryCount=0) => {

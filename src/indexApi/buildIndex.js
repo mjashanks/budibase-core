@@ -1,31 +1,18 @@
 import {getAllIdsIterator} from "../indexing/allIds";
 import {isGlobalIndex, getFlattenedHierarchy
     ,getNodeByKeyOrNodeKey,getNode, isTopLevelCollection,
-    isIndex, isCollection, isRecord,
+    isIndex, isCollection, isRecord, isDecendant,
     fieldReversesReferenceToIndex} from "../templateApi/heirarchy";
-import {find, filter, some, map, join} from "lodash/fp";
-import {joinKey, apiWrapper, events, $} from "../common";
-import {load} from "../recordApi/load";
+import {find, filter, includes,
+    some, map, join} from "lodash/fp";
+import {joinKey, apiWrapper, events, $, allTrue} from "../common";
 import {evaluate} from "../indexing/evaluate";
 import {initialiseIndex} from "../collectionApi/initialise";
-import {readIndex} from "../indexing/read";
 import {deleteIndex} from "../indexApi/delete";
-import {getIndexedDataKey} from "../indexing/sharding";
 import {serializeItem} from "../indexing/serializer";
 import {generateSchema} from "../indexing/indexSchemaCreator";
-
-/*
-GlobalIndex:
-- iterate all records in system, through collections, and apply index
-
-Top Level Collection Index
-- iterate decendant records, and apply index
-
-Collection Index, with record node ancestor
-- iterate records of immediate record node ancestor
-- foreach, iterate all decendant records and apply index
-
-*/
+import {createBuildIndexFolder, 
+    transactionForBuildIndex} from "../transactions/create";
 
 /** rebuilds an index
  * @param {object} app - the application container
@@ -40,6 +27,8 @@ export const buildIndex = app => async (indexNodeKey) =>
 
 const _buildIndex = async (app, indexNodeKey) => {
     const indexNode = getNode(app.heirarchy, indexNodeKey);
+
+    await createBuildIndexFolder(app.datastore, indexNodeKey);
 
     if(!isIndex(indexNode)) 
         throw new Error("BuildIndex: must supply a indexnode");
@@ -62,35 +51,15 @@ const _buildIndex = async (app, indexNodeKey) => {
             app, indexNode
         );
     }
+
+    await app.cleanupTransactions();
 };
 
 const buildReverseReferenceIndex = async (app, indexNode) => {
 
-    const parentCollectionNode = indexNode.parent().parent();
-
-    const iterateReferencedRecords =
-        await getAllIdsIterator(app)
-                (parentCollectionNode.nodeKey());
-    
-    let referencedRecordsIterator = 
-        await iterateReferencedRecords();
-
-    // clear out existing indexes
-    while(!referencedRecordsIterator.done) {
-        const {result} = referencedRecordsIterator;
-        for(let id of result.ids) {
-            const indexKey = joinKey(
-                result.collectionKey, 
-                id, indexNode.name);
-
-            await tryDeleteIndex(app, indexKey);
-        }
-        referencedRecordsIterator = await iterateReferencedRecords();
-    }
-
     // Iterate through all referencING records, 
     // and update referenced index for each record
-
+    let recordCount = 0;
     const referencingNodes = $(app.heirarchy, [
         getFlattenedHierarchy,
         filter(n => isRecord(n)
@@ -98,11 +67,7 @@ const buildReverseReferenceIndex = async (app, indexNode) => {
                            (n.fields))
     ]);
 
-    const applyIndexForReferencingNode = async referencingNode => {
-
-        const referencingFields = 
-            filter(fieldReversesReferenceToIndex(indexNode))
-                  (referencingNode.fields);
+    const createTransactionsForReferencingNode = async referencingNode => {
 
         const iterateReferencingNodes = 
             await getAllIdsIterator(app)
@@ -112,29 +77,9 @@ const buildReverseReferenceIndex = async (app, indexNode) => {
         while(!referencingIdIterator.done) {
             const {result} = referencingIdIterator;
             for(let id of result.ids) {
-                const record = await load(app)(
-                    joinKey(result.collectionKey, id)
-                );
-
-                for(let field of referencingFields) {
-                    const referencedKey = record[field.name].key;
-                    if(!referencedKey) continue;
-
-                    const indexKey = joinKey(
-                        referencedKey, indexNode.name)
-
-                    const indexedDataKey = getIndexedDataKey(
-                        indexNode, indexKey, record
-                    );
-
-                    const indexedData = await readIndex(
-                        app.heirarchy, app.datastore, 
-                        indexNode, indexedDataKey);
-                    applyToIndex(record, indexNode, indexedData);
-                    await writeIndex(
-                        app, indexedData, 
-                        indexedDataKey, indexNode)
-                }
+                const recordKey = joinKey(result.collectionKey, id);
+                await transactionForBuildIndex(app, indexNode.nodeKey, recordKey, recordCount);
+                recordCount++;
             }
             referencingIdIterator = await iterateReferencingNodes();
         }
@@ -142,9 +87,8 @@ const buildReverseReferenceIndex = async (app, indexNode) => {
     };
 
     for(let referencingNode of referencingNodes) {
-        await applyIndexForReferencingNode(referencingNode);
+        await createTransactionsForReferencingNode(referencingNode);
     }
-
 };
 
 const buildGlobalIndex = async (app, indexNode) => {
@@ -153,14 +97,20 @@ const buildGlobalIndex = async (app, indexNode) => {
     const filterNodes = pred => filter(pred)(flatHeirarchy);
     
     const topLevelCollections = filterNodes(isTopLevelCollection);
-
+    let totalCount = 0;
     for(let col of topLevelCollections) {
-        await applyAllDecendantRecords(
+        
+        if(!hasApplicableDecendant(app.heirarchy, col, indexNode))
+            continue;
+
+        const thisCount = await applyAllDecendantRecords(
             app, 
             col.nodeKey(), 
             indexNode,
             indexNode.nodeKey(),
-            [], "");
+            [], "", totalCount);
+
+        totalCount = totalCount + thisCount;
     }
 };
 
@@ -223,41 +173,25 @@ const applyToIndex = (record, indexNode, indexedData) => {
         indexedData.push(result.result);
 };
 
-const reloadIndexedDataIfRequired = async (app,
-                                           indexNode, 
-                                           indexKey, 
-                                           record,
-                                           currentIndexedData,
-                                           currentIndexedDataKey) => {
+const recordNodeApplies = indexNode => recordNode => 
+    includes(recordNode.recordNodeId)(indexNode.allowedRecordNodeIds);
 
-    const indexedDataKey = getIndexedDataKey(
-        indexNode, indexKey, record
-    );
-
-    if(indexedDataKey === currentIndexedDataKey) 
-        return {indexedData:currentIndexedData, 
-                indexedDataKey:currentIndexedDataKey};
-    
-    await writeIndex(
-        app, 
-        currentIndexedData, 
-        currentIndexedDataKey,
-        indexNode);
-    
-    const indexedData = await readIndex(
-        app.heirarchy,
-        app.datastore,
-        indexNode,
-        indexedDataKey
-    );
-
-    return {indexedData, indexedDataKey};
-};
+const hasApplicableDecendant = (heirarchy, ancestorNode, indexNode) => 
+    $(heirarchy, [
+        getFlattenedHierarchy,
+        filter(
+            allTrue(
+                isRecord, 
+                isDecendant(ancestorNode), 
+                recordNodeApplies(indexNode)
+            )
+        )
+    ]);
 
 const applyAllDecendantRecords = 
     async (app, collection_Key_or_NodeKey, 
             indexNode, indexKey, currentIndexedData, 
-           currentIndexedDataKey, inRecursion=false) => {
+           currentIndexedDataKey, recordCount=0) => {
 
     const collectionNode = 
         getNodeByKeyOrNodeKey(app.heirarchy, collection_Key_or_NodeKey);
@@ -265,58 +199,46 @@ const applyAllDecendantRecords =
     const allIdsIterator = await  getAllIdsIterator(app)
                                                    (collection_Key_or_NodeKey);
 
-    const getRecord = async (recordKey) => 
-        await load(app)(recordKey);
     
-    const buildForIds = async (collectionKey, allIds) => {
+    const createTransactionsForIds = async (collectionKey, allIds) => {
 
         for(let recordId of allIds) {
             const recordKey = joinKey(collectionKey, recordId);
-            const record = await getRecord(
-                recordKey
-            );
-            
-            // if index is sharded, we may need to get a different
-            // shard than the current one
-            const newIndexedData =  await reloadIndexedDataIfRequired(
-                app, indexNode, indexKey, record,
-                currentIndexedData, currentIndexedDataKey
-            );
 
-            currentIndexedData = newIndexedData.indexedData;
-            currentIndexedDataKey = newIndexedData.indexedDataKey;
-
-            applyToIndex(record, indexNode, currentIndexedData);
             const recordNode = chooseChildRecordNodeByKey(
                 collectionNode,
                 recordId
             );
 
-            for(let childCollectionNode of recordNode.children) {
-                await applyAllDecendantRecords(
-                    app,
-                    joinKey(recordKey, childCollectionNode.name),
-                    indexNode, indexKey, currentIndexedData,
-                    currentIndexedDataKey, true);
+            if(recordNodeApplies(indexNode)(recordNode)) {
+                await transactionForBuildIndex(app, indexNodeKey, recordKey, recordCount);
+                recordCount++;
+            }
+            
+            if(hasApplicableDecendant(app.heirarchy, recordNode, indexNode))
+            {
+                for(let childCollectionNode of recordNode.children) {
+                    const childCount = await applyAllDecendantRecords(
+                        app,
+                        joinKey(recordKey, childCollectionNode.name),
+                        indexNode, indexKey, currentIndexedData,
+                        currentIndexedDataKey, recordCount);
+                    
+                    recordCount = recordCount + childCount;
+                }
             }
         }
     };
 
     let allIds = await allIdsIterator();
     while(allIds.done === false) {
-        await buildForIds(
+        await createTransactionsForIds(
             allIds.result.collectionKey,
             allIds.result.ids);
         allIds = await allIdsIterator();
     }
-
-    if(!inRecursion) {
-        await writeIndex(
-            app,
-            currentIndexedData, 
-            currentIndexedDataKey,
-            indexNode);
-    }
+    
+    return recordCount;;
 };
 
 const writeIndex = async (app, indexedData, indexedDataKey, indexNode) => {

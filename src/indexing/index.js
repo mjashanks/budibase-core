@@ -1,13 +1,15 @@
 import {getRelevantHeirarchalIndexes,
     getRelevantReverseReferenceIndexes} from "./relevant";
 import {evaluate} from "./evaluate";
-import {$$, $} from "../common";
+import {$$, $, isSomething} from "../common";
 import {filter, map, isUndefined, flatten, intersectionBy,
         isEqual, pull, keys, differenceBy, difference} from "lodash/fp";
 import {union} from "lodash";
 import {createIndexFile, getIndexedDataKey} from "./sharding";
-import {isUpdate, isCreate, isDelete} from "../transactions/create";
+import {isUpdate, isCreate, isDelete, isBuildIndex} from "../transactions/create";
 import { applyToShard } from "./apply";
+import {isTopLevelCollectionIndex, 
+    isGlobalIndex} from "../templateApi/heirarchy";
 
 export const executeTransactions =  app => async transactions => {
     const recordsByShard = mappedRecordsByIndexShard(app.heirarchy, transactions);
@@ -28,12 +30,18 @@ export const executeTransactions =  app => async transactions => {
 const mappedRecordsByIndexShard = (heirarchy, transactions) => {
 
     const updates = getUpdateTransactionsByShard(
-        heirarchy, transactions);
+        heirarchy, transactions
+    );
+
     const created = getCreateTransactionsByShard(
         heirarchy, transactions
     );
     const deletes = getDeleteTransactionsByShard(
         heirarchy, transactions
+    );
+
+    const indexBuild = getBuildIndexTransactionsByShard(
+        transactions
     );
     
     const toRemove = [
@@ -43,9 +51,9 @@ const mappedRecordsByIndexShard = (heirarchy, transactions) => {
 
     const toWrite = [
         ...created,
-        ...updates.toWrite
+        ...updates.toWrite,
+        ...indexBuild
     ];
-
 
     const transByShard = {};
 
@@ -195,6 +203,40 @@ const getUpdateTransactionsByShard = (heirarchy, transactions) => {
     });
     
 };
+
+const getBuildIndexTransactionsByShard =  (transactions) => {
+    const buildTransactions = $(transactions, [filter(isBuildIndex)]);
+    const indexNode = transactions.indexNode;
+
+    const getIndexKey = (t) => {
+        if(isTopLevelCollectionIndex(indexNode)
+          || isGlobalIndex(indexNode)) {
+            return indexNode.nodeKey();
+        }
+
+        return getActualKeyOfParent(
+            indexNode.parent(),
+            t.recordKey
+        );
+    }
+
+    $(buildTransactions, [
+        map(t => {
+            const mappedRecord = evaluate(t.record)(indexNode);
+            if(!mappedRecord.passedFilter) return null;
+            const indexKey = getIndexKey(t);
+            return ({mappedRecord, 
+                indexNode:indexNode, 
+                indexKey:indexKey,
+                indexShardKey:getIndexedDataKey(
+                    indexNode,
+                    indexKey,
+                    mappedRecord.result)
+            });
+        }),
+        filter(isSomething)
+    ]);
+}
 
 const get_Create_Delete_TransactionsByShard = pred => (heirarchy, transactions) => {
     const createTransactions = $(transactions, [filter(pred)]);

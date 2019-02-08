@@ -1,8 +1,9 @@
-import {find, constant, map, last, first, split, intersection,
-        take, union, includes, filter, some} from "lodash/fp";
+import {find, constant, map, last, 
+    first, split, intersection,take, 
+    union, includes, filter, some} from "lodash/fp";
 import {$, switchCase, isNothing, isSomething,
     defaultCase, splitKey, isNonEmptyString,
-    joinKey} from "../common";
+    joinKey, getHashCode} from "../common";
 
 export const getFlattenedHierarchy = (appHeirarchy, useCached=true) => {
 
@@ -160,6 +161,12 @@ export const getAllowedRecordNodesForIndex = (appHeirarchy, indexNode) => {
     }
 
 };
+
+export const getNodeFromNodeKeyHash = (heirarchy, hash) =>
+    $(heirarchy, [
+        getFlattenedHierarchy,
+        find(n => getHashCode(n.nodeKey()) === hash)
+    ]);
     
 export const isRecord = node => isSomething(node) && node.type === "record";
 export const isCollection = node => isSomething(node) && node.type === "collection";

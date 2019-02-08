@@ -9,19 +9,21 @@ export const cleanup = async app => {
 
     try {
         const transactions = await retrieve(app);
-        await executeTransactions(app)(transactions);
-        
-        const deleteFiles = $(transactions, [
-            map(t => joinKey(
-                TRANSACTIONS_FOLDER,
-                getTransactionId(
-                t.recordId, t.transactionType,
-                t.uniqueId)
-            )),
-            map(app.datastore.deleteFile)
-        ]);
+        if(transactions.length > 0) {
+            await executeTransactions(app)(transactions);
+            
+            const deleteFiles = $(transactions, [
+                map(t => joinKey(
+                    TRANSACTIONS_FOLDER,
+                    getTransactionId(
+                    t.recordId, t.transactionType,
+                    t.uniqueId)
+                )),
+                map(app.datastore.deleteFile)
+            ]);
 
-        await Promise.all(deleteFiles);
+            await Promise.all(deleteFiles);
+        }
     }
     finally {
         await app.datastore.deleteFile(lockKey);
