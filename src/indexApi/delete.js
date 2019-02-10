@@ -5,14 +5,14 @@ import {isIndex, isShardedIndex,
 import {getAllShardKeys, getShardMapKey,
         getUnshardedIndexDataKey} from "../indexing/sharding";
 
-export const deleteIndex = (app) => async indexKey => 
+export const deleteIndex = (app) => async (indexKey, includeFolder=true) => 
     apiWrapper(
         app,
         events.indexApi.delete, 
         {indexKey},
-        _deleteIndex, app, indexKey);
+        _deleteIndex, app, indexKey, includeFolder);
 
-const _deleteIndex = async (app, indexKey) => {
+const _deleteIndex = async (app, indexKey, includeFolder) => {
     const indexNode = getExactNodeForPath(app.heirarchy)(indexKey);
     
     if(!isIndex(indexNode))
@@ -38,7 +38,9 @@ const _deleteIndex = async (app, indexKey) => {
         );
     }
 
-    tryAwaitOrIgnore(
-        await app.datastore.deleteFolder(indexKey)
-    );
+    if(includeFolder) {
+        tryAwaitOrIgnore(
+            await app.datastore.deleteFolder(indexKey)
+        );
+    }
 };

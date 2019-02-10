@@ -162,7 +162,7 @@ export const getAllowedRecordNodesForIndex = (appHeirarchy, indexNode) => {
 
 };
 
-export const getNodeFromNodeKeyHash = (heirarchy, hash) =>
+export const getNodeFromNodeKeyHash = heirarchy => hash =>
     $(heirarchy, [
         getFlattenedHierarchy,
         find(n => getHashCode(n.nodeKey()) === hash)

@@ -191,7 +191,8 @@ export const withFields = (heirarchy, templateApi) => {
 
 export const withIndexes = (heirarchy, templateApi) => {
     const {root, customersCollection, customerRecord,
-        invoicesCollection} = heirarchy;
+        invoicesCollection, partnerInvoiceRecord,
+        invoiceRecord} = heirarchy;
     const deceasedCustomersIndex = getNewIndexTemplate(customersCollection);
     deceasedCustomersIndex.name = "deceased";
     deceasedCustomersIndex.map = "return {surname: record.surname, age:record.age};";
@@ -207,6 +208,9 @@ export const withIndexes = (heirarchy, templateApi) => {
     outstandingInvoicesIndex.name = "Outstanding Invoices";
     outstandingInvoicesIndex.filter = "record.type === 'invoice' && record.paidAmount < record.totalIncVat";
     outstandingInvoicesIndex.map = "return {...record};";
+    outstandingInvoicesIndex.allowedRecordNodeIds = [
+        invoiceRecord.recordNodeId, partnerInvoiceRecord.recordNodeId
+    ];
 
     const allInvoicesAggregateGroup = templateApi.getNewAggregateGroupTemplate(outstandingInvoicesIndex);
     allInvoicesAggregateGroup.name = "all_invoices";

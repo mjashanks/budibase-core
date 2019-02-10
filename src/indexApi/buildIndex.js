@@ -167,12 +167,6 @@ const chooseChildRecordNodeByKey = (collectionNode, recordId) =>
     find(c => recordId.startsWith(c.recordNodeId))
         (collectionNode.children);
 
-const applyToIndex = (record, indexNode, indexedData) => {
-    const result = evaluate(record)(indexNode);
-    if(result.passedFilter) 
-        indexedData.push(result.result);
-};
-
 const recordNodeApplies = indexNode => recordNode => 
     includes(recordNode.recordNodeId)(indexNode.allowedRecordNodeIds);
 
@@ -211,7 +205,9 @@ const applyAllDecendantRecords =
             );
 
             if(recordNodeApplies(indexNode)(recordNode)) {
-                await transactionForBuildIndex(app, indexNodeKey, recordKey, recordCount);
+                await transactionForBuildIndex(
+                    app, indexNode.nodeKey(), 
+                    recordKey, recordCount);
                 recordCount++;
             }
             

@@ -22,12 +22,17 @@ const getParentFolder = (data,key) => {
     return JSON.parse(data[parentKey]);
 }
 
-export const createFile = data => async (path, content) => {
-    if(await exists(data)(path)) throw new Error(path + " already exists");
+const addItemToParentFolder = (data, path) => {
+    if(getParentFolderKey(path) === "/") return;
     const parentFolder = getParentFolder(data, path);
     parentFolder.items.push(
         getLastPartInKey(path));
     data[getParentFolderKey(path)] = JSON.stringify(parentFolder);
+}
+
+export const createFile = data => async (path, content) => {
+    if(await exists(data)(path)) throw new Error(path + " already exists");
+    addItemToParentFolder(data, path);
     data[path] = content;
 };
 export const updateFile = data => async (path, content) => {
@@ -83,6 +88,7 @@ export const deleteFile = data => async (path) => {
 }
 export const createFolder = data => async (path) => {
     if(await exists(data)(path)) throw new Error("Cannot create folder, path " + path + " already exists");
+    addItemToParentFolder(data, path);
     data[path] = JSON.stringify({folderMarker, items:[]});
 }
 export const deleteFolder = data => async (path) => {

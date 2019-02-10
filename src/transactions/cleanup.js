@@ -12,9 +12,13 @@ export const cleanup = async app => {
         if(transactions.length > 0) {
             await executeTransactions(app)(transactions);
             
+            const folder = transactions.folderKey 
+                           ? transactions.folderKey 
+                           : TRANSACTIONS_FOLDER;
+
             const deleteFiles = $(transactions, [
                 map(t => joinKey(
-                    TRANSACTIONS_FOLDER,
+                    folder,
                     getTransactionId(
                     t.recordId, t.transactionType,
                     t.uniqueId)

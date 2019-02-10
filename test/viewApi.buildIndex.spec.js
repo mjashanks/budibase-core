@@ -40,7 +40,7 @@ describe("buildIndex > Global index", () => {
         await recordApi.save(paidInvoice);
 
         const indexKey = appHeirarchy.outstandingInvoicesIndex.nodeKey();
-        await indexApi.delete(indexKey);
+        await indexApi.delete(indexKey, false);
 
         await indexApi.buildIndex(indexKey);
         const indexItems = await indexApi.listItems(indexKey);
@@ -93,7 +93,7 @@ describe("buildIndex > Global index", () => {
         await recordApi.save(partnerInvoice);
 
         const indexKey = appHeirarchy.outstandingInvoicesIndex.nodeKey();
-        await indexApi.delete(indexKey);
+        await indexApi.delete(indexKey, false);
 
         await indexApi.buildIndex(indexKey);
         const indexItems = await indexApi.listItems(indexKey);
@@ -133,7 +133,7 @@ describe("buildIndex > TopLevelCollection", () => {
         await recordApi.save(invoice);
 
         const indexKey = appHeirarchy.customerInvoicesIndex.nodeKey();
-        await indexApi.delete(indexKey);
+        await indexApi.delete(indexKey, false);
 
         await indexApi.buildIndex(indexKey);
         const indexItems = await indexApi.listItems(indexKey);
@@ -168,7 +168,7 @@ describe("buildIndex > TopLevelCollection", () => {
         await recordApi.save(invoice);
 
         const indexKey = appHeirarchy.customerInvoicesIndex.nodeKey();
-        await indexApi.delete(indexKey);
+        await indexApi.delete(indexKey, false);
 
         await indexApi.buildIndex(indexKey);
         const indexItems = await indexApi.listItems(indexKey);
@@ -207,7 +207,7 @@ describe("buildIndex > nested collection", () => {
         await recordApi.save(invoice);
 
         const indexKey = joinKey(customer.key, "invoices", "default");
-        await indexApi.delete(indexKey);
+        await indexApi.delete(indexKey, false);
 
         await indexApi.buildIndex(
             appHeirarchy.invoicesCollection.indexes[0].nodeKey());
@@ -263,7 +263,7 @@ describe("buildIndex > nested collection", () => {
         await recordApi.save(invoice2);
 
         const indexKey = joinKey(customer.key, "invoices", "default");
-        await indexApi.delete(indexKey);
+        await indexApi.delete(indexKey, false);
 
         await indexApi.buildIndex(
             appHeirarchy.invoicesCollection.indexes[0].nodeKey());
@@ -296,7 +296,7 @@ describe("buildIndex > sharded index", () => {
                             .customersBySurnameIndex
                             .nodeKey();
 
-        await indexApi.delete(indexKey);
+        await indexApi.delete(indexKey, false);
 
         await indexApi.buildIndex(indexKey);
         const indexItems = await indexApi.listItems(indexKey);
@@ -327,7 +327,7 @@ describe("buildIndex > sharded index", () => {
                             .customersBySurnameIndex
                             .nodeKey();
 
-        await indexApi.delete(indexKey);
+        await indexApi.delete(indexKey, false);
 
         await indexApi.buildIndex(indexKey);
         const indexItems = await indexApi.listItems(indexKey);
@@ -372,7 +372,7 @@ describe("buildIndex > sharded index", () => {
             invoiceCollectionKey, 
             appHeirarchy.invoicesByOutstandingIndex.name);
 
-        await indexApi.delete(indexKey);
+        await indexApi.delete(indexKey, false);
 
         await indexApi.buildIndex(
             appHeirarchy.invoicesByOutstandingIndex.nodeKey());
@@ -412,7 +412,7 @@ describe("buildIndex > sharded index", () => {
 
         const indexKey = joinKey(referencedCustomer.key, "referredToCustomers");
 
-        await indexApi.delete(indexKey);
+        await indexApi.delete(indexKey, false);
 
         await indexApi.buildIndex(
             appHeirarchy.referredToCustomersReverseIndex.nodeKey());
@@ -448,7 +448,7 @@ describe("buildIndex > reverse reference index", () => {
 
         const indexKey = joinKey(partner1.key, "partnerCustomers");
 
-        await indexApi.delete(indexKey);
+        await indexApi.delete(indexKey, false);
 
         await indexApi.buildIndex(
             appHeirarchy.partnerCustomersReverseIndex.nodeKey());
@@ -488,7 +488,7 @@ describe("buildIndex > reverse reference index", () => {
 
         const indexKey = joinKey(partner1.key, "partnerCustomers");
 
-        await indexApi.delete(indexKey);
+        await indexApi.delete(indexKey, false);
 
         await indexApi.buildIndex(
             appHeirarchy.partnerCustomersReverseIndex.nodeKey());
@@ -535,9 +535,9 @@ describe("buildIndex > reverse reference index", () => {
         const indexKey1 = joinKey(partner1.key, "partnerCustomers");
         const indexKey2 = joinKey(partner2.key, "partnerCustomers");
 
-        await indexApi.delete(indexKey1);
+        await indexApi.delete(indexKey1, true);
 
-        await indexApi.delete(indexKey2);
+        await indexApi.delete(indexKey2, true);
 
         await indexApi.buildIndex(
             appHeirarchy.partnerCustomersReverseIndex.nodeKey());
@@ -601,7 +601,7 @@ describe("buildIndex > reverse reference index", () => {
 
         const indexKey = joinKey(partnerInvoice.key, "partnerCharges");
 
-        await indexApi.delete(indexKey);
+        await indexApi.delete(indexKey, false);
 
         await indexApi.buildIndex(
             appHeirarchy.partnerChargesReverseIndex.nodeKey());

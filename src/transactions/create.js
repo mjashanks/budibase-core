@@ -46,12 +46,17 @@ export const transactionForBuildIndex = async (app, indexNodeKey, recordKey, cou
 export const idSep = "$";
 export const TRANSACTIONS_FOLDER = keySep + ".transactions";
 
-const buildIndexFolder = ".BUILD";
+const buildIndexFolder = ".BUILD-";
+export const nodeKeyHashFromBuildFolder = folder =>
+    folder.replace(buildIndexFolder, "");
+    
 export const isBuildIndexFolder = key => 
     getLastPartInKey(key).startsWith(buildIndexFolder);
 
 export const IndexNodeKeyFolder = indexNodeKey => 
-    joinKey(TRANSACTIONS_FOLDER, "" + keyToFolderName(indexNodeKey));
+    joinKey(
+        TRANSACTIONS_FOLDER, 
+        buildIndexFolder + keyToFolderName(indexNodeKey));
 
 export const IndexNodeKeyBatchFolder = (indexNodeKey, count) => 
     joinKey(IndexNodeKeyFolder(indexNodeKey), Math.floor(count/BUILDINDEX_BATCH_COUNT).toString());

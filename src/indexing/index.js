@@ -1,7 +1,7 @@
 import {getRelevantHeirarchalIndexes,
     getRelevantReverseReferenceIndexes} from "./relevant";
 import {evaluate} from "./evaluate";
-import {$$, $, isSomething} from "../common";
+import {$$, $, isSomething, isNonEmptyArray} from "../common";
 import {filter, map, isUndefined, flatten, intersectionBy,
         isEqual, pull, keys, differenceBy, difference} from "lodash/fp";
 import {union} from "lodash";
@@ -206,6 +206,7 @@ const getUpdateTransactionsByShard = (heirarchy, transactions) => {
 
 const getBuildIndexTransactionsByShard =  (transactions) => {
     const buildTransactions = $(transactions, [filter(isBuildIndex)]);
+    if(!isNonEmptyArray(buildTransactions)) return [];
     const indexNode = transactions.indexNode;
 
     const getIndexKey = (t) => {
@@ -220,7 +221,7 @@ const getBuildIndexTransactionsByShard =  (transactions) => {
         );
     }
 
-    $(buildTransactions, [
+    return $(buildTransactions, [
         map(t => {
             const mappedRecord = evaluate(t.record)(indexNode);
             if(!mappedRecord.passedFilter) return null;

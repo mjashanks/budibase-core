@@ -1,5 +1,5 @@
 import {idSep, TRANSACTIONS_FOLDER, isUpdate,
-        isCreate, getTransactionId, 
+        isCreate, getTransactionId, nodeKeyHashFromBuildFolder,
         isDelete, isBuildIndexFolder} from "./create";
 import {joinKey, tryAwaitOrIgnore, $, none} from "../common";
 import {getLastPartInKey, getNodeFromNodeKeyHash} from "../templateApi/heirarchy";
@@ -59,7 +59,7 @@ const retrieveBuildIndexTransactions = async (app, buildIndexFolder) => {
         if(childFolderIndex >= childFolders.length) return [];
 
         const childFolderKey = joinKey(buildIndexFolder, childFolders[childFolderIndex]);
-        const files = await datastore.getFolderContents(
+        const files = await app.datastore.getFolderContents(
             childFolderKey
         );
 
@@ -68,25 +68,33 @@ const retrieveBuildIndexTransactions = async (app, buildIndexFolder) => {
             return await getTransactionFiles(childFolderIndex+1);
         }
 
-        return files;        
+        return {childFolderKey, files};        
     }
 
     const transactionFiles = await getTransactionFiles();
 
-    if(transactionFiles.length === 0) return [];
+    if(transactionFiles.files.length === 0) return [];
 
-    const transactions = $(transactionFiles, [
+    const transactions = $(transactionFiles.files, [
         map(parseTransactionId)
     ]);
 
     for(let t of transactions) {
-        t.record = await load(app)(t.recordKey);
+        const transactionContent = await app.datastore.loadJson(
+            joinKey(
+                transactionFiles.childFolderKey, 
+                t.fullId)
+        );
+        t.record = await load(app)(transactionContent.recordKey);
     }
 
     transactions.indexNode = $(buildIndexFolder, [
         getLastPartInKey,
-        getNodeFromNodeKeyHash
+        nodeKeyHashFromBuildFolder,
+        getNodeFromNodeKeyHash(app.heirarchy)
     ]);
+
+    transactions.folderKey = transactionFiles.childFolderKey;
 
     return transactions;
 }
@@ -234,5 +242,6 @@ const parseTransactionId = id => {
         recordId: splitId[0],
         transactionType: splitId[1],
         uniqueId: splitId[2],
+        fullId: id
     });
 };
