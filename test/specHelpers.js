@@ -192,17 +192,27 @@ export const withFields = (heirarchy, templateApi) => {
 export const withIndexes = (heirarchy, templateApi) => {
     const {root, customersCollection, customerRecord,
         invoicesCollection, partnerInvoiceRecord,
-        invoiceRecord} = heirarchy;
+        invoiceRecord, partnerRecord,
+        chargeRecord, chargesCollection,
+        partnerInvoicesCollection, partnersCollection} = heirarchy;
     const deceasedCustomersIndex = getNewIndexTemplate(customersCollection);
     deceasedCustomersIndex.name = "deceased";
     deceasedCustomersIndex.map = "return {surname: record.surname, age:record.age};";
     deceasedCustomersIndex.filter = "record.isalive === false";
     customersCollection.indexes[0].map = "return record;"
+    deceasedCustomersIndex.allowedRecordNodeIds = [customerRecord.recordNodeId];
+
+    invoicesCollection.indexes[0].allowedRecordNodeIds = [invoiceRecord.recordNodeId];
+    customersCollection.indexes[0].allowedRecordNodeIds = [customerRecord.recordNodeId];
+    partnersCollection.indexes[0].allowedRecordNodeIds = [partnerRecord.recordNodeId];
+    partnerInvoicesCollection.indexes[0].allowedRecordNodeIds = [partnerInvoiceRecord.recordNodeId];
+    chargesCollection.indexes[0].allowedRecordNodeIds = [chargeRecord.recordNodeId];
 
     const customerInvoicesIndex = getNewIndexTemplate(customersCollection);
     customerInvoicesIndex.name = "invoices";
     customerInvoicesIndex.map = "return record;";
     customerInvoicesIndex.filter = "record.type === 'invoice'";
+    customerInvoicesIndex.allowedRecordNodeIds = [invoiceRecord.recordNodeId];
 
     const outstandingInvoicesIndex = getNewIndexTemplate(root);
     outstandingInvoicesIndex.name = "Outstanding Invoices";
@@ -255,7 +265,9 @@ export const withIndexes = (heirarchy, templateApi) => {
     invoicesByOutstandingIndex.map = "return {...record};"
     invoicesByOutstandingIndex.filter = "";
     invoicesByOutstandingIndex.getShardName = "return (record.totalIncVat > record.paidAmount ? 'outstanding' : 'paid');"
-
+    invoicesByOutstandingIndex.allowedRecordNodeIds = [
+        partnerInvoiceRecord.recordNodeId, invoiceRecord.recordNodeId
+    ];
     const allInvoicesByType_Sharded = templateApi.getNewAggregateGroupTemplate(invoicesByOutstandingIndex);
     allInvoicesByType_Sharded.groupBy = "return record.invoiceType";
     allInvoicesByType_Sharded.name = "all_invoices_by_type";

@@ -8,7 +8,7 @@ import {union} from "lodash";
 import {createIndexFile, getIndexedDataKey} from "./sharding";
 import {isUpdate, isCreate, isDelete, isBuildIndex} from "../transactions/create";
 import { applyToShard } from "./apply";
-import {isTopLevelCollectionIndex, 
+import {isTopLevelCollectionIndex,getActualKeyOfParent,
     isGlobalIndex} from "../templateApi/heirarchy";
 
 export const executeTransactions =  app => async transactions => {

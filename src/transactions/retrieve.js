@@ -103,7 +103,8 @@ const retrieveStandardTransactions = async (app, transactionFiles) => {
     
 
     const transactionIds = $(transactionFiles, [
-        filter(f => f !== LOCK_FILENAME),
+        filter(f => f !== LOCK_FILENAME 
+                    && !isBuildIndexFolder(f)),
         map(parseTransactionId),
     ]);
 

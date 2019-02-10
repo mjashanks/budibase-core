@@ -122,8 +122,8 @@ const tryDeleteIndex = async (app, indexKey) => {
 }
 
 const buildCollectionIndex = async (app, indexKey, indexNode, collectionKey) => {
-    await tryDeleteIndex(app,indexKey);
-    await initialiseIndex(app, collectionKey, indexNode);
+    //await tryDeleteIndex(app,indexKey);
+    //await initialiseIndex(app, collectionKey, indexNode);
     await applyAllDecendantRecords(
         app, 
         collectionKey, 
