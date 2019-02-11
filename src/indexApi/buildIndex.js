@@ -1,16 +1,10 @@
 import {getAllIdsIterator} from "../indexing/allIds";
-import {isGlobalIndex, getFlattenedHierarchy, getRecordNodeById,
-    getNodeByKeyOrNodeKey,getNode, isTopLevelCollection,
-    isIndex, isCollection, isRecord, isDecendant, getAllowedRecordNodesForIndex,
+import {getFlattenedHierarchy, getRecordNodeById,
+    getNodeByKeyOrNodeKey,getNode, isIndex, isRecord, isDecendant, getAllowedRecordNodesForIndex,
     fieldReversesReferenceToIndex} from "../templateApi/heirarchy";
 import {find, filter, includes,
-    some, map, join} from "lodash/fp";
+    some, map} from "lodash/fp";
 import {joinKey, apiWrapper, events, $, allTrue} from "../common";
-import {evaluate} from "../indexing/evaluate";
-import {initialiseIndex} from "../collectionApi/initialise";
-import {deleteIndex} from "../indexApi/delete";
-import {serializeItem} from "../indexing/serializer";
-import {generateSchema} from "../indexing/indexSchemaCreator";
 import {createBuildIndexFolder, 
     transactionForBuildIndex} from "../transactions/create";
 
@@ -131,80 +125,6 @@ const buildHeirarchalIndex = async (app, indexNode) => {
     }
 
     return recordCount;
-}
-
-const buildGlobalIndex = async (app, indexNode) => {
-
-    const flatHeirarchy = getFlattenedHierarchy(app.heirarchy);
-    const filterNodes = pred => filter(pred)(flatHeirarchy);
-    
-    const topLevelCollections = filterNodes(isTopLevelCollection);
-    let totalCount = 0;
-
-    for(let col of topLevelCollections) {
-        
-        if(!hasApplicableDecendant(app.heirarchy, col, indexNode))
-            continue;
-
-        const thisCount = await applyAllDecendantRecords(
-            app, 
-            col.nodeKey(), 
-            indexNode,
-            indexNode.nodeKey(),
-            [], "", totalCount);
-
-        totalCount = totalCount + thisCount;
-    }
-};
-
-const tryDeleteIndex = async (app, indexKey) => {
-    try {
-        await deleteIndex(app)(indexKey);
-    }
-    catch(_){} // tolerate if already gone
-}
-
-const buildCollectionIndex = async (app, indexKey, indexNode, collectionKey, recordCount=0) => {
-    //await tryDeleteIndex(app,indexKey);
-    //await initialiseIndex(app, collectionKey, indexNode);
-    return await applyAllDecendantRecords(
-        app, 
-        collectionKey, 
-        indexNode,
-        indexKey,
-        [] ,"", recordCount
-    );
-};
-
-const buildNestedCollectionIndex = async (app, indexNode) => {
-    
-    const nestedCollection = indexNode.parent();
-    const parentCollectionNode = nestedCollection
-                            .parent() //record
-                            .parent(); //parentcollection
-
-    const allIdsIterator = await getAllIdsIterator(app)
-                                                  (parentCollectionNode.nodeKey());
-    let recordCount = 0;
-    let allids = await allIdsIterator();
-    while(!allids.done) {
-        for(let id of allids.result.ids) {
-            const collectionKey =
-                joinKey(
-                    allids.result.collectionKey,
-                    id,
-                    nestedCollection.name
-                );
-
-            const indexKey = joinKey(
-                collectionKey, indexNode.name);
-                recordCount = await buildCollectionIndex(
-                        app, indexKey, indexNode, 
-                        collectionKey, recordCount
-            );
-        }
-        allids = await allIdsIterator(); 
-    }
 }
 
 const chooseChildRecordNodeByKey = (collectionNode, recordId) => 
