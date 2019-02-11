@@ -1,7 +1,7 @@
 import {getRelevantHeirarchalIndexes,
     getRelevantReverseReferenceIndexes} from "./relevant";
 import {evaluate} from "./evaluate";
-import {$$, $, isSomething, isNonEmptyArray} from "../common";
+import {$$, $, isSomething, isNonEmptyArray, joinKey} from "../common";
 import {filter, map, isUndefined, flatten, intersectionBy,
         isEqual, pull, keys, differenceBy, difference} from "lodash/fp";
 import {union} from "lodash";
@@ -215,10 +215,13 @@ const getBuildIndexTransactionsByShard =  (transactions) => {
             return indexNode.nodeKey();
         }
 
-        return getActualKeyOfParent(
-            indexNode.parent(),
-            t.recordKey
-        );
+        return joinKey(
+            getActualKeyOfParent(
+                indexNode.parent().nodeKey(),
+                t.record.key
+            ),
+            indexNode.name
+        )
     }
 
     return $(buildTransactions, [

@@ -269,9 +269,15 @@ describe("buildIndex > nested collection", () => {
             appHeirarchy.invoicesCollection.indexes[0].nodeKey());
         const indexItems = await indexApi.listItems(indexKey);
 
-        expect(indexItems.length).toBe(2);
+        expect(indexItems.length).toBe(1);
         expect(some(indexItems, i => i.key === invoice.key)).toBeTruthy();
-        expect(some(indexItems, i => i.key === invoice2.key)).toBeTruthy();
+
+        const indexItems2 = await indexApi.listItems(
+            joinKey(customer2.key, "invoices", "default")
+        );
+
+        expect(indexItems2.length).toBe(1);
+        expect(some(indexItems2, i => i.key === invoice2.key)).toBeTruthy();
 
     });
 

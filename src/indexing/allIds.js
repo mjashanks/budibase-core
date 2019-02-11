@@ -187,7 +187,8 @@ export const getAllIdsIterator = (app) => async (collection_Key_or_NodeKey) => {
         if(iteratorsArray.length === 0)
             return {done:true, result:[]}; 
         const innerResult = await iteratorsArray[currentIteratorIndex]();
-        if(!innerResult.done) return innerResult;
+        if(!innerResult.done) 
+            return innerResult;
         if(currentIteratorIndex == iteratorsArray.length - 1){
             return {done:true, result: innerResult.result};
         }

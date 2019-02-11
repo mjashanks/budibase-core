@@ -121,15 +121,15 @@ const tryDeleteIndex = async (app, indexKey) => {
     catch(_){} // tolerate if already gone
 }
 
-const buildCollectionIndex = async (app, indexKey, indexNode, collectionKey) => {
+const buildCollectionIndex = async (app, indexKey, indexNode, collectionKey, recordCount=0) => {
     //await tryDeleteIndex(app,indexKey);
     //await initialiseIndex(app, collectionKey, indexNode);
-    await applyAllDecendantRecords(
+    return await applyAllDecendantRecords(
         app, 
         collectionKey, 
         indexNode,
         indexKey,
-        [] ,""
+        [] ,"", recordCount
     );
 };
 
@@ -142,7 +142,7 @@ const buildNestedCollectionIndex = async (app, indexNode) => {
 
     const allIdsIterator = await getAllIdsIterator(app)
                                                   (parentCollectionNode.nodeKey());
-
+    let recordCount = 0;
     let allids = await allIdsIterator();
     while(!allids.done) {
         for(let id of allids.result.ids) {
@@ -155,8 +155,9 @@ const buildNestedCollectionIndex = async (app, indexNode) => {
 
             const indexKey = joinKey(
                 collectionKey, indexNode.name);
-            await buildCollectionIndex(
-                app, indexKey, indexNode, collectionKey
+                recordCount = await buildCollectionIndex(
+                        app, indexKey, indexNode, 
+                        collectionKey, recordCount
             );
         }
         allids = await allIdsIterator(); 
@@ -214,13 +215,11 @@ const applyAllDecendantRecords =
             if(hasApplicableDecendant(app.heirarchy, recordNode, indexNode))
             {
                 for(let childCollectionNode of recordNode.children) {
-                    const childCount = await applyAllDecendantRecords(
+                    recordCount = await applyAllDecendantRecords(
                         app,
                         joinKey(recordKey, childCollectionNode.name),
                         indexNode, indexKey, currentIndexedData,
                         currentIndexedDataKey, recordCount);
-                    
-                    recordCount = recordCount + childCount;
                 }
             }
         }
@@ -236,20 +235,5 @@ const applyAllDecendantRecords =
     
     return recordCount;;
 };
-
-const writeIndex = async (app, indexedData, indexedDataKey, indexNode) => {
-    const schema = generateSchema(app.heirarchy, indexNode);
-    const data = $(indexedData, [
-        map(i => serializeItem(schema,i)),
-        join("")
-    ]); 
-    
-    try{
-        await app.datastore.deleteFile(indexedDataKey);
-    } catch(_) {}
-
-    await app.datastore.createFile(indexedDataKey, data);
-};
-
 
 export default buildIndex;
