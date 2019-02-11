@@ -12,19 +12,18 @@ import {isTopLevelCollectionIndex,getActualKeyOfParent,
     isGlobalIndex} from "../templateApi/heirarchy";
 
 export const executeTransactions =  app => async transactions => {
-    const recordsByShard = mappedRecordsByIndexShard(app.heirarchy, transactions);
-    await Promise.all(
-        $(recordsByShard, [
-            keys,
-            map(k => applyToShard(
-                app.heirarchy, app.datastore,
-                recordsByShard[k].indexKey,
-                recordsByShard[k].indexNode,
-                k,
-                recordsByShard[k].writes,
-                recordsByShard[k].removes
-            ))
-    ]));
+    const recordsByShard = mappedRecordsByIndexShard(app.heirarchy, transactions);         
+
+    for(let shard of keys(recordsByShard)) {
+        await applyToShard(
+            app.heirarchy, app.datastore,
+            recordsByShard[shard].indexKey,
+            recordsByShard[shard].indexNode,
+            shard,
+            recordsByShard[shard].writes,
+            recordsByShard[shard].removes
+        )
+    }
 }
 
 const mappedRecordsByIndexShard = (heirarchy, transactions) => {

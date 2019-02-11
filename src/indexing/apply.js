@@ -1,4 +1,4 @@
-import {getIndexedDataKey, ensureShardNameIsInShardMap} from "./sharding";
+import {getShardMapKey, ensureShardNameIsInShardMap} from "./sharding";
 import {getIndexWriter} from "./serializer";
 import { isShardedIndex } from "../templateApi/heirarchy";
 
