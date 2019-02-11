@@ -1,7 +1,7 @@
 import {getAllIdsIterator} from "../indexing/allIds";
-import {isGlobalIndex, getFlattenedHierarchy
-    ,getNodeByKeyOrNodeKey,getNode, isTopLevelCollection,
-    isIndex, isCollection, isRecord, isDecendant,
+import {isGlobalIndex, getFlattenedHierarchy, getRecordNodeById,
+    getNodeByKeyOrNodeKey,getNode, isTopLevelCollection,
+    isIndex, isCollection, isRecord, isDecendant, getAllowedRecordNodesForIndex,
     fieldReversesReferenceToIndex} from "../templateApi/heirarchy";
 import {find, filter, includes,
     some, map, join} from "lodash/fp";
@@ -13,6 +13,7 @@ import {serializeItem} from "../indexing/serializer";
 import {generateSchema} from "../indexing/indexSchemaCreator";
 import {createBuildIndexFolder, 
     transactionForBuildIndex} from "../transactions/create";
+
 
 /** rebuilds an index
  * @param {object} app - the application container
@@ -33,21 +34,12 @@ const _buildIndex = async (app, indexNodeKey) => {
     if(!isIndex(indexNode)) 
         throw new Error("BuildIndex: must supply a indexnode");
 
-    if(isGlobalIndex(indexNode)) {
-        await buildGlobalIndex(
-            app, indexNode);
-    } else if(isTopLevelCollection(indexNode.parent())) {
-        await buildCollectionIndex(
-            app, indexNode.nodeKey(),
-            indexNode, indexNode.parent().nodeKey()
-        ); 
-    }
-    else if(isCollection(indexNode.parent())){
-        await buildNestedCollectionIndex(
+    if(indexNode.indexType === "reference") {
+        await buildReverseReferenceIndex(
             app, indexNode
         );
-    } else if(indexNode.indexType === "reference") {
-        await buildReverseReferenceIndex(
+    } else {
+        await buildHeirarchalIndex(
             app, indexNode
         );
     }
@@ -91,6 +83,56 @@ const buildReverseReferenceIndex = async (app, indexNode) => {
     }
 };
 
+const getAllowedParentCollectionNodes = (heirarchy, indexNode) => 
+    $(getAllowedRecordNodesForIndex(heirarchy, indexNode), [
+        map(n => n.parent())
+    ]);
+
+const buildHeirarchalIndex = async (app, indexNode) => {
+
+    let recordCount = 0;
+
+    const createTransactionsForIds = async (collectionKey, ids) => {
+
+        for(let recordId of ids) {
+            const recordKey = joinKey(collectionKey, recordId);
+
+            const recordNode = getRecordNodeById(
+                app.heirarchy,
+                recordId
+            );
+
+            if(recordNodeApplies(indexNode)(recordNode)) {
+                await transactionForBuildIndex(
+                    app, indexNode.nodeKey(), 
+                    recordKey, recordCount);
+                recordCount++;
+            }
+        }
+    };
+
+    
+    const collections = getAllowedParentCollectionNodes(
+        app.heirarchy, indexNode
+    );
+
+    for(let targetCollectionNode of collections) {
+        const allIdsIterator = await  getAllIdsIterator(app)
+                                        (targetCollectionNode.nodeKey());
+        
+        let allIds = await allIdsIterator();
+        while(allIds.done === false) {
+            await createTransactionsForIds(
+                allIds.result.collectionKey,
+                allIds.result.ids);
+            allIds = await allIdsIterator();
+        }
+
+    }
+
+    return recordCount;
+}
+
 const buildGlobalIndex = async (app, indexNode) => {
 
     const flatHeirarchy = getFlattenedHierarchy(app.heirarchy);
@@ -98,6 +140,7 @@ const buildGlobalIndex = async (app, indexNode) => {
     
     const topLevelCollections = filterNodes(isTopLevelCollection);
     let totalCount = 0;
+
     for(let col of topLevelCollections) {
         
         if(!hasApplicableDecendant(app.heirarchy, col, indexNode))

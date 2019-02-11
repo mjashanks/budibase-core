@@ -125,10 +125,19 @@ export const getRecordNodeId = recordKey =>
     $(recordKey, [
         splitKey,
         last,
-        split("-"),
-        first,
-        parseInt
+        getRecordNodeIdFromId
     ]);
+
+export const getRecordNodeIdFromId = recordId =>
+    $(recordId, [split("-"), first, parseInt])
+
+export const getRecordNodeById = (heirarchy, recordId) => 
+    $(heirarchy, [
+        getFlattenedHierarchy,
+        find(n => isRecord(n) 
+                    && n.recordNodeId === getRecordNodeIdFromId(recordId))
+    ]);
+
 
 export const getAllowedRecordNodesForIndex = (appHeirarchy, indexNode) => {
     const recordNodes = $(appHeirarchy, [
