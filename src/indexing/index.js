@@ -1,15 +1,21 @@
 import {getRelevantHeirarchalIndexes,
     getRelevantReverseReferenceIndexes} from "./relevant";
 import {evaluate} from "./evaluate";
-import {$$, $, isSomething, isNonEmptyArray, joinKey} from "../common";
-import {filter, map, isUndefined, flatten, intersectionBy,
-        isEqual, pull, keys, differenceBy, difference} from "lodash/fp";
+import {$$, $, isSomething, 
+        isNonEmptyArray, joinKey, 
+        isNonEmptyString} from "../common";
+import {filter, map, isUndefined, includes,
+        flatten, intersectionBy,
+        isEqual, pull, keys, 
+        differenceBy, difference} from "lodash/fp";
 import {union} from "lodash";
 import {createIndexFile, getIndexedDataKey} from "./sharding";
-import {isUpdate, isCreate, isDelete, isBuildIndex} from "../transactions/create";
+import {isUpdate, isCreate, 
+        isDelete, isBuildIndex} from "../transactions/create";
 import { applyToShard } from "./apply";
 import {isTopLevelCollectionIndex,getActualKeyOfParent,
-    isGlobalIndex} from "../templateApi/heirarchy";
+        isGlobalIndex, fieldReversesReferenceToIndex, isReferenceIndex,
+        getExactNodeForPath} from "../templateApi/heirarchy";
 
 export const executeTransactions =  app => async transactions => {
     const recordsByShard = mappedRecordsByIndexShard(app.heirarchy, transactions);         
@@ -40,6 +46,7 @@ const mappedRecordsByIndexShard = (heirarchy, transactions) => {
     );
 
     const indexBuild = getBuildIndexTransactionsByShard(
+        heirarchy,
         transactions
     );
     
@@ -203,40 +210,67 @@ const getUpdateTransactionsByShard = (heirarchy, transactions) => {
     
 };
 
-const getBuildIndexTransactionsByShard =  (transactions) => {
+const getBuildIndexTransactionsByShard =  (heirarchy, transactions) => {
     const buildTransactions = $(transactions, [filter(isBuildIndex)]);
     if(!isNonEmptyArray(buildTransactions)) return [];
     const indexNode = transactions.indexNode;
 
-    const getIndexKey = (t) => {
+    const getIndexKeys = (t) => {
         if(isTopLevelCollectionIndex(indexNode)
           || isGlobalIndex(indexNode)) {
-            return indexNode.nodeKey();
+            return [indexNode.nodeKey()];
+        } 
+
+        if(isReferenceIndex(indexNode)) {
+            const recordNode = getExactNodeForPath
+                                    (heirarchy)
+                                    (t.record.key);
+            const refFields = $(recordNode.fields, [
+                filter(fieldReversesReferenceToIndex(indexNode))
+            ])
+            const indexKeys = [];
+            for(let refField of refFields) {
+                const refValue = t.record[refField.name];
+                if(isSomething(refValue) 
+                   && isNonEmptyString(refValue.key)) {
+                    const indexKey = joinKey(
+                        refValue.key,
+                        indexNode.name
+                    );
+
+                    if(!includes(indexKey)(indexKeys))
+                        indexKeys.push(indexKey);
+                }
+            }
+            return indexKeys;
         }
 
-        return joinKey(
+        return [joinKey(
             getActualKeyOfParent(
                 indexNode.parent().nodeKey(),
                 t.record.key
             ),
             indexNode.name
-        )
+        )];
     }
 
     return $(buildTransactions, [
         map(t => {
             const mappedRecord = evaluate(t.record)(indexNode);
             if(!mappedRecord.passedFilter) return null;
-            const indexKey = getIndexKey(t);
-            return ({mappedRecord, 
+            const indexKeys = getIndexKeys(t);
+            return $(indexKeys, [
+                map(indexKey => ({mappedRecord, 
                 indexNode:indexNode, 
                 indexKey:indexKey,
                 indexShardKey:getIndexedDataKey(
                     indexNode,
                     indexKey,
                     mappedRecord.result)
-            });
+                }))
+            ]);
         }),
+        flatten,
         filter(isSomething)
     ]);
 }

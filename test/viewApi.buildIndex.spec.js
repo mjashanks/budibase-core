@@ -541,9 +541,9 @@ describe("buildIndex > reverse reference index", () => {
         const indexKey1 = joinKey(partner1.key, "partnerCustomers");
         const indexKey2 = joinKey(partner2.key, "partnerCustomers");
 
-        await indexApi.delete(indexKey1, true);
+        await indexApi.delete(indexKey1, false);
 
-        await indexApi.delete(indexKey2, true);
+        await indexApi.delete(indexKey2, false);
 
         await indexApi.buildIndex(
             appHeirarchy.partnerCustomersReverseIndex.nodeKey());

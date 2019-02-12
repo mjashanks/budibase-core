@@ -64,7 +64,7 @@ const buildReverseReferenceIndex = async (app, indexNode) => {
             const {result} = referencingIdIterator;
             for(let id of result.ids) {
                 const recordKey = joinKey(result.collectionKey, id);
-                await transactionForBuildIndex(app, indexNode.nodeKey, recordKey, recordCount);
+                await transactionForBuildIndex(app, indexNode.nodeKey(), recordKey, recordCount);
                 recordCount++;
             }
             referencingIdIterator = await iterateReferencingNodes();

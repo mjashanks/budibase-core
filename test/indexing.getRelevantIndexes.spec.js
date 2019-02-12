@@ -43,7 +43,7 @@ describe("getRelevantIndexes", () => {
         const indexes = getRelevantHeirarchalIndexes(
             appHeirarchy.root, customer);
 
-        expect(indexes.collections.length).toBe(4);
+        expect(indexes.collections.length).toBe(3);
         
         const indexExists = key => 
             some(indexes.collections, c => c.indexKey === key);
@@ -51,7 +51,6 @@ describe("getRelevantIndexes", () => {
         expect(indexExists("/customers/default")).toBeTruthy();
         expect(indexExists("/customers/deceased")).toBeTruthy();
         expect(indexExists("/customers/customersBySurname")).toBeTruthy();
-        expect(indexExists("/customers/invoices")).toBeTruthy();
     });
 
     it("should ignore index when allowedRecordNodeIds does not contain record's node id", async () => {
@@ -81,7 +80,7 @@ describe("getRelevantIndexes", () => {
         const indexes = getRelevantHeirarchalIndexes(
             appHeirarchy.root, customer);
 
-        expect(indexes.collections.length).toBe(4);
+        expect(indexes.collections.length).toBe(3);
         
         const indexExists = key => 
             some(indexes.collections, c => c.indexKey === key);
@@ -99,7 +98,7 @@ describe("getRelevantIndexes", () => {
         const indexes = getRelevantHeirarchalIndexes(
             appHeirarchy.root, invoice);
 
-        expect(indexes.collections.length).toBe(4);
+        expect(indexes.collections.length).toBe(3);
         expect(some(indexes.collections, i => i.indexKey === "/customers/invoices")).toBeTruthy();
         expect(some(indexes.collections, i => i.indexKey === `/customers/${nodeid}-1234/invoices/default`)).toBeTruthy();
     });
