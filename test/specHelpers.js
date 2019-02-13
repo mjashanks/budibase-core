@@ -29,23 +29,26 @@ export const getMemoryTemplateApi = () => {
 }
 
 // TODO: subscribe actions
-export const appFromTempalteApi = async templateApi => {
+export const appFromTempalteApi = async (templateApi, disableCleanupTransactions=false) => {
     const app = {heirarchy:(await templateApi.getApplicationDefinition()).heirarchy, 
     datastore:templateApi._storeHandle,
     publish:templateApi._eventAggregator.publish,
     _eventAggregator: templateApi._eventAggregator}; // not normally available to the apis,
-    app.cleanupTransactions = async () => await cleanup(app);
+    if(disableCleanupTransactions)
+        app.cleanupTransactions = async () => {};
+    else
+        app.cleanupTransactions = async () => await cleanup(app);
     return app;
 };
 
-export const getRecordApiFromTemplateApi = async templateApi => 
-    getRecordApi(await appFromTempalteApi(templateApi));
+export const getRecordApiFromTemplateApi = async (templateApi, disableCleanupTransactions=false) => 
+    getRecordApi(await appFromTempalteApi(templateApi, disableCleanupTransactions));
 
-export const getCollectionApiFromTemplateApi = async templateApi => 
-    getCollectionApi(await appFromTempalteApi(templateApi));
+export const getCollectionApiFromTemplateApi = async (templateApi, disableCleanupTransactions=false) => 
+    getCollectionApi(await appFromTempalteApi(templateApi, disableCleanupTransactions));
 
-export const getIndexApiFromTemplateApi = async templateApi => 
-    getIndexApi(await appFromTempalteApi(templateApi));
+export const getIndexApiFromTemplateApi = async (templateApi, disableCleanupTransactions=false) => 
+    getIndexApi(await appFromTempalteApi(templateApi, disableCleanupTransactions));
 
 export const heirarchyFactory = (...additionalFeatures) => templateApi => {
     const root = templateApi.getNewRootLevel();
@@ -295,22 +298,28 @@ export const basicAppHeirarchyCreator_WithFields = templateApi =>
 export const basicAppHeirarchyCreator_WithFields_AndIndexes = templateApi => 
     heirarchyFactory(withFields, withIndexes)(templateApi);
 
-export const setupAppheirarchy = async creator => {
+export const setupAppheirarchy = async (creator, disableCleanupTransactions=false) => {
     const templateApi = getMemoryTemplateApi();
     const heirarchy = creator(templateApi);
     await templateApi.saveApplicationHeirarchy(heirarchy.root);
-    const collectionApi = await getCollectionApiFromTemplateApi(templateApi);
-    const indexApi = await getIndexApiFromTemplateApi(templateApi);
+    const app = await appFromTempalteApi(templateApi, disableCleanupTransactions);
+    const collectionApi = await getCollectionApi(app);
+    const indexApi = await getIndexApi(app);
     await collectionApi.initialiseAll();
     return ({
-        recordApi: await getRecordApiFromTemplateApi(templateApi),
+        recordApi: await getRecordApi(app),
         collectionApi,
         templateApi,
         indexApi,
         appHeirarchy:heirarchy,
-        subscribe:templateApi._eventAggregator.subscribe
+        subscribe:templateApi._eventAggregator.subscribe, 
+        app
     });
 };
+
+const disableCleanupTransactions = app => {
+
+}
 
 export const getNewFieldAndAdd = (templateApi, record) => (name, type, initial, typeOptions) => {
     const field = templateApi.getNewField(type);

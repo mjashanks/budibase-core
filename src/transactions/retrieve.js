@@ -1,7 +1,8 @@
 import {idSep, TRANSACTIONS_FOLDER, isUpdate,
         isCreate, getTransactionId, nodeKeyHashFromBuildFolder,
         isDelete, isBuildIndexFolder} from "./create";
-import {joinKey, tryAwaitOrIgnore, $, none} from "../common";
+import {joinKey, tryAwaitOrIgnore, 
+    $, none, isSomething} from "../common";
 import {getLastPartInKey, getNodeFromNodeKeyHash} from "../templateApi/heirarchy";
 import {generate} from "shortid";
 import {map, filter, groupBy, split,
@@ -149,11 +150,12 @@ const retrieveStandardTransactions = async (app, transactionFiles) => {
     }
 
     const pickOne = async (trans, forType) => {
-        if(filter(forType)(trans).length === 1) {
-            const t = await verify(trans[0]);
+        const transForType = filter(forType)(trans);
+        if(transForType.length === 1) {
+            const t = await verify(transForType[0]);
             return (t.verified === true ? t : null);
         } else {
-            for(let t of filter(forType)(trans)) {
+            for(let t of transForType) {
                 t = await verify(t);
                 if(t.verified === true)
                     return t;
@@ -166,17 +168,19 @@ const retrieveStandardTransactions = async (app, transactionFiles) => {
         const transIdsForRecord = transactionIdsByRecord[recordId];
         if(transIdsForRecord.length === 1) {
             const t = await verify(transIdsForRecord[0]);
-            dedupedTransactions.push(t);
+            if(t.verified)
+                dedupedTransactions.push(t);
             continue;
         }
         if(some(isDelete)(transIdsForRecord)) {
             const t = await verify(find(isDelete)(transIdsForRecord));
-            dedupedTransactions.push(t);
+            if(t.verified)
+                dedupedTransactions.push(t);
             continue;
         }
         if(some(isUpdate)(transIdsForRecord)) {
             const upd = await pickOne(transIdsForRecord, isUpdate);
-            if(isSomething(upd))
+            if(isSomething(upd) && upd.verified)
                 dedupedTransactions.push(upd);
             continue;
         }
