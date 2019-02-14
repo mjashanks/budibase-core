@@ -85,7 +85,8 @@ export const iterateIndex = (onGetItem, getFinalResult) => async (heirarchy, dat
         if(await datastore.exists(indexedDataKey)) {
             throw e;
         } else {
-            await createIndexFile(datastore)(
+            await createIndexFile(
+                datastore,
                 indexedDataKey, 
                 index
             );

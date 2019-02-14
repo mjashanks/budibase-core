@@ -14,7 +14,7 @@ import {addToAllIds} from "../indexing/allIds";
 import {transactionForCreateRecord,
     transactionForUpdateRecord} from "../transactions/create";
 
-export const save = (app,indexingApi) => async (record, context) => 
+export const save = (app) => async (record, context) => 
     apiWrapper(
         app,
         events.recordApi.save, 

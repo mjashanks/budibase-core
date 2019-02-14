@@ -83,7 +83,7 @@ export const getUnshardedIndexDataKey = indexKey =>
 
 export const getIndexFolderKey = indexKey => indexKey;
 
-export const createIndexFile = (datastore) => async (indexedDataKey, index) => {
+export const createIndexFile = async (datastore, indexedDataKey, index) => {
     if(isShardedIndex(index)) {
         const indexKey = getParentKey(indexedDataKey);
         const shardMap = await getShardMap(datastore, indexKey);

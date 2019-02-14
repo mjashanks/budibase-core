@@ -33,7 +33,8 @@ export const appFromTempalteApi = async (templateApi, disableCleanupTransactions
     const app = {heirarchy:(await templateApi.getApplicationDefinition()).heirarchy, 
     datastore:templateApi._storeHandle,
     publish:templateApi._eventAggregator.publish,
-    _eventAggregator: templateApi._eventAggregator}; // not normally available to the apis,
+    _eventAggregator: templateApi._eventAggregator,
+    getEpochTime : async () => (new Date()).getTime()}; // not normally available to the apis,
     if(disableCleanupTransactions)
         app.cleanupTransactions = async () => {};
     else

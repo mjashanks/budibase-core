@@ -2,8 +2,7 @@ import {getExactNodeForPath} from "../templateApi/heirarchy";
 import {safeKey, apiWrapper, 
         events, joinKey} from "../common";
 import {deleteRecord} from "../recordApi/delete";
-import {getAllIdsIterator, getAllIdsShardKey} from "../indexing/allIds"
-import getIndexingApi from "../indexing";
+import {getAllIdsIterator, getAllIdsShardKey} from "../indexing/allIds";
 import {deleteIndex} from "../indexApi/delete";
 import {includes} from "lodash/fp";
 
@@ -72,7 +71,6 @@ const deleteRecords = async (app, key) => {
     }
 
     const iterate = await getAllIdsIterator(app)(key);
-    const indexingApi = getIndexingApi(app);
 
     let ids = await iterate();
     while(!ids.done) {

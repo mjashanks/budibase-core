@@ -1,29 +1,15 @@
-import {idSep, TRANSACTIONS_FOLDER, isUpdate,
-        isCreate, getTransactionId, nodeKeyHashFromBuildFolder,
-        isDelete, isBuildIndexFolder} from "./create";
-import {joinKey, tryAwaitOrIgnore, 
-    $, none, isSomething} from "../common";
+import {
+    LOCK_FILENAME, TRANSACTIONS_FOLDER, idSep, isUpdate,
+    nodeKeyHashFromBuildFolder, isBuildIndexFolder, getTransactionId,
+    isDelete, isCreate } from "./transactionsCommon";
+import {joinKey, $, none, isSomething} from "../common";
 import {getLastPartInKey, getNodeFromNodeKeyHash} from "../templateApi/heirarchy";
-import {generate} from "shortid";
 import {map, filter, groupBy, split,
     some, find} from "lodash/fp";
 import {load} from "../recordApi/load";
 
-const NO_LOCK = "no lock";
-const isNolock = id => id === NO_LOCK;
-const timeoutMilliseconds =  30 * 1000;
-const maxLockRetries = 1;
-const LOCK_FILENAME = "lock";
-const LOCK_FILE_KEY = joinKey(
-    TRANSACTIONS_FOLDER, LOCK_FILENAME);
-
-export const lockKey = joinKey(TRANSACTIONS_FOLDER, LOCK_FILENAME);
-
 export const retrieve = async app => {
-    const lockid = await getLock(app.datastore);
-
-    if(isNolock(lockid)) return [];
-
+    
     const transactionFiles = await app.datastore.getFolderContents(
         TRANSACTIONS_FOLDER
     );
@@ -215,31 +201,6 @@ const retrieveStandardTransactions = async (app, transactionFiles) => {
     
     return dedupedTransactions;
 }
-
-
-const getLock = async (datastore, retryCount=0) => {
-    const id = generate()
-    try {
-        await datastore.createFile(lockKey, id);
-        return id;
-    } catch(e) {
-
-        return NO_LOCK;
-        // below is about checking lock for timeout
-        const lastModified = await datastore.getLastModifiedTime(lockKey);
-        const currentTime = await datastore.getCurrentTime();
-
-        if(currentTime - lastModified > timeoutMilliseconds) {
-            tryAwaitOrIgnore(datastore.deleteFile, lockKey);
-        } 
-
-        if(retryCount < maxLockRetries ) {
-            return await getLock(datastore, retryCount++);
-        }
-    }
-
-    return NO_LOCK;
-};
 
 const parseTransactionId = id => {
     const splitId = split(idSep)(id);

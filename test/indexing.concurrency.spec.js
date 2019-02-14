@@ -3,7 +3,7 @@ import {setupAppheirarchy,
 import {joinKey} from "../src/common";
 import {some, isArray} from "lodash";
 import {cleanup} from "../src/transactions/cleanup";
-
+import {LOCK_FILE_KEY, getLockFileContent} from "../src/transactions/transactionsCommon";
 
 
 describe("cleanup transactions", () => {
@@ -200,6 +200,7 @@ describe("cleanup transactions", () => {
         savedRecord.isalive = true;
         await recordApi.save(savedRecord);
 
+        await cleanup(app);
         const records = await indexApi.listItems("/customers/deceased");
         expect(records.length).toBe(0);
     });
@@ -222,10 +223,43 @@ describe("cleanup transactions", () => {
     });
 
     it("should do nothing when lockfile exists", async() => {
+        const {recordApi, app,
+            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes, true);
+        const record = recordApi.getNew("/customers", "customer");
+        record.surname = "Ledog";
+        const savedRecord = await recordApi.save(record);
+        await recordApi._storeHandle.createFile(
+            LOCK_FILE_KEY, 
+            getLockFileContent("1234", await app.getEpochTime())
+        );
+
+        await cleanup(app);
+        
+        let records = await indexApi.listItems("/customers/default");
+        expect(records.length).toBe(0);
+
+        await recordApi._storeHandle.deleteFile(LOCK_FILE_KEY);
+        await cleanup(app);
+        records = await indexApi.listItems("/customers/default");
+        expect(records.length).toBe(1);
 
     });
 
     it("should take control when lockfile is timedout", async() => {
+        const {recordApi, app,
+            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes, true);
+        const record = recordApi.getNew("/customers", "customer");
+        record.surname = "Ledog";
+        const savedRecord = await recordApi.save(record);
+        await recordApi._storeHandle.createFile(
+            LOCK_FILE_KEY, 
+            getLockFileContent("1234", (new Date(1990,1,1,0,0,0,0).getTime()))
+        );
+
+        await cleanup(app);
+        
+        let records = await indexApi.listItems("/customers/default");
+        expect(records.length).toBe(1);
 
     });
 

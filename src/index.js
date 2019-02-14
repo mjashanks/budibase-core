@@ -7,7 +7,7 @@ import {initialiseActions} from "./actions"
 import {isSomething} from "./common";
 import {cleanup} from "./transactions/cleanup";
 
-export const getAppApis = async (store, behaviourSources = {}, cleanupTransactions = null) => {
+export const getAppApis = async (store, behaviourSources = {}, cleanupTransactions = null, getEpochTime = null) => {
 
     store = setupDatastore(store);
     const templateApi = getTemplateApi(store);
@@ -30,6 +30,10 @@ export const getAppApis = async (store, behaviourSources = {}, cleanupTransactio
     app.cleanupTransactions = isSomething(cleanupTransactions) 
                               ? cleanupTransactions
                               : async () => cleanup(app);
+
+    app.getEpochTime = isSomething(getEpochTime)
+                       ? getEpochTime
+                       : async () => (new Date()).getTime();
 
     const recordApi = getRecordApi(app);
     const collectionApi = getCollectionApi(app);

@@ -3,9 +3,8 @@ import {getFlattenedHierarchy, hasNoMatchingAncestors,
     getExactNodeForPath, isGlobalIndex} from "../templateApi/heirarchy";
 import {$, allTrue, joinKey, tryAwaitOrIgnore} from "../common";
 import {filter} from "lodash/fp";
-import getIndexing from "../indexing";
-import {getShardMapKey, getUnshardedIndexDataKey} from "../indexing/sharding";
-import {TRANSACTIONS_FOLDER} from "../transactions/create";
+import {getShardMapKey, getUnshardedIndexDataKey, createIndexFile} from "../indexing/sharding";
+import {TRANSACTIONS_FOLDER} from "../transactions/transactionsCommon";
 
 export const initialiseIndex = async (app, parentKey, index) => {
     const indexKey = joinKey(parentKey, index.name);
@@ -18,8 +17,8 @@ export const initialiseIndex = async (app, parentKey, index) => {
             "[]"
         );
     } else {
-        const indexing = getIndexing(app);
-        await indexing.createIndexFile(
+        await createIndexFile(
+            app.datastore,
             getUnshardedIndexDataKey(indexKey), 
             index
         );
