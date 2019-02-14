@@ -27,7 +27,6 @@ const _events = {
     collectionApi: {
         getAllowedRecordTypes: common(),
         initialise: common(),
-        listRecords: common(),
         delete: common()
     }
 }

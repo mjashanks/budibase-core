@@ -9,7 +9,7 @@ describe("recordApi > create > reindex", () => {
     it("should add to default index, when record created", async () => {
 
         const {recordApi,
-        collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+        indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
         const record = recordApi.getNew("/customers", "customer");
 
         record.surname = "Ledog";
@@ -19,7 +19,7 @@ describe("recordApi > create > reindex", () => {
 
         await recordApi.save(record);
 
-        const items = await collectionApi.listRecords("/customers/default");
+        const items = await indexApi.listItems("/customers/default");
 
         expect(items.length).toBe(1);
         expect(items[0].surname).toBe("Ledog");
@@ -30,7 +30,7 @@ describe("recordApi > create > reindex", () => {
     it("should add to index with filter, when record created and passes filter", async () => {
 
         const {recordApi,
-        collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
         const record = recordApi.getNew("/customers", "customer");
 
         record.surname = "Ledog";
@@ -40,7 +40,7 @@ describe("recordApi > create > reindex", () => {
 
         await recordApi.save(record);
 
-        const items = await collectionApi.listRecords("/customers/deceased");
+        const items = await indexApi.listItems("/customers/deceased");
 
         expect(items.length).toBe(1);
         expect(items[0].surname).toBe("Ledog");
@@ -51,7 +51,7 @@ describe("recordApi > create > reindex", () => {
     it("should not add to index with filter, when record created and fails filter", async () => {
 
         const {recordApi,
-        collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
         const record = recordApi.getNew("/customers", "customer");
 
         record.surname = "Ledog";
@@ -61,14 +61,14 @@ describe("recordApi > create > reindex", () => {
 
         await recordApi.save(record);
 
-        const items = await collectionApi.listRecords("/customers/deceased");
+        const items = await indexApi.listItems("/customers/deceased");
 
         expect(items.length).toBe(0);
     });
 
 
     it("should be able to add to and list subcollection, after save (i.e. save initialiieses collection)", async () => {
-        const {recordApi, collectionApi} = 
+        const {recordApi, indexApi} = 
             await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
         
         const customer = recordApi.getNew("/customers", "customer");
@@ -80,7 +80,7 @@ describe("recordApi > create > reindex", () => {
         invoice.createdDate = new Date();
         await recordApi.save(invoice);
 
-        const invoices = await collectionApi.listRecords(
+        const invoices = await indexApi.listItems(
                             joinKey(invoicesCollectionKey, "default"));
         
         expect(isArray(invoices)).toBeTruthy();
@@ -140,7 +140,7 @@ describe("recordApi > create > reindex", () => {
     it("should add to sharded index, when record created, and should add into correct shards", async () => {
 
         const {recordApi,
-        collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
         
         const record1 = recordApi.getNew("/customers", "customer");
         record1.surname = "Ledog";
@@ -150,7 +150,7 @@ describe("recordApi > create > reindex", () => {
         record2.surname = "Zeecat";
         await recordApi.save(record2);
 
-        const items = await collectionApi.listRecords("/customers/customersBySurname");
+        const items = await indexApi.listItems("/customers/customersBySurname");
 
         expect(items.length).toBe(2);
         expect(items[0].surname).toBe("Ledog");
@@ -166,7 +166,7 @@ describe("recordApi > delete > reindex", () => {
 
     it("should remove from default index", async () => {
         const {recordApi,
-            collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
         const record = recordApi.getNew("/customers", "customer");
 
         record.surname = "Ledog";
@@ -177,14 +177,14 @@ describe("recordApi > delete > reindex", () => {
         await recordApi.save(record);
         await recordApi.delete(record.key);
 
-        const itemsAfterDelete= await collectionApi.listRecords("/customers/default");
+        const itemsAfterDelete= await indexApi.listItems("/customers/default");
         expect(itemsAfterDelete.length).toBe(0);
     });
 
     
     it("should remove from sharded index", async () => {
         const {recordApi,
-            collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
         
         const record1 = recordApi.getNew("/customers", "customer");
         record1.surname = "Ledog";
@@ -196,14 +196,14 @@ describe("recordApi > delete > reindex", () => {
 
         await recordApi.delete(record1.key);
 
-        const itemsAfterDelete= await collectionApi.listRecords("/customers/customersBySurname");
+        const itemsAfterDelete= await indexApi.listItems("/customers/customersBySurname");
         expect(itemsAfterDelete.length).toBe(1);
         expect(itemsAfterDelete[0].surname).toBe("Zeecat");
     });
 
     it("should remove from all indexes", async () => {
         const {recordApi,
-            collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
         
         const referredBy = recordApi.getNew("/customers", "customer");
         referredBy.surname = "Zeecat";
@@ -223,23 +223,23 @@ describe("recordApi > delete > reindex", () => {
         await recordApi.save(record);
         await recordApi.delete(record.key);
 
-        const itemsAfterDelete= await collectionApi.listRecords("/customers/default");
+        const itemsAfterDelete= await indexApi.listItems("/customers/default");
         expect(itemsAfterDelete.length).toBe(1);
         expect(itemsAfterDelete[0].surname).toBe("Zeecat");
 
         const deceasedItemsAfterDelete=
-            await collectionApi.listRecords("/customers/deceased");
+            await indexApi.listItems("/customers/deceased");
         expect(deceasedItemsAfterDelete.length).toBe(0);
 
         const referredToItemsAfterDelete = 
-            await collectionApi.listRecords(`${referredBy.key}/referredToCustomers`);
+            await indexApi.listItems(`${referredBy.key}/referredToCustomers`);
         expect(referredToItemsAfterDelete.length).toBe(0);
 
     });
 
     it("should only remove relevant record from all indexes", async () => {
         const {recordApi,
-            collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
         const record = recordApi.getNew("/customers", "customer");
 
         record.surname = "Ledog";
@@ -259,12 +259,12 @@ describe("recordApi > delete > reindex", () => {
 
         await recordApi.delete(record.key);
 
-        const itemsAfterDelete= await collectionApi.listRecords("/customers/default");
+        const itemsAfterDelete= await indexApi.listItems("/customers/default");
         expect(itemsAfterDelete.length).toBe(1);
         expect(itemsAfterDelete[0].surname).toBe("Zeecat");
 
         const deceasedItemsAfterDelete=
-            await collectionApi.listRecords("/customers/deceased");
+            await indexApi.listItems("/customers/deceased");
         expect(deceasedItemsAfterDelete.length).toBe(1);
         expect(deceasedItemsAfterDelete[0].surname).toBe("Zeecat");
     });
@@ -291,7 +291,7 @@ describe("recordApi > update > reindex", () => {
 
     it("should update values in indexes", async () => {
         const {recordApi,
-            collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
         const record = recordApi.getNew("/customers", "customer");
 
         record.surname = "Ledog";
@@ -305,7 +305,7 @@ describe("recordApi > update > reindex", () => {
         loadedRecord.surname = "Zeedog";
         await recordApi.save(loadedRecord);
 
-        const itemsDefault = await collectionApi.listRecords("/customers/default");
+        const itemsDefault = await indexApi.listItems("/customers/default");
         expect(itemsDefault[0].surname).toBe("Zeedog");
         expect(itemsDefault.length).toBe(1);
 
@@ -313,7 +313,7 @@ describe("recordApi > update > reindex", () => {
 
     it("should update values in sharded index", async () => {
         const {recordApi,
-            collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";
         await recordApi.save(record);
@@ -322,7 +322,7 @@ describe("recordApi > update > reindex", () => {
         loadedRecord.surname = "Zeedog";
         await recordApi.save(loadedRecord);
 
-        const itemsDefault = await collectionApi.listRecords("/customers/customersBySurname");
+        const itemsDefault = await indexApi.listItems("/customers/customersBySurname");
         expect(itemsDefault[0].surname).toBe("Zeedog");
         expect(itemsDefault.length).toBe(1);
 
@@ -330,7 +330,7 @@ describe("recordApi > update > reindex", () => {
 
     it("should only update values of relevant item", async () => {
         const {recordApi,
-            collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
         const record = recordApi.getNew("/customers", "customer");
 
         record.surname = "Ledog";
@@ -352,7 +352,7 @@ describe("recordApi > update > reindex", () => {
         loadedRecord.surname = "Zeedog";
         await recordApi.save(loadedRecord);
 
-        const items = await collectionApi.listRecords("/customers/default");
+        const items = await indexApi.listItems("/customers/default");
 
         const hasItemWithSurname = sn => 
             some(items, i => i.surname === sn);
