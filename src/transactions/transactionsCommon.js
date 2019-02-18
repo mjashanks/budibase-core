@@ -6,9 +6,6 @@ export const TRANSACTIONS_FOLDER = keySep + ".transactions";
 export const LOCK_FILENAME = "lock";
 export const LOCK_FILE_KEY = joinKey(
     TRANSACTIONS_FOLDER, LOCK_FILENAME);
-
-export const NO_LOCK = "no lock";
-export const isNolock = id => id === NO_LOCK;
 export const idSep = "$";
 
 
@@ -47,17 +44,6 @@ export const IndexNodeKeyBatchFolder = (indexNodeKey, count) =>
 
 export const IndexShardKeyFolder = (indexNodeKey, indexShardKey) => 
     joinKey(IndexNodeKeyFolder(indexNodeKey), indexShardKey);
-
-export const getLockFileContent = (lockid, epochTime) => 
-    `${lockid}:${epochTime.toString()}`;
-
-export const parseLockFileContent = $$(
-    split(":"),
-    parts => ({
-        id:parts[0], 
-        lockTime:parts[1]
-    })
-);
 
 export const BUILDINDEX_BATCH_COUNT = 1000;
 export const timeoutMilliseconds =  30 * 1000; // 30 secs

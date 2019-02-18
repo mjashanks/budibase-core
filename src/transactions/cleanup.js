@@ -2,16 +2,16 @@ import {retrieve} from "./retrieve";
 import {executeTransactions} from "./execute";
 import {map} from "lodash/fp";
 import {generate} from "shortid";
-import {$, joinKey, tryAwaitOrIgnore} from "../common";
-import {LOCK_FILE_KEY, TRANSACTIONS_FOLDER, NO_LOCK,
-    timeoutMilliseconds, isNolock, parseLockFileContent, 
+import {$, joinKey, getLock, isNolock, releaseLock} from "../common";
+import {LOCK_FILE_KEY, TRANSACTIONS_FOLDER, 
+    timeoutMilliseconds, parseLockFileContent, 
     getLockFileContent, getTransactionId,
     maxLockRetries} from "./transactionsCommon";
 
 export const cleanup = async app => {
 
-    const lockid = await getLock(app);
-    if(isNolock(lockid)) return;
+    const lock = await getTransactionLock(app);
+    if(isNolock(lock)) return;
 
     try {
         const transactions = await retrieve(app);
@@ -36,12 +36,18 @@ export const cleanup = async app => {
         }
     }
     finally {
-        await app.datastore.deleteFile(LOCK_FILE_KEY);
+        await releaseLock(app, lock);
     }
     
 }
 
-const getLock = async (app, retryCount=0) => {
+const getTransactionLock = async app => {
+
+    return await getLock(
+        app, LOCK_FILE_KEY,
+        timeoutMilliseconds, maxLockRetries
+    );
+
     const id = generate()
     try {
         await app.datastore.createFile(

@@ -7,7 +7,10 @@ import {initialiseActions} from "./actions"
 import {isSomething} from "./common";
 import {cleanup} from "./transactions/cleanup";
 
-export const getAppApis = async (store, behaviourSources = {}, cleanupTransactions = null, getEpochTime = null) => {
+export const getAppApis = async (store, behaviourSources = {}, 
+                                cleanupTransactions = null, 
+                                getEpochTime = null,
+                                crypto = null) => {
 
     store = setupDatastore(store);
     const templateApi = getTemplateApi(store);
@@ -24,7 +27,8 @@ export const getAppApis = async (store, behaviourSources = {}, cleanupTransactio
         heirarchy:appDefinition.heirarchy, 
         actions:appDefinition.actions,
         datastore:store, 
-        publish:eventAggregator.publish
+        publish:eventAggregator.publish,
+        crypto
     };
 
     app.cleanupTransactions = isSomething(cleanupTransactions) 

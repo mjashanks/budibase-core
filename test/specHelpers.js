@@ -13,7 +13,7 @@ import {filter} from "lodash/fp";
 import {createBehaviourSources} from "../src/actions/buildBehaviourSource";
 import {createAction, createTrigger} from "../src/templateApi/createActions";
 import {cleanup} from "../src/transactions/cleanup";
-
+import nodeCrypto from "./nodeCrypto";
 const exp = module.exports;
 
 export const testFileArea = (testNameArea) => path.join("test", "fs_test_area", testNameArea);
@@ -30,11 +30,14 @@ export const getMemoryTemplateApi = () => {
 
 // TODO: subscribe actions
 export const appFromTempalteApi = async (templateApi, disableCleanupTransactions=false) => {
-    const app = {heirarchy:(await templateApi.getApplicationDefinition()).heirarchy, 
-    datastore:templateApi._storeHandle,
-    publish:templateApi._eventAggregator.publish,
-    _eventAggregator: templateApi._eventAggregator,
-    getEpochTime : async () => (new Date()).getTime()}; // not normally available to the apis,
+    const app = {
+        heirarchy:(await templateApi.getApplicationDefinition()).heirarchy, 
+        datastore:templateApi._storeHandle,
+        publish:templateApi._eventAggregator.publish,
+        _eventAggregator: templateApi._eventAggregator,
+        getEpochTime : async () => (new Date()).getTime(),
+        crypto:nodeCrypto
+    }; 
     if(disableCleanupTransactions)
         app.cleanupTransactions = async () => {};
     else

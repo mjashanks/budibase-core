@@ -7,6 +7,8 @@ import {isUndefined, isNaN, isNull,
 import {events} from "./events";
 import {apiWrapper} from "./apiWrapper";
 import {some} from "lodash/fp";
+import {getLock, NO_LOCK, 
+    isNolock, releaseLock, extendLock} from "./lock";
 
 // this is the combinator function
 export const $$ = (...funcs) => arg => 
@@ -193,6 +195,8 @@ export const isArrayOfString = opts =>
 
 export {events} from "./events";
 export {apiWrapper} from "./apiWrapper";
+export {getLock, NO_LOCK, releaseLock, 
+    extendLock,isNolock} from "./lock";
 
 export default {
     ifExists, getOrDefault, isDefined, 
@@ -210,6 +214,6 @@ export default {
     causesException, executesWithoutException, none, getHashCode,
     awEx, apiWrapper, events, isNothingOrEmpty, isSafeInteger,
     toNumber, toDate: toDateOrNull, toBool: toBoolOrNull,
-    isArrayOfString
+    isArrayOfString, getLock, NO_LOCK, isNolock
 };
 
