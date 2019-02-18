@@ -1,10 +1,14 @@
 import {getUsers} from "./getUsers";
 import {find} from "lodash/fp";
+import {getUserByName} from "./authCommon";
 
 export const authenticate = app => (username, password) => {
-    const user = $(await getUsers(app),[
-        find(u => u.name === username)
-    ]);
+    const user = getUserByName(
+                    await getUsers(app),
+                    username
+                );
+                
+    if(!user) return false;
 
     return await app.crypto.verify(
         user.passwordSaltedHash, 

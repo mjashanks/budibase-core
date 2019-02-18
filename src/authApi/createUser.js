@@ -61,6 +61,7 @@ const applyAccess = async (app, user, password) => {
 const splitForSaveAndReturn = user => {
     const forSave = clone(user);
     delete forSave.tempCode;
+    forSave.name = forSave.name.toLowerCase();
 
     const forReturn = stripUserOfSensitiveStuff(clone);
 
