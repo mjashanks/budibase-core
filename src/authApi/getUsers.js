@@ -1,4 +1,9 @@
- import {USERS_LIST_FILE} from "./authCommon";
+import {USERS_LIST_FILE, 
+    stripUserOfSensitiveStuff} from "./authCommon";
+import {$} from "../common";
+import {map} from "lodash/fp";
 
-export const getUsers = app => () =>
-    await app.datastore.loadJson(USERS_LIST_FILE);
+export const getUsers = app => () => 
+    $(await app.datastore.loadJson(USERS_LIST_FILE), [
+        map(stripUserOfSensitiveStuff)
+    ]);

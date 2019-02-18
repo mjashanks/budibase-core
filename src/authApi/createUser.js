@@ -1,7 +1,8 @@
 import {validateUser} from "./validateUser";
 import {join, some, clone} from "lodash/fp";
 import {getLock, isNolock, isSomething,releaseLock} from "../common";
-import {USERS_LOCK_FILE, USERS_LIST_FILE} from "./authCommon";
+import {USERS_LOCK_FILE, stripUserOfSensitiveStuff,
+    USERS_LIST_FILE} from "./authCommon";
 import {getTemporaryCode} from "./createTemporaryAccess";
 import {isValidPassword} from "./setPassword";
 
@@ -30,7 +31,7 @@ export const createUser = app => async (user, password=null) => {
     await app.datastore.saveJson(USERS_LIST_FILE, users);
 
     await releaseLock(app, lock);
-    
+
     return forReturn;
 };
 
@@ -61,10 +62,7 @@ const splitForSaveAndReturn = user => {
     const forSave = clone(user);
     delete forSave.tempCode;
 
-    const forReturn = clone(user);
-    delete forReturn.temporaryAccessHash
-    delete forReturn.temporaryAccessId
-    delete forReturn.passwordHash
+    const forReturn = stripUserOfSensitiveStuff(clone);
 
     return ({forReturn, forSave});
 }
