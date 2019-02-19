@@ -7,7 +7,7 @@ import {getNewAccessLevel} from "./getNewAccessLevel";
 import {getNewUser} from "./getNewUser";
 import {getUsers} from "./getUsers";
 import {isAuthorized} from "./isAuthorized";
-import {saveAccessLevel} from "./saveAccessLevel";
+import {saveAccessLevels} from "./saveAccessLevels";
 import {setPassword} from "./setPassword";
 import {validateUser} from "./validateUser";
 
@@ -15,13 +15,13 @@ export const getAuthApi = app => ({
     authenticate: authenticate(app),
     createTemporaryAccess: createTemporaryAccess(app),
     createUser: createUser(app),
-    getAccessLevels: authenticate(getAccessLevels),
+    getAccessLevels: getAccessLevels(app),
     enableUser: enableUser(app),
     disableUser: disableUser(app),
     getNewAccessLevel: getNewAccessLevel(app),
     getNewUser: getNewUser(app),
     getUsers: getUsers(app),
-    saveAccessLevel: saveAccessLevel(app),
+    saveAccessLevels: saveAccessLevels(app),
     isAuthorized: isAuthorized(app),
     setPassword: setPassword(app),
     validateUser: validateUser(app)
