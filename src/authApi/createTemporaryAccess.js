@@ -1,7 +1,7 @@
 import {tempCodeExpiryLength} from "./authCommon";
 import {generate} from "shortid";
 
-export const createTemporaryAccess = app => userName =>  {
+export const createTemporaryAccess = app => async userName =>  {
 
 }
 

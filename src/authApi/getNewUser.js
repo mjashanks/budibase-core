@@ -1,5 +1,5 @@
 
-export const getNewUser = async app => ({
+export const getNewUser = app => () => ({
     name: "",
     accessLevels: [],
     passwordHash: "",

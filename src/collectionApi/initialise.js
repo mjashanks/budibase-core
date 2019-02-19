@@ -5,6 +5,7 @@ import {$, allTrue, joinKey, tryAwaitOrIgnore} from "../common";
 import {filter} from "lodash/fp";
 import {getShardMapKey, getUnshardedIndexDataKey, createIndexFile} from "../indexing/sharding";
 import {TRANSACTIONS_FOLDER} from "../transactions/transactionsCommon";
+import {AUTH_FOLDER, USERS_LIST_FILE, ACCESS_LEVELS_FILE} from "../authApi/authCommon";
 
 export const initialiseIndex = async (app, parentKey, index) => {
     const indexKey = joinKey(parentKey, index.name);
@@ -83,6 +84,18 @@ export const initialiseAll = app => async () => {
     
     try {
         await app.datastore.createFolder(TRANSACTIONS_FOLDER);
+    }catch(_){};
+
+    try {
+        await app.datastore.createFolder(AUTH_FOLDER);
+    }catch(_){};
+
+    try {
+        await app.datastore.createJson(USERS_LIST_FILE, []);
+    }catch(_){};
+
+    try {
+        await app.datastore.createJson(ACCESS_LEVELS_FILE, []);
     }catch(_){};
 
 };

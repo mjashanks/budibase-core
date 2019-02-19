@@ -20,6 +20,7 @@ describe("getAppApis", () => {
         expect(apis.collectionApi).toBeDefined();
         expect(apis.indexApi).toBeDefined();
         expect(apis.subscribe).toBeDefined();
+        expect(apis.authApi).toBeDefined();
     });
 
 });

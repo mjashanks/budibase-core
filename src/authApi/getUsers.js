@@ -3,7 +3,7 @@ import {USERS_LIST_FILE,
 import {$} from "../common";
 import {map} from "lodash/fp";
 
-export const getUsers = app => () => 
+export const getUsers = app => async () => 
     $(await app.datastore.loadJson(USERS_LIST_FILE), [
         map(stripUserOfSensitiveStuff)
     ]);

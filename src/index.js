@@ -2,6 +2,7 @@ import getRecordApi from "./recordApi";
 import getCollectionApi from "./collectionApi";
 import getIndexApi from "./indexApi";
 import getTemplateApi from "./templateApi";
+import getAuthApi from "./authApi";
 import {setupDatastore, createEventAggregator} from "./appInitialise";
 import {initialiseActions} from "./actions"
 import {isSomething} from "./common";
@@ -42,12 +43,14 @@ export const getAppApis = async (store, behaviourSources = {},
     const recordApi = getRecordApi(app);
     const collectionApi = getCollectionApi(app);
     const indexApi = getIndexApi(app);
+    const authApi = getAuthApi(app);
 
     return ({
         recordApi, 
         templateApi,
         collectionApi,
         indexApi,
+        authApi,
         subscribe: eventAggregator.subscribe,
         actions
     });

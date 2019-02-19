@@ -2,7 +2,7 @@ import {getUsers} from "./getUsers";
 import {find} from "lodash/fp";
 import {getUserByName} from "./authCommon";
 
-export const authenticate = app => (username, password) => {
+export const authenticate = app => async (username, password) => {
     const user = getUserByName(
                     await getUsers(app),
                     username

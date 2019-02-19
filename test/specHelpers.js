@@ -8,6 +8,7 @@ import {configFolder, fieldDefinitions,
     joinKey} from "../src/common";
 import { getNewIndexTemplate } from "../src/templateApi/createNodes";
 import getTemplateApi from "../src/templateApi";
+import getAuthApi from "../src/authApi";
 import {createEventAggregator} from "../src/appInitialise/eventAggregator";
 import {filter} from "lodash/fp";
 import {createBehaviourSources} from "../src/actions/buildBehaviourSource";
@@ -53,6 +54,9 @@ export const getCollectionApiFromTemplateApi = async (templateApi, disableCleanu
 
 export const getIndexApiFromTemplateApi = async (templateApi, disableCleanupTransactions=false) => 
     getIndexApi(await appFromTempalteApi(templateApi, disableCleanupTransactions));
+
+export const getAuthApiFromTemplateApi = async (templateApi, disableCleanupTransactions=false) => 
+    getAuthApi(await appFromTempalteApi(templateApi, disableCleanupTransactions));
 
 export const heirarchyFactory = (...additionalFeatures) => templateApi => {
     const root = templateApi.getNewRootLevel();
@@ -307,14 +311,16 @@ export const setupAppheirarchy = async (creator, disableCleanupTransactions=fals
     const heirarchy = creator(templateApi);
     await templateApi.saveApplicationHeirarchy(heirarchy.root);
     const app = await appFromTempalteApi(templateApi, disableCleanupTransactions);
-    const collectionApi = await getCollectionApi(app);
-    const indexApi = await getIndexApi(app);
+    const collectionApi = getCollectionApi(app);
+    const indexApi = getIndexApi(app);
+    const authApi = getAuthApi(app);
     await collectionApi.initialiseAll();
     return ({
         recordApi: await getRecordApi(app),
         collectionApi,
         templateApi,
         indexApi,
+        authApi,
         appHeirarchy:heirarchy,
         subscribe:templateApi._eventAggregator.subscribe, 
         app
