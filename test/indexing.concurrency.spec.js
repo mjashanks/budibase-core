@@ -1,9 +1,10 @@
 import {setupAppheirarchy,
     basicAppHeirarchyCreator_WithFields_AndIndexes} from "./specHelpers";
 import {joinKey} from "../src/common";
+import {getLockFileContent} from "../src/common/lock";
 import {some, isArray} from "lodash";
 import {cleanup} from "../src/transactions/cleanup";
-import {LOCK_FILE_KEY, getLockFileContent} from "../src/transactions/transactionsCommon";
+import {LOCK_FILE_KEY} from "../src/transactions/transactionsCommon";
 
 
 describe("cleanup transactions", () => {
@@ -228,9 +229,10 @@ describe("cleanup transactions", () => {
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";
         const savedRecord = await recordApi.save(record);
+        const currentTime = await app.getEpochTime();
         await recordApi._storeHandle.createFile(
             LOCK_FILE_KEY, 
-            getLockFileContent("1234", await app.getEpochTime())
+            getLockFileContent(30000, (currentTime + 30000))
         );
 
         await cleanup(app);
@@ -253,7 +255,7 @@ describe("cleanup transactions", () => {
         const savedRecord = await recordApi.save(record);
         await recordApi._storeHandle.createFile(
             LOCK_FILE_KEY, 
-            getLockFileContent("1234", (new Date(1990,1,1,0,0,0,0).getTime()))
+            getLockFileContent(30000, (new Date(1990,1,1,0,0,0,0).getTime()))
         );
 
         await cleanup(app);

@@ -41,44 +41,8 @@ export const cleanup = async app => {
     
 }
 
-const getTransactionLock = async app => {
-
-    return await getLock(
+const getTransactionLock = async app => 
+    await getLock(
         app, LOCK_FILE_KEY,
         timeoutMilliseconds, maxLockRetries
     );
-
-    const id = generate()
-    try {
-        await app.datastore.createFile(
-            LOCK_FILE_KEY, 
-            getLockFileContent(
-                id, 
-                await app.getEpochTime())
-        );
-        return id;
-    } catch(e) {
-
-        const currentEpochTime = await app.getEpochTime();
-        const lockContent = await app.datastore.loadFile(LOCK_FILE_KEY);
-        const lockInfo = parseLockFileContent(lockContent);
-        const lockTimeout = (
-            new Number(lockInfo.lockTime)
-            +
-            timeoutMilliseconds
-        );
-
-        if(currentEpochTime > lockTimeout) {
-            try {
-                await app.datastore.deleteFile(LOCK_FILE_KEY);
-            }
-            catch(_) {};
-        } 
-
-        if(retryCount < maxLockRetries ) {
-            return await getLock(app, retryCount+1);
-        }
-    }
-
-    return NO_LOCK;
-};

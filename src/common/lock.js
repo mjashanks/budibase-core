@@ -1,12 +1,14 @@
+import {$} from "./index";
+import {split} from "lodash/fp";
 
 const lockOverlapMilliseconds = 10;
 
 export const getLock = async (app, lockFile, timeoutMilliseconds, maxLockRetries, retryCount=0) => {
     try {
         const timeout = 
-            (await app.getEpochTime()
+            (await app.getEpochTime())
             +
-            timeoutMilliseconds);
+            timeoutMilliseconds;
 
         const lock = {
             timeout,
@@ -24,29 +26,36 @@ export const getLock = async (app, lockFile, timeoutMilliseconds, maxLockRetries
         return lock;
     } catch(e) {
 
+        if(retryCount == maxLockRetries)
+            return NO_LOCK;
+
         const lock = parseLockFileContent(
+            lockFile,
             await app.datastore.loadFile(lockFile)
         );
 
         const currentEpochTime = await app.getEpochTime();
-  
-        if(currentEpochTime > lock.timeout) {
-            try {
-                await app.datastore.deleteFile(lockFile);
-            }
-            catch(_) {};
-        } 
 
-        if(retryCount < maxLockRetries ) {
-            await sleepForRetry();
-            return await getLock(app, retryCount+1);
+        if(currentEpochTime < lock.timeout) {
+            return NO_LOCK;
         }
+
+        try {
+            await app.datastore.deleteFile(lockFile);
+        }
+        catch(_) {}; 
+        
+        await sleepForRetry();
+
+        return  await getLock(
+            app, lockFile, timeoutMilliseconds, 
+            maxLockRetries, retryCount+1);        
     }
 
     return NO_LOCK;
 };
 
-const getLockFileContent = (totalTimeout, epochTime) => 
+export const getLockFileContent = (totalTimeout, epochTime) => 
     `${totalTimeout}:${epochTime.toString()}`;
 
 const parseLockFileContent = (key, content) =>  

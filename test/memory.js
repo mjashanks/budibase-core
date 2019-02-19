@@ -31,7 +31,9 @@ const addItemToParentFolder = (data, path) => {
 }
 
 export const createFile = data => async (path, content) => {
-    if(await exists(data)(path)) throw new Error(path + " already exists");
+    if(await exists(data)(path))  {
+        throw new Error(path + " already exists");
+    }
     addItemToParentFolder(data, path);
     data[path] = content;
 };
