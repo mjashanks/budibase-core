@@ -95,7 +95,7 @@ export const initialiseAll = app => async () => {
     }catch(_){};
 
     try {
-        await app.datastore.createJson(ACCESS_LEVELS_FILE, []);
+        await app.datastore.createJson(ACCESS_LEVELS_FILE, {version:0,levels:[]});
     }catch(_){};
 
 };

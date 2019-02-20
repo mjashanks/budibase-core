@@ -1,5 +1,7 @@
 import {tempCodeExpiryLength} from "./authCommon";
 import {generate} from "shortid";
+import {split} from "lodash/fp";
+import {$} from "../common";
 
 export const createTemporaryAccess = app => async userName =>  {
 
@@ -20,8 +22,19 @@ export const getTemporaryCode = async app => {
         ),
         temporaryAccessExpiryEpoch: 
             (await app.getEpochTime()) + tempCodeExpiryLength,
-        tempCode: `${tempId}:${tempCode}`,
+        tempCode: `tmp:${tempId}:${tempCode}`,
         temporaryAccessId: tempId
     };
 };
 
+export const looksLikeTemporaryCode = code =>
+    code.startsWith("tmp:");
+
+export const parseTemporaryCode = fullCode => 
+    $(fullCode, [
+        split(":"),
+        parts => ({
+            id:parts[0],
+            code:parts[1]
+        })
+    ]);

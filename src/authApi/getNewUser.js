@@ -2,9 +2,12 @@
 export const getNewUser = app => () => ({
     name: "",
     accessLevels: [],
-    passwordHash: "",
-    temporaryAccessHash: "",
-    temporaryAccessExpiryEpoch: 0,
+    enabled: true,
     temporaryAccessId: ""
 });
 
+export const getNewUserAuth = app => () => ({
+    passwordHash: "",
+    temporaryAccessHash: "",
+    temporaryAccessExpiryEpoch: 0
+});

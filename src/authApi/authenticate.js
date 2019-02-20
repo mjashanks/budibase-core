@@ -1,6 +1,7 @@
 import {getUsers} from "./getUsers";
 import {find} from "lodash/fp";
-import {getUserByName} from "./authCommon";
+import {getUserByName, userAuthFile} from "./authCommon";
+import {parseTemporaryCode} from "./createTemporaryAccess";
 
 export const authenticate = app => async (username, password) => {
     const user = getUserByName(
@@ -8,24 +9,38 @@ export const authenticate = app => async (username, password) => {
                     username
                 );
                 
-    if(!user) return false;
+    if(!user || !user.enabled) return null; 
 
-    return await app.crypto.verify(
+    const verified = await app.crypto.verify(
         user.passwordSaltedHash, 
         password);  
+
+    return verified
+           ? {...user, temp:false}
+           : null;
 };
 
 export const authenticateTemporaryAccess = app => async (tempAccessCode) => {
 
-    const parts = tempAccessCode.split(":");
+    const temp = parseTemporaryCode(tempAccessCode);
     const user = $(await getUsers(app),[
-        find(u => u.temporaryAccessId === parts[0])
+        find(u => u.temporaryAccessId === temp.id)
     ]);
 
-    if(user.temporaryAccessExpiryEpoch < await app.getEpochTime()) 
-        return false;
+    if(!user || !user.enabled) return null; 
 
-    return await app.crypto.verify(
-        user.temporaryAccessHash, 
-        parts[1]); 
+    const userAuth = await app.datastore.loadJson(
+        userAuthFile(user.name)
+    );
+
+    if(userAuth.temporaryAccessExpiryEpoch < await app.getEpochTime()) 
+        return null;
+
+    const verified =  await app.crypto.verify(
+        userAuth.temporaryAccessHash, 
+        temp.code); 
+
+    return verified
+           ? {...user, temp:true}
+           : null;
 }

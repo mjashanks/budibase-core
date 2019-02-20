@@ -1,8 +1,9 @@
 import {validateUser} from "./validateUser";
+import {getNewAuth} from "./getNewUser";
 import {join, some, clone} from "lodash/fp";
 import {getLock, isNolock, isSomething,releaseLock} from "../common";
 import {USERS_LOCK_FILE, stripUserOfSensitiveStuff,
-    USERS_LIST_FILE} from "./authCommon";
+    USERS_LIST_FILE, userAuthFile} from "./authCommon";
 import {getTemporaryCode} from "./createTemporaryAccess";
 import {isValidPassword} from "./setPassword";
 
@@ -12,8 +13,8 @@ export const createUser = app => async (user, password=null) => {
     if(userErrors.length > 0)
         throw new Error("User is invalid. " + join("; ")(userErrors));
 
-    applyAccess(app, user, password);
-    const {forSave, forReturn} = splitForSaveAndReturn(user);
+    const {auth, tempCode} = getAccess(app, password);
+    user.tempCode = tempCode;
 
     const lock = await getLock(
         app, USERS_LOCK_FILE, 1000, 2
@@ -27,43 +28,49 @@ export const createUser = app => async (user, password=null) => {
     if(some(u => u.name === user.name)(users))
         throw new Error("User already exists");
 
-    users.push(forSave);
-    await app.datastore.saveJson(USERS_LIST_FILE, users);
+    users.push(user);
+    await app.datastore.updateJson(USERS_LIST_FILE, users);
+    
+    try {
+        await app.datastore.createJson(
+            userAuthFile(user.name),
+            auth
+        );
+    } catch {
+        await app.datastore.updateJson(
+            userAuthFile(user.name),
+            auth
+        );
+    }
 
     await releaseLock(app, lock);
 
     return forReturn;
 };
 
-const applyAccess = async (app, user, password) => {
+const getAccess = async (app, password) => {
+
+    const auth = getNewAuth();
 
     if(isSomething(password)) {
         if(isValidPassword(password)) {
-            user.passwordHash = await app.crypto.hash(password);
-            user.temporaryAccessHash = "";
-            user.temporaryAccessId = "";
-            user.temporaryAccessExpiryEpoch = 0;
-            user.tempCode = "";
+            auth.passwordHash = await app.crypto.hash(password);
+            auth.temporaryAccessHash = "";
+            auth.temporaryAccessId = "";
+            auth.temporaryAccessExpiryEpoch = 0;
+            return {auth};
         } else {
             throw new Error("Password does not meet requirements");
         }
     } else {
         const tempAccess = await getTemporaryCode(app);
-        user.temporaryAccessHash = tempAccess.temporaryAccessHash;
-        user.temporaryAccessId = tempAccess.temporaryAccessId;
-        user.temporaryAccessExpiryEpoch = tempAccess.temporaryAccessExpiryEpoch;
-        user.tempCode = tempAccess.tempCode;
-        user.passwordHash = "";
+        auth.temporaryAccessHash = tempAccess.temporaryAccessHash;
+        auth.temporaryAccessExpiryEpoch = tempAccess.temporaryAccessExpiryEpoch;
+        auth.passwordHash = "";
+        return ({
+            auth, 
+            tempCode: tempAccess.tempCode, 
+            temporaryAccessId:tempAccess.temporaryAccessId
+        });
     }
-    return user;
-}
-
-const splitForSaveAndReturn = user => {
-    const forSave = clone(user);
-    delete forSave.tempCode;
-    forSave.name = forSave.name.toLowerCase();
-
-    const forReturn = stripUserOfSensitiveStuff(clone);
-
-    return ({forReturn, forSave});
 }
