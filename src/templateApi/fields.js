@@ -5,7 +5,7 @@ import {isSomething, $,
         isNothingOrEmpty,
         isNothing} from "../common";
 import {all, getDefaultOptions} from "../types";
-import {applyRuleSet, makerule} from "./validationCommon";
+import {applyRuleSet, makerule} from "../common/validationCommon";
 
 export const fieldErrors = {
     AddFieldValidationFailed : "Add field validation: "

@@ -36,7 +36,7 @@ export const createUser = app => async (user, password=null) => {
             userAuthFile(user.name),
             auth
         );
-    } catch {
+    } catch(_) {
         await app.datastore.updateJson(
             userAuthFile(user.name),
             auth

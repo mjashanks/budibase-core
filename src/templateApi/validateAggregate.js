@@ -1,4 +1,4 @@
-import {applyRuleSet, makerule} from "./validationCommon";
+import {applyRuleSet, makerule} from "../common/validationCommon";
 import {flatten, map} from "lodash/fp";
 import {isEmpty, difference} from "lodash";
 import {isNonEmptyString, executesWithoutException, 

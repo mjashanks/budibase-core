@@ -11,7 +11,7 @@ import {eventsList} from "../common/events";
 import {compileExpression, compileCode} from "@nx-js/compiler-util";
 import {validateAllFields} from "./fields";
 import {applyRuleSet, makerule, stringNotEmpty, 
-        validationError} from "./validationCommon";
+        validationError} from "../common/validationCommon";
 import {indexRuleSet} from "./indexes";
 import {validateAllAggregates} from "./validateAggregate";
 

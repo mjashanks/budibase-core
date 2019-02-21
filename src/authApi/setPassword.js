@@ -4,7 +4,7 @@ import {parseTemporaryCode,
 import {isSomething} from "../common";
 
 export const isValidPassword = app => async password => {
-    return true;
+    return scorePassword(password).score > 30;
 };
 
 export const setMyPassword = app => async (oldpassword_orTempAccess, newpassword) => 
@@ -56,4 +56,49 @@ export const setPassword = app => async (username, pw_orTempCode, newpassword) =
     return false;
 
 };
+
+export const scorePassword = (password) => {
+
+    // from https://stackoverflow.com/questions/948172/password-strength-meter
+    // thank you https://stackoverflow.com/users/46617/tm-lv
+
+    let score = 0;
+    if (!password)
+        return score;
+
+    // award every unique letter until 5 repetitions
+    let letters = new Object();
+    for (let i=0; i<password.length; i++) {
+        letters[password[i]] = (letters[password[i]] || 0) + 1;
+        score += 5.0 / letters[password[i]];
+    }
+
+    // bonus points for mixing it up
+    const variations = {
+        digits: /\d/.test(password),
+        lower: /[a-z]/.test(password),
+        upper: /[A-Z]/.test(password),
+        nonWords: /\W/.test(password),
+    }
+
+    let variationCount = 0;
+    for (let check in variations) {
+        variationCount += (variations[check] == true) ? 1 : 0;
+    }
+    score += (variationCount - 1) * 10;
+
+    const strengthText =
+        score > 80 
+        ? "strong"
+        : score > 60
+        ? "good"
+        : score >= 30
+        ? "weak"
+        : "very weak";
+
+    return {
+        score: parseInt(score), 
+        strengthText
+    };
+}
 

@@ -1,4 +1,4 @@
-import {applyRuleSet, makerule} from "./validationCommon";
+import {applyRuleSet, makerule} from "../common/validationCommon";
 import {compileFilter, compileMap} from "../indexing/evaluate";
 import {isEmpty, countBy, flatten, includes} from "lodash/fp";
 import {join, keys} from "lodash";

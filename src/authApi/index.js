@@ -8,8 +8,10 @@ import {getNewUser} from "./getNewUser";
 import {getUsers} from "./getUsers";
 import {isAuthorized} from "./isAuthorized";
 import {saveAccessLevels} from "./saveAccessLevels";
-import {setPassword} from "./setPassword";
+import {setPassword, scorePassword, 
+    isValidPassword, setMyPassword} from "./setPassword";
 import {validateUser} from "./validateUser";
+import {validateAccessLevels} from "./validateAccessLevels";
 
 export const getAuthApi = app => ({
     authenticate: authenticate(app),
@@ -24,7 +26,11 @@ export const getAuthApi = app => ({
     saveAccessLevels: saveAccessLevels(app),
     isAuthorized: isAuthorized(app),
     setPassword: setPassword(app),
-    validateUser: validateUser(app)
+    scorePassword,
+    setMyPassword: setMyPassword(app),
+    isValidPassword: isValidPassword(app),
+    validateUser: validateUser(app),
+    validateAccessLevels: validateAccessLevels(app)
 });
 
 export default getAuthApi;
