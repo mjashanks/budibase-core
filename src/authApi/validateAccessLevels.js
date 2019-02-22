@@ -1,6 +1,6 @@
 import {applyRuleSet, makerule, applyRule} from "../common/validationCommon";
 import {permissionTypes, WHITELIST, BLACKLIST} from "./authCommon";
-import {values, includes, map, concat, isEmpty,
+import {values, includes, map, concat, isEmpty, uniqWith,
     flatten, filter} from "lodash/fp";
 import {$, isSomething, insensitiveEquals,
     isNonEmptyString, none, isNothing} from "../common";
@@ -58,5 +58,8 @@ export const validateAccessLevel = app => (allLevels, level) => {
 export const validateAccessLevels = app => allLevels => 
     $(allLevels, [
         map(l => validateAccessLevel(app)(allLevels, l)),
-        flatten
+        flatten,
+        uniqWith((x,y) => x.field === y.field
+                        && x.item === y.item
+                        && x.error === y.error)
     ]);

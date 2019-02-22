@@ -1,8 +1,23 @@
-import {getLock, releaseLock, isNolock} from "../common";
+import {getLock, releaseLock, $,
+    isNolock} from "../common";
 import {ACCESS_LEVELS_LOCK_FILE, 
     ACCESS_LEVELS_FILE} from "./authCommon";
+import {join, map} from "lodash/fp";
+import {validateAccessLevels} from "./validateAccessLevels";
 
 export const saveAccessLevels = app => async accessLevels => {
+    
+    const validationErrors = validateAccessLevels(app)(accessLevels.levels);
+    if(validationErrors.length > 0) {
+        var errs = $(validationErrors, [
+            map(e => e.error),
+            join(", ")
+        ]);
+        throw new Error(
+            "Access Levels Invalid: " + errs
+        );
+    } 
+    
     const lock = await getLock(
         app, ACCESS_LEVELS_LOCK_FILE, 2000, 2);
 
@@ -10,7 +25,7 @@ export const saveAccessLevels = app => async accessLevels => {
         throw new Error("Could not get lock to save access levels");
 
     try{
-        const existing = app.datastore.loadJson(ACCESS_LEVELS_FILE);
+        const existing = await app.datastore.loadJson(ACCESS_LEVELS_FILE);
         if(existing.version !== accessLevels.version)
             throw new Error("Access levels have already been updated, since you loaded");
         
