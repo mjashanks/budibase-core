@@ -1,13 +1,14 @@
 import {applyRuleSet, makerule, applyRule} from "../common/validationCommon";
 import {permissionTypes, WHITELIST, BLACKLIST} from "./authCommon";
-import {keys, includes, map, flatten, filter} from "lodash/fp";
-import {$, isSomething, 
+import {values, includes, map, concat, isEmpty,
+    flatten, filter} from "lodash/fp";
+import {$, isSomething, insensitiveEquals,
     isNonEmptyString, none, isNothing} from "../common";
 import {getNode} from "../templateApi/heirarchy";
 
 const isAllowedType = t => 
     $(permissionTypes, [
-        keys, 
+        values, 
         includes(t)
     ]);
 
@@ -24,27 +25,29 @@ const permissionRules = app => ([
              ||  isSomething(getNode(app.heirarchy, p.nodeKey)))
 ]);
 
+const applyPermissionRules = app => 
+    applyRuleSet(permissionRules(app));
+
 const accessLevelRules = allLevels => ([
     makerule("name", "name must be set",
         l => isNonEmptyString(l.name)),
     makerule("name", "access level names must be unique",
         l => isEmpty(l.name) 
-             || filter(a => insensitiveEquals(l.name, a.name))(allLevels).length > 1),
+             || filter(a => insensitiveEquals(l.name, a.name))(allLevels).length === 1),
     makerule("accessType", "accessType must be whitelist or blacklist",
         l => l.accessType === WHITELIST || l.accessType === BLACKLIST)
 ]);
 
+const applyLevelRules = allLevels =>
+    applyRuleSet(accessLevelRules(allLevels));
+
 export const validateAccessLevel = app => (allLevels, level) => {
 
     const errs = $(level.permissions, [
-        map(perm =>  $(permissionRules(app), [
-            applyRule(perm)
-        ])),
+        map(applyPermissionRules(app)),
         flatten,
         concat(
-            $(accessLevelRules(allLevels), [
-                applyRule(level)
-            ])
+            applyLevelRules(allLevels)(level)
         )
     ]);
 

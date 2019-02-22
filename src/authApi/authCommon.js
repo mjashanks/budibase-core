@@ -15,7 +15,7 @@ export const WHITELIST = "whitelist";
 export const isBlacklist = type => type === BLACKLIST;
 export const isWhitelist = type => type === WHITELIST;
 
-export const PermissionTypes = {
+export const permissionTypes = {
     CREATE_RECORD : "create record",
     UPDATE_RECORD : "update record",
     READ_RECORD : "update record",

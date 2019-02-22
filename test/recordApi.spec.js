@@ -1,7 +1,5 @@
-import {setupAppheirarchy, basicAppHeirarchyCreator,
-    basicAppHeirarchyCreator_WithFields, getNewFieldAndAdd,
-    stubEventHandler} from "./specHelpers";
-import {isFunction} from "lodash";
+import {setupAppheirarchy, basicAppHeirarchyCreator_WithFields, 
+    getNewFieldAndAdd, stubEventHandler} from "./specHelpers";
 import {events, isNonEmptyString} from "../src/common";
 import { isBoolean } from "util";
 

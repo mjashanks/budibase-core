@@ -1,4 +1,4 @@
-import {WHITELIST, PermissionTypes} from "./authCommon";
+import {WHITELIST, permissionTypes} from "./authCommon";
 
 export const getNewAccessLevel = app => () => ({
     name:"",
@@ -10,44 +10,44 @@ const nodePermission = (accessLevel, type, nodeKey) => {
     accessLevel.permissions.push({type, nodeKey});
 };
 
-const staticPermission = type => 
-    accessLevel.push({type});
+const staticPermission = (accessLevel, type) => 
+    accessLevel.permissions.push({type});
 
-export const createRecordPermission = (recordNodeKey) =>
-    nodePermission(recordNodeKey, PermissionTypes.CREATE_RECORD);
+export const createRecordPermission = (accessLevel, recordNodeKey) =>
+    nodePermission(accessLevel, recordNodeKey, permissionTypes.CREATE_RECORD);
 
-export const updateRecordPermission = (recordNodeKey) =>
-    nodePermission(recordNodeKey, PermissionTypes.UPDATE_RECORD);
+export const updateRecordPermission = (accessLevel, recordNodeKey) =>
+    nodePermission(accessLevel, recordNodeKey, permissionTypes.UPDATE_RECORD);
 
-export const deleteRecordPermission = (recordNodeKey) =>
-    nodePermission(recordNodeKey, PermissionTypes.DELETE_RECORD);
+export const deleteRecordPermission = (accessLevel, recordNodeKey) =>
+    nodePermission(accessLevel, recordNodeKey, permissionTypes.DELETE_RECORD);
 
-export const readRecordPermission = (recordNodeKey) =>
-    nodePermission(recordNodeKey, PermissionTypes.READ_RECORD);
+export const readRecordPermission = (accessLevel, recordNodeKey) =>
+    nodePermission(accessLevel, recordNodeKey, permissionTypes.READ_RECORD);
 
-export const writeTemplatesPermission = () =>
-    staticPermission(PermissionTypes.WRITE_TEMPLATES);
+export const writeTemplatesPermission = (accessLevel) =>
+    staticPermission(accessLevel, permissionTypes.WRITE_TEMPLATES);
 
-export const createUserPermission = () =>
-    staticPermission(PermissionTypes.CREATE_USER);
+export const createUserPermission = (accessLevel) =>
+    staticPermission(accessLevel, permissionTypes.CREATE_USER);
 
-export const setPasswordPermission = () =>
-    staticPermission(PermissionTypes.SET_PASSWORD);
+export const setPasswordPermission = (accessLevel) =>
+    staticPermission(accessLevel, permissionTypes.SET_PASSWORD);
 
 export const readIndexPermission = (indexNodeKey) =>
-    nodePermission(indexNodeKey, PermissionTypes.READ_INDEX);
+    nodePermission(accessLevel, indexNodeKey, permissionTypes.READ_INDEX);
 
-export const createTemporaryAccessPermission = () =>
-    staticPermission(PermissionTypes.CREATE_TEMPORARY_ACCESS);
+export const createTemporaryAccessPermission = (accessLevel) =>
+    staticPermission(accessLevel, permissionTypes.CREATE_TEMPORARY_ACCESS);
 
-export const enableDisableUserPermission = () =>
-    staticPermission(PermissionTypes.ENABLE_DISABLE_USER);
+export const enableDisableUserPermission = (accessLevel) =>
+    staticPermission(accessLevel, permissionTypes.ENABLE_DISABLE_USER);
 
-export const writeAccessLevelsPermission = () =>
-    staticPermission(PermissionTypes.WRITE_ACCESS_LEVELS);
+export const writeAccessLevelsPermission = (accessLevel) =>
+    staticPermission(accessLevel, permissionTypes.WRITE_ACCESS_LEVELS);
 
-export const listUsersPermission = () =>
-    staticPermission(PermissionTypes.LIST_USERS);
+export const listUsersPermission = (accessLevel) =>
+    staticPermission(accessLevel, permissionTypes.LIST_USERS);
 
-export const listAccessLevelsPermission = () =>
-    staticPermission(PermissionTypes.LIST_ACCESS_LEVELS);
+export const listAccessLevelsPermission = (accessLevel) =>
+    staticPermission(accessLevel, permissionTypes.LIST_ACCESS_LEVELS);
