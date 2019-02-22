@@ -64,6 +64,9 @@ export const anyTrue = (...funcArgs) => (val) =>
             result == true || conditionFunc(val),
         null);
 
+export const insensitiveEquals = (str1, str2) =>
+        str1.trim().toLowerCase() === str2.trim().toLowerCase();
+
 export const isSomething = allTrue(isDefined, isNonNull, isNotNaN);
 export const isNothing = not(isSomething);
 export const isNothingOrEmpty = v => isNothing(v) || isEmpty(v);
@@ -214,6 +217,6 @@ export default {
     causesException, executesWithoutException, none, getHashCode,
     awEx, apiWrapper, events, isNothingOrEmpty, isSafeInteger,
     toNumber, toDate: toDateOrNull, toBool: toBoolOrNull,
-    isArrayOfString, getLock, NO_LOCK, isNolock
+    isArrayOfString, getLock, NO_LOCK, isNolock, insensitiveEquals
 };
 

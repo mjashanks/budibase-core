@@ -15,19 +15,21 @@ export const WHITELIST = "whitelist";
 export const isBlacklist = type => type === BLACKLIST;
 export const isWhitelist = type => type === WHITELIST;
 
-export const CREATE_RECORD = "create record";
-export const UPDATE_RECORD = "update record";
-export const READ_RECORD = "update record";
-export const DELETE_RECORD = "delete record";
-export const READ_INDEX = "read index";
-export const WRITE_TEMPLATES = "write templates";
-export const CREATE_USER = "create user";
-export const SET_PASSWORD = "set password";
-export const CREATE_TEMPORARY_ACCESS = "create temporary access";
-export const ENABLE_DISABLE_USER = "enable or disable user";
-export const WRITE_ACCESS_LEVELS = "write access levels";
-export const LIST_USERS = "list users";
-export const LIST_ACCESS_LEVELS = "list access levels";
+export const PermissionTypes = {
+    CREATE_RECORD : "create record",
+    UPDATE_RECORD : "update record",
+    READ_RECORD : "update record",
+    DELETE_RECORD : "delete record",
+    READ_INDEX : "read index",
+    WRITE_TEMPLATES : "write templates",
+    CREATE_USER : "create user",
+    SET_PASSWORD : "set password",
+    CREATE_TEMPORARY_ACCESS : "create temporary access",
+    ENABLE_DISABLE_USER : "enable or disable user",
+    WRITE_ACCESS_LEVELS : "write access levels",
+    LIST_USERS : "list users",
+    LIST_ACCESS_LEVELS : "list access levels"
+}
 
 export const getUserByName = (users, name) => $(users, [
     find(u => u.name.toLowerCase() === name.toLowerCase())
