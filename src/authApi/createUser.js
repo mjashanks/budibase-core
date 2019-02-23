@@ -1,5 +1,5 @@
 import {validateUser} from "./validateUser";
-import {getNewAuth} from "./getNewUser";
+import {getNewUserAuth} from "./getNewUser";
 import {join, some, clone} from "lodash/fp";
 import {getLock, isNolock, isSomething,releaseLock} from "../common";
 import {USERS_LOCK_FILE, stripUserOfSensitiveStuff,
@@ -9,21 +9,23 @@ import {isValidPassword} from "./setPassword";
 
 export const createUser = app => async (user, password=null) => {
 
-    const userErrors = await validateUser(user);
-    if(userErrors.length > 0)
-        throw new Error("User is invalid. " + join("; ")(userErrors));
-
-    const {auth, tempCode} = getAccess(app, password);
-    user.tempCode = tempCode;
-
     const lock = await getLock(
         app, USERS_LOCK_FILE, 1000, 2
     );
 
     if(isNolock(lock))
         throw new Error("Unable to create user, could not get lock - try again");
-    
+        
     const users = await app.datastore.loadJson(USERS_LIST_FILE);
+
+    const userErrors = validateUser(app)([...users,user], user);
+    if(userErrors.length > 0)
+        throw new Error("User is invalid. " + join("; ")(userErrors));
+
+    const {auth, tempCode, temporaryAccessId} = await getAccess(
+        app, password);
+    user.tempCode = tempCode;
+    user.temporaryAccessId = temporaryAccessId;
     
     if(some(u => u.name === user.name)(users))
         throw new Error("User already exists");
@@ -45,12 +47,12 @@ export const createUser = app => async (user, password=null) => {
 
     await releaseLock(app, lock);
 
-    return forReturn;
+    return user;
 };
 
 const getAccess = async (app, password) => {
 
-    const auth = getNewAuth();
+    const auth = getNewUserAuth(app)();
 
     if(isSomething(password)) {
         if(isValidPassword(password)) {
