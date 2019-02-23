@@ -1,10 +1,8 @@
-import {applyRuleSet, makerule, applyRule} from "../common/validationCommon";
-import {permissionTypes, WHITELIST, BLACKLIST} from "./authCommon";
-import {values, includes, map, concat, isEmpty, uniqWith,
+import {applyRuleSet, makerule} from "../common/validationCommon";
+import {map, uniqWith,
     flatten, filter} from "lodash/fp";
-import {$, isSomething, insensitiveEquals,
-    isNonEmptyString, none, isNothing, isArrayOfString} from "../common";
-import {getNode} from "../templateApi/heirarchy";
+import {$, insensitiveEquals,
+    isNonEmptyString, all} from "../common";
 
 const userRules = allUsers => [
     makerule("name", "username must be set",
@@ -12,13 +10,20 @@ const userRules = allUsers => [
     makerule("accessLevels", "user must have at least one access level",
         u => u.accessLevels.length > 0),
     makerule("name", "username must be unique",
-        u => filter(u2 => insensitiveEquals(u2,u))(allUsers).length > 1),
+        u => filter(u2 => insensitiveEquals(u2.name,u.name))
+                   (allUsers).length === 1),
     makerule("accessLevels", "access levels must only contain stings",
         u => all(isNonEmptyString)(u.accessLevels))
 ];
 
-export const validateUser = app => (allusers, user) => {
+export const validateUser = () => (allusers, user) => 
+    applyRuleSet(userRules(allusers))(user);
 
-
-
-};
+export const validateUsers = app => (allUsers) => 
+    $(allUsers, [
+        map(l => validateUser(app)(allUsers, l)),
+        flatten,
+        uniqWith((x,y) => x.field === y.field
+                        && x.item === y.item
+                        && x.error === y.error)
+    ]);
