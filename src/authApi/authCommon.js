@@ -1,4 +1,4 @@
-import {joinKey} from "../common";
+import {joinKey, $} from "../common";
 import {clone, find} from "lodash/fp";
 // 5 minutes
 export const tempCodeExpiryLength = 5 * 60 * 60;

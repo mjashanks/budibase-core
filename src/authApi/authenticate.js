@@ -1,22 +1,47 @@
 import {getUsers} from "./getUsers";
-import {find} from "lodash/fp";
+import {find, filter, some, map} from "lodash/fp";
 import {getUserByName, userAuthFile} from "./authCommon";
 import {parseTemporaryCode} from "./createTemporaryAccess";
+import {loadAccessLevels} from "./loadAccessLevels";
+import {temporaryAccessPermissions} from "./getNewAccessLevel";
+import { isNothing, $ } from "../common";
 
 export const authenticate = app => async (username, password) => {
-    const user = getUserByName(
+
+    if(isNothing(username) || isNothing(password))
+        return null;
+
+    let user = getUserByName(
                     await getUsers(app),
                     username
                 );
-                
-    if(!user || !user.enabled) return null; 
+             
+    const notAUser = "not-a-user";
+    // continue with non-user - so time to verify remains consistent
+    // with verification of a valid user
+    if(!user || !user.enabled) 
+        user = notAUser; 
+
+    let userAuth;
+    try {
+        userAuth = app.datastore.loadJson(
+            userAuthFile(username)
+        );
+    } catch(_) {
+        userAuth = {accessLevels:[], passwordHash:"not a hash"};
+    }
+
+    const permissions = await buildUserPermissions(app, userAuth.accessLevels);
 
     const verified = await app.crypto.verify(
-        user.passwordSaltedHash, 
-        password);  
+        userAuth.passwordHash, 
+        password);
+
+    if(user === notAUser)
+        return null;
 
     return verified
-           ? {...user, temp:false}
+           ? {...user, permissions, temp:false}
            : null;
 };
 
@@ -41,6 +66,19 @@ export const authenticateTemporaryAccess = app => async (tempAccessCode) => {
         temp.code); 
 
     return verified
-           ? {...user, temp:true}
+           ? {
+               ...user, 
+               permissions: 
+               temporaryAccessPermissions(), temp:true
+            }
            : null;
 }
+
+export const buildUserPermissions = async (app, userAccessLevels) => {
+    const allAccessLevels = await loadAccessLevels(app)();
+
+    return $(allAccessLevels, [
+        filter(l => some(ua => l.name === ua)(userAccessLevels)),
+        map(l => l.levels)
+    ]);
+};

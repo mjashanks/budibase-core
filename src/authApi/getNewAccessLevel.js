@@ -13,6 +13,9 @@ const nodePermission = (accessLevel, type, nodeKey) => {
 const staticPermission = (accessLevel, type) => 
     accessLevel.permissions.push({type});
 
+export const temporaryAccessPermissions = () =>
+    ([{type:permissionTypes.SET_PASSWORD}]);
+
 export const createRecordPermission = (accessLevel, recordNodeKey) =>
     nodePermission(accessLevel, recordNodeKey, permissionTypes.CREATE_RECORD);
 

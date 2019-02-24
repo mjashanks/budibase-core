@@ -1,11 +1,7 @@
 import {setupAppheirarchy, 
     basicAppHeirarchyCreator_WithFields} from "./specHelpers";
-import { WHITELIST, permissionTypes, 
-    ACCESS_LEVELS_FILE, 
-    userAuthFile,
+import { userAuthFile,
     USERS_LOCK_FILE} from "../src/authApi/authCommon";
-import {writeTemplatesPermission} from "../src/authApi/getNewAccessLevel";
-import {cloneDeep} from "lodash/fp";
 import {getLock} from "../src/common/lock";
 import {getNewUserAuth} from "../src/authApi/getNewUser";
 
@@ -132,7 +128,7 @@ describe("create and list users", () => {
     });
 
     it("should not create user when user with same name already exists", async () => {
-        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
         const user = validUser(authApi);
         await authApi.createUser(user);
 
