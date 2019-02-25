@@ -5,6 +5,7 @@ import {getUserByName, userAuthFile} from "./authCommon";
 import {parseTemporaryCode} from "./createTemporaryAccess";
 import {loadAccessLevels} from "./loadAccessLevels";
 import { isNothingOrEmpty, $ } from "../common";
+import {generate} from "shortid";
 
 const dummyHash = "$argon2i$v=19$m=4096,t=3,p=1$UZRo409UYBGjHJS3CV6Uxw$rU84qUqPeORFzKYmYY0ceBLDaPO+JWSH4PfNiKXfIKk";
 
@@ -54,24 +55,37 @@ export const authenticateTemporaryAccess = app => async (tempAccessCode) => {
         return null;
 
     const temp = parseTemporaryCode(tempAccessCode);
-    const user = $(await getUsers(app)(),[
+    let user = $(await getUsers(app)(),[
         find(u => u.temporaryAccessId === temp.id)
     ]);
 
+    const notAUser = "not-a-user";
     if(!user || !user.enabled) 
-        return null; 
+        user = notAUser;
 
-    const userAuth = await app.datastore.loadJson(
-        userAuthFile(user.name)
-    );
+    let userAuth;
+    try {
+        userAuth = await app.datastore.loadJson(
+            userAuthFile(user.name)
+        );
+    } catch(e) {
+        userAuth = {
+            temporaryAccessHash:dummyHash,
+            temporaryAccessExpiryEpoch:(await app.getEpochTime() + 10000)
+        };
+    }
 
     if(userAuth.temporaryAccessExpiryEpoch < await app.getEpochTime()) 
-        return null;
+        user = notAUser;
 
+    const tempCode = !tempCode ? generate() : temp.code;
     const verified =  await app.crypto.verify(
         userAuth.temporaryAccessHash, 
-        temp.code); 
+        tempCode); 
 
+    if(user === notAUser) 
+        return null;
+    
     return verified
            ? {
                ...user, 

@@ -68,6 +68,40 @@ describe("authApi > authenticateTemporaryAccess", () => {
         expect(result.temp).toBe(true);
     });
 
+    it("should return null when blank code suplied", async () => {
+        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const u = await validUser(authApi, "");
+        const result = await authApi.authenticateTemporaryAccess("");
+        expect(result).toBeNull();
+    });
+
+    it("should return null when invalid code supplied", async () => {
+        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const u = await validUser(authApi, "");
+        const result = await authApi.authenticateTemporaryAccess("incorrect");
+        expect(result).toBeNull();
+    });
+
+    it("should return null when user disabled", async () => {
+        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const u = await validUser(authApi, "", false);
+        const result = await authApi.authenticateTemporaryAccess(u.tempCode);
+        expect(result).toBeNull();
+    });
+
+    it("should return null when temporary access code is expired", async () => {
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const u = await validUser(authApi, "");
+        const userAuth = await app.datastore.loadJson(
+            userAuthFile(u.name)
+        );
+        userAuth.temporaryAccessExpiryEpoch = 0;
+        await app.datastore.updateJson(
+            userAuthFile(u.name), userAuth
+        );
+        const result = await authApi.authenticateTemporaryAccess(u.tempCode);
+        expect(result).toBeNull();
+    });
 });
 
 const validUser = async (authApi, password, enabled=true) => {
