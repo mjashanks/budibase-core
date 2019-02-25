@@ -78,7 +78,7 @@ export const authenticateTemporaryAccess = app => async (tempAccessCode) => {
     if(userAuth.temporaryAccessExpiryEpoch < await app.getEpochTime()) 
         user = notAUser;
 
-    const tempCode = !tempCode ? generate() : temp.code;
+    const tempCode = !temp.code ? generate() : temp.code;
     const verified =  await app.crypto.verify(
         userAuth.temporaryAccessHash, 
         tempCode); 
