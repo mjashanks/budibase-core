@@ -114,6 +114,14 @@ describe("create and list users", () => {
         expect(returnedUser.temporaryAccessId.length).toBeGreaterThan(0);
     });
 
+    it("should not store tempCode when temp access created", async () => {
+        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const user = validUser(authApi);
+        await authApi.createUser(user);
+        const storedUser = (await authApi.getUsers())[0];
+        expect(storedUser.tempCode).toBeUndefined();
+    });
+
     it("should create user auth file with password hash, when password supplied", async () => {
         const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
         const user = validUser(authApi);

@@ -1,18 +1,21 @@
 import {getUsers} from "./getUsers";
-import {find, filter, some, map} from "lodash/fp";
+import {find, filter, some, 
+        map, flatten} from "lodash/fp";
 import {getUserByName, userAuthFile} from "./authCommon";
 import {parseTemporaryCode} from "./createTemporaryAccess";
 import {loadAccessLevels} from "./loadAccessLevels";
-import {temporaryAccessPermissions} from "./getNewAccessLevel";
-import { isNothing, $ } from "../common";
+import { isNothingOrEmpty, $ } from "../common";
+
+const dummyHash = "$argon2i$v=19$m=4096,t=3,p=1$UZRo409UYBGjHJS3CV6Uxw$rU84qUqPeORFzKYmYY0ceBLDaPO+JWSH4PfNiKXfIKk";
 
 export const authenticate = app => async (username, password) => {
 
-    if(isNothing(username) || isNothing(password))
+    if(isNothingOrEmpty(username) || isNothingOrEmpty(password))
         return null;
 
+    const allUsers = await getUsers(app)();
     let user = getUserByName(
-                    await getUsers(app),
+                    allUsers,
                     username
                 );
              
@@ -24,14 +27,14 @@ export const authenticate = app => async (username, password) => {
 
     let userAuth;
     try {
-        userAuth = app.datastore.loadJson(
+        userAuth = await app.datastore.loadJson(
             userAuthFile(username)
         );
     } catch(_) {
-        userAuth = {accessLevels:[], passwordHash:"not a hash"};
+        userAuth = {accessLevels:[], passwordHash:dummyHash};
     }
 
-    const permissions = await buildUserPermissions(app, userAuth.accessLevels);
+    const permissions = await buildUserPermissions(app, user.accessLevels);
 
     const verified = await app.crypto.verify(
         userAuth.passwordHash, 
@@ -47,12 +50,16 @@ export const authenticate = app => async (username, password) => {
 
 export const authenticateTemporaryAccess = app => async (tempAccessCode) => {
 
+    if(isNothingOrEmpty(tempAccessCode))
+        return null;
+
     const temp = parseTemporaryCode(tempAccessCode);
-    const user = $(await getUsers(app),[
+    const user = $(await getUsers(app)(),[
         find(u => u.temporaryAccessId === temp.id)
     ]);
 
-    if(!user || !user.enabled) return null; 
+    if(!user || !user.enabled) 
+        return null; 
 
     const userAuth = await app.datastore.loadJson(
         userAuthFile(user.name)
@@ -68,8 +75,8 @@ export const authenticateTemporaryAccess = app => async (tempAccessCode) => {
     return verified
            ? {
                ...user, 
-               permissions: 
-               temporaryAccessPermissions(), temp:true
+               permissions: [], 
+               temp:true
             }
            : null;
 }
@@ -77,8 +84,9 @@ export const authenticateTemporaryAccess = app => async (tempAccessCode) => {
 export const buildUserPermissions = async (app, userAccessLevels) => {
     const allAccessLevels = await loadAccessLevels(app)();
 
-    return $(allAccessLevels, [
+    return $(allAccessLevels.levels, [
         filter(l => some(ua => l.name === ua)(userAccessLevels)),
-        map(l => l.levels)
+        map(l => l.permissions),
+        flatten
     ]);
 };

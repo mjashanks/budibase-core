@@ -1,5 +1,5 @@
 import {applyRuleSet, makerule, applyRule} from "../common/validationCommon";
-import {permissionTypes, WHITELIST, BLACKLIST} from "./authCommon";
+import {permissionTypes} from "./authCommon";
 import {values, includes, map, concat, isEmpty, uniqWith,
     flatten, filter} from "lodash/fp";
 import {$, isSomething, insensitiveEquals,
@@ -33,9 +33,7 @@ const accessLevelRules = allLevels => ([
         l => isNonEmptyString(l.name)),
     makerule("name", "access level names must be unique",
         l => isEmpty(l.name) 
-             || filter(a => insensitiveEquals(l.name, a.name))(allLevels).length === 1),
-    makerule("accessType", "accessType must be whitelist or blacklist",
-        l => l.accessType === WHITELIST || l.accessType === BLACKLIST)
+             || filter(a => insensitiveEquals(l.name, a.name))(allLevels).length === 1)
 ]);
 
 const applyLevelRules = allLevels =>

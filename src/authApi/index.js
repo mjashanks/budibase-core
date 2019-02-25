@@ -1,4 +1,5 @@
-import {authenticate} from "./authenticate";
+import {authenticate, 
+    authenticateTemporaryAccess} from "./authenticate";
 import {createTemporaryAccess} from "./createTemporaryAccess";
 import {createUser} from "./createUser";
 import {enableUser, disableUser} from "./enableUser";
@@ -15,6 +16,7 @@ import {validateAccessLevels} from "./validateAccessLevels";
 
 export const getAuthApi = app => ({
     authenticate: authenticate(app),
+    authenticateTemporaryAccess: authenticateTemporaryAccess(app),
     createTemporaryAccess: createTemporaryAccess(app),
     createUser: createUser(app),
     loadAccessLevels: loadAccessLevels(app),

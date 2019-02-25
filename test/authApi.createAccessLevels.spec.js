@@ -1,9 +1,9 @@
 import {setupAppheirarchy, 
     basicAppHeirarchyCreator_WithFields} from "./specHelpers";
-import { WHITELIST, permissionTypes, 
+import { permissionTypes, 
     ACCESS_LEVELS_FILE, 
     ACCESS_LEVELS_LOCK_FILE} from "../src/authApi/authCommon";
-import {writeTemplatesPermission} from "../src/authApi/getNewAccessLevel";
+import {addPermission} from "../src/authApi/getNewAccessLevel";
 import {cloneDeep} from "lodash/fp";
 import {getLock} from "../src/common/lock";
 
@@ -13,7 +13,6 @@ describe("getNewAccessLevel", () => {
         const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
         const accLev = authApi.getNewAccessLevel();
         expect(accLev.name).toBe("");
-        expect(accLev.accessType).toBe(WHITELIST);
         expect(accLev.permissions).toEqual([]);
     });
 
@@ -35,15 +34,6 @@ describe("validateAccessLevels", () => {
         const errs = authApi.validateAccessLevels([accessLevel]);
         expect(errs.length).toEqual(1);
         expect(errs[0].field).toBe("name");
-    });
-
-    it("should error when access type not whitelist or blacklist", async () => {
-        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
-        const accessLevel = validAccessLevel(authApi);
-        accessLevel.accessType = ""
-        const errs = authApi.validateAccessLevels([accessLevel]);
-        expect(errs.length).toEqual(1);
-        expect(errs[0].field).toBe("accessType");
     });
 
     it("should error when 2 access levels with the same name", async () => {
@@ -164,6 +154,6 @@ const validAccessLevels = (authApi) => {
 const validAccessLevel = (authApi) => {
     const lev = authApi.getNewAccessLevel();
     lev.name = "test level";
-    writeTemplatesPermission(lev);
+    addPermission.writeTemplates(lev);
     return lev;        
 }

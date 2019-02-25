@@ -1,7 +1,8 @@
 import {validateUser} from "./validateUser";
 import {getNewUserAuth} from "./getNewUser";
 import {join, some, clone} from "lodash/fp";
-import {getLock, isNolock, isSomething,releaseLock} from "../common";
+import {getLock, isNolock, releaseLock, 
+    insensitiveEquals, isNonEmptyString} from "../common";
 import {USERS_LOCK_FILE, stripUserOfSensitiveStuff,
     USERS_LIST_FILE, userAuthFile} from "./authCommon";
 import {getTemporaryCode} from "./createTemporaryAccess";
@@ -27,11 +28,17 @@ export const createUser = app => async (user, password=null) => {
     user.tempCode = tempCode;
     user.temporaryAccessId = temporaryAccessId;
     
-    if(some(u => u.name === user.name)(users))
+    if(some(u => insensitiveEquals(u.name, user.name))(users))
         throw new Error("User already exists");
 
-    users.push(user);
-    await app.datastore.updateJson(USERS_LIST_FILE, users);
+    users.push(
+        stripUserOfSensitiveStuff(user)
+    );
+
+    await app.datastore.updateJson(
+        USERS_LIST_FILE, 
+        users
+    );
     
     try {
         await app.datastore.createJson(
@@ -54,7 +61,7 @@ const getAccess = async (app, password) => {
 
     const auth = getNewUserAuth(app)();
 
-    if(isSomething(password)) {
+    if(isNonEmptyString(password)) {
         if(isValidPassword(password)) {
             auth.passwordHash = await app.crypto.hash(password);
             auth.temporaryAccessHash = "";

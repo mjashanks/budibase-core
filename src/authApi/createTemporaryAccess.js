@@ -34,7 +34,7 @@ export const parseTemporaryCode = fullCode =>
     $(fullCode, [
         split(":"),
         parts => ({
-            id:parts[0],
-            code:parts[1]
+            id:parts[1],
+            code:parts[2]
         })
     ]);

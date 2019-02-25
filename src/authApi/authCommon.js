@@ -10,11 +10,6 @@ export const USERS_LOCK_FILE = joinKey(AUTH_FOLDER, "users_lock");
 export const ACCESS_LEVELS_FILE = joinKey(AUTH_FOLDER, "access_levels.json");
 export const ACCESS_LEVELS_LOCK_FILE = joinKey(AUTH_FOLDER, "access_levels_lock");
 
-export const BLACKLIST = "blacklist";
-export const WHITELIST = "whitelist";
-export const isBlacklist = type => type === BLACKLIST;
-export const isWhitelist = type => type === WHITELIST;
-
 export const permissionTypes = {
     CREATE_RECORD : "create record",
     UPDATE_RECORD : "update record",
@@ -37,6 +32,6 @@ export const getUserByName = (users, name) => $(users, [
 
 export const stripUserOfSensitiveStuff = user => {
     const stripped = clone(user);
-    delete stripped.temporaryAccessId
+    delete stripped.tempCode;
     return stripped;
 }
