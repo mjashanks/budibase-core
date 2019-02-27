@@ -1,60 +1,80 @@
-import {userAuthFile} from "./authCommon";
-import {parseTemporaryCode, 
-    looksLikeTemporaryCode} from "./createTemporaryAccess";
-import {isSomething} from "../common";
+import {userAuthFile, parseTemporaryCode} from "./authCommon";
+import {looksLikeTemporaryCode} from "./createTemporaryAccess";
+import {isSomething, $} from "../common";
+import {getUsers} from "./getUsers";
+import {find} from "lodash/fp";
 
 export const isValidPassword = app => async password => {
     return scorePassword(password).score > 30;
 };
 
-export const setMyPassword = app => async (oldpassword_orTempAccess, newpassword) => 
-    setPassword(app)(oldpassword_orTempAccess, newpassword);
-
-export const setPassword = app => async (username, pw_orTempCode, newpassword) => {
+export const changeMyPassword = app => async (currentPw, newpassword) => {
     const existingAuth = await app.datastore.loadJson(
-        userAuthFile(username)
+        userAuthFile(app.user.name)
     );
 
-    const doSet = async () => {
-        existingAuth.temporaryAccessHash = "";
-        existingAuth.temporaryAccessExpiryEpoch = 0;
-        existingAuth.passwordHash = await app.crypto.hash(
-            newpassword
-        );
-        await app.datastore.updateJson(
-            userAuthFile(username)
-        );
-    };
-
-    const currentTime = await app.getEpochTime();
-
-    if(isSomething(existingAuth.temporaryAccessHash)
-       || existingAuth.temporaryAccessExpiryEpoch > currentTime) {
-
-        const verified = await app.crypto.verify(
-            existingAuth.temporaryAccessHash, 
-            pw_orTempCode);
-
-        if(verified) {
-            await doSet();
-            return true;
-        }
-    }
-    
     if(isSomething(existingAuth.passwordHash)) {
         
         const verified = await app.crypto.verify(
             existingAuth.passwordHash, 
-            pw_orTempCode);
+            currentPw);
 
         if(verified) {
-            await doSet();
+            await await doSet(
+                app, existingAuth, 
+                app.user.name, newpassword);
             return true;
         }
     }
-
+    
     return false;
+}
 
+export const setPasswordFromTemporaryCode = app => async (tempCode, newpassword) => {
+
+    const currentTime = await app.getEpochTime();
+
+    const temp = parseTemporaryCode(tempCode);
+
+    const user = $(await getUsers(app)(), [
+        find(u => u.temporaryAccessId === temp.id)
+    ]);
+
+    if(!user)
+        return false;
+
+    const existingAuth = await app.datastore.loadJson(
+        userAuthFile(user.name)
+    );
+
+    if(isSomething(existingAuth.temporaryAccessHash)
+       && existingAuth.temporaryAccessExpiryEpoch > currentTime) {
+
+        const verified = await app.crypto.verify(
+            existingAuth.temporaryAccessHash, 
+            temp.code);
+
+        if(verified) {
+            await doSet(
+                app, existingAuth, 
+                user.name, newpassword);
+            return true;
+        }
+    }
+    
+    return false;
+};
+
+const doSet = async (app, auth, username, newpassword) => {
+    auth.temporaryAccessHash = "";
+    auth.temporaryAccessExpiryEpoch = 0;
+    auth.passwordHash = await app.crypto.hash(
+        newpassword
+    );
+    await app.datastore.updateJson(
+        userAuthFile(username),
+        auth
+    );
 };
 
 export const scorePassword = (password) => {

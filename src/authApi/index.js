@@ -9,8 +9,9 @@ import {getNewUser} from "./getNewUser";
 import {getUsers} from "./getUsers";
 import {isAuthorized} from "./isAuthorized";
 import {saveAccessLevels} from "./saveAccessLevels";
-import {setPassword, scorePassword, 
-    isValidPassword, setMyPassword} from "./setPassword";
+import {changeMyPassword, changePassword,
+    scorePassword, setPasswordFromTemporaryCode, 
+    isValidPassword} from "./setPassword";
 import {validateUser} from "./validateUser";
 import {validateAccessLevels} from "./validateAccessLevels";
 
@@ -27,9 +28,9 @@ export const getAuthApi = app => ({
     getUsers: getUsers(app),
     saveAccessLevels: saveAccessLevels(app),
     isAuthorized: isAuthorized(app),
-    setPassword: setPassword(app),
+    changeMyPassword: changeMyPassword(app),
+    setPasswordFromTemporaryCode: setPasswordFromTemporaryCode(app),
     scorePassword,
-    setMyPassword: setMyPassword(app),
     isValidPassword: isValidPassword(app),
     validateUser: validateUser(app),
     validateAccessLevels: validateAccessLevels(app)

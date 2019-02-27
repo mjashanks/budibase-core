@@ -37,7 +37,8 @@ export const appFromTempalteApi = async (templateApi, disableCleanupTransactions
         publish:templateApi._eventAggregator.publish,
         _eventAggregator: templateApi._eventAggregator,
         getEpochTime : async () => (new Date()).getTime(),
-        crypto:nodeCrypto
+        crypto:nodeCrypto,
+        user:{name:"bob", permissions: []}
     }; 
     if(disableCleanupTransactions)
         app.cleanupTransactions = async () => {};

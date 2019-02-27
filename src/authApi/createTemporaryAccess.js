@@ -1,10 +1,53 @@
-import {tempCodeExpiryLength} from "./authCommon";
+import {tempCodeExpiryLength, USERS_LOCK_FILE,
+    USERS_LIST_FILE, userAuthFile, 
+    getUserByName} from "./authCommon";
 import {generate} from "shortid";
+import {getLock, isNolock, 
+    releaseLock} from "../common/lock";
 import {split} from "lodash/fp";
 import {$} from "../common";
 
-export const createTemporaryAccess = app => async userName =>  {
+export const createTemporaryAccess = app => async (userName) =>  {
 
+    const tempCode = await getTemporaryCode(app);
+
+    const lock = await getLock(
+        app, USERS_LOCK_FILE, 1000, 2
+    );
+
+    if(isNolock(lock))
+        throw new Error("Unable to create temporary access, could not get lock - try again");
+        
+    try {
+        const users = await app.datastore.loadJson(USERS_LIST_FILE);
+
+        const user = getUserByName(users, userName);
+        user.temporaryAccessId = tempCode.temporaryAccessId;    
+
+        await app.datastore.updateJson(
+            USERS_LIST_FILE, 
+            users
+        );
+
+    } finally {
+        await releaseLock(app, lock);
+    }
+    
+    const userAuth = await app.datastore.loadJson(
+        userAuthFile(userName)
+    );
+    userAuth.temporaryAccessHash = 
+        tempCode.temporaryAccessHash;
+
+    userAuth.temporaryAccessExpiryEpoch = 
+        tempCode.temporaryAccessExpiryEpoch; 
+
+    await app.datastore.updateJson(
+        userAuthFile(userName),
+        userAuth
+    );
+
+    return tempCode.tempCode;
 }
 
 export const getTemporaryCode = async app => {
@@ -29,12 +72,3 @@ export const getTemporaryCode = async app => {
 
 export const looksLikeTemporaryCode = code =>
     code.startsWith("tmp:");
-
-export const parseTemporaryCode = fullCode => 
-    $(fullCode, [
-        split(":"),
-        parts => ({
-            id:parts[1],
-            code:parts[2]
-        })
-    ]);

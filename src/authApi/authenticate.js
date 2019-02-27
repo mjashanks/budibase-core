@@ -1,8 +1,8 @@
 import {getUsers} from "./getUsers";
 import {find, filter, some, 
         map, flatten} from "lodash/fp";
-import {getUserByName, userAuthFile} from "./authCommon";
-import {parseTemporaryCode} from "./createTemporaryAccess";
+import {getUserByName, userAuthFile, 
+    parseTemporaryCode} from "./authCommon";
 import {loadAccessLevels} from "./loadAccessLevels";
 import { isNothingOrEmpty, $ } from "../common";
 import {generate} from "shortid";

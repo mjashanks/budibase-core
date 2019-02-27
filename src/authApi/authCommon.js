@@ -1,5 +1,5 @@
 import {joinKey, $} from "../common";
-import {clone, find} from "lodash/fp";
+import {clone, find, split} from "lodash/fp";
 // 5 minutes
 export const tempCodeExpiryLength = 5 * 60 * 60;
 
@@ -35,3 +35,12 @@ export const stripUserOfSensitiveStuff = user => {
     delete stripped.tempCode;
     return stripped;
 }
+
+export const parseTemporaryCode = fullCode => 
+    $(fullCode, [
+        split(":"),
+        parts => ({
+            id:parts[1],
+            code:parts[2]
+        })
+    ]);

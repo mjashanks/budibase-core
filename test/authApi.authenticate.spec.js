@@ -1,13 +1,8 @@
 import {setupAppheirarchy, 
     basicAppHeirarchyCreator_WithFields} from "./specHelpers";
 import { permissionTypes, 
-    ACCESS_LEVELS_FILE, 
-    userAuthFile,
-    USERS_LOCK_FILE} from "../src/authApi/authCommon";
+    userAuthFile} from "../src/authApi/authCommon";
 import {addPermission} from "../src/authApi/getNewAccessLevel";
-import {cloneDeep} from "lodash/fp";
-import {getLock} from "../src/common/lock";
-import {getNewUserAuth} from "../src/authApi/getNewUser";
 
 
 describe("authApi > authenticate", () => {
@@ -34,7 +29,6 @@ describe("authApi > authenticate", () => {
 
     it("should return null when non existing user", async () => {
         const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
-        const u = await validUser(authApi, "password");
         const result = await authApi.authenticate("nobody", "password");
         expect(result).toBeNull();
     });
@@ -70,14 +64,12 @@ describe("authApi > authenticateTemporaryAccess", () => {
 
     it("should return null when blank code suplied", async () => {
         const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
-        const u = await validUser(authApi, "");
         const result = await authApi.authenticateTemporaryAccess("");
         expect(result).toBeNull();
     });
 
     it("should return null when invalid code supplied", async () => {
         const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
-        const u = await validUser(authApi, "");
         const result = await authApi.authenticateTemporaryAccess("incorrect");
         expect(result).toBeNull();
     });
