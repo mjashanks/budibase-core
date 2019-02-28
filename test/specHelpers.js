@@ -15,6 +15,7 @@ import {createBehaviourSources} from "../src/actions/buildBehaviourSource";
 import {createAction, createTrigger} from "../src/templateApi/createActions";
 import {cleanup} from "../src/transactions/cleanup";
 import nodeCrypto from "./nodeCrypto";
+import {addPermission} from "../src/authApi/getNewAccessLevel";
 const exp = module.exports;
 
 export const testFileArea = (testNameArea) => path.join("test", "fs_test_area", testNameArea);
@@ -424,4 +425,21 @@ export const createAppDefinitionWithActionsAndTriggers = async () => {
     await templateApi.saveActionsAndTriggers(allActions, allTriggers);
     const appDefinition = await templateApi.getApplicationDefinition();
     return {templateApi, appDefinition, ...actionsAndTriggers, ...appHeirarchy};
+};
+
+
+export const validUser = async (authApi, password, enabled=true) => {
+    const access = await authApi.getNewAccessLevel();
+    access.name = "admin";
+    addPermission.setPassword(access);
+
+    await authApi.saveAccessLevels({version:0, levels:[access]});
+    
+    const u = authApi.getNewUser();
+    u.name = "bob";
+    u.accessLevels = ["admin"];
+    u.enabled = enabled;
+    
+    await authApi.createUser(u, password);
+    return u;
 };

@@ -1,8 +1,9 @@
-import {setupAppheirarchy, 
+import {setupAppheirarchy, validUser,
     basicAppHeirarchyCreator_WithFields} from "./specHelpers";
-import { permissionTypes, 
-    userAuthFile} from "../src/authApi/authCommon";
-import {addPermission} from "../src/authApi/getNewAccessLevel";
+import { parseTemporaryCode,
+    userAuthFile,
+    USERS_LIST_FILE,
+    getUserByName} from "../src/authApi/authCommon";
 
 
 describe("authApi > changeMyPassword", () => {
@@ -66,20 +67,42 @@ describe("authApi > resetPasswordFlow", () => {
         expect(secondPasswordCheck).toBeNull();
 
     });
+
+    it("should still be able to authenticate with password when temp access is set", async () => {
+        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const u = await validUser(authApi, "firstpassword");
+
+        await authApi.createTemporaryAccess(u.name);
+
+        const secondPasswordCheck = await authApi.authenticate(u.name, "firstpassword");
+        expect(secondPasswordCheck).not.toBeNull();
+
+    });
 });
 
-const validUser = async (authApi, password, enabled=true) => {
-    const access = await authApi.getNewAccessLevel();
-    access.name = "admin";
-    addPermission.setPassword(access);
+describe("authApi > createTemporaryAccess", () => {
 
-    await authApi.saveAccessLevels({version:0, levels:[access]});
-    
-    const u = authApi.getNewUser();
-    u.name = "bob";
-    u.accessLevels = ["admin"];
-    u.enabled = enabled;
-    
-    await authApi.createUser(u, password);
-    return u;
-};
+    it("should set users accessId annd userAuth hash and expiry", async () => {
+
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const u = await validUser(authApi, "firstpassword");
+
+        const tempCode = await authApi.createTemporaryAccess(u.name);
+        const tempInfo = parseTemporaryCode(tempCode);
+
+        const userAuth = await app.datastore.loadJson(
+            userAuthFile(u.name)
+        );
+
+        const currentTime = await app.getEpochTime();
+        expect(app.crypto.verify(userAuth.temporaryAccessHash, tempInfo.code)).toBeTruthy();
+        expect(userAuth.temporaryAccessExpiryEpoch).toBeGreaterThan(currentTime);
+
+        const users = await app.datastore.loadJson(USERS_LIST_FILE);
+        const user = getUserByName(users, u.name);
+
+        expect(user.temporaryAccessId).toBe(tempInfo.id);
+
+    });
+
+});
