@@ -5,9 +5,16 @@ import {generate} from "shortid";
 import {getLock, isNolock, 
     releaseLock} from "../common/lock";
 import {split} from "lodash/fp";
-import {$} from "../common";
+import {apiWrapper, events} from "../common";
 
-export const createTemporaryAccess = app => async (userName) =>  {
+export const createTemporaryAccess = app => async (userName) => 
+    apiWrapper(
+        app,
+        events.authApi.createTemporaryAccess, 
+        {userName},
+        _createTemporaryAccess, app, userName);
+
+export const _createTemporaryAccess = async (app, userName) =>  {
 
     const tempCode = await getTemporaryCode(app);
 

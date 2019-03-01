@@ -1,6 +1,14 @@
 import {permissionTypes} from "./authCommon";
+import {apiWrapper, events} from "../common";
 
-export const getNewAccessLevel = app => () => ({
+export const getNewAccessLevel = app => () => 
+    apiWrapper(
+        app,
+        events.authApi.getNewAccessLevel, 
+        {},
+        _getNewAccessLevel, app);
+
+export const _getNewAccessLevel = app => ({
     name:"",
     permissions: []
 });

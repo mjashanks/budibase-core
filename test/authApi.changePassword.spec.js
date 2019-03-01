@@ -9,8 +9,8 @@ import { parseTemporaryCode,
 describe("authApi > changeMyPassword", () => {
 
     it("should be able to authenticate after a change", async () => {
-        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
-        const u = await validUser(authApi, "firstpassword");
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const u = await validUser(app, authApi, "firstpassword");
         const firstPasswordCheck = await authApi.authenticate(u.name, "firstpassword");
         expect(firstPasswordCheck).not.toBeNull();
         const changeResult = await authApi.changeMyPassword("firstpassword", "secondpassword");
@@ -22,8 +22,8 @@ describe("authApi > changeMyPassword", () => {
     });
 
     it("should not change password if current password is incorrect", async () => {
-        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
-        const u = await validUser(authApi, "firstpassword");
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const u = await validUser(app, authApi, "firstpassword");
         const changeResult = await authApi.changeMyPassword("not-firstpassword", "secondpassword");
         expect(changeResult).toBe(false);
         const secondPasswordCheck = await authApi.authenticate(u.name, "secondpassword");
@@ -36,8 +36,8 @@ describe("authApi > changeMyPassword", () => {
 describe("authApi > resetPasswordFlow", () => {
 
     it("should successfully set password from temporary access", async () => {
-        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
-        const u = await validUser(authApi, "firstpassword");
+        const {authApi,app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const u = await validUser(app,authApi, "firstpassword");
 
         const tempCode = await authApi.createTemporaryAccess(u.name);
 
@@ -50,7 +50,7 @@ describe("authApi > resetPasswordFlow", () => {
 
     it("should not set password when temporary access expired", async () => {
         const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
-        const u = await validUser(authApi, "firstpassword");
+        const u = await validUser(app, authApi, "firstpassword");
 
         const tempCode = await authApi.createTemporaryAccess(u.name);
 
@@ -69,8 +69,8 @@ describe("authApi > resetPasswordFlow", () => {
     });
 
     it("should still be able to authenticate with password when temp access is set", async () => {
-        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
-        const u = await validUser(authApi, "firstpassword");
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const u = await validUser(app, authApi, "firstpassword");
 
         await authApi.createTemporaryAccess(u.name);
 
@@ -85,7 +85,7 @@ describe("authApi > createTemporaryAccess", () => {
     it("should set users accessId annd userAuth hash and expiry", async () => {
 
         const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
-        const u = await validUser(authApi, "firstpassword");
+        const u = await validUser(app, authApi, "firstpassword");
 
         const tempCode = await authApi.createTemporaryAccess(u.name);
         const tempInfo = parseTemporaryCode(tempCode);

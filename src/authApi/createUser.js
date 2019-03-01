@@ -1,14 +1,22 @@
 import {validateUser} from "./validateUser";
 import {getNewUserAuth} from "./getNewUser";
 import {join, some, clone} from "lodash/fp";
-import {getLock, isNolock, releaseLock, 
+import {getLock, isNolock, releaseLock, apiWrapper, events,
     insensitiveEquals, isNonEmptyString} from "../common";
 import {USERS_LOCK_FILE, stripUserOfSensitiveStuff,
     USERS_LIST_FILE, userAuthFile} from "./authCommon";
 import {getTemporaryCode} from "./createTemporaryAccess";
 import {isValidPassword} from "./setPassword";
 
-export const createUser = app => async (user, password=null) => {
+
+export const createUser = app => async (user, password=null) => 
+    apiWrapper(
+        app,
+        events.authApi.createUser, 
+        {user, password},
+        _createUser, app, user, password);
+
+export const _createUser = async (app, user, password=null) => {
 
     const lock = await getLock(
         app, USERS_LOCK_FILE, 1000, 2

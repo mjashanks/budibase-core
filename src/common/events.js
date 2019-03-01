@@ -28,6 +28,27 @@ const _events = {
         getAllowedRecordTypes: common(),
         initialise: common(),
         delete: common()
+    },
+    authApi: {
+        authenticate: common(),
+        authenticateTemporaryAccess: common(),
+        createTemporaryAccess: common(),
+        createUser: common(),
+        enableUser: common(),
+        disableUser: common(),
+        loadAccessLevels: common(),
+        getNewAccessLevel: common(),
+        getNewUser: common(),
+        getNewUserAuth: common(),
+        getUsers: common(),
+        saveAccessLevels: common(),
+        isAuthorized: common(),
+        changeMyPassword: common(),
+        setPasswordFromTemporaryCode: common(),
+        scorePassword: common(),
+        isValidPassword: common(),
+        validateUser: common(),
+        validateAccessLevels: common()
     }
 }
 

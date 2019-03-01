@@ -1,11 +1,26 @@
 import {getLock, 
     isNolock, releaseLock} from "../common/lock";
 import { USERS_LOCK_FILE, USERS_LIST_FILE, getUserByName } from "./authCommon";
+import {apiWrapper, events} from "../common";
 
-export const enableUser = app => async username => 
+export const enableUser = app => async username =>
+    apiWrapper(
+        app,
+        events.authApi.enableUser, 
+        {app, username},
+        _enableUser, app, username);
+
+export const disableUser = app => async username =>
+    apiWrapper(
+        app,
+        events.authApi.disableUser, 
+        {username},
+        _disableUser, app, username);
+
+export const _enableUser = async (app, username) => 
     await toggleUser(app, username, true);
 
-export const disableUser = app => async username => 
+export const _disableUser = async (app, username) => 
     await toggleUser(app, username, false);
 
 const toggleUser = async (app, username, enabled) => {

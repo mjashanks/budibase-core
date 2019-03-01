@@ -1,11 +1,18 @@
 import {getLock, releaseLock, $,
-    isNolock} from "../common";
+    isNolock, apiWrapper, events} from "../common";
 import {ACCESS_LEVELS_LOCK_FILE, 
     ACCESS_LEVELS_FILE} from "./authCommon";
 import {join, map} from "lodash/fp";
 import {validateAccessLevels} from "./validateAccessLevels";
 
-export const saveAccessLevels = app => async accessLevels => {
+export const saveAccessLevels = app => async (accessLevels) => 
+    apiWrapper(
+        app,
+        events.authApi.saveAccessLevels, 
+        {accessLevels},
+        _saveAccessLevels, app, accessLevels);
+
+export const _saveAccessLevels = async (app, accessLevels) => {
     
     const validationErrors = validateAccessLevels(app)(accessLevels.levels);
     if(validationErrors.length > 0) {

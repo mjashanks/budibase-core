@@ -1,14 +1,28 @@
 import {userAuthFile, parseTemporaryCode} from "./authCommon";
 import {looksLikeTemporaryCode} from "./createTemporaryAccess";
-import {isSomething, $} from "../common";
+import {isSomething, $, apiWrapper, events} from "../common";
 import {getUsers} from "./getUsers";
 import {find} from "lodash/fp";
 
-export const isValidPassword = app => async password => {
+export const isValidPassword = app => (password) => 
+    apiWrapper(
+        app,
+        events.authApi.isValidPassword, 
+        {password},
+        _isValidPassword, app, password);
+
+export const _isValidPassword = (app, password) => {
     return scorePassword(password).score > 30;
 };
 
-export const changeMyPassword = app => async (currentPw, newpassword) => {
+export const changeMyPassword = app => async (currentPw, newpassword) => 
+    apiWrapper(
+        app,
+        events.authApi.changeMyPassword, 
+        {currentPw, newpassword},
+        _changeMyPassword, app, currentPw, newpassword);
+
+export const _changeMyPassword = async (app, currentPw, newpassword) => {
     const existingAuth = await app.datastore.loadJson(
         userAuthFile(app.user.name)
     );
@@ -30,7 +44,15 @@ export const changeMyPassword = app => async (currentPw, newpassword) => {
     return false;
 }
 
-export const setPasswordFromTemporaryCode = app => async (tempCode, newpassword) => {
+export const setPasswordFromTemporaryCode = app => async (tempCode, newpassword) => 
+    apiWrapper(
+        app,
+        events.authApi.setPasswordFromTemporaryCode, 
+        {tempCode, newpassword},
+        _setPasswordFromTemporaryCode, app, tempCode, newpassword);
+
+
+export const _setPasswordFromTemporaryCode = async (app, tempCode, newpassword) => {
 
     const currentTime = await app.getEpochTime();
 
@@ -77,7 +99,14 @@ const doSet = async (app, auth, username, newpassword) => {
     );
 };
 
-export const scorePassword = (password) => {
+export const scorePassword =  (password) => 
+    apiWrapper(
+        app,
+        events.authApi.scorePassword, 
+        {password},
+        _scorePassword, password);
+
+export const _scorePassword = (password) => {
 
     // from https://stackoverflow.com/questions/948172/password-strength-meter
     // thank you https://stackoverflow.com/users/46617/tm-lv

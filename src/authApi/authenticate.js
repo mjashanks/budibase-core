@@ -4,12 +4,27 @@ import {find, filter, some,
 import {getUserByName, userAuthFile, 
     parseTemporaryCode} from "./authCommon";
 import {loadAccessLevels} from "./loadAccessLevels";
-import { isNothingOrEmpty, $ } from "../common";
+import { isNothingOrEmpty, $, apiWrapper, events } from "../common";
 import {generate} from "shortid";
 
 const dummyHash = "$argon2i$v=19$m=4096,t=3,p=1$UZRo409UYBGjHJS3CV6Uxw$rU84qUqPeORFzKYmYY0ceBLDaPO+JWSH4PfNiKXfIKk";
 
-export const authenticate = app => async (username, password) => {
+/*
+export const funcName = app => async (params) => {
+    apiWrapper(
+        app,
+        events.authApi.funcName, 
+        {params},
+        funcName, params);
+*/
+export const authenticate = app => async (username, password) => 
+    apiWrapper(
+        app,
+        events.authApi.authenticate, 
+        {username, password},
+        _authenticate, app, username, password);
+
+export const _authenticate = async (app, username, password) => {
 
     if(isNothingOrEmpty(username) || isNothingOrEmpty(password))
         return null;

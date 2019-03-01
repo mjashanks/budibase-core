@@ -428,14 +428,14 @@ export const createAppDefinitionWithActionsAndTriggers = async () => {
 };
 
 
-export const validUser = async (authApi, password, enabled=true) => {
-    const access = await authApi.getNewAccessLevel();
+export const validUser = async (app, authApi, password, enabled=true) => {
+    const access = await authApi.getNewAccessLevel(app);
     access.name = "admin";
     addPermission.setPassword(access);
 
     await authApi.saveAccessLevels({version:0, levels:[access]});
     
-    const u = authApi.getNewUser();
+    const u = authApi.getNewUser(app);
     u.name = "bob";
     u.accessLevels = ["admin"];
     u.enabled = enabled;

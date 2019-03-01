@@ -8,8 +8,8 @@ import {addPermission} from "../src/authApi/getNewAccessLevel";
 describe("authApi > authenticate", () => {
 
     it("should return user + access when correct password supplied", async () => {
-        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
-        const u = await validUser(authApi, "password");
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const u = await validUser(app, authApi, "password");
         const result = await authApi.authenticate(u.name, "password");
         expect(result).not.toBeNull();
         expect(result.name).toBe("bob");
@@ -21,28 +21,28 @@ describe("authApi > authenticate", () => {
     });
 
     it("should return null when password incorrect", async () => {
-        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
-        const u = await validUser(authApi, "password");
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const u = await validUser(app, authApi, "password");
         const result = await authApi.authenticate(u.name, "letmein");
         expect(result).toBeNull();
     });
 
     it("should return null when non existing user", async () => {
-        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
         const result = await authApi.authenticate("nobody", "password");
         expect(result).toBeNull();
     });
 
     it("should return null when user not enabled", async () => {
-        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
-        const u = await validUser(authApi, "password", false);
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const u = await validUser(app, authApi, "password", false);
         const result = await authApi.authenticate(u.name, "password");
         expect(result).toBeNull();
     });
 
     it("should return null when password not set", async () => {
-        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
-        const u = await validUser(authApi, "", false);
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const u = await validUser(app, authApi, "", false);
         const result = await authApi.authenticate(u.name, "");
         expect(result).toBeNull();
     });
@@ -52,8 +52,8 @@ describe("authApi > authenticate", () => {
 describe("authApi > authenticateTemporaryAccess", () => {
 
     it("should return user with no permissions", async () => {
-        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
-        const u = await validUser(authApi, "");
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const u = await validUser(app, authApi, "");
         const result = await authApi.authenticateTemporaryAccess(u.tempCode);
         expect(result).not.toBeNull();
         expect(result.name).toBe("bob");
@@ -63,27 +63,27 @@ describe("authApi > authenticateTemporaryAccess", () => {
     });
 
     it("should return null when blank code suplied", async () => {
-        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
         const result = await authApi.authenticateTemporaryAccess("");
         expect(result).toBeNull();
     });
 
     it("should return null when invalid code supplied", async () => {
-        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
         const result = await authApi.authenticateTemporaryAccess("incorrect");
         expect(result).toBeNull();
     });
 
     it("should return null when user disabled", async () => {
-        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
-        const u = await validUser(authApi, "", false);
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const u = await validUser(app, authApi, "", false);
         const result = await authApi.authenticateTemporaryAccess(u.tempCode);
         expect(result).toBeNull();
     });
 
     it("should return null when temporary access code is expired", async () => {
         const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
-        const u = await validUser(authApi, "");
+        const u = await validUser(app, authApi, "");
         const userAuth = await app.datastore.loadJson(
             userAuthFile(u.name)
         );
@@ -96,14 +96,14 @@ describe("authApi > authenticateTemporaryAccess", () => {
     });
 });
 
-const validUser = async (authApi, password, enabled=true) => {
-    const access = await authApi.getNewAccessLevel();
+const validUser = async (app, authApi, password, enabled=true) => {
+    const access = await authApi.getNewAccessLevel(app);
     access.name = "admin";
     addPermission.setPassword(access);
 
     await authApi.saveAccessLevels({version:0, levels:[access]});
     
-    const u = authApi.getNewUser();
+    const u = authApi.getNewUser(app);
     u.name = "bob";
     u.accessLevels = ["admin"];
     u.enabled = enabled;

@@ -1,9 +1,16 @@
 import {permissionTypes} from "./authCommon";
 import {keys, includes, some} from "lodash/fp";
-import {$, isNothing} from "../common";
+import {$, isNothing, apiWrapper, events} from "../common";
 import {getExactNodeForPath} from "../templateApi/heirarchy";
 
-export const isAuthorized = app => resource => {
+export const isAuthorized = app => async (resource) => 
+    apiWrapper(
+        app,
+        events.authApi.isAuthorized, 
+        {resource},
+        _isAuthorized, resource);
+
+export const _isAuthorized = (app, resource) => {
     
     if(!app.user) {
         return false;

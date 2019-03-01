@@ -1,7 +1,7 @@
 import {applyRuleSet, makerule} from "../common/validationCommon";
 import {map, uniqWith,
     flatten, filter} from "lodash/fp";
-import {$, insensitiveEquals,
+import {$, insensitiveEquals, apiWrapper, events,
     isNonEmptyString, all} from "../common";
 
 const userRules = allUsers => [
@@ -20,6 +20,13 @@ export const validateUser = () => (allusers, user) =>
     applyRuleSet(userRules(allusers))(user);
 
 export const validateUsers = app => (allUsers) => 
+    apiWrapper(
+        app,
+        events.authApi.validateUsers, 
+        {allUsers},
+        _validateUsers, app, allUsers);
+
+export const _validateUsers = (app, allUsers) => 
     $(allUsers, [
         map(l => validateUser(app)(allUsers, l)),
         flatten,
