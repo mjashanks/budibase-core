@@ -3,11 +3,11 @@ import {getExactNodeForPath, isTopLevelCollectionIndex,
 import {listItems} from "../indexApi/listItems";
 import {has, some} from "lodash";
 import {map, isString} from "lodash/fp";
-import {$, apiWrapper, events, joinKey} from "../common";
+import {$, apiWrapperSync, events, joinKey} from "../common";
 import {getIndexKey_BasedOnDecendant} from "../indexing/sharding";
 
 export const getContext = app => recordKey => 
-    apiWrapper(
+    apiWrapperSync(
         app,
         events.recordApi.getContext, 
         {recordKey},

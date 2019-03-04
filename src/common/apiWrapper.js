@@ -1,33 +1,35 @@
 import {cloneDeep, isUndefined} from "lodash/fp";
 import {generate} from "shortid";
 
-export const apiWrapper = (app, eventNamespace, eventContext, func, ...params) => {
+export const apiWrapper = async (app, eventNamespace, eventContext, func, ...params) => {
 
     const startDate = Date.now();
     const elapsed = () => 
         (Date.now() - startDate);
 
-    const publishError = err => {
-        const ctx = cloneDeep(eventContext);
-        ctx.error = err;
-        ctx.elapsed = elapsed();
-        app.publish(
-            eventNamespace.onError,
-            ctx);
-        popCallStack(app);
-        throw err;
-    };
+    pushCallStack(app,eventNamespace);
 
-    const publishComplete = result => {
-        const endcontext = cloneDeep(eventContext);
-        endcontext.result = result;
-        endcontext.elapsed = elapsed();
+    try {
         app.publish(
-            eventNamespace.onComplete,
-            endcontext);
-        popCallStack(app);
+            eventNamespace.onBegin,
+            eventContext
+        ); 
+
+        const result = await func(...params);
+        
+        publishComplete(app, eventContext, eventNamespace, elapsed, result);
         return result;
-    };
+
+    } catch (error) {
+        publishError(app, eventContext, eventNamespace, elapsed, error)
+    }
+}
+
+export const apiWrapperSync = (app, eventNamespace, eventContext, func, ...params) => {
+
+    const startDate = Date.now();
+    const elapsed = () => 
+        (Date.now() - startDate);
 
     pushCallStack(app,eventNamespace);
 
@@ -38,19 +40,12 @@ export const apiWrapper = (app, eventNamespace, eventContext, func, ...params) =
         ); 
 
         const result = func(...params);
-
-        if(result.then) {
-            result
-                .then(publishComplete)
-                .catch(publishError);
-            return result;
-        }
         
-        publishComplete(result);
+        publishComplete(app, eventContext, eventNamespace, elapsed, result);
         return result;
 
     } catch (error) {
-        publishError(error)
+        publishError(app, eventContext, eventNamespace, elapsed, error)
     }
 }
 
@@ -83,5 +78,26 @@ const popCallStack = (app) => {
     }
 }
 
+const publishError = (app, eventContext, eventNamespace, elapsed, err) => {
+    const ctx = cloneDeep(eventContext);
+    ctx.error = err;
+    ctx.elapsed = elapsed();
+    app.publish(
+        eventNamespace.onError,
+        ctx);
+    popCallStack(app);
+    throw err;
+};
+
+const publishComplete = (app, eventContext, eventNamespace, elapsed, result) => {
+    const endcontext = cloneDeep(eventContext);
+    endcontext.result = result;
+    endcontext.elapsed = elapsed();
+    app.publish(
+        eventNamespace.onComplete,
+        endcontext);
+    popCallStack(app);
+    return result;
+};
 
 export default apiWrapper;

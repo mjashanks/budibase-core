@@ -4,7 +4,6 @@ import { parseTemporaryCode,
     USERS_LOCK_FILE,
     USERS_LIST_FILE,
     getUserByName} from "../src/authApi/authCommon";
-import {addPermission} from "../src/authApi/getNewAccessLevel";
 import {$} from "../src/common";
 import {getLock} from "../src/common/lock";
 

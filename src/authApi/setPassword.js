@@ -1,11 +1,11 @@
 import {userAuthFile, parseTemporaryCode} from "./authCommon";
 import {looksLikeTemporaryCode} from "./createTemporaryAccess";
-import {isSomething, $, apiWrapper, events} from "../common";
+import {isSomething, $, apiWrapper, apiWrapperSync, events} from "../common";
 import {getUsers} from "./getUsers";
 import {find} from "lodash/fp";
 
 export const isValidPassword = app => (password) => 
-    apiWrapper(
+    apiWrapperSync(
         app,
         events.authApi.isValidPassword, 
         {password},
@@ -100,7 +100,7 @@ const doSet = async (app, auth, username, newpassword) => {
 };
 
 export const scorePassword =  (password) => 
-    apiWrapper(
+    apiWrapperSync(
         app,
         events.authApi.scorePassword, 
         {password},

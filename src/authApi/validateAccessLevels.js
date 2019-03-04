@@ -3,7 +3,7 @@ import {permissionTypes} from "./authCommon";
 import {values, includes, map, concat, isEmpty, uniqWith,
     flatten, filter} from "lodash/fp";
 import {$, isSomething, insensitiveEquals,
-    isNonEmptyString, apiWrapper, events} from "../common";
+    isNonEmptyString, apiWrapperSync, events} from "../common";
 import {getNode} from "../templateApi/heirarchy";
 
 const isAllowedType = t => 
@@ -54,7 +54,7 @@ export const validateAccessLevel = app => (allLevels, level) => {
 };
 
 export const validateAccessLevels = app => allLevels => 
-    apiWrapper(
+    apiWrapperSync(
         app,
         events.authApi.validateAccessLevels, 
         {allLevels},

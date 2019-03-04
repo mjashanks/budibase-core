@@ -2,7 +2,7 @@ import {setupAppheirarchy,
     basicAppHeirarchyCreator_WithFields} from "./specHelpers";
 import { permissionTypes, 
     userAuthFile} from "../src/authApi/authCommon";
-import {addPermission} from "../src/authApi/getNewAccessLevel";
+import {permission} from "../src/authApi/getNewAccessLevel";
 
 
 describe("authApi > authenticate", () => {
@@ -99,7 +99,7 @@ describe("authApi > authenticateTemporaryAccess", () => {
 const validUser = async (app, authApi, password, enabled=true) => {
     const access = await authApi.getNewAccessLevel(app);
     access.name = "admin";
-    addPermission.setPassword(access);
+    permission.setPassword().add(access);
 
     await authApi.saveAccessLevels({version:0, levels:[access]});
     

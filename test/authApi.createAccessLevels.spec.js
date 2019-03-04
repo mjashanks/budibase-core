@@ -3,7 +3,7 @@ import {setupAppheirarchy,
 import { permissionTypes, 
     ACCESS_LEVELS_FILE, 
     ACCESS_LEVELS_LOCK_FILE} from "../src/authApi/authCommon";
-import {addPermission} from "../src/authApi/getNewAccessLevel";
+import {permission} from "../src/authApi/getNewAccessLevel";
 import {cloneDeep} from "lodash/fp";
 import {getLock} from "../src/common/lock";
 
@@ -154,6 +154,6 @@ const validAccessLevels = (authApi) => {
 const validAccessLevel = (authApi) => {
     const lev = authApi.getNewAccessLevel();
     lev.name = "test level";
-    addPermission.writeTemplates(lev);
+    permission.writeTemplates().add(lev);
     return lev;        
 }

@@ -197,7 +197,7 @@ export const isArrayOfString = opts =>
     isArray(opts) && all(isString)(opts);
 
 export {events} from "./events";
-export {apiWrapper} from "./apiWrapper";
+export {apiWrapper, apiWrapperSync} from "./apiWrapper";
 export {getLock, NO_LOCK, releaseLock, 
     extendLock,isNolock} from "./lock";
 

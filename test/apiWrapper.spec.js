@@ -1,4 +1,4 @@
-import {apiWrapper} from "../src/common/apiWrapper";
+import {apiWrapper, apiWrapperSync} from "../src/common/apiWrapper";
 import {filter} from "lodash/fp";
 import {event, onComplete, 
         onBegin, onError, events} from "../src/common";
@@ -37,7 +37,7 @@ describe("apiWrapper", () => {
         const throwEx = (x,y) => {throw new Error("test error");}
         const app = getApp();
         try {
-            apiWrapper(
+            apiWrapperSync(
                 app,
                 testNamespace, {prop:"hello"}, 
                 throwEx, arg1, arg2
@@ -66,7 +66,7 @@ describe("apiWrapper", () => {
     const runAdd = (arg1, arg2) => {
         const add = (x,y) => x+y;
         const app =getApp();
-        const result = apiWrapper(
+        const result = apiWrapperSync(
             app,
             testNamespace, {prop:"hello"}, 
             add, arg1, arg2

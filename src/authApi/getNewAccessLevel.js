@@ -1,8 +1,8 @@
 import {permissionTypes} from "./authCommon";
-import {apiWrapper, events} from "../common";
+import {apiWrapperSync, events} from "../common";
 
 export const getNewAccessLevel = app => () => 
-    apiWrapper(
+    apiWrapperSync(
         app,
         events.authApi.getNewAccessLevel, 
         {},
@@ -16,53 +16,57 @@ export const _getNewAccessLevel = app => ({
 export const temporaryAccessPermissions = () =>
     ([{type:permissionTypes.SET_PASSWORD}]);
 
-const nodePermission = (accessLevel, type, nodeKey) => {
-    accessLevel.permissions.push({type, nodeKey});
-};
+const nodePermission = (type, nodeKey) => ({
+    type, nodeKey,
+    add : (accessLevel) => accessLevel.permissions.push({type, nodeKey}),
+    isAuthorized: (app, resourcePath=null) => true
+});
 
-const staticPermission = (accessLevel, type) => 
-    accessLevel.permissions.push({type});
+const staticPermission = (type) => ({
+    type,
+    add : accessLevel => accessLevel.permissions.push({type})
+});
 
-const createRecord = (accessLevel, recordNodeKey) =>
-    nodePermission(accessLevel, recordNodeKey, permissionTypes.CREATE_RECORD);
+const createRecord = (recordNodeKey) =>
+    nodePermission(recordNodeKey, permissionTypes.CREATE_RECORD);
 
-const updateRecord = (accessLevel, recordNodeKey) =>
-    nodePermission(accessLevel, recordNodeKey, permissionTypes.UPDATE_RECORD);
+const updateRecord = (recordNodeKey) =>
+    nodePermission(recordNodeKey, permissionTypes.UPDATE_RECORD);
 
-const deleteRecord = (accessLevel, recordNodeKey) =>
-    nodePermission(accessLevel, recordNodeKey, permissionTypes.DELETE_RECORD);
+const deleteRecord = (recordNodeKey) =>
+    nodePermission(recordNodeKey, permissionTypes.DELETE_RECORD);
 
-const readRecord = (accessLevel, recordNodeKey) =>
-    nodePermission(accessLevel, recordNodeKey, permissionTypes.READ_RECORD);
+const readRecord = (recordNodeKey) =>
+    nodePermission(recordNodeKey, permissionTypes.READ_RECORD);
 
-const writeTemplates = (accessLevel) =>
-    staticPermission(accessLevel, permissionTypes.WRITE_TEMPLATES);
+const writeTemplates = () =>
+    staticPermission(permissionTypes.WRITE_TEMPLATES);
 
-const createUser = (accessLevel) =>
-    staticPermission(accessLevel, permissionTypes.CREATE_USER);
+const createUser = () =>
+    staticPermission(permissionTypes.CREATE_USER);
 
-const setPassword = (accessLevel) =>
-    staticPermission(accessLevel, permissionTypes.SET_PASSWORD);
+const setPassword = () =>
+    staticPermission(permissionTypes.SET_PASSWORD);
 
 const readIndex = (indexNodeKey) =>
-    nodePermission(accessLevel, indexNodeKey, permissionTypes.READ_INDEX);
+    nodePermission(indexNodeKey, permissionTypes.READ_INDEX);
 
-const createTemporaryAccess = (accessLevel) =>
-    staticPermission(accessLevel, permissionTypes.CREATE_TEMPORARY_ACCESS);
+const createTemporaryAccess = () =>
+    staticPermission(permissionTypes.CREATE_TEMPORARY_ACCESS);
 
-const enableDisableUser = (accessLevel) =>
-    staticPermission(accessLevel, permissionTypes.ENABLE_DISABLE_USER);
+const enableDisableUser = () =>
+    staticPermission(permissionTypes.ENABLE_DISABLE_USER);
 
-const writeAccessLevels = (accessLevel) =>
-    staticPermission(accessLevel, permissionTypes.WRITE_ACCESS_LEVELS);
+const writeAccessLevels = () =>
+    staticPermission(permissionTypes.WRITE_ACCESS_LEVELS);
 
-const listUsers = (accessLevel) =>
-    staticPermission(accessLevel, permissionTypes.LIST_USERS);
+const listUsers = () =>
+    staticPermission(permissionTypes.LIST_USERS);
 
-const listAccessLevels = (accessLevel) =>
-    staticPermission(accessLevel, permissionTypes.LIST_ACCESS_LEVELS);
+const listAccessLevels = () =>
+    staticPermission(permissionTypes.LIST_ACCESS_LEVELS);
 
-export const addPermission = {
+export const permission = {
     createRecord, updateRecord, deleteRecord,
     readRecord, writeTemplates, createUser,
     setPassword, readIndex, createTemporaryAccess,

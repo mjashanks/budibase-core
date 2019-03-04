@@ -1,9 +1,9 @@
 import {getExactNodeForPath} from "../templateApi/heirarchy";
-import {isNothing, safeKey, apiWrapper, events} from "../common";
+import {isNothing, safeKey, apiWrapperSync, events} from "../common";
 import {map} from "lodash/fp";
 
 export const getAllowedRecordTypes = (app) => (key) => 
-    apiWrapper(
+    apiWrapperSync(
         app,
         events.collectionApi.getAllowedRecordTypes, 
         {key},

@@ -1,7 +1,7 @@
-import {apiWrapper, events} from "../common";
+import {apiWrapperSync, events} from "../common";
 
 export const getNewUser = app => () => 
-    apiWrapper(
+    apiWrapperSync(
         app,
         events.authApi.getNewUser, 
         {},
@@ -15,7 +15,7 @@ export const _getNewUser = app => ({
 });
 
 export const getNewUserAuth = app => () => 
-    apiWrapper(
+    apiWrapperSync(
         app,
         events.authApi.getNewUserAuth, 
         {},
