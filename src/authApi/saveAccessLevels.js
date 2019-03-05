@@ -4,11 +4,13 @@ import {ACCESS_LEVELS_LOCK_FILE,
     ACCESS_LEVELS_FILE} from "./authCommon";
 import {join, map} from "lodash/fp";
 import {validateAccessLevels} from "./validateAccessLevels";
+import {permission} from "./permissions";
 
 export const saveAccessLevels = app => async (accessLevels) => 
     apiWrapper(
         app,
         events.authApi.saveAccessLevels, 
+        permission.writeAccessLevels.isAuthorized,
         {accessLevels},
         _saveAccessLevels, app, accessLevels);
 

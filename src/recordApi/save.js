@@ -13,11 +13,15 @@ import {listItems} from "../indexApi/listItems";
 import {addToAllIds} from "../indexing/allIds";
 import {transactionForCreateRecord,
     transactionForUpdateRecord} from "../transactions/create";
+import {permission} from "../authApi/permissions";
 
 export const save = (app) => async (record, context) => 
     apiWrapper(
         app,
         events.recordApi.save, 
+        record.isNew 
+        ? permission.createRecord.isAuthorized(record.key)
+        : permission.updateRecord.isAuthorized(record.key),
         {record},
         _save, app, record, context, false);
 

@@ -7,12 +7,13 @@ import {USERS_LOCK_FILE, stripUserOfSensitiveStuff,
     USERS_LIST_FILE, userAuthFile} from "./authCommon";
 import {getTemporaryCode} from "./createTemporaryAccess";
 import {isValidPassword} from "./setPassword";
-
+import {permission} from "./permissions";
 
 export const createUser = app => async (user, password=null) => 
     apiWrapper(
         app,
         events.authApi.createUser, 
+        permission.createUser.isAuthorized,
         {user, password},
         _createUser, app, user, password);
 

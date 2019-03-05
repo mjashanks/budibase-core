@@ -3,6 +3,7 @@ import {map, uniqWith,
     flatten, filter} from "lodash/fp";
 import {$, insensitiveEquals, apiWrapper, events,
     isNonEmptyString, all} from "../common";
+import {alwaysAuthorized} from "./permissions";
 
 const userRules = allUsers => [
     makerule("name", "username must be set",
@@ -23,6 +24,7 @@ export const validateUsers = app => (allUsers) =>
     apiWrapper(
         app,
         events.authApi.validateUsers, 
+        alwaysAuthorized,
         {allUsers},
         _validateUsers, app, allUsers);
 

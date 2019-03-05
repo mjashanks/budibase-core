@@ -6,21 +6,15 @@ import {getUserByName, userAuthFile,
 import {loadAccessLevels} from "./loadAccessLevels";
 import { isNothingOrEmpty, $, apiWrapper, events } from "../common";
 import {generate} from "shortid";
+import {alwaysAuthorized} from "./permissions";
 
 const dummyHash = "$argon2i$v=19$m=4096,t=3,p=1$UZRo409UYBGjHJS3CV6Uxw$rU84qUqPeORFzKYmYY0ceBLDaPO+JWSH4PfNiKXfIKk";
 
-/*
-export const funcName = app => async (params) => {
-    apiWrapper(
-        app,
-        events.authApi.funcName, 
-        {params},
-        funcName, params);
-*/
 export const authenticate = app => async (username, password) => 
     apiWrapper(
         app,
         events.authApi.authenticate, 
+        alwaysAuthorized,
         {username, password},
         _authenticate, app, username, password);
 

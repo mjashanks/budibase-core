@@ -15,7 +15,8 @@ import {createBehaviourSources} from "../src/actions/buildBehaviourSource";
 import {createAction, createTrigger} from "../src/templateApi/createActions";
 import {cleanup} from "../src/transactions/cleanup";
 import nodeCrypto from "./nodeCrypto";
-import {permission} from "../src/authApi/getNewAccessLevel";
+import {permission} from "../src/authApi/permissions";
+import {generateFullPermissions} from "../src/authApi/generateFullPermissions"
 const exp = module.exports;
 
 export const testFileArea = (testNameArea) => path.join("test", "fs_test_area", testNameArea);
@@ -41,6 +42,8 @@ export const appFromTempalteApi = async (templateApi, disableCleanupTransactions
         crypto:nodeCrypto,
         user:{name:"bob", permissions: []}
     }; 
+    const fullPermissions = generateFullPermissions(app);
+    app.user.permissions = fullPermissions;
     if(disableCleanupTransactions)
         app.cleanupTransactions = async () => {};
     else
@@ -317,6 +320,7 @@ export const setupAppheirarchy = async (creator, disableCleanupTransactions=fals
     const indexApi = getIndexApi(app);
     const authApi = getAuthApi(app);
     await collectionApi.initialiseAll();
+
     return ({
         recordApi: await getRecordApi(app),
         collectionApi,
@@ -431,7 +435,7 @@ export const createAppDefinitionWithActionsAndTriggers = async () => {
 export const validUser = async (app, authApi, password, enabled=true) => {
     const access = await authApi.getNewAccessLevel(app);
     access.name = "admin";
-    permission.setPassword().add(access);
+    permission.setPassword.add(access);
 
     await authApi.saveAccessLevels({version:0, levels:[access]});
     

@@ -5,11 +5,13 @@ import {deleteRecord} from "../recordApi/delete";
 import {getAllIdsIterator, getAllIdsShardKey} from "../indexing/allIds";
 import {deleteIndex} from "../indexApi/delete";
 import {includes} from "lodash/fp";
+import {permission} from "../authApi/permissions";
 
 export const deleteCollection = (app, disableCleanup=false) => async key => 
     apiWrapper(
         app,
         events.collectionApi.delete, 
+        permission.manageCollection.isAuthorized,
         {key},
         _delete, app, key, disableCleanup);
 

@@ -3,22 +3,27 @@ import {getNewFieldValue} from "../types";
 import {find, keyBy, mapValues, constant} from "lodash/fp";
 import {$, joinKey, safeKey, apiWrapperSync, events} from "../common";
 import {generate} from "shortid";
+import {permission} from "../authApi/permissions";
 
-export const getNew = app => (collectionKey, recordTypeName) => 
-    apiWrapperSync(
+export const getNew = app => (collectionKey, recordTypeName) => {
+    const recordNode = getRecordNode(app, collectionKey, recordTypeName);
+    return apiWrapperSync(
         app,
         events.recordApi.getNew, 
+        permission.createRecord.isAuthorized(recordNode.nodeKey()),
         {collectionKey, recordTypeName},
-        _getNew, app, collectionKey, recordTypeName);
+        _getNew, recordNode, collectionKey);
+}
 
-const _getNew = (app, collectionKey, recordTypeName) => {
+const _getNew = (recordNode, collectionKey) => 
+    constructRecord(recordNode, getNewFieldValue, collectionKey);
+
+const getRecordNode = (app, collectionKey, recordTypeName) => {
     collectionKey = safeKey(collectionKey);
     const collectionNode = getExactNodeForPath(app.heirarchy)(collectionKey);
-    const recordNode = find(c => c.name === recordTypeName)
-                           (collectionNode.children);
-
-    return constructRecord(recordNode, getNewFieldValue, collectionKey);
-};
+    return find(c => c.name === recordTypeName)
+                (collectionNode.children);
+}
 
 export const getNewChild = (app) => 
         (recordKey, collectionName, recordTypeName) => 

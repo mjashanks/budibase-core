@@ -6,6 +6,7 @@ import {$, isNothing, isNonEmptyString} from "../common";
 import {compileExpression} from "@nx-js/compiler-util";
 import _ from "lodash";
 import {getContext} from "./getContext";
+import {permission} from "../authApi/permissions";
 
 const fieldParseError = (fieldName, value) => 
     ({fields:[fieldName], 

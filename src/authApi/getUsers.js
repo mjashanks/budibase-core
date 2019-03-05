@@ -2,11 +2,13 @@ import {USERS_LIST_FILE,
     stripUserOfSensitiveStuff} from "./authCommon";
 import {$, apiWrapper, events} from "../common";
 import {map} from "lodash/fp";
+import {permission} from "./permissions";
 
 export const getUsers = app => async () => 
     apiWrapper(
         app,
         events.authApi.getUsers, 
+        permission.listUsers.isAuthorized,
         {},
         _getUsers, app);
 

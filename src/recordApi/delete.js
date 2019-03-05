@@ -9,11 +9,13 @@ import {map, flatten, filter} from "lodash/fp";
 import {deleteIndex} from "../indexApi/delete";
 import {transactionForDeleteRecord} from "../transactions/create";
 import {removeFromAllIds} from "../indexing/allIds";
+import {permission} from "../authApi/permissions";
 
 export const deleteRecord = (app, disableCleanup=false) => async (key) => 
     apiWrapper(
         app,
         events.recordApi.delete, 
+        permission.deleteRecord.isAuthorized(key),
         {key},
         _deleteRecord, app, key, disableCleanup);
 

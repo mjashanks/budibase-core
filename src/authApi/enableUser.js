@@ -2,11 +2,13 @@ import {getLock,
     isNolock, releaseLock} from "../common/lock";
 import { USERS_LOCK_FILE, USERS_LIST_FILE, getUserByName } from "./authCommon";
 import {apiWrapper, events} from "../common";
+import {permission} from "./permissions";
 
 export const enableUser = app => async username =>
     apiWrapper(
         app,
         events.authApi.enableUser, 
+        permission.enableDisableUser.isAuthorized,
         {app, username},
         _enableUser, app, username);
 
@@ -14,6 +16,7 @@ export const disableUser = app => async username =>
     apiWrapper(
         app,
         events.authApi.disableUser, 
+        permission.enableDisableUser.isAuthorized,
         {username},
         _disableUser, app, username);
 

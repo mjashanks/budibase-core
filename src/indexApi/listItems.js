@@ -6,12 +6,13 @@ import {getUnshardedIndexDataKey,
 import {getExactNodeForPath, isIndex, 
     isShardedIndex} from "../templateApi/heirarchy";
 import {flatten, merge} from "lodash/fp";
-
+import {permission} from "../authApi/permissions";
 
 export const listItems = app => async (indexKey, options) => 
     apiWrapper(
         app,
         events.indexApi.listItems, 
+        permission.readIndex.isAuthorized(indexKey),
         {indexKey, options},
         _listItems, app, indexKey, options);
 

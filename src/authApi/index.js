@@ -14,6 +14,7 @@ import {changeMyPassword, changePassword,
     isValidPassword} from "./setPassword";
 import {validateUser} from "./validateUser";
 import {validateAccessLevels} from "./validateAccessLevels";
+import {generateFullPermissions} from "./generateFullPermissions";
 
 export const getAuthApi = app => ({
     authenticate: authenticate(app),
@@ -34,7 +35,8 @@ export const getAuthApi = app => ({
     scorePassword,
     isValidPassword: isValidPassword(app),
     validateUser: validateUser(app),
-    validateAccessLevels: validateAccessLevels(app)
+    validateAccessLevels: validateAccessLevels(app),
+    generateFullPermissions: generateFullPermissions(app)
 });
 
 export default getAuthApi;

@@ -6,11 +6,13 @@ import {getLock, isNolock,
     releaseLock} from "../common/lock";
 import {split} from "lodash/fp";
 import {apiWrapper, events} from "../common";
+import {alwaysAuthorized} from "../authApi/permissions";
 
 export const createTemporaryAccess = app => async (userName) => 
     apiWrapper(
         app,
         events.authApi.createTemporaryAccess, 
+        alwaysAuthorized,
         {userName},
         _createTemporaryAccess, app, userName);
 

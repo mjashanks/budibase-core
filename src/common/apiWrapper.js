@@ -1,13 +1,18 @@
 import {cloneDeep, isUndefined} from "lodash/fp";
 import {generate} from "shortid";
 
-export const apiWrapper = async (app, eventNamespace, eventContext, func, ...params) => {
+export const apiWrapper = async (app, eventNamespace, isAuthorized, eventContext, func, ...params) => {
+
+    pushCallStack(app,eventNamespace);
+
+    if(!isAuthorized(app)) {
+        handleNotAuthorized(app, eventContext, eventNamespace);
+        return;
+    }
 
     const startDate = Date.now();
     const elapsed = () => 
         (Date.now() - startDate);
-
-    pushCallStack(app,eventNamespace);
 
     try {
         app.publish(
@@ -25,13 +30,18 @@ export const apiWrapper = async (app, eventNamespace, eventContext, func, ...par
     }
 }
 
-export const apiWrapperSync = (app, eventNamespace, eventContext, func, ...params) => {
+export const apiWrapperSync = (app, eventNamespace, isAuthorized, eventContext, func, ...params) => {
 
+    pushCallStack(app,eventNamespace);
+
+    if(!isAuthorized(app)) {
+        handleNotAuthorized(app, eventContext, eventNamespace);
+        return;
+    }
+    
     const startDate = Date.now();
     const elapsed = () => 
         (Date.now() - startDate);
-
-    pushCallStack(app,eventNamespace);
 
     try {
         app.publish(
@@ -48,6 +58,12 @@ export const apiWrapperSync = (app, eventNamespace, eventContext, func, ...param
         publishError(app, eventContext, eventNamespace, elapsed, error)
     }
 }
+
+const handleNotAuthorized = (app, eventContext, eventNamespace) => {
+    const err = new Error("Unauthorized");
+    publishError(app, eventContext, eventNamespace, () => 0, err);
+    throw err;
+};
 
 const pushCallStack = (app, eventNamespace, seedCallId) => {
 

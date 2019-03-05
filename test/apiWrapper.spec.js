@@ -39,7 +39,9 @@ describe("apiWrapper", () => {
         try {
             apiWrapperSync(
                 app,
-                testNamespace, {prop:"hello"}, 
+                testNamespace, 
+                () => true,
+                {prop:"hello"}, 
                 throwEx, arg1, arg2
             );
         } catch(error) {
@@ -54,7 +56,9 @@ describe("apiWrapper", () => {
         try {
             await apiWrapper(
                 app,
-                testNamespace, {prop:"hello"}, 
+                testNamespace, 
+                () => true,
+                {prop:"hello"}, 
                 throwEx, arg1, arg2
             );
         } catch(error) {
@@ -63,23 +67,27 @@ describe("apiWrapper", () => {
         return {app, error:"error was not thrown"};
     }
 
-    const runAdd = (arg1, arg2) => {
+    const runAdd = (arg1, arg2, isAuthorized=true) => {
         const add = (x,y) => x+y;
         const app =getApp();
         const result = apiWrapperSync(
             app,
-            testNamespace, {prop:"hello"}, 
+            testNamespace, 
+            () => isAuthorized,
+            {prop:"hello"}, 
             add, arg1, arg2
         );
         return {app, result};
     }
 
-    const runAddAsync = async (arg1, arg2) => {
+    const runAddAsync = async (arg1, arg2, isAuthorized=true) => {
         const add = async (x,y) => x+y;
         const app =getApp();
         const result = await apiWrapper(
             app,
-            testNamespace, {prop:"hello"}, 
+            testNamespace, 
+            () => isAuthorized,
+            {prop:"hello"}, 
             add, arg1, arg2
         );
         return {app, result};

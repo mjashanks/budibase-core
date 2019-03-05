@@ -7,6 +7,7 @@ import {find, filter, includes,
 import {joinKey, apiWrapper, events, $, allTrue} from "../common";
 import {createBuildIndexFolder, 
     transactionForBuildIndex} from "../transactions/create";
+import {permission} from "../authApi/permissions";
 
 
 /** rebuilds an index
@@ -17,6 +18,7 @@ export const buildIndex = app => async (indexNodeKey) =>
     apiWrapper(
         app,
         events.indexApi.buildIndex, 
+        permission.manageIndex.isAuthorized,
         {indexNodeKey},
         _buildIndex, app, indexNodeKey);
 

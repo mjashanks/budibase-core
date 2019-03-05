@@ -1,13 +1,14 @@
 import {userAuthFile, parseTemporaryCode} from "./authCommon";
-import {looksLikeTemporaryCode} from "./createTemporaryAccess";
 import {isSomething, $, apiWrapper, apiWrapperSync, events} from "../common";
 import {getUsers} from "./getUsers";
 import {find} from "lodash/fp";
+import {alwaysAuthorized} from "./permissions";
 
 export const isValidPassword = app => (password) => 
     apiWrapperSync(
         app,
         events.authApi.isValidPassword, 
+        alwaysAuthorized,
         {password},
         _isValidPassword, app, password);
 
@@ -19,6 +20,7 @@ export const changeMyPassword = app => async (currentPw, newpassword) =>
     apiWrapper(
         app,
         events.authApi.changeMyPassword, 
+        alwaysAuthorized,
         {currentPw, newpassword},
         _changeMyPassword, app, currentPw, newpassword);
 
@@ -47,7 +49,8 @@ export const _changeMyPassword = async (app, currentPw, newpassword) => {
 export const setPasswordFromTemporaryCode = app => async (tempCode, newpassword) => 
     apiWrapper(
         app,
-        events.authApi.setPasswordFromTemporaryCode, 
+        events.authApi.setPasswordFromTemporaryCode,
+        alwaysAuthorized, 
         {tempCode, newpassword},
         _setPasswordFromTemporaryCode, app, tempCode, newpassword);
 
@@ -103,6 +106,7 @@ export const scorePassword =  (password) =>
     apiWrapperSync(
         app,
         events.authApi.scorePassword, 
+        alwaysAuthorized,
         {password},
         _scorePassword, password);
 

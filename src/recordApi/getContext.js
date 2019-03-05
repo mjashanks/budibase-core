@@ -5,11 +5,13 @@ import {has, some} from "lodash";
 import {map, isString} from "lodash/fp";
 import {$, apiWrapperSync, events, joinKey} from "../common";
 import {getIndexKey_BasedOnDecendant} from "../indexing/sharding";
+import {permission} from "../authApi/permissions";
 
 export const getContext = app => recordKey => 
     apiWrapperSync(
         app,
         events.recordApi.getContext, 
+        permission.readRecord.isAuthorized(recordKey),
         {recordKey},
         _getContext, app, recordKey);
 

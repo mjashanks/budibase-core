@@ -5,6 +5,7 @@ import {keyBy, mapValues, filter, map, includes,
 import {$, splitKey, safeKey, isNonEmptyString,
     apiWrapper, events, joinKey} from "../common";
 import {mapRecord} from "../indexing/evaluate";
+import {permission} from "../authApi/permissions";
 
 export const getRecordFileName = key => 
     joinKey(key, "record.json");
@@ -13,6 +14,7 @@ export const load = (app) => async key =>
     apiWrapper(
         app,
         events.recordApi.load, 
+        permission.readRecord.isAuthorized(key),
         {key},
         _load, app, key);
 

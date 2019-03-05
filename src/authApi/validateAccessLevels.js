@@ -5,6 +5,7 @@ import {values, includes, map, concat, isEmpty, uniqWith,
 import {$, isSomething, insensitiveEquals,
     isNonEmptyString, apiWrapperSync, events} from "../common";
 import {getNode} from "../templateApi/heirarchy";
+import {alwaysAuthorized} from "./permissions";
 
 const isAllowedType = t => 
     $(permissionTypes, [
@@ -57,6 +58,7 @@ export const validateAccessLevels = app => allLevels =>
     apiWrapperSync(
         app,
         events.authApi.validateAccessLevels, 
+        alwaysAuthorized,
         {allLevels},
         _validateAccessLevels, app, allLevels);
 

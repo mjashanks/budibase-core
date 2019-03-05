@@ -8,11 +8,13 @@ import {getExactNodeForPath, isIndex,
 import {has, isNumber, isUndefined} from "lodash/fp";
 import {compileExpression, compileCode} from "@nx-js/compiler-util";
 import {CONTINUE_READING_RECORDS} from "../indexing/serializer";
+import {permission} from "../authApi/permissions";
 
 export const aggregates = app => async (indexKey, rangeStartParams=null, rangeEndParams=null) => 
     apiWrapper(
         app,
         events.indexApi.aggregates, 
+        permission.readIndex.isAuthorized(indexKey),
         {indexKey, rangeStartParams, rangeEndParams},
         _aggregates, app, indexKey, rangeStartParams, rangeEndParams);
 

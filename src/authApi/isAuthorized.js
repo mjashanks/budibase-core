@@ -1,40 +1,41 @@
 import {permissionTypes} from "./authCommon";
-import {keys, includes, some} from "lodash/fp";
+import {values, includes, some} from "lodash/fp";
 import {$, isNothing, apiWrapper, events} from "../common";
-import {getExactNodeForPath} from "../templateApi/heirarchy";
+import {getNodeByKeyOrNodeKey} from "../templateApi/heirarchy";
+import {alwaysAuthorized} from "./permissions";
 
-export const isAuthorized = app => async (resource) => 
+export const isAuthorized = (app) => async (permissionType, resourceKey) => 
     apiWrapper(
         app,
         events.authApi.isAuthorized, 
-        {resource},
-        _isAuthorized, resource);
+        alwaysAuthorized,
+        {resourceKey, permissionType},
+        _isAuthorized, app, permissionType, resourceKey);
 
-export const _isAuthorized = (app, resource) => {
+export const _isAuthorized =  (app, permissionType, resourceKey) => {
     
     if(!app.user) {
         return false;
     }
 
     const validType = $(permissionTypes, [
-        keys,
-        includes(resource.type)
+        values,
+        includes(permissionType)
     ]);
 
     if(!validType) {
         return false;
     }
 
-    const permMatchesResource = perm => 
-        (p.type === resource.type)
+    const permMatchesResource = userperm => 
+        (userperm.type === permissionType)
         &&
         (
-            isNothing(resource.itemKey)
+            isNothing(resourceKey)
             ||
-            $(resource.itemKey, [
-                getExactNodeForPath(app),
-                n => n.nodeKey === perm.nodeKey
-            ])
+            getNodeByKeyOrNodeKey(
+                    app.heirarchy,
+                    resourceKey).nodeKey() === userperm.nodeKey
         );    
 
     return $(app.user.permissions, [
