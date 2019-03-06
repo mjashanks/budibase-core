@@ -6,7 +6,7 @@ import {joinKey, $, none, isSomething} from "../common";
 import {getLastPartInKey, getNodeFromNodeKeyHash} from "../templateApi/heirarchy";
 import {map, filter, groupBy, split,
     some, find} from "lodash/fp";
-import {load} from "../recordApi/load";
+import {_load} from "../recordApi/load";
 
 export const retrieve = async app => {
     
@@ -72,7 +72,7 @@ const retrieveBuildIndexTransactions = async (app, buildIndexFolder) => {
                 transactionFiles.childFolderKey, 
                 t.fullId)
         );
-        t.record = await load(app)(transactionContent.recordKey);
+        t.record = await _load(app, transactionContent.recordKey);
     }
 
     transactions.indexNode = $(buildIndexFolder, [
@@ -120,7 +120,8 @@ const retrieveStandardTransactions = async (app, transactionFiles) => {
             return t;
         }
         
-        const rec = await load(app)(
+        const rec = await _load(
+            app,
             transaction.recordKey
         );
         if(rec.transactionId === id) {

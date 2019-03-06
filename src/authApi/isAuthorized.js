@@ -1,11 +1,11 @@
 import {permissionTypes} from "./authCommon";
 import {values, includes, some} from "lodash/fp";
-import {$, isNothing, apiWrapper, events} from "../common";
+import {$, isNothing, apiWrapperSync, events} from "../common";
 import {getNodeByKeyOrNodeKey} from "../templateApi/heirarchy";
 import {alwaysAuthorized} from "./permissions";
 
-export const isAuthorized = (app) => async (permissionType, resourceKey) => 
-    apiWrapper(
+export const isAuthorized = (app) => (permissionType, resourceKey) => 
+    apiWrapperSync(
         app,
         events.authApi.isAuthorized, 
         alwaysAuthorized,

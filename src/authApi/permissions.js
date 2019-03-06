@@ -7,13 +7,15 @@ export const temporaryAccessPermissions = () =>
 const nodePermission = (type) => ({
     add : (nodeKey, accessLevel) => accessLevel.permissions.push({type, nodeKey}),
     isAuthorized: resourceKey => app => isAuthorized(app)(type, resourceKey),
-    isNode:true
+    isNode:true,
+    get: nodeKey => ({type, nodeKey})
 });
 
 const staticPermission = (type) => ({
     add : accessLevel => accessLevel.permissions.push({type}),
     isAuthorized: app => isAuthorized(app)(type),
-    isNode:false
+    isNode:false,
+    get: nodeKey => ({type})
 });
 
 const createRecord = nodePermission(permissionTypes.CREATE_RECORD);

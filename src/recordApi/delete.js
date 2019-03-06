@@ -1,7 +1,7 @@
 import {safeKey, apiWrapper, isSomething, 
     events, joinKey, $} from "../common";
 import {load, getRecordFileName} from "./load";
-import {deleteCollection} from "../collectionApi/delete";
+import {_deleteCollection} from "../collectionApi/delete";
 import {getExactNodeForPath, 
         getFlattenedHierarchy, getNode,
         fieldReversesReferenceToNode} from "../templateApi/heirarchy";
@@ -32,7 +32,7 @@ const _deleteRecord = async (app, key, disableCleanup) => {
         const collectionKey = joinKey(
             key, collection.name
         );
-        await deleteCollection(app, true)(collectionKey);
+        await _deleteCollection(app, collectionKey, true);
     }
 
     

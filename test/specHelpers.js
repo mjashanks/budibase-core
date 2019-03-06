@@ -4,8 +4,9 @@ import {getAppApis, getRecordApi,
 import memory from "./memory";
 import {setupDatastore} from "../src/appInitialise";
 import {configFolder, fieldDefinitions, 
-    templateDefinitions,
-    joinKey} from "../src/common";
+    templateDefinitions, isNothing,
+    joinKey,
+    isSomething} from "../src/common";
 import { getNewIndexTemplate } from "../src/templateApi/createNodes";
 import getTemplateApi from "../src/templateApi";
 import getAuthApi from "../src/authApi";
@@ -42,14 +43,29 @@ export const appFromTempalteApi = async (templateApi, disableCleanupTransactions
         crypto:nodeCrypto,
         user:{name:"bob", permissions: []}
     }; 
+    app.removePermission = removePermission(app);
+    app.withOnlyThisPermission = withOnlyThisPermission(app);
+
     const fullPermissions = generateFullPermissions(app);
     app.user.permissions = fullPermissions;
+
     if(disableCleanupTransactions)
         app.cleanupTransactions = async () => {};
     else
         app.cleanupTransactions = async () => await cleanup(app);
     return app;
 };
+
+const removePermission = app => perm => {
+    app.user.permissions = filter(p => p.type !== perm.type 
+                                       || (isSomething(perm.nodeKey)
+                                           && perm.nodeKey !== p.nodeKey))
+                                (app.user.permissions);
+}
+
+const withOnlyThisPermission = app => perm => 
+    app.user.permissions = [perm];
+
 
 export const getRecordApiFromTemplateApi = async (templateApi, disableCleanupTransactions=false) => 
     getRecordApi(await appFromTempalteApi(templateApi, disableCleanupTransactions));

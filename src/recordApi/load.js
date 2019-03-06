@@ -18,7 +18,7 @@ export const load = (app) => async key =>
         {key},
         _load, app, key);
 
-const _load = async (app, key, keyStack=[]) => {
+export const _load = async (app, key, keyStack=[]) => {
     key = safeKey(key);
     const recordNode = getExactNodeForPath(app.heirarchy)(key);
     const storedData = await app.datastore.loadJson(

@@ -97,6 +97,20 @@ describe("apiWrapper", () => {
         expect(runAdd(1,2).result).toBe(3);
     });
 
+    it("should throw error when unauthorized", () => {
+        expect(() => runAdd(1,2,false)).toThrow(/Unauthorized/);
+    })
+
+    it("should async throw error when unauthorized", async () => {
+        let foundE = null;
+        try {
+            await runAddAsync(1,2,false)
+        } catch(ex) {
+            foundE = ex;
+        }
+        expect(foundE).not.toBeNull();
+    })
+
     it("should return result of inner function when async", async () => {
         expect(
             (await runAddAsync(1,2)).result).toBe(3);

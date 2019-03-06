@@ -13,7 +13,7 @@ export const ACCESS_LEVELS_LOCK_FILE = joinKey(AUTH_FOLDER, "access_levels_lock"
 export const permissionTypes = {
     CREATE_RECORD : "create record",
     UPDATE_RECORD : "update record",
-    READ_RECORD : "update record",
+    READ_RECORD : "read record",
     DELETE_RECORD : "delete record",
     READ_INDEX : "read index",
     MANAGE_INDEX : "manage index",

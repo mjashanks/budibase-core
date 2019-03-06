@@ -15,7 +15,7 @@ export const getContext = app => recordKey =>
         {recordKey},
         _getContext, app, recordKey);
 
-const _getContext = (app, recordKey) => {
+export const _getContext = (app, recordKey) => {
 
     const recordNode = getExactNodeForPath(app.heirarchy)(recordKey);    
 

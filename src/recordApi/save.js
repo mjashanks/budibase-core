@@ -3,7 +3,7 @@ import {cloneDeep, constant, isEqual,
 import {initialiseChildCollections,
     initialiseIndex} from "../collectionApi/initialise";
 import {validate} from "./validate";
-import {load, getRecordFileName} from "./load";
+import {_load, getRecordFileName} from "./load";
 import {apiWrapper, events, $, joinKey} from "../common";
 import { getFlattenedHierarchy, getLastPartInKey,
         getExactNodeForPath, isRecord,
@@ -56,8 +56,7 @@ const _save = async (app, record, context, skipValidation=false) => {
         });
     }
     else {
-        const loadRecord = load(app);
-        const oldRecord = await loadRecord(recordClone.key);
+        const oldRecord = await _load(app, recordClone.key);
         const transaction = await transactionForUpdateRecord(
             app, oldRecord, recordClone);
         recordClone.transactionId = transaction.id;
@@ -145,7 +144,7 @@ const maintainReferentialIntegrity =
 
             for(let key of map(r => r.key)(rows)) {
                 const record = 
-                    await load(app)(key);
+                    await _load(app, key);
                 if(record[update.field.name].key === newRecord.key) {
                     record[update.field.name] = update.new;
                     await _save(app, indexingApi, record, undefined, true);

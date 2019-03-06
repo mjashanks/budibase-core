@@ -13,10 +13,10 @@ export const deleteCollection = (app, disableCleanup=false) => async key =>
         events.collectionApi.delete, 
         permission.manageCollection.isAuthorized,
         {key},
-        _delete, app, key, disableCleanup);
+        _deleteCollection, app, key, disableCleanup);
 
 
-const _delete = async (app, key, disableCleanup) => {
+export const _deleteCollection = async (app, key, disableCleanup) => {
     key = safeKey(key);
     const node = getExactNodeForPath(app.heirarchy)(key);
     

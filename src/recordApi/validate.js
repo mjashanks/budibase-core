@@ -5,7 +5,7 @@ import {map, reduce, filter,
 import {$, isNothing, isNonEmptyString} from "../common";
 import {compileExpression} from "@nx-js/compiler-util";
 import _ from "lodash";
-import {getContext} from "./getContext";
+import {_getContext} from "./getContext";
 import {permission} from "../authApi/permissions";
 
 const fieldParseError = (fieldName, value) => 
@@ -57,7 +57,7 @@ const runRecordValidationRules = (record, recordNode) => {
 
 export const validate = app => async (record, context) => {
     context = isNothing(context) 
-              ? getContext(app)(record.key)
+              ? _getContext(app, record.key)
               : context;
 
     const recordNode = getExactNodeForPath(app.heirarchy)(record.key);

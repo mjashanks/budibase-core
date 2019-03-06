@@ -2,6 +2,7 @@ import {setupAppheirarchy, basicAppHeirarchyCreator_WithFields,
     getNewFieldAndAdd, stubEventHandler} from "./specHelpers";
 import {events, isNonEmptyString} from "../src/common";
 import { isBoolean } from "util";
+import {permission} from "../src/authApi/permissions";
 
 describe("recordApi > getNew", () => {
 
@@ -66,6 +67,18 @@ describe("recordApi > getNew", () => {
         expect(record.type).toBeDefined();
         expect(isNonEmptyString(record.type)).toBeTruthy();
         expect(record.type).toBe("customer");
+    });
+
+    it("should throw error, user user does not have permission", async () => {
+        const {recordApi, app, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        app.removePermission(permission.createRecord.get(appHeirarchy.customerRecord.nodeKey()));
+        expect(() => recordApi.getNew("/customers", "customer")).toThrow(/Unauthorized/);
+    });
+
+    it("should not depend on having any other permissions", async () => {
+        const {recordApi, app, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        app.withOnlyThisPermission(permission.createRecord.get(appHeirarchy.customerRecord.nodeKey()));
+        recordApi.getNew("/customers", "customer");
     });
 });
 
@@ -282,4 +295,54 @@ describe("save", () => {
         expect(await recordApi._storeHandle.exists(allIdsPath)).toBeTruthy();
         
     });
+
+    it("create should throw error, user user does not have permission", async () => {
+        const {recordApi, app, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const record = recordApi.getNew("/customers", "customer");
+        app.removePermission(permission.createRecord.get(appHeirarchy.customerRecord.nodeKey()));
+        expect(recordApi.save(record)).rejects.toThrow(/Unauthorized/);
+    });
+
+    it("create should not depend on having any other permissions", async () => {
+        const {recordApi, app, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        app.withOnlyThisPermission(permission.createRecord.get(appHeirarchy.customerRecord.nodeKey()));
+        const record = recordApi.getNew("/customers", "customer");
+        await recordApi.save(record);
+    });
+
+    it("update should throw error, user user does not have permission", async () => {
+        const {recordApi, app, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const record = recordApi.getNew("/customers", "customer");
+        app.removePermission(permission.updateRecord.get(appHeirarchy.customerRecord.nodeKey()));
+        const created = await recordApi.save(record);
+        expect(recordApi.save(created)).rejects.toThrow(/Unauthorized/);
+    });
+
+    it("update should not depend on having any other permissions", async () => {
+        const {recordApi, app, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const record = recordApi.getNew("/customers", "customer");
+        const saved = await recordApi.save(record);
+        app.withOnlyThisPermission(permission.updateRecord.get(appHeirarchy.customerRecord.nodeKey()));
+        await recordApi.save(saved);
+    });
 })
+
+describe("recordApi > load", () => {
+
+    it("should throw error when user user does not have permission", async () => {
+        const {recordApi, app, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const record = recordApi.getNew("/customers", "customer");
+        const created = await recordApi.save(record);
+        app.removePermission(permission.readRecord.get(appHeirarchy.customerRecord.nodeKey()));
+        expect(recordApi.load(created.key)).rejects.toThrow(/Unauthorized/);
+    });
+
+    it("should not depend on having any other permissions", async () => {
+        const {recordApi, app, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const record = recordApi.getNew("/customers", "customer");
+        const saved = await recordApi.save(record);
+        app.withOnlyThisPermission(permission.readRecord.get(appHeirarchy.customerRecord.nodeKey()));
+        await recordApi.load(saved.key);
+    });
+
+});
