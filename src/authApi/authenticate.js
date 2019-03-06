@@ -54,7 +54,7 @@ export const _authenticate = async (app, username, password) => {
         return null;
 
     return verified
-           ? {...user, permissions, temp:false}
+           ? {...user, permissions, temp:false, isUser:true}
            : null;
 };
 
@@ -99,7 +99,8 @@ export const authenticateTemporaryAccess = app => async (tempAccessCode) => {
            ? {
                ...user, 
                permissions: [], 
-               temp:true
+               temp:true,
+               isUser:true
             }
            : null;
 }

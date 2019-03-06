@@ -22,9 +22,9 @@ describe("triggers execute", () => {
         const {logs, 
             templateApi, behaviourSources} = await createAppDefinitionWithActionsAndTriggers();
 
-        const {recordApi} = await getAppApis(
+        const {recordApi, asFullAccess} = await getAppApis(
             templateApi._storeHandle, behaviourSources);
-
+        asFullAccess();
         // trigger setup to add to logs on recordApi:save:onError event
         const customer = recordApi.getNew("/customers", "customer");
 
@@ -44,8 +44,9 @@ describe("triggers execute", () => {
                templateApi, 
                behaviourSources} = await createAppDefinitionWithActionsAndTriggers();
 
-        const {recordApi} = await getAppApis(
+        const {recordApi, asFullAccess} = await getAppApis(
             templateApi._storeHandle, behaviourSources);
+        asFullAccess();
 
         const customer = recordApi.getNew("/customers", "customer");
         customer.surname = "Ledog";
@@ -62,8 +63,9 @@ describe("triggers execute", () => {
                templateApi, 
                behaviourSources} = await createAppDefinitionWithActionsAndTriggers();
 
-        const {recordApi} = await getAppApis(
+        const {recordApi, asFullAccess} = await getAppApis(
             templateApi._storeHandle, behaviourSources);
+        asFullAccess();
 
         const partner = recordApi.getNew("/partners", "partner");
 

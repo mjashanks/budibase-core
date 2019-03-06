@@ -14,7 +14,7 @@ export const deleteIndex = (app) => async (indexKey, includeFolder=true) =>
         {indexKey},
         _deleteIndex, app, indexKey, includeFolder);
 
-const _deleteIndex = async (app, indexKey, includeFolder) => {
+export const _deleteIndex = async (app, indexKey, includeFolder) => {
     const indexNode = getExactNodeForPath(app.heirarchy)(indexKey);
     
     if(!isIndex(indexNode))

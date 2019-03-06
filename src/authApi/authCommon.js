@@ -17,7 +17,7 @@ export const permissionTypes = {
     DELETE_RECORD : "delete record",
     READ_INDEX : "read index",
     MANAGE_INDEX : "manage index",
-    MANAGE_INDEX : "manage collection",
+    MANAGE_COLLECTION : "manage collection",
     WRITE_TEMPLATES : "write templates",
     CREATE_USER : "create user",
     SET_PASSWORD : "set password",

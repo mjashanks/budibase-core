@@ -7,6 +7,7 @@ import {setupDatastore, createEventAggregator} from "./appInitialise";
 import {initialiseActions} from "./actions"
 import {isSomething} from "./common";
 import {cleanup} from "./transactions/cleanup";
+import {generateFullPermissions} from "./authApi/generateFullPermissions";
 
 export const getAppApis = async (store, behaviourSources = {}, 
                                 cleanupTransactions = null, 
@@ -45,6 +46,19 @@ export const getAppApis = async (store, behaviourSources = {},
     const indexApi = getIndexApi(app);
     const authApi = getAuthApi(app);
 
+    const asUser = async (username, password) => {
+        app.user = await authApi.authenticate(username, password);
+    };
+
+    const asFullAccess = () => {
+        app.user = {
+            name: "app",
+            permissions : generateFullPermissions(app),
+            isUser:false,
+            temp:false
+        }
+    };
+
     return ({
         recordApi, 
         templateApi,
@@ -52,7 +66,9 @@ export const getAppApis = async (store, behaviourSources = {},
         indexApi,
         authApi,
         subscribe: eventAggregator.subscribe,
-        actions
+        actions,
+        asUser,
+        asFullAccess
     });
 };
 

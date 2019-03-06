@@ -1,9 +1,9 @@
 import {getExactNodeForPath} from "../templateApi/heirarchy";
 import {safeKey, apiWrapper, 
         events, joinKey} from "../common";
-import {deleteRecord} from "../recordApi/delete";
+import {_deleteRecord} from "../recordApi/delete";
 import {getAllIdsIterator, getAllIdsShardKey} from "../indexing/allIds";
-import {deleteIndex} from "../indexApi/delete";
+import {_deleteIndex} from "../indexApi/delete";
 import {includes} from "lodash/fp";
 import {permission} from "../authApi/permissions";
 
@@ -34,7 +34,7 @@ const deleteCollectionFolder = async (app, key) =>
 const deleteIndexes = async (app, node, key) => {
     for(let index of node.indexes) {
         const indexKey = joinKey(key, index.name);
-        await deleteIndex(app)(indexKey);
+        await _deleteIndex(app, indexKey, true);
     }
 };
 
@@ -79,8 +79,10 @@ const deleteRecords = async (app, key) => {
 
         if(ids.result.collectionKey === key) {
             for(let id of ids.result.ids) {
-                await deleteRecord(app, true)
-                                (joinKey(key, id));
+                await _deleteRecord(
+                    app, 
+                    joinKey(key, id), 
+                    true);
                 await deleteAllIdsShard(id);
             }       
         }

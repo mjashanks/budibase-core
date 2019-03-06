@@ -20,7 +20,7 @@ export const deleteRecord = (app, disableCleanup=false) => async (key) =>
         _deleteRecord, app, key, disableCleanup);
 
 // called deleteRecord because delete is a keyword
-const _deleteRecord = async (app, key, disableCleanup) => { 
+export const _deleteRecord = async (app, key, disableCleanup) => { 
     key = safeKey(key);
     const node = getExactNodeForPath(app.heirarchy)(key);
     
