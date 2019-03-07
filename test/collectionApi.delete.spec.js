@@ -1,6 +1,8 @@
 import {setupAppheirarchy, basicAppHeirarchyCreator_WithFields} from "./specHelpers";
 import {$, splitKey} from "../src/common";
 import {keys, filter} from "lodash/fp";
+import {permission} from "../src/authApi/permissions";
+
 describe("collectionApi > delete", () => {
 
     it("should remove every key in collection's path", async () => {
@@ -52,6 +54,18 @@ describe("collectionApi > delete", () => {
         const remainingKeys = keys(recordApi._storeHandle.data);
         expect(remainingKeys.length).toBe(expectedRemainingKeys);
 
+    });
+
+    it("should throw error when user user does not have permission", async () => {
+        const {collectionApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        app.removePermission(permission.manageCollection.get("/customers"));
+        expect(collectionApi.delete("/customers")).rejects.toThrow(/Unauthorized/);
+    });
+
+    it("should not depend on having any other permissions", async () => {
+        const {collectionApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        app.withOnlyThisPermission(permission.manageCollection.get("/customers"));
+        await collectionApi.delete("/customers");
     });
 
 });

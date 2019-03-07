@@ -1,12 +1,12 @@
 import {safeKey, apiWrapper, isSomething, 
     events, joinKey, $} from "../common";
-import {load, getRecordFileName} from "./load";
+import {_load, getRecordFileName} from "./load";
 import {_deleteCollection} from "../collectionApi/delete";
 import {getExactNodeForPath, 
         getFlattenedHierarchy, getNode,
         fieldReversesReferenceToNode} from "../templateApi/heirarchy";
 import {map, flatten, filter} from "lodash/fp";
-import {deleteIndex} from "../indexApi/delete";
+import {_deleteIndex} from "../indexApi/delete";
 import {transactionForDeleteRecord} from "../transactions/create";
 import {removeFromAllIds} from "../indexing/allIds";
 import {permission} from "../authApi/permissions";
@@ -24,7 +24,7 @@ export const _deleteRecord = async (app, key, disableCleanup) => {
     key = safeKey(key);
     const node = getExactNodeForPath(app.heirarchy)(key);
     
-    const record = await load(app)(key);
+    const record = await _load(app, key);
     await transactionForDeleteRecord(app, record);
 
     
@@ -67,6 +67,6 @@ const deleteIndexes = async (app, key) => {
     ]);
 
     for(let i of reverseIndexKeys) {
-        await deleteIndex(app)(i);
+        await _deleteIndex(app, i, true);
     }
 }

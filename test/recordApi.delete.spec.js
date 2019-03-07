@@ -2,6 +2,7 @@ import {setupAppheirarchy,
     basicAppHeirarchyCreator_WithFields} from "./specHelpers";
 import {keys, filter} from "lodash/fp";
 import {$} from "../src/common";
+import {permission} from "../src/authApi/permissions";
 
 describe("recordApi > delete", () => {
     
@@ -42,6 +43,22 @@ describe("recordApi > delete", () => {
         
         expect(remainingKeys).toEqual([]);
 
+    });
+
+    it("should throw error when user user does not have permission", async () => {
+        const {recordApi, app, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const record = recordApi.getNew("/customers", "customer");
+        const created = await recordApi.save(record);
+        app.removePermission(permission.deleteRecord.get(appHeirarchy.customerRecord.nodeKey()));
+        expect(recordApi.delete(created.key)).rejects.toThrow(/Unauthorized/);
+    });
+
+    it("should not depend on having any other permissions", async () => {
+        const {recordApi, app, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const record = recordApi.getNew("/customers", "customer");
+        const saved = await recordApi.save(record);
+        app.withOnlyThisPermission(permission.deleteRecord.get(appHeirarchy.customerRecord.nodeKey()));
+        await recordApi.delete(saved.key);
     });
 
 })
