@@ -4,15 +4,6 @@ import {isIndex, isShardedIndex,
         getExactNodeForPath} from "../templateApi/heirarchy";
 import {getAllShardKeys, getShardMapKey,
         getUnshardedIndexDataKey} from "../indexing/sharding";
-import {permission} from "../authApi/permissions";
-
-export const deleteIndex = (app) => async (indexKey, includeFolder=true) => 
-    apiWrapper(
-        app,
-        events.indexApi.delete, 
-        permission.manageIndex.isAuthorized,
-        {indexKey},
-        _deleteIndex, app, indexKey, includeFolder);
 
 export const _deleteIndex = async (app, indexKey, includeFolder) => {
     const indexNode = getExactNodeForPath(app.heirarchy)(indexKey);

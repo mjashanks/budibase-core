@@ -1,5 +1,6 @@
 import {setupAppheirarchy,
     basicAppHeirarchyCreator_WithFields_AndIndexes} from "./specHelpers";
+import {permission} from "../src/authApi/permissions";
 
 describe("aggregates", () => {
     it("should calculate correct totals, when no condition supplied", async () => {
@@ -101,11 +102,23 @@ describe("aggregates", () => {
         expect(result.all_invoices_by_type.Important.totalIncVat.sum).toBe(50);
         expect(result.all_invoices_by_type.Important.totalIncVat.mean).toBe(50 / 2);
     });
+
+    it("should throw error when user user does not have permission", async () => {
+        const {app, indexApi} = await setup();
+        app.removePermission(permission.readIndex.get("/customers/default"));
+        expect(indexApi.aggregates("/customers/default")).rejects.toThrow(/Unauthorized/);
+    });
+
+    it("should not depend on having any other permissions", async () => {
+        const {app, indexApi} = await setup();
+        app.withOnlyThisPermission(permission.readIndex.get("/customers/default"));
+        await indexApi.aggregates("/customers/default");
+    });
 });
 
 
 const setup = async () => {
-    const {recordApi,
+    const {recordApi, app,
         indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
     
     const customer = recordApi.getNew("/customers", "customer");
@@ -122,5 +135,5 @@ const setup = async () => {
 
     const invoicesByOutstandingKey = `/customers/${customer.id}/invoices/invoicesByOutstanding`;
 
-    return {createInvoice, indexApi, invoicesByOutstandingKey};
+    return {createInvoice, indexApi, invoicesByOutstandingKey, app};
 }

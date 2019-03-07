@@ -1,5 +1,6 @@
 import {setupAppheirarchy,
     basicAppHeirarchyCreator_WithFields_AndIndexes} from "./specHelpers";
+import {permission} from "../src/authApi/permissions";
 
 describe("indexApi > listItems", () => {
 
@@ -83,60 +84,72 @@ describe("indexApi > listItems", () => {
     it("should filter items by given search phrase", async () => {
         const {recordApi,
             indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
-            
-            const record1 = recordApi.getNew("/customers", "customer");
-            record1.surname = "Ledog";
-            await recordApi.save(record1);
-    
-            const record2 = recordApi.getNew("/customers", "customer");
-            record2.surname = "Zeecat";
-            await recordApi.save(record2);
+        
+        const record1 = recordApi.getNew("/customers", "customer");
+        record1.surname = "Ledog";
+        await recordApi.save(record1);
 
-            const results = await indexApi.listItems("/customers/default",{searchPhrase:"*cat"});
-            expect(results.length).toBe(1);
-            expect(results[0].surname).toBe("Zeecat");
+        const record2 = recordApi.getNew("/customers", "customer");
+        record2.surname = "Zeecat";
+        await recordApi.save(record2);
+
+        const results = await indexApi.listItems("/customers/default",{searchPhrase:"*cat"});
+        expect(results.length).toBe(1);
+        expect(results[0].surname).toBe("Zeecat");
     });
 
     it("should filter items by given search phrase, accross sharded whole index", async () => {
         const {recordApi,
             indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
-            
-            const record1 = recordApi.getNew("/customers", "customer");
-            record1.surname = "Ledog";
-            await recordApi.save(record1);
-    
-            const record2 = recordApi.getNew("/customers", "customer");
-            record2.surname = "Zeecat";
-            await recordApi.save(record2);
+        
+        const record1 = recordApi.getNew("/customers", "customer");
+        record1.surname = "Ledog";
+        await recordApi.save(record1);
 
-            const results = await indexApi.listItems("/customers/customersBySurname",{searchPhrase:"*cat"});
-            expect(results.length).toBe(1);
-            expect(results[0].surname).toBe("Zeecat");
+        const record2 = recordApi.getNew("/customers", "customer");
+        record2.surname = "Zeecat";
+        await recordApi.save(record2);
+
+        const results = await indexApi.listItems("/customers/customersBySurname",{searchPhrase:"*cat"});
+        expect(results.length).toBe(1);
+        expect(results[0].surname).toBe("Zeecat");
     });
 
     it("should filter items by given search phrase, in single shard ", async () => {
         const {recordApi,
             indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
-            
-            const record1 = recordApi.getNew("/customers", "customer");
-            record1.surname = "Lecat";
-            await recordApi.save(record1);
-    
-            const record2 = recordApi.getNew("/customers", "customer");
-            record2.surname = "Zeecat";
-            await recordApi.save(record2);
+        
+        const record1 = recordApi.getNew("/customers", "customer");
+        record1.surname = "Lecat";
+        await recordApi.save(record1);
 
-            const record3 = recordApi.getNew("/customers", "customer");
-            record3.surname = "Zeedog";
-            await recordApi.save(record3);
+        const record2 = recordApi.getNew("/customers", "customer");
+        record2.surname = "Zeecat";
+        await recordApi.save(record2);
 
-            const results = await indexApi.listItems("/customers/customersBySurname",{
-                searchPhrase:"*cat",
-                rangeStartParams: {surname:"Z"},
-                rangeEndParams: {surname:"Z"}
-            });
-            expect(results.length).toBe(1);
-            expect(results[0].surname).toBe("Zeecat");
+        const record3 = recordApi.getNew("/customers", "customer");
+        record3.surname = "Zeedog";
+        await recordApi.save(record3);
+
+        const results = await indexApi.listItems("/customers/customersBySurname",{
+            searchPhrase:"*cat",
+            rangeStartParams: {surname:"Z"},
+            rangeEndParams: {surname:"Z"}
+        });
+        expect(results.length).toBe(1);
+        expect(results[0].surname).toBe("Zeecat");
+    });
+
+    it("should throw error when user user does not have permission", async () => {
+        const {indexApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+        app.removePermission(permission.readIndex.get("/customers/customersBySurname"));
+        expect(indexApi.listItems("/customers/customersBySurname")).rejects.toThrow(/Unauthorized/);
+    });
+
+    it("should not depend on having any other permissions", async () => {
+        const {app, indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+        app.withOnlyThisPermission(permission.readIndex.get("/customers/customersBySurname"));
+        await indexApi.listItems("/customers/customersBySurname");
     });
 
 });
