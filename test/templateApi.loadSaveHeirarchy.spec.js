@@ -1,7 +1,7 @@
 import {getMemoryTemplateApi} from "./specHelpers";
-
+import {permission} from "../src/authApi/permissions";
 const saveThreeLevelHeirarchy = async () => {
-    const templateApi = await getMemoryTemplateApi();
+    const {templateApi, app} = await getMemoryTemplateApi();
     const root = templateApi.getNewRootLevel();
     const collection = templateApi.getNewCollectionTemplate(root);
     collection.name = "customers"
@@ -13,7 +13,7 @@ const saveThreeLevelHeirarchy = async () => {
     templateApi.addField(record, surname);
 
     await templateApi.saveApplicationHeirarchy(root);
-    return {templateApi, root, collection};
+    return {templateApi, root, collection, app};
 };
 
 describe("Load & Save App Heirarchy", () => {
@@ -81,12 +81,24 @@ describe("Load & Save App Heirarchy", () => {
         expect(await templateApi._storeHandle.exists("/.config")).toBeTruthy();
     });
 
+    it("should throw error when user user does not have permission", async () => {
+        const {templateApi, app, root} = await saveThreeLevelHeirarchy();
+        app.removePermission(permission.writeTemplates.get());
+        expect(templateApi.saveApplicationHeirarchy(root)).rejects.toThrow(/Unauthorized/);
+    });
+
+    it("should not depend on having any other permissions", async () => {
+        const {templateApi, app, root} = await saveThreeLevelHeirarchy();
+        app.withOnlyThisPermission(permission.writeTemplates.get());
+        await templateApi.saveApplicationHeirarchy(root);
+    });
+
 });
 
 describe("save load actions", () => {
 
     const appDefinitionWithTriggersAndActions = async () => {
-        const {templateApi} = await saveThreeLevelHeirarchy();
+        const {templateApi, app} = await saveThreeLevelHeirarchy();
         
         const logAction = templateApi.createAction();
         logAction.behaviourName = "log";
@@ -100,7 +112,8 @@ describe("save load actions", () => {
         return ({
             templateApi, 
             actions:[logAction],
-            triggers:[logOnErrorTrigger]
+            triggers:[logOnErrorTrigger],
+            app
         });
 
     }
@@ -148,6 +161,20 @@ describe("save load actions", () => {
         }
 
         expect(err).toBeDefined();
-    })
+    });
+
+    it("should throw error when user user does not have permission", async () => {
+        const {templateApi, actions, triggers, app} = 
+            await appDefinitionWithTriggersAndActions();
+        app.removePermission(permission.writeTemplates.get());
+        expect(templateApi.saveActionsAndTriggers(actions, triggers)).rejects.toThrow(/Unauthorized/);
+    });
+
+    it("should not depend on having any other permissions", async () => {
+        const {templateApi, actions, triggers, app} = 
+            await appDefinitionWithTriggersAndActions();
+        app.withOnlyThisPermission(permission.writeTemplates.get());
+        await templateApi.saveActionsAndTriggers(actions, triggers);
+    });
 
 });

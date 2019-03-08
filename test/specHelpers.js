@@ -9,6 +9,7 @@ import {configFolder, fieldDefinitions,
     isSomething} from "../src/common";
 import { getNewIndexTemplate } from "../src/templateApi/createNodes";
 import getTemplateApi from "../src/templateApi";
+import {getApplicationDefinition} from "../src/templateApi/getApplicationDefinition";
 import getAuthApi from "../src/authApi";
 import {createEventAggregator} from "../src/appInitialise/eventAggregator";
 import {filter} from "lodash/fp";
@@ -27,9 +28,17 @@ export const testTemplatesPath = (testAreaName) => path.join(exp.testFileArea(te
  
 export const getMemoryStore = () => setupDatastore(memory({}));
 export const getMemoryTemplateApi = () => {
-    const templateApi = getTemplateApi(getMemoryStore());
+    const app = {
+        datastore:getMemoryStore(),
+        publish: () => {},
+        getEpochTime : async () => (new Date()).getTime(),
+        user:{name:"", permissions:[permission.writeTemplates.get()]}
+    };
+    app.removePermission = removePermission(app);
+    app.withOnlyThisPermission = withOnlyThisPermission(app);
+    const templateApi = getTemplateApi(app);
     templateApi._eventAggregator = createEventAggregator();
-    return templateApi;
+    return {templateApi, app};
 }
 
 // TODO: subscribe actions
@@ -328,7 +337,7 @@ export const basicAppHeirarchyCreator_WithFields_AndIndexes = templateApi =>
     heirarchyFactory(withFields, withIndexes)(templateApi);
 
 export const setupAppheirarchy = async (creator, disableCleanupTransactions=false) => {
-    const templateApi = getMemoryTemplateApi();
+    const {templateApi} = getMemoryTemplateApi();
     const heirarchy = creator(templateApi);
     await templateApi.saveApplicationHeirarchy(heirarchy.root);
     const app = await appFromTempalteApi(templateApi, disableCleanupTransactions);

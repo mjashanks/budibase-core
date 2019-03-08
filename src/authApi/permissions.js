@@ -15,7 +15,7 @@ const staticPermission = (type) => ({
     add : accessLevel => accessLevel.permissions.push({type}),
     isAuthorized: app => isAuthorized(app)(type),
     isNode:false,
-    get: nodeKey => ({type})
+    get: () => ({type})
 });
 
 const createRecord = nodePermission(permissionTypes.CREATE_RECORD);

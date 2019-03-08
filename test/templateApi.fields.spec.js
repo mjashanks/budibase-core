@@ -15,7 +15,7 @@ const getValidField = templateApi => {
 };
 
 const testMemberIsNotSet = membername => async () => {
-    const templateApi = await getMemoryTemplateApi();
+    const {templateApi} = await getMemoryTemplateApi();
     const field = getValidField(templateApi);
     field[membername] = "";
     const errorsNotSet = templateApi.validateField([field])(field);
@@ -24,7 +24,7 @@ const testMemberIsNotSet = membername => async () => {
 };
 
 const testMemberIsNotDefined = membername => async () => {
-    const templateApi = await getMemoryTemplateApi();
+    const {templateApi} = await getMemoryTemplateApi();
     const field = getValidField(templateApi);
     delete field[membername];
     const errorsNotSet = templateApi.validateField([field])(field);
@@ -62,14 +62,14 @@ describe("validateField", () => {
         testMemberIsNotSet("getUndefinedValue"));
     
     it("should return no errors when valid field is supplied", async () => {
-        const templateApi = await getMemoryTemplateApi();
+        const {templateApi} = await getMemoryTemplateApi();
         const field = getValidField(templateApi);
         const errors = templateApi.validateField([field])(field);
         expect(errors.length).toBe(0);
     });
 
     it("should return error when field with same name exists already", async () => {
-        const templateApi = await getMemoryTemplateApi();
+        const {templateApi} = await getMemoryTemplateApi();
         const field1 = getValidField(templateApi);
         field1.name = "surname";
 
@@ -82,7 +82,7 @@ describe("validateField", () => {
     });
 
     it("should return error when field is not one of allowed types", async () => {
-        const templateApi = await getMemoryTemplateApi();
+        const {templateApi} = await getMemoryTemplateApi();
         const field = getValidField(templateApi);
         field.type = "sometype";
         const errors = templateApi.validateField([field])(field);
@@ -96,7 +96,7 @@ describe("validateField", () => {
 describe("addField", () => {
 
     it("should throw exception when field is invalid", async () => {
-        const templateApi = await getMemoryTemplateApi();
+        const {templateApi} = await getMemoryTemplateApi();
         const record = getRecordTemplate(templateApi);
         const field = getValidField(templateApi);
         field.name = "";
@@ -105,7 +105,7 @@ describe("addField", () => {
     });
 
     it("should add field when field is valid", async () => {
-        const templateApi = await getMemoryTemplateApi();
+        const {templateApi} = await getMemoryTemplateApi();
         const record = getRecordTemplate(templateApi);
         const field = getValidField(templateApi);
         field.name = "some_new_field";

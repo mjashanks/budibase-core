@@ -6,7 +6,7 @@ import {isFunction} from "lodash";
 describe("getAppApis", () => {
 
     const getMemoryAppApis = async () => {
-        const templateApi = getMemoryTemplateApi();
+        const {templateApi} = getMemoryTemplateApi();
         const rootNode = templateApi.getNewRootLevel();
         await templateApi.saveApplicationHeirarchy(rootNode);
 

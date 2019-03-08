@@ -8,6 +8,7 @@ import {initialiseActions} from "./actions"
 import {isSomething} from "./common";
 import {cleanup} from "./transactions/cleanup";
 import {generateFullPermissions} from "./authApi/generateFullPermissions";
+import {getApplicationDefinition} from "./templateApi/getApplicationDefinition";
 
 export const getAppApis = async (store, behaviourSources = {}, 
                                 cleanupTransactions = null, 
@@ -15,23 +16,24 @@ export const getAppApis = async (store, behaviourSources = {},
                                 crypto = null) => {
 
     store = setupDatastore(store);
-    const templateApi = getTemplateApi(store);
-    const appDefinition = await templateApi.getApplicationDefinition();
+    const appDefinition = await getApplicationDefinition(store)();
     const eventAggregator = createEventAggregator();
+
+    const app = {
+        datastore:store,
+        crypto,
+        publish:eventAggregator.publish,
+        heirarchy:appDefinition.heirarchy,
+        actions:appDefinition.actions
+    };
+
+    const templateApi = getTemplateApi(app);    
 
     const actions = initialiseActions(
         eventAggregator.subscribe,
         behaviourSources,
         appDefinition.actions,
         appDefinition.triggers);
-
-    const app = {
-        heirarchy:appDefinition.heirarchy, 
-        actions:appDefinition.actions,
-        datastore:store, 
-        publish:eventAggregator.publish,
-        crypto
-    };
 
     app.cleanupTransactions = isSomething(cleanupTransactions) 
                               ? cleanupTransactions
