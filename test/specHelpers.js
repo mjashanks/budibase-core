@@ -36,6 +36,7 @@ export const getMemoryTemplateApi = () => {
     };
     app.removePermission = removePermission(app);
     app.withOnlyThisPermission = withOnlyThisPermission(app);
+    app.withNoPermissions = withNoPermissions(app);
     const templateApi = getTemplateApi(app);
     templateApi._eventAggregator = createEventAggregator();
     return {templateApi, app};
@@ -54,6 +55,7 @@ export const appFromTempalteApi = async (templateApi, disableCleanupTransactions
     }; 
     app.removePermission = removePermission(app);
     app.withOnlyThisPermission = withOnlyThisPermission(app);
+    app.withNoPermissions = withNoPermissions(app);
 
     const fullPermissions = generateFullPermissions(app);
     app.user.permissions = fullPermissions;
@@ -75,6 +77,8 @@ const removePermission = app => perm => {
 const withOnlyThisPermission = app => perm => 
     app.user.permissions = [perm];
 
+const withNoPermissions = app => () => 
+    app.user.permissions = [];
 
 export const getRecordApiFromTemplateApi = async (templateApi, disableCleanupTransactions=false) => 
     getRecordApi(await appFromTempalteApi(templateApi, disableCleanupTransactions));

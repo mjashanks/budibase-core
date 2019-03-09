@@ -47,6 +47,12 @@ describe("authApi > authenticate", () => {
         expect(result).toBeNull();
     });
 
+    it("authenticate should be allowed wit no permissions", async () => {
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        app.withNoPermissions();
+        await authApi.authenticate("", "");
+    });
+
 });
 
 describe("authApi > authenticateTemporaryAccess", () => {
@@ -94,6 +100,14 @@ describe("authApi > authenticateTemporaryAccess", () => {
         const result = await authApi.authenticateTemporaryAccess(u.tempCode);
         expect(result).toBeNull();
     });
+
+    
+    it("authenticate should be allowed wit no permissions", async () => {
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        app.withNoPermissions();
+        await authApi.authenticateTemporaryAccess("");
+    });
+
 });
 
 const validUser = async (app, authApi, password, enabled=true) => {

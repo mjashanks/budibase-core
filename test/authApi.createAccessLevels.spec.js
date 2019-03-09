@@ -141,6 +141,37 @@ describe("save and load access level", () => {
         expect(loadedLevels.version).toBe(0);
     });
 
+
+    it("save should throw error when user user does not have permission", async () => {
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const levels = validAccessLevels(authApi);
+        app.removePermission(permission.writeAccessLevels.get());
+        expect(authApi.saveAccessLevels(levels)).rejects.toThrow(/Unauthorized/);
+    });
+
+    it("save should not depend on having any other permissions", async () => {
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const levels = validAccessLevels(authApi);
+        app.withOnlyThisPermission(permission.writeAccessLevels.get());
+        await authApi.saveAccessLevels(levels)
+    });
+
+    it("load should throw error when user user does not have permission", async () => {
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const levels = validAccessLevels(authApi);
+        await authApi.saveAccessLevels(levels)
+        app.removePermission(permission.listAccessLevels.get());
+        expect(authApi.loadAccessLevels()).rejects.toThrow(/Unauthorized/);
+    });
+
+    it("load should not depend on having any other permissions", async () => {
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const levels = validAccessLevels(authApi);
+        await authApi.saveAccessLevels(levels)
+        app.withOnlyThisPermission(permission.listAccessLevels.get());
+        await authApi.loadAccessLevels();
+    });
+
 });
 
 const validAccessLevels = (authApi) => {

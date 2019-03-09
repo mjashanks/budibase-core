@@ -6,7 +6,7 @@ import { parseTemporaryCode,
     getUserByName} from "../src/authApi/authCommon";
 import {$} from "../src/common";
 import {getLock} from "../src/common/lock";
-
+import {permission} from "../src/authApi/permissions";
 
 describe("authApi > enableUser", () => {
 
@@ -50,6 +50,20 @@ describe("authApi > enableUser", () => {
             ex = e;
         }
         expect(ex).toBeDefined();
+    });
+
+    it("should throw error when user user does not have permission", async () => {
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const u = await validUser(app, authApi, "firstpassword", false);
+        app.removePermission(permission.enableDisableUser.get());
+        expect(authApi.enableUser(u)).rejects.toThrow(/Unauthorized/);
+    });
+
+    it("should not depend on having any other permissions", async () => {
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const u = await validUser(app, authApi, "firstpassword", false);
+        app.withOnlyThisPermission(permission.enableDisableUser.get());
+        await authApi.enableUser(u.name);
     });
 
 });
@@ -96,6 +110,20 @@ describe("authApi > disableUser", () => {
             ex = e;
         }
         expect(ex).toBeDefined();
+    });
+
+    it("should throw error when user user does not have permission", async () => {
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const u = await validUser(app, authApi, "firstpassword", false);
+        app.removePermission(permission.enableDisableUser.get());
+        expect(authApi.disableUser(u)).rejects.toThrow(/Unauthorized/);
+    });
+
+    it("should not depend on having any other permissions", async () => {
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const u = await validUser(app, authApi, "firstpassword", false);
+        app.withOnlyThisPermission(permission.enableDisableUser.get());
+        await authApi.disableUser(u.name);
     });
 
 });

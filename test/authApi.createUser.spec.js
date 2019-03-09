@@ -4,6 +4,7 @@ import { userAuthFile,
     USERS_LOCK_FILE} from "../src/authApi/authCommon";
 import {getLock} from "../src/common/lock";
 import {getNewUserAuth} from "../src/authApi/getNewUser";
+import {permission} from "../src/authApi/permissions";
 
 describe("getNewUser", () => {
     it("should create correct fields", async () => {
@@ -150,6 +151,32 @@ describe("create and list users", () => {
         expect(e).toBeDefined();
         const users = await authApi.getUsers();
         expect(users.length).toBe(1);
+    });
+
+    it("create should throw error when user user does not have permission", async () => {
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const user = validUser(app, authApi);
+        app.removePermission(permission.createUser.get());
+        expect(authApi.createUser(user)).rejects.toThrow(/Unauthorized/);
+    });
+
+    it("create should not depend on having any other permissions", async () => {
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const user = validUser(app, authApi);
+        app.withOnlyThisPermission(permission.createUser.get());
+        await authApi.createUser(user);
+    });
+
+    it("list should throw error when user user does not have permission", async () => {
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        app.removePermission(permission.listUsers.get());
+        expect(authApi.getUsers()).rejects.toThrow(/Unauthorized/);
+    });
+
+    it("list should not depend on having any other permissions", async () => {
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        app.withOnlyThisPermission(permission.listUsers.get());
+        await authApi.getUsers();
     });
 
 });

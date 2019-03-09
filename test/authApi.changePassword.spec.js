@@ -30,6 +30,13 @@ describe("authApi > changeMyPassword", () => {
         expect(secondPasswordCheck).toBeNull();
     });
 
+    it("should be allowed with no permissions", async () => {
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const u = await validUser(app, authApi, "firstpassword");
+        app.withNoPermissions();
+        await authApi.changeMyPassword("firstpassword", "secondpassword");
+    });
+
 });
 
 
@@ -78,6 +85,7 @@ describe("authApi > resetPasswordFlow", () => {
         expect(secondPasswordCheck).not.toBeNull();
 
     });
+
 });
 
 describe("authApi > createTemporaryAccess", () => {
@@ -103,6 +111,13 @@ describe("authApi > createTemporaryAccess", () => {
 
         expect(user.temporaryAccessId).toBe(tempInfo.id);
 
+    });
+
+    it("should be allowed with no permissions", async () => {
+        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const u = await validUser(app, authApi, "firstpassword");
+        app.withNoPermissions();
+        await authApi.createTemporaryAccess(u.name);
     });
 
 });
