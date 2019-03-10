@@ -13,7 +13,7 @@ import {getApplicationDefinition} from "../src/templateApi/getApplicationDefinit
 import getAuthApi from "../src/authApi";
 import {createEventAggregator} from "../src/appInitialise/eventAggregator";
 import {filter} from "lodash/fp";
-import {createBehaviourSources} from "../src/actions/buildBehaviourSource";
+import {createBehaviourSources} from "../src/actionsApi/buildBehaviourSource";
 import {createAction, createTrigger} from "../src/templateApi/createActions";
 import {cleanup} from "../src/transactions/cleanup";
 import nodeCrypto from "./nodeCrypto";

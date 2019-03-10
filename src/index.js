@@ -3,8 +3,9 @@ import getCollectionApi from "./collectionApi";
 import getIndexApi from "./indexApi";
 import getTemplateApi from "./templateApi";
 import getAuthApi from "./authApi";
+import getActionsApi from "./actionsApi";
 import {setupDatastore, createEventAggregator} from "./appInitialise";
-import {initialiseActions} from "./actions"
+import {initialiseActions} from "./actionsApi/initialise"
 import {isSomething} from "./common";
 import {cleanup} from "./transactions/cleanup";
 import {generateFullPermissions} from "./authApi/generateFullPermissions";
@@ -47,6 +48,7 @@ export const getAppApis = async (store, behaviourSources = {},
     const collectionApi = getCollectionApi(app);
     const indexApi = getIndexApi(app);
     const authApi = getAuthApi(app);
+    const actionsApi = getActionsApi(app)
 
     const asUser = async (username, password) => {
         app.user = await authApi.authenticate(username, password);
@@ -67,6 +69,7 @@ export const getAppApis = async (store, behaviourSources = {},
         collectionApi,
         indexApi,
         authApi,
+        actionsApi,
         subscribe: eventAggregator.subscribe,
         actions,
         asUser,

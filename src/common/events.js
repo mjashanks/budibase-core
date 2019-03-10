@@ -53,6 +53,9 @@ const _events = {
     templateApi: {
         saveApplicationHeirarchy: common(),
         saveActionsAndTriggers: common()
+    },
+    actionsApi: {
+        execute: common()
     }
 }
 

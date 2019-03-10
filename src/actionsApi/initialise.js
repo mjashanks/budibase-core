@@ -2,7 +2,7 @@ import {isFunction, filter, map,
         uniqBy, keys, difference,
         join, reduce, find} from "lodash/fp";
 import {$} from "../common";
-import {executeAction} from "./execute";
+import {_executeAction} from "./execute";
 import {compileExpression, compileCode} from "@nx-js/compiler-util";
 
 export const initialiseActions = (subscribe, behaviourSources, actions, triggers) => {
@@ -16,7 +16,7 @@ export const initialiseActions = (subscribe, behaviourSources, actions, triggers
 const createActionsCollection = (behaviourSources, actions) =>
     $(actions,[
         reduce((all,a) => {
-            all[a.name] = opts => executeAction(behaviourSources, a, opts)
+            all[a.name] = opts => _executeAction(behaviourSources, a, opts)
             return all;
         }, {})
     ]);
@@ -38,7 +38,7 @@ const subscribeTriggers = (subscribe, behaviourSources, actions, triggers) => {
     for(let trig of triggers) {
         subscribe(trig.eventName, (ev, ctx) => {
             if(shouldRunTrigger(trig, ctx)) {
-                executeAction(
+                _executeAction(
                     behaviourSources, 
                     find(a => a.name === trig.actionName)(actions),
                     createOptions(trig.optionsCreator, ctx));
