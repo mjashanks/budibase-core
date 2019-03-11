@@ -48,7 +48,7 @@ export const getAppApis = async (store, behaviourSources = {},
     const collectionApi = getCollectionApi(app);
     const indexApi = getIndexApi(app);
     const authApi = getAuthApi(app);
-    const actionsApi = getActionsApi(app)
+    const actionsApi = getActionsApi(app);
 
     const asUser = async (username, password) => {
         app.user = await authApi.authenticate(username, password);
@@ -84,5 +84,6 @@ export {getRecordApi} from "./recordApi";
 export {getCollectionApi} from "./collectionApi";
 export {getIndexApi} from "./indexApi";
 export {setupDatastore} from "./appInitialise";
+export {getActionsApi} from "./actionsApi";
 
 export default getAppApis;

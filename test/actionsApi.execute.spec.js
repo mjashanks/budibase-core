@@ -1,19 +1,35 @@
 import {createAppDefinitionWithActionsAndTriggers} from "./specHelpers";
 import {getAppApis} from "../src";
+import {permission} from "../src/authApi/permissions";
 
 describe("actions execute", () => {
 
     it("should successfully execute actions", async () => {
-        const {emails, 
-            templateApi, behaviourSources} = await createAppDefinitionWithActionsAndTriggers();
+        const {emails, app} = await createAppDefinitionWithActionsAndTriggers();
 
-        const apis = await getAppApis(
-            templateApi._storeHandle, behaviourSources);
-
-        apis.actions.sendEmail("an email");
+        app.actions.sendEmail("an email");
         expect(emails).toEqual(["an email"]);
     });
 
+    it("should successfully execute actions via actions api", async () => {
+        const {emails, actionsApi} = await createAppDefinitionWithActionsAndTriggers();
+
+        actionsApi.execute("sendEmail", "an email");
+        expect(emails).toEqual(["an email"]);
+    });
+
+    it("should throw error when user user does not have permission", async () => {
+        const {actionsApi, app} = await createAppDefinitionWithActionsAndTriggers();
+        app.removePermission(permission.executeAction.get("sendEmail"));
+        expect(() => actionsApi.execute("sendEmail")).toThrow(/Unauthorized/);
+    });
+
+    it("should not depend on having any other permissions", async () => {
+        const {actionsApi, app} = await createAppDefinitionWithActionsAndTriggers();
+        app.withOnlyThisPermission(permission.executeAction.get("sendEmail"));
+        actionsApi.execute("sendEmail", "am email");
+    });
+    
 });
 
 describe("triggers execute", () => {

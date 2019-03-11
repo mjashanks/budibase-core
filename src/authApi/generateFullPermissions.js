@@ -1,7 +1,7 @@
 import {permission} from "./permissions";
 import {getFlattenedHierarchy, 
     isIndex, isRecord} from "../templateApi/heirarchy";
-import {filter, values, each} from "lodash/fp";
+import {filter, values, each, keys} from "lodash/fp";
 import {$} from "../common";
 
 export const generateFullPermissions = app => {
@@ -26,6 +26,10 @@ export const generateFullPermissions = app => {
 
     for(let n of indexNodes) {
         permission.readIndex.add(n.nodeKey(), accessLevel);
+    }
+
+    for(let a of keys(app.actions)) {
+        permission.executeAction.add(a, accessLevel);
     }
 
     $(permission, [

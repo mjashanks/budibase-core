@@ -86,7 +86,7 @@ export const getNodeByKeyOrNodeKey = (appHeirarchy, keyOrNodeKey) => {
 }
 
 export const isNode = (appHeirarchy, key) => 
-    isNothing(getExactNodeForPath(appHeirarchy)(key))
+    isSomething(getExactNodeForPath(appHeirarchy)(key))
 
 export const getActualKeyOfParent = (parentNodeKey, actualChildKey) => 
     $(actualChildKey, [

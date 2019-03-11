@@ -1,7 +1,7 @@
 import {permissionTypes} from "./authCommon";
 import {values, includes, some} from "lodash/fp";
 import {$, isNothing, apiWrapperSync, events} from "../common";
-import {getNodeByKeyOrNodeKey} from "../templateApi/heirarchy";
+import {getNodeByKeyOrNodeKey, isNode} from "../templateApi/heirarchy";
 import {alwaysAuthorized} from "./permissions";
 
 export const isAuthorized = (app) => (permissionType, resourceKey) => 
@@ -27,16 +27,23 @@ export const _isAuthorized =  (app, permissionType, resourceKey) => {
         return false;
     }
 
-    const permMatchesResource = userperm => 
-        (userperm.type === permissionType)
+    const permMatchesResource = userperm => {
+
+        const nodeKey = isNothing(resourceKey) 
+                        ? null
+                        : isNode(app.heirarchy, resourceKey)
+                        ? getNodeByKeyOrNodeKey(
+                            app.heirarchy, resourceKey).nodeKey()
+                        : resourceKey;
+
+        return (userperm.type === permissionType)
         &&
         (
             isNothing(resourceKey)
             ||
-            getNodeByKeyOrNodeKey(
-                    app.heirarchy,
-                    resourceKey).nodeKey() === userperm.nodeKey
+            nodeKey === userperm.nodeKey
         );    
+    }
 
     return $(app.user.permissions, [
         some(permMatchesResource)

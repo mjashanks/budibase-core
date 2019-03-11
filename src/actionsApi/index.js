@@ -1,7 +1,7 @@
 import {executeAction} from "./execute";
 
-export const getApi = app => {
-    executeAction: executeAction(app)
-};
+export const getActionsApi = app => ({
+    execute: executeAction(app)
+});
 
-export default getApi;
+export default getActionsApi;

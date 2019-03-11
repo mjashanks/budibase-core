@@ -6,9 +6,9 @@ export const executeAction = app => (actionName, options) => {
     apiWrapperSync(
         app, 
         events.actionsApi.execute,
-        permission.executeAction.get(actionName),
+        permission.executeAction.isAuthorized(actionName),
         {actionName, options},
-        _executeAction, app.behaviourSources, app.actions[actionName], options
+        app.actions[actionName], options
     );
 }
 

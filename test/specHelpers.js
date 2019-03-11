@@ -1,6 +1,6 @@
 import path from "path";
 import {getAppApis, getRecordApi, 
-    getCollectionApi, getIndexApi}  from "../src";
+    getCollectionApi, getIndexApi, getActionsApi}  from "../src";
 import memory from "./memory";
 import {setupDatastore} from "../src/appInitialise";
 import {configFolder, fieldDefinitions, 
@@ -15,6 +15,7 @@ import {createEventAggregator} from "../src/appInitialise/eventAggregator";
 import {filter} from "lodash/fp";
 import {createBehaviourSources} from "../src/actionsApi/buildBehaviourSource";
 import {createAction, createTrigger} from "../src/templateApi/createActions";
+import {initialiseActions} from "../src/actionsApi/initialise";
 import {cleanup} from "../src/transactions/cleanup";
 import nodeCrypto from "./nodeCrypto";
 import {permission} from "../src/authApi/permissions";
@@ -44,14 +45,16 @@ export const getMemoryTemplateApi = () => {
 
 // TODO: subscribe actions
 export const appFromTempalteApi = async (templateApi, disableCleanupTransactions=false) => {
+    const appDef = await templateApi.getApplicationDefinition();
     const app = {
-        heirarchy:(await templateApi.getApplicationDefinition()).heirarchy, 
+        heirarchy:appDef.heirarchy, 
         datastore:templateApi._storeHandle,
         publish:templateApi._eventAggregator.publish,
         _eventAggregator: templateApi._eventAggregator,
         getEpochTime : async () => (new Date()).getTime(),
         crypto:nodeCrypto,
-        user:{name:"bob", permissions: []}
+        user:{name:"bob", permissions: []},
+        actions:{}
     }; 
     app.removePermission = removePermission(app);
     app.withOnlyThisPermission = withOnlyThisPermission(app);
@@ -348,6 +351,8 @@ export const setupAppheirarchy = async (creator, disableCleanupTransactions=fals
     const collectionApi = getCollectionApi(app);
     const indexApi = getIndexApi(app);
     const authApi = getAuthApi(app);
+    const actionsApi = getActionsApi(app);
+    actionsApi._app = app;
     await collectionApi.initialiseAll();
 
     return ({
@@ -356,6 +361,7 @@ export const setupAppheirarchy = async (creator, disableCleanupTransactions=fals
         templateApi,
         indexApi,
         authApi,
+        actionsApi,
         appHeirarchy:heirarchy,
         subscribe:templateApi._eventAggregator.subscribe, 
         app
@@ -442,7 +448,7 @@ export const createValidActionsAndTriggers = () => {
 
 export const createAppDefinitionWithActionsAndTriggers = async () => {
 
-    const {appHeirarchy, templateApi} = await setupAppheirarchy(
+    const {appHeirarchy, templateApi, app, actionsApi} = await setupAppheirarchy(
         basicAppHeirarchyCreator_WithFields
     );
 
@@ -454,10 +460,17 @@ export const createAppDefinitionWithActionsAndTriggers = async () => {
     await templateApi.saveApplicationHeirarchy(appHeirarchy.root);
     
     const actionsAndTriggers = createValidActionsAndTriggers();
-    const {allActions, allTriggers} = actionsAndTriggers;
+    const {allActions, allTriggers, behaviourSources} = actionsAndTriggers;
     await templateApi.saveActionsAndTriggers(allActions, allTriggers);
+    app.actions = initialiseActions(
+        templateApi._eventAggregator.subscribe,
+        behaviourSources, 
+        allActions, 
+        allTriggers);
+    app.user.permissions = generateFullPermissions(app);
+    app.behaviourSources = behaviourSources;
     const appDefinition = await templateApi.getApplicationDefinition();
-    return {templateApi, appDefinition, ...actionsAndTriggers, ...appHeirarchy};
+    return {templateApi, appDefinition, ...actionsAndTriggers, ...appHeirarchy, app, actionsApi};
 };
 
 
