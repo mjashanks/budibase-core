@@ -20,6 +20,8 @@ import {cleanup} from "../src/transactions/cleanup";
 import nodeCrypto from "./nodeCrypto";
 import {permission} from "../src/authApi/permissions";
 import {generateFullPermissions} from "../src/authApi/generateFullPermissions"
+import {initialiseData} from "../src/appInitialise/initialiseData";
+
 const exp = module.exports;
 
 export const testFileArea = (testNameArea) => path.join("test", "fs_test_area", testNameArea);
@@ -346,6 +348,7 @@ export const basicAppHeirarchyCreator_WithFields_AndIndexes = templateApi =>
 export const setupAppheirarchy = async (creator, disableCleanupTransactions=false) => {
     const {templateApi} = getMemoryTemplateApi();
     const heirarchy = creator(templateApi);
+    await initialiseData(templateApi._storeHandle, {heirarchy:heirarchy.root, actions:[], triggers:[]});
     await templateApi.saveApplicationHeirarchy(heirarchy.root);
     const app = await appFromTempalteApi(templateApi, disableCleanupTransactions);
     const collectionApi = getCollectionApi(app);
@@ -353,7 +356,6 @@ export const setupAppheirarchy = async (creator, disableCleanupTransactions=fals
     const authApi = getAuthApi(app);
     const actionsApi = getActionsApi(app);
     actionsApi._app = app;
-    await collectionApi.initialiseAll();
 
     return ({
         recordApi: await getRecordApi(app),

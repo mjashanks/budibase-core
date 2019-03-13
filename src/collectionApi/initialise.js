@@ -1,40 +1,38 @@
 import {getFlattenedHierarchy, hasNoMatchingAncestors, 
     isRecord, isCollection, isShardedIndex, 
     getExactNodeForPath, isGlobalIndex} from "../templateApi/heirarchy";
-import {$, allTrue, joinKey, tryAwaitOrIgnore} from "../common";
+import {$, allTrue, joinKey} from "../common";
 import {filter} from "lodash/fp";
 import {getShardMapKey, getUnshardedIndexDataKey, createIndexFile} from "../indexing/sharding";
-import {TRANSACTIONS_FOLDER} from "../transactions/transactionsCommon";
-import {AUTH_FOLDER, USERS_LIST_FILE, ACCESS_LEVELS_FILE} from "../authApi/authCommon";
 
-export const initialiseIndex = async (app, parentKey, index) => {
+export const initialiseIndex = async (datastore, parentKey, index) => {
     const indexKey = joinKey(parentKey, index.name);
 
-    await app.datastore.createFolder(indexKey);
+    await datastore.createFolder(indexKey);
 
     if(isShardedIndex(index)) {
-        await app.datastore.createFile(
+        await datastore.createFile(
             getShardMapKey(indexKey),
             "[]"
         );
     } else {
         await createIndexFile(
-            app.datastore,
+            datastore,
             getUnshardedIndexDataKey(indexKey), 
             index
         );
     }
 };
 
-const ensureCollectionIsInitialised = async (app, node, parentKey) => {
+const ensureCollectionIsInitialised = async (datastore, node, parentKey) => {
 
-    if(!await app.datastore.exists(parentKey)) {
-        await app.datastore.createFolder(parentKey);
-        await app.datastore.createFolder(
+    if(!await datastore.exists(parentKey)) {
+        await datastore.createFolder(parentKey);
+        await datastore.createFolder(
             joinKey(parentKey,"allids")
         );
         for(let childRecord of node.children) {
-            await app.datastore.createFolder(
+            await datastore.createFolder(
                 joinKey(
                     parentKey,
                     "allids",
@@ -46,12 +44,12 @@ const ensureCollectionIsInitialised = async (app, node, parentKey) => {
 
     for(let index of node.indexes) {
         const indexKey = joinKey(parentKey, index.name);
-        if(!await app.datastore.exists(indexKey))
-            await initialiseIndex(app, parentKey, index);
+        if(!await datastore.exists(indexKey))
+            await initialiseIndex(datastore, parentKey, index);
     }    
-}
+};
 
-export const initialiseAll = app => async () => {
+export const initialiseRootCollections = async (datastore, heirarchy) => {
 
     const collectionThatIsNotAnAncestorOfARecord = 
         allTrue(
@@ -59,7 +57,7 @@ export const initialiseAll = app => async () => {
             isCollection
         );
 
-    const flatheirarchy = getFlattenedHierarchy(app.heirarchy);
+    const flatheirarchy = getFlattenedHierarchy(heirarchy);
 
     const collections = $(flatheirarchy, [
         filter(collectionThatIsNotAnAncestorOfARecord)
@@ -71,32 +69,15 @@ export const initialiseAll = app => async () => {
     
     for(let col of collections) {
         await ensureCollectionIsInitialised(
-                app, 
+                datastore, 
                 col, 
                 col.pathRegx());
     }
 
     for(let index of globalIndexes) {
-        if(!await app.datastore.exists(index.nodeKey()))
-            await initialiseIndex(app, "", index);
-    }
-
-    
-    try {
-        await app.datastore.createFolder(TRANSACTIONS_FOLDER);
-    }catch(_){};
-
-    try {
-        await app.datastore.createFolder(AUTH_FOLDER);
-    }catch(_){};
-
-    try {
-        await app.datastore.createJson(USERS_LIST_FILE, []);
-    }catch(_){};
-
-    try {
-        await app.datastore.createJson(ACCESS_LEVELS_FILE, {version:0,levels:[]});
-    }catch(_){};
+        if(!await datastore.exists(index.nodeKey()))
+            await initialiseIndex(datastore, "", index);
+    }    
 
 };
 
@@ -109,7 +90,7 @@ export const initialiseChildCollections = async (app, recordKey) => {
 
     for(let child of childCollections) {
         await ensureCollectionIsInitialised(
-            app,
+            app.datastore,
             child,
             joinKey(recordKey, child.name)
         );

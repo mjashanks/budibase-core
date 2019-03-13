@@ -32,7 +32,7 @@ export const splitKey = $$(trimKeySep, splitByKeySep);
 export const getDirFomKey = $$(splitKey, dropRight, (p) => joinKey(...p));
 export const getFileFromKey = $$(splitKey, takeRight, head);
 
-export const configFolder = ".config";
+export const configFolder = keySep + ".config";
 export const fieldDefinitions = joinKey(configFolder, "fields.json");
 export const templateDefinitions = joinKey(configFolder, "templates.json");
 export const appDefinitionFile = joinKey(configFolder, "appDefinition.json");

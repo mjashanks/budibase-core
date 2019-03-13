@@ -95,7 +95,7 @@ const initialiseReverseReferenceIndexes = async (app, record) => {
 
     for(let indexNode of indexNodes) {
         await initialiseIndex(
-            app, record.key, indexNode
+            app.datastore, record.key, indexNode
         );
     }
 }
