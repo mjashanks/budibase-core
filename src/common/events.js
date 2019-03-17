@@ -48,7 +48,8 @@ const _events = {
         scorePassword: common(),
         isValidPassword: common(),
         validateUser: common(),
-        validateAccessLevels: common()
+        validateAccessLevels: common(),
+        setUserAccessLevels: common()
     },
     templateApi: {
         saveApplicationHeirarchy: common(),

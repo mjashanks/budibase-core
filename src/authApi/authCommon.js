@@ -26,7 +26,8 @@ export const permissionTypes = {
     WRITE_ACCESS_LEVELS : "write access levels",
     LIST_USERS : "list users",
     LIST_ACCESS_LEVELS : "list access levels",
-    EXECUTE_ACTION : "execute action"
+    EXECUTE_ACTION : "execute action",
+    SET_USER_ACCESS_LEVELS: "set user access levels"
 }
 
 export const getUserByName = (users, name) => $(users, [

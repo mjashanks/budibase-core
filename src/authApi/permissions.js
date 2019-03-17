@@ -48,6 +48,8 @@ const listUsers = staticPermission(permissionTypes.LIST_USERS);
 
 const listAccessLevels = staticPermission(permissionTypes.LIST_ACCESS_LEVELS);
 
+const setUserAccessLevels = staticPermission(permissionTypes.SET_USER_ACCESS_LEVELS);
+
 const executeAction = nodePermission(permissionTypes.EXECUTE_ACTION);
 
 export const alwaysAuthorized = () => true;
@@ -58,5 +60,5 @@ export const permission = {
     setPassword, readIndex, createTemporaryAccess,
     enableDisableUser, writeAccessLevels, listUsers,
     listAccessLevels, manageIndex, manageCollection,
-    executeAction
+    executeAction, setUserAccessLevels
 };
