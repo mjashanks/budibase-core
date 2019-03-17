@@ -85,5 +85,6 @@ export {getCollectionApi} from "./collectionApi";
 export {getIndexApi} from "./indexApi";
 export {setupDatastore} from "./appInitialise";
 export {getActionsApi} from "./actionsApi";
+export {initialiseData} from "./appInitialise/initialiseData";
 
 export default getAppApis;
