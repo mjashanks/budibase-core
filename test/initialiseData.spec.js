@@ -1,51 +1,65 @@
-import {setupAppheirarchy, basicAppHeirarchyCreator_WithFields_AndIndexes} from "./specHelpers";
+import {getMemoryTemplateApi, basicAppHeirarchyCreator_WithFields_AndIndexes} from "./specHelpers";
 import {initialiseData} from "../src/appInitialise/initialiseData";
+import {TRANSACTIONS_FOLDER} from "../src/transactions/transactionsCommon";
+import {AUTH_FOLDER, USERS_LIST_FILE, ACCESS_LEVELS_FILE} from "../src/authApi/authCommon";
 
 describe("initialiseData", () => {
 
     it("should create csv file for each index, when does not exist", async () => {
-        await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+        const {appDef, datastore} = getApplicationDefinition();
+        await initialiseData(datastore, appDef);
     
-        expect(await collectionApi._store.exists(`/customers/default/index.csv`)).toBeTruthy();
-        expect(await collectionApi._store.exists(`/customers/default`)).toBeTruthy();
-        expect(await collectionApi._store.exists(`/customers/deceased/index.csv`)).toBeTruthy();
-        expect(await collectionApi._store.exists(`/customers/deceased`)).toBeTruthy();
+        expect(await datastore.exists(`/customers/default/index.csv`)).toBeTruthy();
+        expect(await datastore.exists(`/customers/default`)).toBeTruthy();
+        expect(await datastore.exists(`/customers/deceased/index.csv`)).toBeTruthy();
+        expect(await datastore.exists(`/customers/deceased`)).toBeTruthy();
     });
 
     it("should create folder for collection", async () => {
-
-        await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
-        expect(await collectionApi._store.exists(`/customers`)).toBeTruthy();
+        const {appDef, datastore} = getApplicationDefinition();
+        await initialiseData(datastore, appDef);
+        expect(await datastore.exists(`/customers`)).toBeTruthy();
     });
 
-    it("should not overwrite existing index files", async () => {
-        await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
-
-        const defaultIndexName = "/customers/default/index.csv";
-        const deceasedIndexName = "/customers/deceased/index.csv";
-
-        await collectionApi._store.updateFile(defaultIndexName, "default test");
-        await collectionApi._store.updateFile(deceasedIndexName, "deceased test");
-        
-        await collectionApi.initialiseAll();
-
-        const defaultIndexContent = await collectionApi._store.loadFile(defaultIndexName);
-        const deceasedIndexContent = await collectionApi._store.loadFile(deceasedIndexName);
-
-        expect(defaultIndexContent).toBe("default test");
-        expect(deceasedIndexContent).toBe("deceased test");
-    });
 
     it("should create allids folders", async () => {
-        const {collectionApi, appHeirarchy} = 
-            await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+        const {appDef, datastore, h} = getApplicationDefinition();
+        await initialiseData(datastore, appDef);
 
-        await collectionApi.initialiseAll();
-
-        const allIdsTypeFolder = "/customers/allids/" + appHeirarchy.customerRecord.recordNodeId;
+        const allIdsTypeFolder = "/customers/allids/" + h.customerRecord.recordNodeId;
         const allIdsFolder = "/customers/allids";
-        expect(await collectionApi._store.exists(allIdsTypeFolder)).toBeTruthy();
-        expect(await collectionApi._store.exists(allIdsFolder)).toBeTruthy();
+        expect(await datastore.exists(allIdsTypeFolder)).toBeTruthy();
+        expect(await datastore.exists(allIdsFolder)).toBeTruthy();
     });
+
+    it("should create transactions folder", async () => {
+        const {appDef, datastore} = getApplicationDefinition();
+        await initialiseData(datastore, appDef);
+        expect(await datastore.exists(TRANSACTIONS_FOLDER)).toBeTruthy();
+    });
+
+    it("should create auth folder", async () => {
+        const {appDef, datastore} = getApplicationDefinition();
+        await initialiseData(datastore, appDef);
+        expect(await datastore.exists(AUTH_FOLDER)).toBeTruthy();
+    });
+
+    it("should create users list", async () => {
+        const {appDef, datastore} = getApplicationDefinition();
+        await initialiseData(datastore, appDef);
+        expect(await datastore.exists(USERS_LIST_FILE)).toBeTruthy();
+    });
+
+    it("should create access levels file", async () => {
+        const {appDef, datastore} = getApplicationDefinition();
+        await initialiseData(datastore, appDef);
+        expect(await datastore.exists(ACCESS_LEVELS_FILE)).toBeTruthy();
+    });
+
+    const getApplicationDefinition = () => {
+        const {templateApi, app} = getMemoryTemplateApi();
+        const h = basicAppHeirarchyCreator_WithFields_AndIndexes(templateApi);
+        return {appDef:{heirarchy:h.root, actions:[], triggers:[]}, datastore:app.datastore, h};
+    }
 
 });
