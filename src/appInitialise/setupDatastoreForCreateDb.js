@@ -1,3 +1,4 @@
+import {isNothing} from "../common";
 
 export const getDatabaseCreator = datastore => ({
     createEmptyMasterDb: createEmptyMasterDb(datastore),
@@ -10,9 +11,23 @@ const createEmptyMasterDb = ds => async () =>
     await ds.createEmptyDb();
 
 
-const createEmptyProductSetDb = ds => async (productSetId) => 
-    await ds.createEmptyDb(productSetId);
+const createEmptyProductSetDb = ds => async (productSetId) => {
+    
+    if(isNothing(productSetId))
+        throw new Error("CreateDb: Product Set Id not supplied");
+    
+    return await ds.createEmptyDb(productSetId);
+}
 
 
-const createEmptyProductInstanceDb = ds => async (productSetId, productId, productInstanceId) => 
-    await ds.createEmptyDb(productSetId, productId, productInstanceId)
+const createEmptyProductInstanceDb = ds => async (productSetId, productId, productInstanceId) => {
+    
+    if(isNothing(productSetId))
+        throw new Error("CreateDb: Product Set Id not supplied");
+    if(isNothing(productId))
+        throw new Error("CreateDb: Product Id not supplied");
+    if(isNothing(productInstanceId))
+        throw new Error("CreateDb: Product Instance Id not supplied");
+
+    return await ds.createEmptyDb(productSetId, productId, productInstanceId);
+}
