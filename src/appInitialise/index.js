@@ -11,6 +11,8 @@ export const setupDatastore = (datastore) => {
     datastore.loadJson = loadJson(datastore);
     datastore.createJson = createJson(datastore);
     datastore.updateJson = updateJson(datastore);
+    if(datastore.createEmptyDb) 
+        delete datastore.createEmptyDb;
     return datastore;
 };
 
