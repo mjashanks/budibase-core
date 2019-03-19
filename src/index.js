@@ -78,7 +78,6 @@ export const getAppApis = async (store, behaviourSources = {},
 };
 
 export {events, eventsList} from "./common/events";
-
 export {getTemplateApi} from "./templateApi";
 export {getRecordApi} from "./recordApi";
 export {getCollectionApi} from "./collectionApi";
@@ -86,5 +85,6 @@ export {getIndexApi} from "./indexApi";
 export {setupDatastore} from "./appInitialise";
 export {getActionsApi} from "./actionsApi";
 export {initialiseData} from "./appInitialise/initialiseData";
+export {getDatabaseCreator} from "./appInitialise/setupDatastoreForCreateDb";
 
 export default getAppApis;
