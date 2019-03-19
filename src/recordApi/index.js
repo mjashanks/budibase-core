@@ -13,8 +13,7 @@ const api = app => {
         load: load(app), 
         delete: deleteRecord(app, false),
         validate: validate(app),
-        getContext: getContext(app),
-        _storeHandle : app.datastore
+        getContext: getContext(app)
     });
 };
 

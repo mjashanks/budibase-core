@@ -6,8 +6,7 @@ import {aggregates} from "./aggregates";
 export const getIndexApi = app => ({
     listItems : listItems(app), 
     buildIndex: buildIndex(app),
-    aggregates: aggregates(app),
-    _store : app.datastore
+    aggregates: aggregates(app)
 });
 
 export default getIndexApi;

@@ -5,8 +5,7 @@ import {deleteCollection} from "./delete";
 export const getCollectionApi = app => ({
     getAllowedRecordTypes : getAllowedRecordTypes(app),
     getAllIdsIterator : getAllIdsIterator(app),
-    delete: deleteCollection(app),
-    _store : app.datastore
+    delete: deleteCollection(app)
 });
 
 export default getCollectionApi;

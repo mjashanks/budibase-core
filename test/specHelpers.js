@@ -42,6 +42,7 @@ export const getMemoryTemplateApi = () => {
     app.withNoPermissions = withNoPermissions(app);
     const templateApi = getTemplateApi(app);
     templateApi._eventAggregator = createEventAggregator();
+    templateApi._storeHandle = app.datastore;
     return {templateApi, app};
 }
 
@@ -85,8 +86,11 @@ const withOnlyThisPermission = app => perm =>
 const withNoPermissions = app => () => 
     app.user.permissions = [];
 
-export const getRecordApiFromTemplateApi = async (templateApi, disableCleanupTransactions=false) => 
-    getRecordApi(await appFromTempalteApi(templateApi, disableCleanupTransactions));
+export const getRecordApiFromTemplateApi = async (templateApi, disableCleanupTransactions=false) => {
+    const app = await appFromTempalteApi(templateApi, disableCleanupTransactions);
+    const recordapi = getRecordApi();
+    recordapi._storeHandle = app.datastore;
+}
 
 export const getCollectionApiFromTemplateApi = async (templateApi, disableCleanupTransactions=false) => 
     getCollectionApi(await appFromTempalteApi(templateApi, disableCleanupTransactions));
@@ -355,10 +359,12 @@ export const setupAppheirarchy = async (creator, disableCleanupTransactions=fals
     const indexApi = getIndexApi(app);
     const authApi = getAuthApi(app);
     const actionsApi = getActionsApi(app);
+    const recordApi = await getRecordApi(app);
+    recordApi._storeHandle = app.datastore;
     actionsApi._app = app;
 
     return ({
-        recordApi: await getRecordApi(app),
+        recordApi,
         collectionApi,
         templateApi,
         indexApi,
