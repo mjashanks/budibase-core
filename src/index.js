@@ -85,6 +85,6 @@ export {getIndexApi} from "./indexApi";
 export {setupDatastore} from "./appInitialise";
 export {getActionsApi} from "./actionsApi";
 export {initialiseData} from "./appInitialise/initialiseData";
-export {getDatabaseFactory} from "./appInitialise/setupDatastoreForCreateDb";
+export {getDatabaseManager} from "./appInitialise/databaseManager";
 
 export default getAppApis;
