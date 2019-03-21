@@ -10,6 +10,7 @@ import {isSomething} from "./common";
 import {cleanup} from "./transactions/cleanup";
 import {generateFullPermissions} from "./authApi/generateFullPermissions";
 import {getApplicationDefinition} from "./templateApi/getApplicationDefinition";
+import common from "./common";
 
 export const getAppApis = async (store, behaviourSources = {}, 
                                 cleanupTransactions = null, 
@@ -86,5 +87,6 @@ export {setupDatastore} from "./appInitialise";
 export {getActionsApi} from "./actionsApi";
 export {initialiseData} from "./appInitialise/initialiseData";
 export {getDatabaseManager} from "./appInitialise/databaseManager";
+export {common};
 
 export default getAppApis;
