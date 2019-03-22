@@ -16,7 +16,9 @@ const _events = {
         getContext: common(),
         getNew: common(),
         load: common(),
-        validate: common()
+        validate: common(),
+        uploadFile: common(),
+        downloadFile: common()
     },
     indexApi : {
         buildIndex: common(),

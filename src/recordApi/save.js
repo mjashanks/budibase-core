@@ -45,6 +45,8 @@ const _save = async (app, record, context, skipValidation=false) => {
             app, recordClone);
         recordClone.transactionId = transaction.id;
         await app.datastore.createFolder(recordClone.key)
+        await app.datastore.createFolder(
+            joinKey(recordClone.key, "files"));
         await app.datastore.createJson(
             getRecordFileName(recordClone.key), 
             recordClone

@@ -10,10 +10,11 @@ import number from "./number";
 import datetime from "./datetime";
 import array from "./array";
 import reference from "./reference";
+import file from "./file";
 
 const allTypes = () => {
     const basicTypes = {
-        string, number, datetime, bool, reference
+        string, number, datetime, bool, reference, filename: file
     };        
 
     const arrays = $(basicTypes, [
@@ -67,5 +68,9 @@ export const detectType = value => {
     if(isObject(value) 
        && has(value, "key")
        && has(value, "value")) return reference;
+    if(isObject(value)
+        && has(value, "filename")
+        && has(value, "uploaded")) return file;
+    
     throw new Error("cannot determine type: " + JSON.stringify(value));
 }
