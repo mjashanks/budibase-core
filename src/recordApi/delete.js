@@ -38,6 +38,9 @@ export const _deleteRecord = async (app, key, disableCleanup) => {
     
     await app.datastore.deleteFile(
         getRecordFileName(key));
+
+    await deleteFiles(app, key);
+
     await removeFromAllIds(app.heirarchy, app.datastore)(record);
     
     if(!disableCleanup)
@@ -69,4 +72,20 @@ const deleteIndexes = async (app, key) => {
     for(let i of reverseIndexKeys) {
         await _deleteIndex(app, i, true);
     }
+}
+
+const deleteFiles = async (app, key) => {
+    
+    const filesFolder = joinKey(key, "files");
+    const allFiles = await app.datastore.getFolderContents(
+        filesFolder
+    );
+
+    for(let file of allFiles) {
+        await app.datastore.deleteFile(file);
+    }
+    
+    await app.datastore.deleteFolder(
+        joinKey(key, "files")
+    );
 }

@@ -1,9 +1,9 @@
 import {includes} from "lodash/fp";
 import {_load} from "./load";
-import {apiWrapper, events, $, joinKey} from "../common";
+import {apiWrapper, events, splitKey, 
+        $, joinKey} from "../common";
 import { getExactNodeForPath} from "../templateApi/heirarchy";
 import {permission} from "../authApi/permissions";
-import {splitKey, joinKey} from "../common";
 import { join } from "path";
 
 export const uploadFile = (app) => async (recordKey, readableStream, relativePath) => 
