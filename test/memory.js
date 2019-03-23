@@ -66,6 +66,12 @@ export const readableFileStream = data => async (path) => {
     return s;
 };
 
+export const getFileSize = data => async (path) => {
+    if(!await exists(data)(path)) 
+        throw new Error("cannot get size of " + path + " - does not exist"); 
+    return data[path].length;
+} 
+
 export const renameFile = data => async (oldKey, newKey) => {
     if(!await exists(data)(oldKey)) throw new Error("cannot rename path: " + oldKey + " ... does not exist");
     if(await exists(data)(newKey)) throw new Error("cannot rename path: " + newKey + " ... already exists");    
@@ -121,6 +127,7 @@ export default data => {
         writableFileStream: writableFileStream(data),
         renameFile: renameFile(data),
         getFolderContents: getFolderContents(data),
+        getFileSize: getFileSize(data),
         datastoreType : "memory",
         datastoreDescription: "",
         data 

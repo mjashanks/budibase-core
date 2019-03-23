@@ -2,10 +2,18 @@ import {typeFunctions, parsedFailed,
     parsedSuccess, getDefaultExport} from "./typeHelpers";
 import {last, has, isString, intersection, 
     isNull, isNumber} from "lodash/fp";
-import {switchCase, defaultCase, 
+import {switchCase, defaultCase, none,
         $, splitKey} from "../common";
 
 const illegalCharacters = "*?\\/:<>|\0\b\f\v";
+
+export const isLegalFilename = filePath => {
+    const fn = fileName(filePath);
+    return fn.length <= 255
+    && intersection(fn.split(""))
+                    (illegalCharacters.split("")).length === 0
+    && none(f => f === "..")(splitKey(filePath));
+}
 
 const fileNothing = () => ({relativePath:"",size:0});
 
@@ -20,8 +28,8 @@ const fileTryParse = v =>
         [defaultCase, parsedFailed]
     )(v);
 
-const fileName = file => 
-    $(file.relativePath, [
+const fileName = filePath => 
+    $(filePath, [
         splitKey,
         last
     ]);
@@ -31,8 +39,7 @@ const isValidFile = f => {
     && has("relativePath")(f) && has("size")(f)
     && isNumber(f.size)
     && isString(f.relativePath) 
-    && fileName(f).length <= 255
-    && intersection(illegalCharacters.split())(fileName(f).split()).length === 0;
+    && isLegalFilename(f.relativePath)
 }
 
 const options = {};
