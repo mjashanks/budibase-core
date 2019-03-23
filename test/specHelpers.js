@@ -175,6 +175,7 @@ export const withFields = (heirarchy, templateApi) => {
     newCustomerField("isalive", "bool", "true");
     newCustomerField("createddate", "datetime");
     newCustomerField("age", "number");
+    newCustomerField("profilepic", "file");
     const customerPartnerField = newCustomerField("partner", "reference", undefined, {
         indexNodeKey : "/partners/partnersReference",
         displayValue : "name",

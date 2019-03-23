@@ -8,6 +8,7 @@ const getField = type => {
 };
 
 const nothingReference = {key:""};
+const nothingFile = {relativePath:"",size:0};
 
 describe("types > getNew", () => {
 
@@ -35,6 +36,13 @@ describe("types > getNew", () => {
         field.getInitialValue = "default";
         const value = getNewFieldValue(field);
         expect(value).toEqual(nothingReference);
+    });
+
+    it("file should return {relativePath:'', size:0} when fields getInitialValue is 'default'", () => {
+        const field = getField("file");
+        field.getInitialValue = "default";
+        const value = getNewFieldValue(field);
+        expect(value).toEqual(nothingFile);
     });
 
     it("array should return empty array when field getInitialValue is 'default'", () => {
@@ -99,10 +107,15 @@ describe("types > getNew", () => {
         test_getNewFieldValue("array<number>", 1, [])();
         test_getNewFieldValue("array<datetime>", "", [])();
         test_getNewFieldValue("array<reference>", "", [])();
+        test_getNewFieldValue("array<file>", "", [])();
     });
 
     it("reference should {key:''} when function not recognised", () => {
         test_getNewFieldValue("reference", "blah", nothingReference)();
+    });
+
+    it("file should return {relativePath:'',size:0} when function not recognised", () => {
+        test_getNewFieldValue("file", "blah", nothingFile)();
     });
 });
 
@@ -129,6 +142,7 @@ describe("types > getSafeFieldValue", () => {
         test_getSafeFieldValue("number", "age", null, null)();
         test_getSafeFieldValue("array<string>", "tags", null, [])();
         test_getSafeFieldValue("reference", "moretags", null, nothingReference)();
+        test_getSafeFieldValue("file", "moretags", null, nothingFile)();
     });
 
     it("bool should parse a defined set of true/false aliases", () => {
@@ -204,6 +218,12 @@ describe("types > getSafeFieldValue", () => {
         test_getSafeFieldValue("reference", "customer", 
                                 {key:"/customer/1234", value:"bob"}, 
                                 {key:"/customer/1234", value:"bob"})();
+    });
+
+    it("reference should parse reference", () => {
+        test_getSafeFieldValue("file", "profilepic", 
+                                {relativePath:"path/to/pic.jpg", size:120}, 
+                                {relativePath:"path/to/pic.jpg", size:120})();
     });
 
 });

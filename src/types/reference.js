@@ -5,7 +5,6 @@ import {isString, isObjectLike,
     isNull, has, isEmpty} from "lodash";
 import {switchCase, defaultCase, 
     isNonEmptyString, isArrayOfString} from "../common";
-import {uniqueIndexName} from "../indexing/read";
 
 const referenceNothing = () => ({key:""});
 
