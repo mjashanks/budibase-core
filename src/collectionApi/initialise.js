@@ -1,28 +1,7 @@
 import {getFlattenedHierarchy, hasNoMatchingAncestors, 
-    isRecord, isCollection, isShardedIndex, 
-    getExactNodeForPath, isGlobalIndex} from "../templateApi/heirarchy";
+    isRecord, isCollection, getExactNodeForPath} from "../templateApi/heirarchy";
 import {$, allTrue, joinKey} from "../common";
 import {filter} from "lodash/fp";
-import {getShardMapKey, getUnshardedIndexDataKey, createIndexFile} from "../indexing/sharding";
-
-export const initialiseIndex = async (datastore, parentKey, index) => {
-    const indexKey = joinKey(parentKey, index.name);
-
-    await datastore.createFolder(indexKey);
-
-    if(isShardedIndex(index)) {
-        await datastore.createFile(
-            getShardMapKey(indexKey),
-            "[]"
-        );
-    } else {
-        await createIndexFile(
-            datastore,
-            getUnshardedIndexDataKey(indexKey), 
-            index
-        );
-    }
-};
 
 const ensureCollectionIsInitialised = async (datastore, node, parentKey) => {
 
@@ -39,14 +18,7 @@ const ensureCollectionIsInitialised = async (datastore, node, parentKey) => {
                     childRecord.recordNodeId.toString())
             );
         }
-    }
-    
-
-    for(let index of node.indexes) {
-        const indexKey = joinKey(parentKey, index.name);
-        if(!await datastore.exists(indexKey))
-            await initialiseIndex(datastore, parentKey, index);
-    }    
+    }   
 };
 
 export const initialiseRootCollections = async (datastore, heirarchy) => {
@@ -62,22 +34,13 @@ export const initialiseRootCollections = async (datastore, heirarchy) => {
     const collections = $(flatheirarchy, [
         filter(collectionThatIsNotAnAncestorOfARecord)
     ]);
-
-    const globalIndexes = $(flatheirarchy, [
-        filter(isGlobalIndex)
-    ]);
     
     for(let col of collections) {
         await ensureCollectionIsInitialised(
                 datastore, 
                 col, 
                 col.pathRegx());
-    }
-
-    for(let index of globalIndexes) {
-        if(!await datastore.exists(index.nodeKey()))
-            await initialiseIndex(datastore, "", index);
-    }    
+    }   
 
 };
 

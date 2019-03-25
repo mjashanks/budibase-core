@@ -1,4 +1,4 @@
-import {getRelevantHeirarchalIndexes,
+import {getRelevantAncestorIndexes,
     getRelevantReverseReferenceIndexes} from "../indexing/relevant";
 import {evaluate} from "../indexing/evaluate";
 import {$$, $, isSomething, 
@@ -13,7 +13,7 @@ import {getIndexedDataKey} from "../indexing/sharding";
 import {isUpdate, isCreate, 
         isDelete, isBuildIndex} from "./transactionsCommon";
 import { applyToShard } from "../indexing/apply";
-import {isTopLevelCollectionIndex,getActualKeyOfParent,
+import {getActualKeyOfParent,
         isGlobalIndex, fieldReversesReferenceToIndex, isReferenceIndex,
         getExactNodeForPath} from "../templateApi/heirarchy";
 
@@ -132,7 +132,7 @@ const getUpdateTransactionsByShard = (heirarchy, transactions) => {
     const toWrite = [];
 
     for(let t of updateTransactions) {
-        const heirarchal = getRelevantHeirarchalIndexes(
+        const ancestorIdxs = getRelevantAncestorIndexes(
             heirarchy, t.record);
 
         const referenceChanges = diffReverseRefForUpdate(
@@ -141,8 +141,7 @@ const getUpdateTransactionsByShard = (heirarchy, transactions) => {
         // old records to remove (filtered out)
         const filteredOut_toRemove =
             union(
-                getIndexNodesToApply(toRemoveFilter)(t, heirarchal.collections),
-                getIndexNodesToApply(toRemoveFilter)(t, heirarchal.globalIndexes),
+                getIndexNodesToApply(toRemoveFilter)(t, ancestorIdxs),
                 // still referenced - check filter
                 getIndexNodesToApply(toRemoveFilter)(t, referenceChanges.notChanged),
                 // un referenced - remove if in there already
@@ -153,8 +152,7 @@ const getUpdateTransactionsByShard = (heirarchy, transactions) => {
         // new records to add (filtered in)
         const filteredIn_toAdd =
             union(
-                getIndexNodesToApply(toAddFilter)(t, heirarchal.collections),
-                getIndexNodesToApply(toAddFilter)(t, heirarchal.globalIndexes),
+                getIndexNodesToApply(toAddFilter)(t, ancestorIdxs),
                 // newly referenced - check filter
                 getIndexNodesToApply(n => toAddFilter(n,true))
                                     (t, referenceChanges.newlyReferenced),
@@ -164,8 +162,7 @@ const getUpdateTransactionsByShard = (heirarchy, transactions) => {
 
         const changed = 
             union(
-                getIndexNodesToApply(toUpdateFilter)(t, heirarchal.collections),
-                getIndexNodesToApply(toUpdateFilter)(t, heirarchal.globalIndexes),
+                getIndexNodesToApply(toUpdateFilter)(t, ancestorIdxs),
                 // still referenced - recheck filter
                 getIndexNodesToApply(toUpdateFilter)(t, referenceChanges.notChanged),
             );
@@ -216,8 +213,7 @@ const getBuildIndexTransactionsByShard =  (heirarchy, transactions) => {
     const indexNode = transactions.indexNode;
 
     const getIndexKeys = (t) => {
-        if(isTopLevelCollectionIndex(indexNode)
-          || isGlobalIndex(indexNode)) {
+        if(isGlobalIndex(indexNode)) {
             return [indexNode.nodeKey()];
         } 
 
@@ -297,16 +293,13 @@ const get_Create_Delete_TransactionsByShard = pred => (heirarchy, transactions) 
     const allToApply = [];
 
     for(let t of createTransactions) {
-        const heirarchal = 
-            getRelevantHeirarchalIndexes(heirarchy, t.record);
+        const ancestorIdxs = 
+            getRelevantAncestorIndexes(heirarchy, t.record);
         const reverseRef = 
             getRelevantReverseReferenceIndexes(heirarchy, t.record);
         
         allToApply.push(
-            getIndexNodesToApply(t, heirarchal.collections)
-        );
-        allToApply.push(
-            getIndexNodesToApply(t, heirarchal.globalIndexes)
+            getIndexNodesToApply(t, ancestorIdxs)
         );
         allToApply.push(
             getIndexNodesToApply(t, reverseRef)

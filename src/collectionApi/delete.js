@@ -21,7 +21,6 @@ export const _deleteCollection = async (app, key, disableCleanup) => {
     const node = getExactNodeForPath(app.heirarchy)(key);
     
     await deleteRecords(app, key);
-    await deleteIndexes(app,node, key);
     await deleteAllIdsFolders(app, node, key);
     await deleteCollectionFolder(app, key);
     if(!disableCleanup)
@@ -31,12 +30,6 @@ export const _deleteCollection = async (app, key, disableCleanup) => {
 const deleteCollectionFolder = async (app, key) =>
     await app.datastore.deleteFolder(key);
 
-const deleteIndexes = async (app, node, key) => {
-    for(let index of node.indexes) {
-        const indexKey = joinKey(key, index.name);
-        await _deleteIndex(app, indexKey, true);
-    }
-};
 
 const deleteAllIdsFolders = async (app, node, key) => {
     

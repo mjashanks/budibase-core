@@ -1,13 +1,16 @@
 import {joinKey, splitKey, isNonEmptyString,
     isNothing, $, isSomething} from "../common";
 import {orderBy, constant} from "lodash";
-import {reduce, find, includes, flatten,
+import {reduce, find, includes, flatten, union,
         filter, each, map} from "lodash/fp";
 import {getFlattenedHierarchy, isIndex, 
         isCollection, getNode, getRecordNodeId,
-        getExactNodeForPath} from "../templateApi/heirarchy";
+        getExactNodeForPath, recordNodeIdIsAllowed,
+        isRecord, isRoot,
+        isGlobalIndex} from "../templateApi/heirarchy";
+import { indexTypes } from "../templateApi/indexes";
 
-export const getRelevantHeirarchalIndexes = (appHeirarchy, record) => {
+export const getRelevantAncestorIndexes = (appHeirarchy, record) => {
 
     const key = record.key;
     const keyParts = splitKey(key);
@@ -18,10 +21,10 @@ export const getRelevantHeirarchalIndexes = (appHeirarchy, record) => {
                 [node => node.pathRegx().length],
                 ["desc"]);
 
-    const makeindexNodeAndKey_ForCollectionIndex = (indexNode, indexKey) => 
+    const makeindexNodeAndKey_ForAncestorIndex = (indexNode, indexKey) => 
         makeIndexNodeAndKey(indexNode, joinKey(indexKey, indexNode.name));
 
-    const traverseHeirarchyCollectionIndexesInPath = () => 
+    const traverseAncestorIndexesInPath = () => 
         reduce((acc, part) => {
             const currentIndexKey = joinKey(acc.lastIndexKey, part);
             acc.lastIndexKey = currentIndexKey;
@@ -32,35 +35,31 @@ export const getRelevantHeirarchalIndexes = (appHeirarchy, record) => {
             if(isNothing(nodeMatch)) 
                 return acc;
             
-            if(!isCollection(nodeMatch) || nodeMatch.indexes.length === 0)
+            if(!isRecord(nodeMatch) 
+                || nodeMatch.indexes.length === 0)
                 return acc;
             
             const indexes = $(nodeMatch.indexes, [
-                filter(i => i.allowedRecordNodeIds.length === 0
-                         || includes(recordNodeId)(i.allowedRecordNodeIds))
+                filter(i => i.indexType === indexTypes.ancestor && 
+                        (i.allowedRecordNodeIds.length === 0
+                         || includes(recordNodeId)(i.allowedRecordNodeIds)))
             ]);
 
             each(v => 
                 acc.nodesAndKeys.push(
-                    makeindexNodeAndKey_ForCollectionIndex(v, currentIndexKey)))
+                    makeindexNodeAndKey_ForAncestorIndex(v, currentIndexKey)))
             (indexes);
 
             return acc;             
         }, {lastIndexKey:"", nodesAndKeys:[]})
         (keyParts).nodesAndKeys;
     
-    const getGlobalIndexes = () => 
-        // returns indexes that are direct children of root
-        // and therefor apply globally
-        $(appHeirarchy.indexes, [
-            filter(isIndex),
-            map(c => makeIndexNodeAndKey(c, c.nodeKey()))
-        ]);
-    
-    return ({
-        globalIndexes: getGlobalIndexes(),
-        collections: traverseHeirarchyCollectionIndexesInPath()
-    });
+    const rootIndexes = $(flatHeirarchy, [
+        filter(n => isGlobalIndex(n) && recordNodeIdIsAllowed(n)(recordNodeId)),
+        map(i => makeIndexNodeAndKey(i, i.nodeKey()))
+    ]);
+
+    return union(traverseAncestorIndexesInPath())(rootIndexes);
 };
 
 export const getRelevantReverseReferenceIndexes = (appHeirarchy, record) => 
@@ -82,4 +81,4 @@ export const getRelevantReverseReferenceIndexes = (appHeirarchy, record) =>
 
 const makeIndexNodeAndKey = (indexNode, indexKey) => ({indexNode, indexKey});
 
-export default getRelevantHeirarchalIndexes;
+export default getRelevantAncestorIndexes;

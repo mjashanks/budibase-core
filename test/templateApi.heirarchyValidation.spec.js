@@ -5,22 +5,22 @@ import {getNewField, addField} from "../src/templateApi/fields";
 import {getNewRecordValidationRule, commonRecordValidationRules,
     addRecordValidationRule} from "../src/templateApi/recordValidationRules";
 import { findField } from "../src/templateApi/heirarchy";
+import {findCollectionDefaultIndex} from "./specHelpers";
 
 const createValidHeirarchy = () => {
     const root = createNodes.getNewRootLevel();
 
-    const customerCollection = createNodes.getNewCollectionTemplate(root);
-    customerCollection.name = "customers";
+    const customerCollection = createNodes.getNewCollectionTemplate(root, "customers");
 
-    const customersDefaultIndex = customerCollection.indexes[0];
+    const customersDefaultIndex = findCollectionDefaultIndex(customerCollection);
     const customersNoGroupaggregateGroup = createNodes.getNewAggregateGroupTemplate(customersDefaultIndex);
     customersNoGroupaggregateGroup.name = "Customers Summary";
     const allCustomersOwedFunctions = createNodes.getNewAggregateTemplate(customersNoGroupaggregateGroup);
     allCustomersOwedFunctions.aggregatedValue = "return record.owed";
     allCustomersOwedFunctions.name = "all customers owed amount";
 
-    const partnersCollection = createNodes.getNewCollectionTemplate(root);
-    partnersCollection.name = "partners";
+    const partnersCollection = createNodes.getNewCollectionTemplate(root, "partners");
+
     const partnerRecord = createNodes.getNewRecordTemplate(partnersCollection);
     partnerRecord.name = "partner";
     const businessName = getNewField("string");

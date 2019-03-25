@@ -18,7 +18,7 @@ describe("indexApi > listItems", () => {
         await recordApi.save(record2);
 
         const items_L_shard = await indexApi.listItems(
-            "/customers/customersBySurname", {
+            "/customersBySurname", {
             rangeStartParams: {surname:"L"},
             rangeEndParams: {surname:"L"}
         });
@@ -26,7 +26,7 @@ describe("indexApi > listItems", () => {
         expect(items_L_shard[0].key).toBe(record1.key);
 
         const items_Z_shard = await indexApi.listItems(
-            "/customers/customersBySurname", {
+            "/customersBySurname", {
             rangeStartParams: {surname:"Z"},
             rangeEndParams: {surname:"Z"}
         });
@@ -49,7 +49,7 @@ describe("indexApi > listItems", () => {
         await recordApi.save(record2);
 
         const items_L_shard = await indexApi.listItems(
-            "/customers/customersBySurname", {
+            "/customersBySurname", {
             rangeStartParams: {surname:"K"},
             rangeEndParams: {surname:"M"}
         });
@@ -72,7 +72,7 @@ describe("indexApi > listItems", () => {
         await recordApi.save(record2);
 
         const items_L_shard = await indexApi.listItems(
-            "/customers/customersBySurname", {
+            "/customersBySurname", {
             rangeStartParams: {surname:"K"},
             rangeEndParams: {surname:"Z"}
         });
@@ -93,7 +93,7 @@ describe("indexApi > listItems", () => {
         record2.surname = "Zeecat";
         await recordApi.save(record2);
 
-        const results = await indexApi.listItems("/customers/default",{searchPhrase:"*cat"});
+        const results = await indexApi.listItems("/customers_index",{searchPhrase:"*cat"});
         expect(results.length).toBe(1);
         expect(results[0].surname).toBe("Zeecat");
     });
@@ -110,7 +110,7 @@ describe("indexApi > listItems", () => {
         record2.surname = "Zeecat";
         await recordApi.save(record2);
 
-        const results = await indexApi.listItems("/customers/customersBySurname",{searchPhrase:"*cat"});
+        const results = await indexApi.listItems("/customersBySurname",{searchPhrase:"*cat"});
         expect(results.length).toBe(1);
         expect(results[0].surname).toBe("Zeecat");
     });
@@ -131,7 +131,7 @@ describe("indexApi > listItems", () => {
         record3.surname = "Zeedog";
         await recordApi.save(record3);
 
-        const results = await indexApi.listItems("/customers/customersBySurname",{
+        const results = await indexApi.listItems("/customersBySurname",{
             searchPhrase:"*cat",
             rangeStartParams: {surname:"Z"},
             rangeEndParams: {surname:"Z"}
@@ -142,14 +142,14 @@ describe("indexApi > listItems", () => {
 
     it("should throw error when user user does not have permission", async () => {
         const {indexApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
-        app.removePermission(permission.readIndex.get("/customers/customersBySurname"));
-        expect(indexApi.listItems("/customers/customersBySurname")).rejects.toThrow(/Unauthorized/);
+        app.removePermission(permission.readIndex.get("/customersBySurname"));
+        expect(indexApi.listItems("/customersBySurname")).rejects.toThrow(/Unauthorized/);
     });
 
     it("should not depend on having any other permissions", async () => {
         const {app, indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
-        app.withOnlyThisPermission(permission.readIndex.get("/customers/customersBySurname"));
-        await indexApi.listItems("/customers/customersBySurname");
+        app.withOnlyThisPermission(permission.readIndex.get("/customersBySurname"));
+        await indexApi.listItems("/customersBySurname");
     });
 
 });

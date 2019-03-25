@@ -39,7 +39,6 @@ const validate = parent => node => {
 
     if(isIndex(node) 
         && isSomething(parent) 
-        && !isCollection(parent)
         && !isRoot(parent)
         && !isRecord(parent)) {
         throw new Error(createNodeErrors.indexParentMustBeCollectionOrRoot);
@@ -82,8 +81,8 @@ const addToParent = obj => {
 
         if(isCollection(parent) && isRecord(obj)) {
             const defaultIndex = find(
-                parent.indexes, 
-                i => i.name === "default");
+                parent.parent().indexes, 
+                i => i.name === parent.name + "_index");
             if(!!defaultIndex) {
                 defaultIndex.allowedRecordNodeIds.push(obj.recordNodeId);
             } 
@@ -158,28 +157,25 @@ export const getNewRecordTemplate = parent =>
         indexes: []
     });
 
-export const getNewCollectionTemplate = parent => {
+export const getNewCollectionTemplate = (parent, name) => {
     const collection = constructNode(parent, {
-        name:"",
+        name:name,
         type:"collection",
-        indexes: [],
         children:[],
         allidsShardFactor: isRecord(parent) ? 1 : 64
     });
-    const defaultIndex = getNewIndexTemplate(collection);
-    defaultIndex.name = "default";
+    const defaultIndex = getNewIndexTemplate(parent);
+    defaultIndex.name = name + "_index";
     return collection;
 };
 
-export const getNewIndexTemplate = parent => 
+export const getNewIndexTemplate = (parent, type="ancestor") => 
     constructNode(parent, {
         name:"",
         type:"index",
         map:"return {...record};",
         filter:"",
-        indexType: isRecord(parent) 
-                   ? "reference" 
-                   : "heirarchal",
+        indexType: type,
         getShardName: "",
         getSortKey: "record.id",
         aggregateGroups: [],

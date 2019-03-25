@@ -8,11 +8,12 @@ import {configFolder, fieldDefinitions,
     joinKey,
     isSomething} from "../src/common";
 import { getNewIndexTemplate } from "../src/templateApi/createNodes";
+import {indexTypes} from "../src/templateApi/indexes";
 import getTemplateApi from "../src/templateApi";
 import {getApplicationDefinition} from "../src/templateApi/getApplicationDefinition";
 import getAuthApi from "../src/authApi";
 import {createEventAggregator} from "../src/appInitialise/eventAggregator";
-import {filter} from "lodash/fp";
+import {filter, find} from "lodash/fp";
 import {createBehaviourSources} from "../src/actionsApi/buildBehaviourSource";
 import {createAction, createTrigger} from "../src/templateApi/createActions";
 import {initialiseActions} from "../src/actionsApi/initialise";
@@ -101,38 +102,40 @@ export const getIndexApiFromTemplateApi = async (templateApi, disableCleanupTran
 export const getAuthApiFromTemplateApi = async (templateApi, disableCleanupTransactions=false) => 
     getAuthApi(await appFromTempalteApi(templateApi, disableCleanupTransactions));
 
+export const findIndex = (parentNode, name) => 
+    find(i => i.name === name)(parentNode.indexes);
+
+export const findCollectionDefaultIndex = (collectionNode) => 
+    findIndex(collectionNode.parent(), collectionNode.name + "_index");
+
 export const heirarchyFactory = (...additionalFeatures) => templateApi => {
     const root = templateApi.getNewRootLevel();
 
     const settingsRecord = templateApi.getNewRecordTemplate(root);
     settingsRecord.name = "settings";
 
-    const customersCollection = templateApi.getNewCollectionTemplate(root);
-    customersCollection.name = "customers";
-    customersCollection.indexes[0].map = "return {surname:record.surname, isalive:record.isalive};";
+    const customersCollection = templateApi.getNewCollectionTemplate(root, "customers");
+    findCollectionDefaultIndex(customersCollection).map = "return {surname:record.surname, isalive:record.isalive};";
     const customerRecord = templateApi.getNewRecordTemplate(customersCollection);
     customerRecord.name = "customer";
 
-    const partnersCollection = templateApi.getNewCollectionTemplate(root);
-    partnersCollection.name = "partners";
-    
+    const partnersCollection = templateApi.getNewCollectionTemplate(root, "partners");
+
     const partnerRecord = templateApi.getNewRecordTemplate(partnersCollection);
     partnerRecord.name = "partner";
 
-    const partnerInvoicesCollection = templateApi.getNewCollectionTemplate(partnerRecord);
-    partnerInvoicesCollection.name = "invoices";
+    const partnerInvoicesCollection = templateApi.getNewCollectionTemplate(partnerRecord, "invoices");
+    findCollectionDefaultIndex(partnerInvoicesCollection).name = "partnerInvoices_index";
 
     const partnerInvoiceRecord  = templateApi.getNewRecordTemplate(partnerInvoicesCollection);
     partnerInvoiceRecord.name = "invoice";
 
-    const invoicesCollection = templateApi.getNewCollectionTemplate(customerRecord);
-    invoicesCollection.name = "invoices";
-    invoicesCollection.indexes[0].map = "return {createdDate: record.createdDate, totalIncVat: record.totalIncVat};";
+    const invoicesCollection = templateApi.getNewCollectionTemplate(customerRecord, "invoices");
+    findCollectionDefaultIndex(invoicesCollection).map = "return {createdDate: record.createdDate, totalIncVat: record.totalIncVat};";
     const invoiceRecord = templateApi.getNewRecordTemplate(invoicesCollection);
     invoiceRecord.name = "invoice";
     
-    const chargesCollection = templateApi.getNewCollectionTemplate(invoiceRecord);
-    chargesCollection.name = "charges";
+    const chargesCollection = templateApi.getNewCollectionTemplate(invoiceRecord, "charges");
     const chargeRecord = templateApi.getNewRecordTemplate(chargesCollection);
     chargeRecord.name = "charge";
 
@@ -154,21 +157,23 @@ export const withFields = (heirarchy, templateApi) => {
         partnerInvoiceRecord, chargeRecord,
         partnerRecord, partnersCollection, 
         settingsRecord, partnerInvoicesCollection,
-        invoicesCollection} = heirarchy;
+        invoicesCollection, root} = heirarchy;
 
     getNewFieldAndAdd(templateApi, settingsRecord)("appName", "string", "");
     
     const newCustomerField = getNewFieldAndAdd(templateApi, customerRecord);
 
 
-    const partnersReferenceIndex = templateApi.getNewIndexTemplate(partnersCollection);
+    const partnersReferenceIndex = templateApi.getNewIndexTemplate(root);
     partnersReferenceIndex.name = "partnersReference";
     partnersReferenceIndex.map = "return {name:record.businessName};";
+    partnersReferenceIndex.allowedRecordNodeIds = [partnerRecord.recordNodeId];
 
-    const partnerCustomersReverseIndex = templateApi.getNewIndexTemplate(partnerRecord);
+    const partnerCustomersReverseIndex = templateApi.getNewIndexTemplate(partnerRecord, indexTypes.reference);
     partnerCustomersReverseIndex.name = "partnerCustomers";
     partnerCustomersReverseIndex.map = "return {...record};";
     partnerCustomersReverseIndex.filter = "record.isalive === true"
+    partnerCustomersReverseIndex.allowedRecordNodeIds = [customerRecord.recordNodeId];
     heirarchy.partnerCustomersReverseIndex = partnerCustomersReverseIndex;
 
     newCustomerField("surname", "string");
@@ -177,20 +182,21 @@ export const withFields = (heirarchy, templateApi) => {
     newCustomerField("age", "number");
     newCustomerField("profilepic", "file");
     const customerPartnerField = newCustomerField("partner", "reference", undefined, {
-        indexNodeKey : "/partners/partnersReference",
+        indexNodeKey : "/partnersReference",
         displayValue : "name",
         reverseIndexNodeKeys : [joinKey(
             partnerRecord.nodeKey(), "partnerCustomers" )]
     });
 
-    const referredToCustomersReverseIndex = templateApi.getNewIndexTemplate(customerRecord);
+    const referredToCustomersReverseIndex = templateApi.getNewIndexTemplate(customerRecord, indexTypes.reference);
     referredToCustomersReverseIndex.name = "referredToCustomers";
     referredToCustomersReverseIndex.map = "return {...record};";
-    referredToCustomersReverseIndex.getShardName = "return !record.surname ? 'null' : record.surname.substring(0,1);"
+    referredToCustomersReverseIndex.getShardName = "return !record.surname ? 'null' : record.surname.substring(0,1);"   
+    referredToCustomersReverseIndex.allowedRecordNodeIds = [customerRecord.recordNodeId];
     heirarchy.referredToCustomersReverseIndex = referredToCustomersReverseIndex;
 
     const customerReferredByField = newCustomerField("referredBy", "reference", undefined, {
-        indexNodeKey : "/customers/default",
+        indexNodeKey : "/customers_index",
         displayValue : "surname",
         reverseIndexNodeKeys : [joinKey(
             customerRecord.nodeKey(), "referredToCustomers")]
@@ -224,22 +230,24 @@ export const withFields = (heirarchy, templateApi) => {
         )],
         displayValue : "createdDate",
         indexNodeKey : joinKey(
-            partnerInvoicesCollection.nodeKey(), "default")
+            partnerRecord.nodeKey(), "partnerInvoices_index")
     });
     
-    const partnerChargesReverseIndex = templateApi.getNewIndexTemplate(partnerInvoiceRecord);
+    const partnerChargesReverseIndex = templateApi.getNewIndexTemplate(partnerInvoiceRecord, indexTypes.reference);
     partnerChargesReverseIndex.name = "partnerCharges";
     partnerChargesReverseIndex.map = "return {...record};";
+    partnerChargesReverseIndex.allowedRecordNodeIds = [chargeRecord];
     heirarchy.partnerChargesReverseIndex = partnerChargesReverseIndex;
 
     const customersReferenceIndex = templateApi.getNewIndexTemplate(heirarchy.root);
     customersReferenceIndex.name = "customersReference";
     customersReferenceIndex.map = "return {name:record.surname}";
     customersReferenceIndex.filter = "record.isalive === true";
-
+    customersReferenceIndex.allowedRecordNodeIds = [customerRecord.recordNodeId];
+    
     const invoiceCustomerField = newInvoiceField("customer", "reference", undefined, {
         indexNodeKey : "/customersReference",
-        reverseIndexNodeKeys : [invoicesCollection.indexes[0].nodeKey()],
+        reverseIndexNodeKeys : [findCollectionDefaultIndex(invoicesCollection).nodeKey()],
         displayValue : "name"
     });
 }
@@ -250,21 +258,21 @@ export const withIndexes = (heirarchy, templateApi) => {
         invoiceRecord, partnerRecord,
         chargeRecord, chargesCollection,
         partnerInvoicesCollection, partnersCollection} = heirarchy;
-    const deceasedCustomersIndex = getNewIndexTemplate(customersCollection);
+    const deceasedCustomersIndex = getNewIndexTemplate(root);
     deceasedCustomersIndex.name = "deceased";
     deceasedCustomersIndex.map = "return {surname: record.surname, age:record.age};";
     deceasedCustomersIndex.filter = "record.isalive === false";
-    customersCollection.indexes[0].map = "return record;"
+    findCollectionDefaultIndex(customersCollection).map = "return record;"
     deceasedCustomersIndex.allowedRecordNodeIds = [customerRecord.recordNodeId];
 
-    invoicesCollection.indexes[0].allowedRecordNodeIds = [invoiceRecord.recordNodeId];
-    customersCollection.indexes[0].allowedRecordNodeIds = [customerRecord.recordNodeId];
-    partnersCollection.indexes[0].allowedRecordNodeIds = [partnerRecord.recordNodeId];
-    partnerInvoicesCollection.indexes[0].allowedRecordNodeIds = [partnerInvoiceRecord.recordNodeId];
-    chargesCollection.indexes[0].allowedRecordNodeIds = [chargeRecord.recordNodeId];
+    findCollectionDefaultIndex(invoicesCollection).allowedRecordNodeIds = [invoiceRecord.recordNodeId];
+    findCollectionDefaultIndex(customersCollection).allowedRecordNodeIds = [customerRecord.recordNodeId];
+    findCollectionDefaultIndex(partnersCollection).allowedRecordNodeIds = [partnerRecord.recordNodeId];
+    findIndex(partnerRecord, "partnerInvoices_index").allowedRecordNodeIds = [partnerInvoiceRecord.recordNodeId];
+    findCollectionDefaultIndex(chargesCollection).allowedRecordNodeIds = [chargeRecord.recordNodeId];
 
-    const customerInvoicesIndex = getNewIndexTemplate(customersCollection);
-    customerInvoicesIndex.name = "invoices";
+    const customerInvoicesIndex = getNewIndexTemplate(root);
+    customerInvoicesIndex.name = "customer_invoices";
     customerInvoicesIndex.map = "return record;";
     customerInvoicesIndex.filter = "record.type === 'invoice'";
     customerInvoicesIndex.allowedRecordNodeIds = [invoiceRecord.recordNodeId];
@@ -301,21 +309,21 @@ export const withIndexes = (heirarchy, templateApi) => {
     writtenOffInvoicesTotalAmountAggregate.name = "totalIncVat";
     writtenOffInvoicesTotalAmountAggregate.aggregatedValue = "return record.totalIncVat";
 
-    const customersBySurnameIndex = templateApi.getNewIndexTemplate(customersCollection);
+    const customersBySurnameIndex = templateApi.getNewIndexTemplate(root);
     customersBySurnameIndex.name = "customersBySurname";
     customersBySurnameIndex.map = "return {...record};"
     customersBySurnameIndex.filter = "";
     customersBySurnameIndex.allowedRecordNodeIds = [customerRecord.recordNodeId];
     customersBySurnameIndex.getShardName = "return !record.surname ? 'null' : record.surname.substring(0,1);"
     
-    const customersDefaultIndex = customersCollection.indexes[0];
+    const customersDefaultIndex = findCollectionDefaultIndex(customersCollection);
     const customersNoGroupaggregateGroup = templateApi.getNewAggregateGroupTemplate(customersDefaultIndex);
     customersNoGroupaggregateGroup.name = "Customers Summary";
     const allCustomersAgeFunctions = templateApi.getNewAggregateTemplate(customersNoGroupaggregateGroup);
     allCustomersAgeFunctions.aggregatedValue = "return record.age";
     allCustomersAgeFunctions.name = "all customers - age breakdown";
     
-    const invoicesByOutstandingIndex = templateApi.getNewIndexTemplate(invoicesCollection);
+    const invoicesByOutstandingIndex = templateApi.getNewIndexTemplate(customerRecord);
     invoicesByOutstandingIndex.name = "invoicesByOutstanding";
     invoicesByOutstandingIndex.map = "return {...record};"
     invoicesByOutstandingIndex.filter = "";

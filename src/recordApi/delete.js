@@ -53,7 +53,7 @@ export const _deleteRecord = async (app, key, disableCleanup) => {
 const deleteIndexes = async (app, key) => {
     const node = getExactNodeForPath(app.heirarchy)
                                     (key);
-    const reverseIndexKeys = $(app.heirarchy, [
+    /*const reverseIndexKeys = $(app.heirarchy, [
         getFlattenedHierarchy,
         map(n => n.fields),
         flatten,
@@ -71,6 +71,11 @@ const deleteIndexes = async (app, key) => {
 
     for(let i of reverseIndexKeys) {
         await _deleteIndex(app, i, true);
+    }*/
+
+    for(let index of node.indexes) {
+        const indexKey = joinKey(key, index.name);
+        await _deleteIndex(app, indexKey, true);
     }
 }
 

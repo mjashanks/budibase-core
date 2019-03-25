@@ -1,5 +1,5 @@
-import {getExactNodeForPath, isTopLevelCollectionIndex,
-    findField, getNode} from "../templateApi/heirarchy";
+import {getExactNodeForPath,
+    findField, getNode, isGlobalIndex} from "../templateApi/heirarchy";
 import {listItems} from "../indexApi/listItems";
 import {has, some} from "lodash";
 import {map, isString} from "lodash/fp";
@@ -58,7 +58,7 @@ export const _getContext = (app, recordKey) => {
 
 const readReferenceIndex = async (app, recordKey,typeOptions) => {
     const indexNode = getNode(app.heirarchy, typeOptions.indexNodeKey);
-    const indexKey = isTopLevelCollectionIndex(indexNode)
+    const indexKey = isGlobalIndex(indexNode)
                      ? indexNode.nodeKey()
                      : getIndexKey_BasedOnDecendant(
                             recordKey, indexNode

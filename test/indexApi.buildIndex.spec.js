@@ -1,8 +1,10 @@
-import {setupAppheirarchy, basicAppHeirarchyCreator_WithFields_AndIndexes} from "./specHelpers";
+import {setupAppheirarchy, findCollectionDefaultIndex,
+    basicAppHeirarchyCreator_WithFields_AndIndexes} from "./specHelpers";
 import { joinKey } from "../src/common";
 import {some} from "lodash";
 import {_deleteIndex} from "../src/indexApi/delete";
 import {permission} from "../src/authApi/permissions";
+import { getExactNodeForPath } from "../src/templateApi/heirarchy";
 
 describe("buildIndex > Global index", () => {
 
@@ -208,11 +210,11 @@ describe("buildIndex > nested collection", () => {
 
         await recordApi.save(invoice);
 
-        const indexKey = joinKey(customer.key, "invoices", "default");
+        const indexKey = joinKey(customer.key, "invoices_index");
         await _deleteIndex(app, indexKey, false);
 
-        await indexApi.buildIndex(
-            appHeirarchy.invoicesCollection.indexes[0].nodeKey());
+        const indexNode = getExactNodeForPath(appHeirarchy.root)(indexKey);
+        await indexApi.buildIndex(indexNode.nodeKey());
         const indexItems = await indexApi.listItems(indexKey);
 
         expect(indexItems.length).toBe(1);
@@ -264,18 +266,19 @@ describe("buildIndex > nested collection", () => {
 
         await recordApi.save(invoice2);
 
-        const indexKey = joinKey(customer.key, "invoices", "default");
+        const indexKey = joinKey(customer.key, "invoices_index");
         await _deleteIndex(app, indexKey, false);
 
+        const indexNode = getExactNodeForPath(appHeirarchy.root)(indexKey);
         await indexApi.buildIndex(
-            appHeirarchy.invoicesCollection.indexes[0].nodeKey());
+            indexNode.nodeKey());
         const indexItems = await indexApi.listItems(indexKey);
 
         expect(indexItems.length).toBe(1);
         expect(some(indexItems, i => i.key === invoice.key)).toBeTruthy();
 
         const indexItems2 = await indexApi.listItems(
-            joinKey(customer2.key, "invoices", "default")
+            joinKey(customer2.key, "invoices_index")
         );
 
         expect(indexItems2.length).toBe(1);
@@ -377,7 +380,7 @@ describe("buildIndex > sharded index", () => {
         await recordApi.save(invoice2);
 
         const indexKey = joinKey(
-            invoiceCollectionKey, 
+            customer.key, 
             appHeirarchy.invoicesByOutstandingIndex.name);
 
         await _deleteIndex(app, indexKey, false);

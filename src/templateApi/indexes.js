@@ -5,7 +5,7 @@ import {join, keys} from "lodash";
 import {isNonEmptyString, executesWithoutException, $} from "../common";
 import {isRecord} from "./heirarchy";
 
-export const indexTypes = { reference: "reference", heirarchal: "heirarchal" };
+export const indexTypes = { reference: "reference", ancestor: "ancestor" };
 
 export const indexRuleSet = [
     makerule("map", "index has no map function",

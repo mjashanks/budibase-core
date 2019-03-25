@@ -19,7 +19,7 @@ describe("recordApi > create > reindex", () => {
 
         await recordApi.save(record);
 
-        const items = await indexApi.listItems("/customers/default");
+        const items = await indexApi.listItems("/customers_index");
 
         expect(items.length).toBe(1);
         expect(items[0].surname).toBe("Ledog");
@@ -40,7 +40,7 @@ describe("recordApi > create > reindex", () => {
 
         await recordApi.save(record);
 
-        const items = await indexApi.listItems("/customers/deceased");
+        const items = await indexApi.listItems("/deceased");
 
         expect(items.length).toBe(1);
         expect(items[0].surname).toBe("Ledog");
@@ -61,7 +61,7 @@ describe("recordApi > create > reindex", () => {
 
         await recordApi.save(record);
 
-        const items = await indexApi.listItems("/customers/deceased");
+        const items = await indexApi.listItems("/deceased");
 
         expect(items.length).toBe(0);
     });
@@ -81,7 +81,7 @@ describe("recordApi > create > reindex", () => {
         await recordApi.save(invoice);
 
         const invoices = await indexApi.listItems(
-                            joinKey(invoicesCollectionKey, "default"));
+                            joinKey(customer.key, "invoices_index"));
         
         expect(isArray(invoices)).toBeTruthy();
         expect(invoices.length).toBe(1);
@@ -150,7 +150,7 @@ describe("recordApi > create > reindex", () => {
         record2.surname = "Zeecat";
         await recordApi.save(record2);
 
-        const items = await indexApi.listItems("/customers/customersBySurname");
+        const items = await indexApi.listItems("/customersBySurname");
 
         expect(items.length).toBe(2);
         expect(items[0].surname).toBe("Ledog");
@@ -177,7 +177,7 @@ describe("recordApi > delete > reindex", () => {
         await recordApi.save(record);
         await recordApi.delete(record.key);
 
-        const itemsAfterDelete= await indexApi.listItems("/customers/default");
+        const itemsAfterDelete= await indexApi.listItems("/customers_index");
         expect(itemsAfterDelete.length).toBe(0);
     });
 
@@ -196,7 +196,7 @@ describe("recordApi > delete > reindex", () => {
 
         await recordApi.delete(record1.key);
 
-        const itemsAfterDelete= await indexApi.listItems("/customers/customersBySurname");
+        const itemsAfterDelete= await indexApi.listItems("/customersBySurname");
         expect(itemsAfterDelete.length).toBe(1);
         expect(itemsAfterDelete[0].surname).toBe("Zeecat");
     });
@@ -223,12 +223,12 @@ describe("recordApi > delete > reindex", () => {
         await recordApi.save(record);
         await recordApi.delete(record.key);
 
-        const itemsAfterDelete= await indexApi.listItems("/customers/default");
+        const itemsAfterDelete= await indexApi.listItems("/customers_index");
         expect(itemsAfterDelete.length).toBe(1);
         expect(itemsAfterDelete[0].surname).toBe("Zeecat");
 
         const deceasedItemsAfterDelete=
-            await indexApi.listItems("/customers/deceased");
+            await indexApi.listItems("/deceased");
         expect(deceasedItemsAfterDelete.length).toBe(0);
 
         const referredToItemsAfterDelete = 
@@ -259,12 +259,12 @@ describe("recordApi > delete > reindex", () => {
 
         await recordApi.delete(record.key);
 
-        const itemsAfterDelete= await indexApi.listItems("/customers/default");
+        const itemsAfterDelete= await indexApi.listItems("/customers_index");
         expect(itemsAfterDelete.length).toBe(1);
         expect(itemsAfterDelete[0].surname).toBe("Zeecat");
 
         const deceasedItemsAfterDelete=
-            await indexApi.listItems("/customers/deceased");
+            await indexApi.listItems("/deceased");
         expect(deceasedItemsAfterDelete.length).toBe(1);
         expect(deceasedItemsAfterDelete[0].surname).toBe("Zeecat");
     });
@@ -305,7 +305,7 @@ describe("recordApi > update > reindex", () => {
         loadedRecord.surname = "Zeedog";
         await recordApi.save(loadedRecord);
 
-        const itemsDefault = await indexApi.listItems("/customers/default");
+        const itemsDefault = await indexApi.listItems("/customers_index");
         expect(itemsDefault[0].surname).toBe("Zeedog");
         expect(itemsDefault.length).toBe(1);
 
@@ -322,7 +322,7 @@ describe("recordApi > update > reindex", () => {
         loadedRecord.surname = "Zeedog";
         await recordApi.save(loadedRecord);
 
-        const itemsDefault = await indexApi.listItems("/customers/customersBySurname");
+        const itemsDefault = await indexApi.listItems("/customersBySurname");
         expect(itemsDefault[0].surname).toBe("Zeedog");
         expect(itemsDefault.length).toBe(1);
 
@@ -352,7 +352,7 @@ describe("recordApi > update > reindex", () => {
         loadedRecord.surname = "Zeedog";
         await recordApi.save(loadedRecord);
 
-        const items = await indexApi.listItems("/customers/default");
+        const items = await indexApi.listItems("/customers_index");
 
         const hasItemWithSurname = sn => 
             some(items, i => i.surname === sn);

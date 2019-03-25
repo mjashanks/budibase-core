@@ -9,10 +9,10 @@ describe("initialiseData", () => {
         const {appDef, datastore} = getApplicationDefinition();
         await initialiseData(datastore, appDef);
     
-        expect(await datastore.exists(`/customers/default/index.csv`)).toBeTruthy();
-        expect(await datastore.exists(`/customers/default`)).toBeTruthy();
-        expect(await datastore.exists(`/customers/deceased/index.csv`)).toBeTruthy();
-        expect(await datastore.exists(`/customers/deceased`)).toBeTruthy();
+        expect(await datastore.exists(`/customers_index/index.csv`)).toBeTruthy();
+        expect(await datastore.exists(`/customers_index`)).toBeTruthy();
+        expect(await datastore.exists(`/deceased/index.csv`)).toBeTruthy();
+        expect(await datastore.exists(`/deceased`)).toBeTruthy();
     });
 
     it("should create folder for collection", async () => {

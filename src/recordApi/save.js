@@ -1,7 +1,6 @@
 import {cloneDeep, constant, isEqual,
         flatten, map, filter} from "lodash/fp";
-import {initialiseChildCollections,
-    initialiseIndex} from "../collectionApi/initialise";
+import {initialiseChildCollections} from "../collectionApi/initialise";
 import {validate} from "./validate";
 import {_load, getRecordFileName} from "./load";
 import {apiWrapper, events, $, joinKey} from "../common";
@@ -14,6 +13,7 @@ import {addToAllIds} from "../indexing/allIds";
 import {transactionForCreateRecord,
     transactionForUpdateRecord} from "../transactions/create";
 import {permission} from "../authApi/permissions";
+import {initialiseIndex} from "../indexing/initialiseIndex";
 
 export const save = (app) => async (record, context) => 
     apiWrapper(
@@ -52,6 +52,7 @@ const _save = async (app, record, context, skipValidation=false) => {
             recordClone
         );
         await initialiseReverseReferenceIndexes(app, record);
+        await initialiseAncestorIndexes(app, record);
         await initialiseChildCollections(app, recordClone.key);
         app.publish(events.recordApi.save.onRecordCreated, {
             record:recordClone
@@ -78,6 +79,17 @@ const _save = async (app, record, context, skipValidation=false) => {
     returnedClone.isNew = false;
     return returnedClone;
 };
+
+const initialiseAncestorIndexes = async (app, record) => {
+    const recordNode = getExactNodeForPath(app.heirarchy)
+                                          (record.key);
+
+    for(let index of recordNode.indexes) {
+        const indexKey = joinKey(record.key, index.name);
+        if(!await app.datastore.exists(indexKey))
+            await initialiseIndex(app.datastore, record.key, index);
+    } 
+}
 
 const initialiseReverseReferenceIndexes = async (app, record) => {
 

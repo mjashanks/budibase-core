@@ -4,6 +4,7 @@ import {find, constant, map, last,
 import {$, switchCase, isNothing, isSomething,
     defaultCase, splitKey, isNonEmptyString,
     joinKey, getHashCode} from "../common";
+import { indexTypes } from "./indexes";
 
 export const getFlattenedHierarchy = (appHeirarchy, useCached=true) => {
 
@@ -138,6 +139,12 @@ export const getRecordNodeById = (heirarchy, recordId) =>
                     && n.recordNodeId === getRecordNodeIdFromId(recordId))
     ]);
 
+export const recordNodeIdIsAllowed = (indexNode) => (recordNodeId) =>
+    indexNode.allowedRecordNodeIds.length === 0
+    || includes(recordNodeId)(indexNode.allowedRecordNodeIds);
+
+export const recordNodeIsAllowed = (indexNode) => (recordNode) =>
+    recordNodeIdIsAllowed(indexNode)(recordNode.recordNodeId);
 
 export const getAllowedRecordNodesForIndex = (appHeirarchy, indexNode) => {
     const recordNodes = $(appHeirarchy, [
@@ -145,20 +152,17 @@ export const getAllowedRecordNodesForIndex = (appHeirarchy, indexNode) => {
         filter(isRecord)
     ]);
 
-    const recordNodeIsAllowed = recordNode =>
-        indexNode.allowedRecordNodeIds.length === 0
-        || includes(recordNode.recordNodeId)(indexNode.allowedRecordNodeIds);
 
     if(isGlobalIndex(indexNode)) {
         return $(recordNodes, [
-            filter(recordNodeIsAllowed)
+            filter(recordNodeIsAllowed(indexNode))
         ]);
     }
 
-    if(isCollectionIndex(indexNode)) {
+    if(isAncestorIndex(indexNode)) {
         return $(recordNodes, [
             filter(isDecendant(indexNode.parent())),
-            filter(recordNodeIsAllowed)
+            filter(recordNodeIsAllowed(indexNode))
         ]);
     }
 
@@ -187,15 +191,9 @@ export const isDecendantOfARecord = hasMatchingAncestor(isRecord)
 export const isGlobalIndex = node => 
     isIndex(node) && isRoot(node.parent()); 
 export const isReferenceIndex = node =>
-    isIndex(node) && isRecord(node.parent());
-export const isCollectionIndex = node => 
-    isIndex(node) && isCollection(node.parent());
-export const isTopLevelCollection = node => 
-    isCollection(node)
-    && !isDecendantOfARecord(node);
-export const isTopLevelCollectionIndex = node => 
-    isTopLevelCollection(node.parent())
-    && isIndex(node); 
+    isIndex(node) && node.indexType === indexTypes.reference;
+export const isAncestorIndex = node => 
+    isIndex(node) && node.indexType === indexTypes.ancestor;
 
 export const fieldReversesReferenceToNode = node => field => 
     field.type === "reference"

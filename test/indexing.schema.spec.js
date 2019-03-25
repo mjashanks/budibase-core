@@ -1,6 +1,7 @@
 import {generateSchema} from "../src/indexing/indexSchemaCreator";
-import {setupAppheirarchy} from "./specHelpers";
+import {setupAppheirarchy, findCollectionDefaultIndex} from "./specHelpers";
 import {find} from "lodash";
+import {indexTypes} from "../src/templateApi/indexes";
 
 describe("indexSchemGenerator", () => {
 
@@ -78,8 +79,7 @@ const setup = includeFish =>
 const createApp = (includeFish) => (templateApi) => {
     
     const root = templateApi.getNewRootLevel();
-    const pets = templateApi.getNewCollectionTemplate(root);
-    pets.name = "pets";
+    const pets = templateApi.getNewCollectionTemplate(root, "pets");
 
     const dogRecord = templateApi.getNewRecordTemplate(pets);
     dogRecord.name = "dog";
@@ -106,12 +106,12 @@ const createApp = (includeFish) => (templateApi) => {
         addFishField("isAlive", "bool");
         addFishField("noOfGills", "number");
         fishStuff.fishRecord = fishRecord;
-        const fishOnlyIndex = templateApi.getNewIndexTemplate(pets);
+        const fishOnlyIndex = templateApi.getNewIndexTemplate(root);
         fishOnlyIndex.name = "fishOnly";
         fishOnlyIndex.allowedRecordNodeIds = [fishRecord.recordNodeId];
         fishStuff.fishOnlyIndex = fishOnlyIndex;
 
-        const dogFriends = templateApi.getNewIndexTemplate(dogRecord);
+        const dogFriends = templateApi.getNewIndexTemplate(dogRecord, indexTypes.reference);
         dogFriends.name = "dogFriends";
         fishStuff.dogFriends = dogFriends;
 
@@ -124,7 +124,7 @@ const createApp = (includeFish) => (templateApi) => {
     }
 
     return ({
-        pets, petsDefaultIndex: pets.indexes[0],
+        pets, petsDefaultIndex: findCollectionDefaultIndex(pets),
         dogRecord, root, ...fishStuff
     })
 };
