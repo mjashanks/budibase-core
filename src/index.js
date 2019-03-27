@@ -11,7 +11,7 @@ import {cleanup} from "./transactions/cleanup";
 import {generateFullPermissions} from "./authApi/generateFullPermissions";
 import {getApplicationDefinition} from "./templateApi/getApplicationDefinition";
 import common from "./common";
-import {getBehaviourSources} from "./templateApi/getApplicationDefinition";
+import {getBehaviourSources} from "./templateApi/getBehaviourSources";
 
 export const getAppApis = async (store, behaviourSources = null, 
                                 cleanupTransactions = null, 
