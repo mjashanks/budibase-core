@@ -10,7 +10,7 @@ describe("getAppApis", () => {
         const rootNode = templateApi.getNewRootLevel();
         await templateApi.saveApplicationHeirarchy(rootNode);
 
-        return await getAppApis(templateApi._storeHandle);
+        return await getAppApis(templateApi._storeHandle, {});
     }
 
     it("should return api factory functions", async () => {

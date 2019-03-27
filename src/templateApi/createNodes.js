@@ -157,15 +157,17 @@ export const getNewRecordTemplate = parent =>
         indexes: []
     });
 
-export const getNewCollectionTemplate = (parent, name) => {
+export const getNewCollectionTemplate = (parent, name, createDefault=true) => {
     const collection = constructNode(parent, {
         name:name,
         type:"collection",
         children:[],
         allidsShardFactor: isRecord(parent) ? 1 : 64
     });
-    const defaultIndex = getNewIndexTemplate(parent);
-    defaultIndex.name = name + "_index";
+    if(createDefault) {
+        const defaultIndex = getNewIndexTemplate(parent);
+        defaultIndex.name = name + "_index";
+    }
     return collection;
 };
 

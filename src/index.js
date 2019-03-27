@@ -11,14 +11,22 @@ import {cleanup} from "./transactions/cleanup";
 import {generateFullPermissions} from "./authApi/generateFullPermissions";
 import {getApplicationDefinition} from "./templateApi/getApplicationDefinition";
 import common from "./common";
+import {getBehaviourSources} from "./templateApi/getApplicationDefinition";
 
-export const getAppApis = async (store, behaviourSources = {}, 
+export const getAppApis = async (store, behaviourSources = null, 
                                 cleanupTransactions = null, 
                                 getEpochTime = null,
-                                crypto = null) => {
+                                crypto = null,
+                                appDefinition = null) => {
 
     store = setupDatastore(store);
-    const appDefinition = await getApplicationDefinition(store)();
+    
+    if(!appDefinition)
+        appDefinition = await getApplicationDefinition(store)();
+
+    if(!behaviourSources)
+        behaviourSources = await getBehaviourSources(store);
+
     const eventAggregator = createEventAggregator();
 
     const app = {

@@ -5,7 +5,7 @@ import {constant, isBoolean, isNull} from "lodash";
 import {switchCase, defaultCase, isOneOf, toBoolOrNull} from "../common";
 
 const boolFunctions = typeFunctions({
-    default: constant(null)
+    default: constant(null),
 });
 
 const boolTryParse = 

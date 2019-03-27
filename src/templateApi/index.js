@@ -23,7 +23,7 @@ const api = app => ({
     getApplicationDefinition : getApplicationDefinition(app.datastore),
     saveApplicationHeirarchy : saveApplicationHeirarchy(app),
     saveActionsAndTriggers : saveActionsAndTriggers(app),
-
+    getBehaviourSources: () => getBehaviourSources(app.datastore),
     getNewRootLevel, getNewCollectionTemplate, 
     getNewIndexTemplate, getNewRecordTemplate,
     getNewField, validateField, addField, fieldErrors,
