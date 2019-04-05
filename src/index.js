@@ -59,17 +59,21 @@ export const getAppApis = async (store, behaviourSources = null,
     const authApi = getAuthApi(app);
     const actionsApi = getActionsApi(app);
 
-    const asUser = async (username, password) => {
+    const authenticateAs = async (username, password) => {
         app.user = await authApi.authenticate(username, password);
     };
 
-    const asFullAccess = () => {
+    const withFullAccess = () => {
         app.user = {
             name: "app",
             permissions : generateFullPermissions(app),
             isUser:false,
             temp:false
         }
+    };
+
+    const asUser = (user) => {
+        app.user = user
     };
 
     return ({
@@ -81,8 +85,9 @@ export const getAppApis = async (store, behaviourSources = null,
         actionsApi,
         subscribe: eventAggregator.subscribe,
         actions,
-        asUser,
-        asFullAccess
+        authenticateAs,
+        withFullAccess,
+        asUser
     });
 };
 
