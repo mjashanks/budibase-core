@@ -15,7 +15,7 @@
     "budibase"
   ],
   "author": "Michael Shanks",
-  "license": "AGPL-3.0",
+  "license": "MPL-2.0",
   "jest": {
     "globals": {
       "GLOBALS": {
