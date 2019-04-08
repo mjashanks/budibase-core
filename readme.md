@@ -1,5 +1,23 @@
-Dev requires node-gyp global
+# Getting Started
 
-due to https://github.com/ranisalt/node-argon2
+Install requires [node-gyp](https://github.com/nodejs/node-gyp), due to a dependancy on [argon2](https://github.com/ranisalt/node-argon2)
 
-https://github.com/nodejs/node-gyp/issues/1278
+For node gyp on windows: https://github.com/nodejs/node-gyp/issues/1278
+
+For node gyp on ubuntu: `sudo apt-get install build-essentials`
+
+Once you have this, try...
+
+`npm install`
+
+Next, run the tests. Install jest, globally:
+
+`npm install -g jest`
+
+And finally, run
+
+`jest`
+
+
+
+
