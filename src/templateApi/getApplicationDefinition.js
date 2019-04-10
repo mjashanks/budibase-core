@@ -1,6 +1,5 @@
 import {appDefinitionFile} from "../common";
-import {constructHeirarchy} 
-        from "./createNodes";
+import {constructHeirarchy} from "./createNodes";
 
 export const getApplicationDefinition = (datastore) => async () => {
     const exists = await datastore.exists(appDefinitionFile);

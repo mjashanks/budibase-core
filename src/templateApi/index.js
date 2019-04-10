@@ -30,7 +30,7 @@ const api = app => ({
     getNewRecordValidationRule, commonRecordValidationRules, 
     addRecordValidationRule, createAction, createTrigger, validateActions,
     validateTrigger, getNewAggregateGroupTemplate,
-    getNewAggregateTemplate
+    getNewAggregateTemplate, constructHeirarchy
 });
 
 
