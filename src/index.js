@@ -100,6 +100,7 @@ export {setupDatastore} from "./appInitialise";
 export {getActionsApi} from "./actionsApi";
 export {initialiseData} from "./appInitialise/initialiseData";
 export {getDatabaseManager} from "./appInitialise/databaseManager";
+export {heirarchy} from "./templateApi/heirarchy";
 export {common};
 
 export default getAppApis;
