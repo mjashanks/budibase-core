@@ -2,7 +2,8 @@
 
 Install requires [node-gyp](https://github.com/nodejs/node-gyp), due to a dependancy on [argon2](https://github.com/ranisalt/node-argon2)
 
-For node gyp on windows: https://github.com/nodejs/node-gyp/issues/1278
+For node gyp on windows: `npm install --global --production windows-build-tools`
+and this might help: https://github.com/nodejs/node-gyp/issues/1278
 
 For node gyp on ubuntu: `sudo apt-get install build-essentials`
 
