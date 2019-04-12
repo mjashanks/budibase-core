@@ -10,7 +10,7 @@ describe("recordApi > getContext", () => {
         const {recordApi, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
 
         const customer = recordApi.getNew(
-            appHeirarchy.customersCollection.nodeKey(),
+            appHeirarchy.customerRecord.collectionNodeKey(),
             "customer");
         customer.isalive = true;
         await recordApi.save(customer);
@@ -30,7 +30,7 @@ describe("recordApi > getContext", () => {
         const {recordApi, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
 
         const customer = recordApi.getNew(
-            appHeirarchy.customersCollection.nodeKey(),
+            appHeirarchy.customerRecord.collectionNodeKey(),
             "customer");
         customer.isalive = true;
         await recordApi.save(customer);
@@ -49,7 +49,7 @@ describe("recordApi > getContext", () => {
         const {recordApi, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
 
         const customer = recordApi.getNew(
-            appHeirarchy.customersCollection.nodeKey(),
+            appHeirarchy.customerRecord.collectionNodeKey(),
             "customer");
         customer.surname = "Leedog";
         customer.isalive = true;
@@ -73,7 +73,7 @@ describe("recordApi > getContext", () => {
         const {recordApi, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
 
         const customer = recordApi.getNew(
-            appHeirarchy.customersCollection.nodeKey(),
+            appHeirarchy.customerRecord.collectionNodeKey(),
             "customer");
         customer.surname = "Leedog";
         customer.isalive = false;

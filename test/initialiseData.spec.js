@@ -9,8 +9,8 @@ describe("initialiseData", () => {
         const {appDef, datastore} = getApplicationDefinition();
         await initialiseData(datastore, appDef);
     
-        expect(await datastore.exists(`/customers_index/index.csv`)).toBeTruthy();
-        expect(await datastore.exists(`/customers_index`)).toBeTruthy();
+        expect(await datastore.exists(`/customer_index/index.csv`)).toBeTruthy();
+        expect(await datastore.exists(`/customer_index`)).toBeTruthy();
         expect(await datastore.exists(`/deceased/index.csv`)).toBeTruthy();
         expect(await datastore.exists(`/deceased`)).toBeTruthy();
     });

@@ -1,4 +1,4 @@
-import {getExactNodeForPath} from "../templateApi/heirarchy";
+import {getNodeForCollectionPath} from "../templateApi/heirarchy";
 import {safeKey, apiWrapper, 
         events, joinKey} from "../common";
 import {_deleteRecord} from "../recordApi/delete";
@@ -18,7 +18,7 @@ export const deleteCollection = (app, disableCleanup=false) => async key =>
 
 export const _deleteCollection = async (app, key, disableCleanup) => {
     key = safeKey(key);
-    const node = getExactNodeForPath(app.heirarchy)(key);
+    const node = getNodeForCollectionPath(app.heirarchy)(key);
     
     await deleteRecords(app, key);
     await deleteAllIdsFolders(app, node, key);
@@ -32,15 +32,13 @@ const deleteCollectionFolder = async (app, key) =>
 
 
 const deleteAllIdsFolders = async (app, node, key) => {
-    
-    for(let child of node.children) {
-        await app.datastore.deleteFolder(
-            joinKey(
-                key, "allids", 
-                child.recordNodeId
-            )
-        );
-    }
+        
+    await app.datastore.deleteFolder(
+        joinKey(
+            key, "allids", 
+            node.recordNodeId
+        )
+    );    
 
     await app.datastore.deleteFolder(
         joinKey(key, "allids")

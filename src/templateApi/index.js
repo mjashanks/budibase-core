@@ -4,7 +4,7 @@ import {map} from "lodash/fp";
 import {getNewCollectionTemplate, getNewRootLevel, 
         getNewRecordTemplate, getNewIndexTemplate,
         createNodeErrors, constructHeirarchy,
-        getNewAggregateGroupTemplate,
+        getNewAggregateGroupTemplate, getNewSingleRecordTemplate,
         getNewAggregateTemplate} 
         from "./createNodes";
 import {getNewField, validateField, 
@@ -30,7 +30,7 @@ const api = app => ({
     getNewRecordValidationRule, commonRecordValidationRules, 
     addRecordValidationRule, createAction, createTrigger, validateActions,
     validateTrigger, getNewAggregateGroupTemplate,
-    getNewAggregateTemplate, constructHeirarchy
+    getNewAggregateTemplate, constructHeirarchy, getNewSingleRecordTemplate
 });
 
 

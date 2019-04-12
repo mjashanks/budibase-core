@@ -47,7 +47,7 @@ describe("getRelevantIndexes", () => {
         const indexExists = key => 
             some(indexes, c => c.indexKey === key);
         
-        expect(indexExists("/customers_index")).toBeTruthy();
+        expect(indexExists("/customer_index")).toBeTruthy();
         expect(indexExists("/deceased")).toBeTruthy();
         expect(indexExists("/customersBySurname")).toBeTruthy();
     });
@@ -99,7 +99,7 @@ describe("getRelevantIndexes", () => {
 
         expect(indexes.length).toBe(4);
         expect(some(indexes, i => i.indexKey === `/customer_invoices`)).toBeTruthy();
-        expect(some(indexes, i => i.indexKey === `/customers/${nodeid}-1234/invoices_index`)).toBeTruthy();
+        expect(some(indexes, i => i.indexKey === `/customers/${nodeid}-1234/invoice_index`)).toBeTruthy();
     });
 
     it("should get reverseReferenceIndex accross heirarchy branches", async () => {

@@ -24,13 +24,13 @@ describe("collectionApi > allids", () => {
             await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
 
         const customer1 = await recordApi.getNew(
-            appHeirarchy.customersCollection.nodeKey(), "customer");
+            appHeirarchy.customerRecord.collectionNodeKey(), "customer");
         customer1.surname = "thedog";
         
         await recordApi.save(customer1);
         
         const customer2 = await recordApi.getNew(
-            appHeirarchy.customersCollection.nodeKey(), "customer");
+            appHeirarchy.customerRecord.collectionNodeKey(), "customer");
         customer2.surname = "thedog";
         
         await recordApi.save(customer2);
@@ -55,13 +55,13 @@ describe("collectionApi > allids", () => {
             await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
 
         const customer1 = await recordApi.getNew(
-            appHeirarchy.customersCollection.nodeKey(), "customer");
+            appHeirarchy.customerRecord.collectionNodeKey(), "customer");
         customer1.surname = "thedog";
         
         await recordApi.save(customer1);
         
         const customer2 = await recordApi.getNew(
-            appHeirarchy.customersCollection.nodeKey(), "customer");
+            appHeirarchy.customerRecord.collectionNodeKey(), "customer");
         customer2.surname = "thedog";
         
         await recordApi.save(customer2);
@@ -91,7 +91,7 @@ describe("collectionApi > allids", () => {
 
         for(let c of allIdChars) {
             const customer = await recordApi.getNew(
-                appHeirarchy.customersCollection.nodeKey(), "customer");
+                appHeirarchy.customerRecord.collectionNodeKey(), "customer");
             customer.surname = "thedog";   
             const id = `${appHeirarchy.customerRecord.recordNodeId}-${c}${customer.id.replace("0-","")}`;
             customer.id = id;
@@ -115,7 +115,7 @@ describe("collectionApi > allids", () => {
             await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
 
         const customer = await recordApi.getNew(
-            appHeirarchy.customersCollection.nodeKey(), "customer");
+            appHeirarchy.customerRecord.collectionNodeKey(), "customer");
         customer.surname = "thedog";
         
         await recordApi.save(customer);
@@ -130,7 +130,7 @@ describe("collectionApi > allids", () => {
         await recordApi.save(invoice);
 
         const allIdsIterator = await collectionApi.getAllIdsIterator(
-            appHeirarchy.invoicesCollection.nodeKey());
+            appHeirarchy.invoiceRecord.collectionNodeKey());
 
         let allIds = [];
 
@@ -150,7 +150,7 @@ describe("collectionApi > allids", () => {
         await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
 
         const customer = await recordApi.getNew(
-            appHeirarchy.customersCollection.nodeKey(), "customer");
+            appHeirarchy.customerRecord.collectionNodeKey(), "customer");
         customer.surname = "thedog";
         
         await recordApi.save(customer);
@@ -174,7 +174,7 @@ describe("collectionApi > allids", () => {
         await recordApi.save(charge);
 
         const allIdsIterator = await collectionApi.getAllIdsIterator(
-            appHeirarchy.chargesCollection.nodeKey());
+            appHeirarchy.chargeRecord.collectionNodeKey());
 
         let allIds = [];
 

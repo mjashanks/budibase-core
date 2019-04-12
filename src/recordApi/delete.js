@@ -28,9 +28,9 @@ export const _deleteRecord = async (app, key, disableCleanup) => {
     await transactionForDeleteRecord(app, record);
 
     
-    for(let collection of node.children) {
+    for(let collectionRecord of node.children) {
         const collectionKey = joinKey(
-            key, collection.name
+            key, collectionRecord.collectionName
         );
         await _deleteCollection(app, collectionKey, true);
     }

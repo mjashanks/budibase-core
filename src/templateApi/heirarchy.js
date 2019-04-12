@@ -59,6 +59,13 @@ export const getExactNodeForPath = appHeirarchy => key =>
         find(n => new RegExp(`${n.pathRegx()}$`).test(key))
     ]);
 
+export const getNodeForCollectionPath = appHeirarchy => collectionKey => 
+    $(appHeirarchy, [
+        getFlattenedHierarchy,
+        find(n => (isCollectionRecord(n) 
+                   && new RegExp(`${n.collectionPathRegx()}$`).test(collectionKey)))
+    ]);
+
 export const hasMatchingAncestor = ancestorPredicate => decendantNode =>
     switchCase(
         
@@ -76,7 +83,16 @@ export const hasMatchingAncestor = ancestorPredicate => decendantNode =>
 export const getNode = (appHeirarchy, nodeKey) => 
     $(appHeirarchy, [
         getFlattenedHierarchy,
-        find(n => n.nodeKey() === nodeKey)
+        find(n => n.nodeKey() === nodeKey
+                  || (isCollectionRecord(n)
+                      && n.collectionNodeKey() === nodeKey))
+    ]);
+
+export const getCollectionNode = (appHeirarchy, nodeKey) => 
+    $(appHeirarchy, [
+        getFlattenedHierarchy,
+        find(n => (isCollectionRecord(n)
+                    && n.collectionNodeKey() === nodeKey))
     ]);
 
 export const getNodeByKeyOrNodeKey = (appHeirarchy, keyOrNodeKey) => {
@@ -85,6 +101,14 @@ export const getNodeByKeyOrNodeKey = (appHeirarchy, keyOrNodeKey) => {
            ? getNode(appHeirarchy, keyOrNodeKey)
            : nodeByKey;
 }
+
+export const getCollectionNodeByKeyOrNodeKey = (appHeirarchy, keyOrNodeKey) => {
+    const nodeByKey = getNodeForCollectionPath(appHeirarchy)(keyOrNodeKey);
+    return isNothing(nodeByKey)
+           ? getCollectionNode(appHeirarchy, keyOrNodeKey)
+           : nodeByKey;
+}
+
 
 export const isNode = (appHeirarchy, key) => 
     isSomething(getExactNodeForPath(appHeirarchy)(key))
@@ -182,7 +206,8 @@ export const getNodeFromNodeKeyHash = heirarchy => hash =>
     ]);
     
 export const isRecord = node => isSomething(node) && node.type === "record";
-export const isCollection = node => isSomething(node) && node.type === "collection";
+export const isSingleRecord = node => isRecord(node) && node.isSingle;
+export const isCollectionRecord = node => isRecord(node) && !node.isSingle;
 export const isIndex = node => isSomething(node) && node.type === "index";
 export const isaggregateGroup = node => isSomething(node) && node.type === "aggregateGroup"
 export const isShardedIndex = node => isIndex(node) && isNonEmptyString(node.getShardName);
@@ -214,7 +239,7 @@ export default {
     findField, isAncestor, isDecendant, getRecordNodeId, getRecordNodeIdFromId,
     getRecordNodeById, recordNodeIdIsAllowed, recordNodeIsAllowed, 
     getAllowedRecordNodesForIndex, getNodeFromNodeKeyHash, isRecord,
-    isCollection, isIndex, isaggregateGroup, isShardedIndex, isRoot,
+    isCollectionRecord, isIndex, isaggregateGroup, isShardedIndex, isRoot,
     isDecendantOfARecord, isGlobalIndex, isReferenceIndex, isAncestorIndex,
     fieldReversesReferenceToNode, fieldReversesReferenceToIndex,
     getFlattenedHierarchy,

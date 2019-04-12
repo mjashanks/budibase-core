@@ -1,6 +1,7 @@
 import {getExactNodeForPath, getParentKey, 
-    getFlattenedHierarchy, getNodeByKeyOrNodeKey,
-    getNode, isCollection, isAncestor} from "../templateApi/heirarchy";
+    getFlattenedHierarchy,  
+    getCollectionNodeByKeyOrNodeKey, getNodeForCollectionPath,
+    isCollectionRecord, isAncestor} from "../templateApi/heirarchy";
 import {joinKey, safeKey, $} from "../common";
 import {join, pull, 
         map, flatten, orderBy,
@@ -28,14 +29,13 @@ const allIdsStringsForFactor = collectionNode => {
 };
 
 export const getAllIdsShardNames = (appHeirarchy, collectionKey) => {
-    const collectionNode = getExactNodeForPath(appHeirarchy)
+    const collectionRecordNode = getNodeForCollectionPath(appHeirarchy)
                                               (collectionKey);
-    return $(collectionNode,[
-        n => n.children,
-        map(c => c.recordNodeId),
+    return $(collectionRecordNode,[
+        c => [c.recordNodeId],
         map(i => 
             map(c => _allIdsShardKey(collectionKey, i, c))
-                (allIdsStringsForFactor(collectionNode))
+                (allIdsStringsForFactor(collectionRecordNode))
         ),
         flatten
     ]);
@@ -52,8 +52,8 @@ const _allIdsShardKey = (collectionKey, childNo, shardKey) =>
 export const getAllIdsShardKey = (appHeirarchy, collectionKey, recordId) => {  
     const indexOfFirstDash = recordId.indexOf("-");
 
-    const collectionNode = getExactNodeForPath(appHeirarchy)
-                                              (collectionKey);
+    const collectionNode = getNodeForCollectionPath(appHeirarchy)
+                                                    (collectionKey);
 
     const idFirstChar = recordId[indexOfFirstDash + 1];
     const allIdsShardId = $(collectionNode, [
@@ -109,7 +109,7 @@ export const addToAllIds = (appHeirarchy, datastore) => async record => {
 export const getAllIdsIterator = (app) => async (collection_Key_or_NodeKey) => {
 
     collection_Key_or_NodeKey = safeKey(collection_Key_or_NodeKey);
-    const targetNode = getNodeByKeyOrNodeKey(
+    const targetNode = getCollectionNodeByKeyOrNodeKey(
         app.heirarchy,
         collection_Key_or_NodeKey);
 
@@ -141,17 +141,17 @@ export const getAllIdsIterator = (app) => async (collection_Key_or_NodeKey) => {
     };    
     
     const ancestors = $(getFlattenedHierarchy(app.heirarchy), [
-        filter(isCollection),
+        filter(isCollectionRecord),
         filter(n => isAncestor(targetNode)(n) 
                     || n.nodeKey() === targetNode.nodeKey()),
         orderBy([n => n.nodeKey().length], ["asc"])
     ]); // parents first
 
-    const traverseForIteraterators = async (currentRecordKey = "", currentNodeIndex = 0) => {
+    const traverseForIteraterators = async (parentRecordKey = "", currentNodeIndex = 0) => {
         const currentNode = ancestors[currentNodeIndex];
         const currentCollectionKey = joinKey(
-            currentRecordKey,
-            currentNode.name
+            parentRecordKey,
+            currentNode.collectionName
         );
         if(currentNode.nodeKey() === targetNode.nodeKey()) {
             return [

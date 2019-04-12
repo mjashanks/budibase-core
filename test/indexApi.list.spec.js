@@ -93,7 +93,7 @@ describe("indexApi > listItems", () => {
         record2.surname = "Zeecat";
         await recordApi.save(record2);
 
-        const results = await indexApi.listItems("/customers_index",{searchPhrase:"*cat"});
+        const results = await indexApi.listItems("/customer_index",{searchPhrase:"*cat"});
         expect(results.length).toBe(1);
         expect(results[0].surname).toBe("Zeecat");
     });

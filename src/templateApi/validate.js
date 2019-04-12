@@ -1,7 +1,7 @@
 import {$, isSomething, switchCase
         ,anyTrue, isNonEmptyArray, executesWithoutException
         , isNonEmptyString, defaultCase} from "../common";
-import {isCollection, isRecord, isRoot, isaggregateGroup,
+import {isRecord, isRoot, isaggregateGroup,
         isIndex, getFlattenedHierarchy} from "./heirarchy";
 import {filter, union, constant, 
         map, flatten, every, uniqBy,
@@ -22,7 +22,7 @@ const commonRules = [
     makerule("name", "node name is not set", 
          node => stringNotEmpty(node.name)),
     makerule("type", "node type not recognised",
-        anyTrue(isRecord, isCollection, isRoot, isIndex, isaggregateGroup ))
+        anyTrue(isRecord, isRoot, isIndex, isaggregateGroup ))
 ];
 
 const recordRules = [
@@ -42,18 +42,10 @@ const aggregateGroupRules = [
         a => isEmpty(a.condition)
              || executesWithoutException(
                     () => compileExpression(a.condition))),
-]
-
-const collectionRules = [
-    makerule("children", "collection does not have and children",
-        node => isNonEmptyArray(node.children))
 ];
 
 const getRuleSet = node => 
     switchCase(
-        [isCollection, ruleSet(
-                        commonRules, 
-                        collectionRules)],
 
         [isRecord, ruleSet(
                     commonRules, 

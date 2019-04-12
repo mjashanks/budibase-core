@@ -19,7 +19,7 @@ describe("recordApi > create > reindex", () => {
 
         await recordApi.save(record);
 
-        const items = await indexApi.listItems("/customers_index");
+        const items = await indexApi.listItems("/customer_index");
 
         expect(items.length).toBe(1);
         expect(items[0].surname).toBe("Ledog");
@@ -81,7 +81,7 @@ describe("recordApi > create > reindex", () => {
         await recordApi.save(invoice);
 
         const invoices = await indexApi.listItems(
-                            joinKey(customer.key, "invoices_index"));
+                            joinKey(customer.key, "invoice_index"));
         
         expect(isArray(invoices)).toBeTruthy();
         expect(invoices.length).toBe(1);
@@ -177,7 +177,7 @@ describe("recordApi > delete > reindex", () => {
         await recordApi.save(record);
         await recordApi.delete(record.key);
 
-        const itemsAfterDelete= await indexApi.listItems("/customers_index");
+        const itemsAfterDelete= await indexApi.listItems("/customer_index");
         expect(itemsAfterDelete.length).toBe(0);
     });
 
@@ -223,7 +223,7 @@ describe("recordApi > delete > reindex", () => {
         await recordApi.save(record);
         await recordApi.delete(record.key);
 
-        const itemsAfterDelete= await indexApi.listItems("/customers_index");
+        const itemsAfterDelete= await indexApi.listItems("/customer_index");
         expect(itemsAfterDelete.length).toBe(1);
         expect(itemsAfterDelete[0].surname).toBe("Zeecat");
 
@@ -259,7 +259,7 @@ describe("recordApi > delete > reindex", () => {
 
         await recordApi.delete(record.key);
 
-        const itemsAfterDelete= await indexApi.listItems("/customers_index");
+        const itemsAfterDelete= await indexApi.listItems("/customer_index");
         expect(itemsAfterDelete.length).toBe(1);
         expect(itemsAfterDelete[0].surname).toBe("Zeecat");
 
@@ -305,7 +305,7 @@ describe("recordApi > update > reindex", () => {
         loadedRecord.surname = "Zeedog";
         await recordApi.save(loadedRecord);
 
-        const itemsDefault = await indexApi.listItems("/customers_index");
+        const itemsDefault = await indexApi.listItems("/customer_index");
         expect(itemsDefault[0].surname).toBe("Zeedog");
         expect(itemsDefault.length).toBe(1);
 
@@ -352,7 +352,7 @@ describe("recordApi > update > reindex", () => {
         loadedRecord.surname = "Zeedog";
         await recordApi.save(loadedRecord);
 
-        const items = await indexApi.listItems("/customers_index");
+        const items = await indexApi.listItems("/customer_index");
 
         const hasItemWithSurname = sn => 
             some(items, i => i.surname === sn);

@@ -111,8 +111,8 @@ describe("aggregates", () => {
 
     it("should not depend on having any other permissions", async () => {
         const {app, indexApi} = await setup();
-        app.withOnlyThisPermission(permission.readIndex.get("/customers_index"));
-        await indexApi.aggregates("/customers_index");
+        app.withOnlyThisPermission(permission.readIndex.get("/customer_index"));
+        await indexApi.aggregates("/customer_index");
     });
 });
 

@@ -259,8 +259,8 @@ describe("save", () => {
         record.surname = "Ledog";
 
         const savedRecord = await recordApi.save(record);
-        expect(await recordApi._storeHandle.exists(`${record.key}/invoices_index/index.csv`)).toBeTruthy()
-        expect(await recordApi._storeHandle.exists(`${record.key}/invoices_index`)).toBeTruthy()
+        expect(await recordApi._storeHandle.exists(`${record.key}/invoice_index/index.csv`)).toBeTruthy()
+        expect(await recordApi._storeHandle.exists(`${record.key}/invoice_index`)).toBeTruthy()
         expect(await recordApi._storeHandle.exists(`${record.key}/invoices`)).toBeTruthy()
     });
 

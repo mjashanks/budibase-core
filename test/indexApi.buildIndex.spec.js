@@ -14,7 +14,7 @@ describe("buildIndex > Global index", () => {
         );
 
         const customer = recordApi.getNew(
-            appHeirarchy.customersCollection.nodeKey(),
+            appHeirarchy.customerRecord.collectionNodeKey(),
             "customer");
         
         customer.surname = "thedog";
@@ -59,7 +59,7 @@ describe("buildIndex > Global index", () => {
         );
 
         const customer = recordApi.getNew(
-            appHeirarchy.customersCollection.nodeKey(),
+            appHeirarchy.customerRecord.collectionNodeKey(),
             "customer");
         
         customer.surname = "thedog";
@@ -118,7 +118,7 @@ describe("buildIndex > TopLevelCollection", () => {
         );
 
         const customer = recordApi.getNew(
-            appHeirarchy.customersCollection.nodeKey(),
+            appHeirarchy.customerRecord.collectionNodeKey(),
             "customer");
         
         customer.surname = "thedog";
@@ -192,7 +192,7 @@ describe("buildIndex > nested collection", () => {
         );
 
         const customer = recordApi.getNew(
-            appHeirarchy.customersCollection.nodeKey(),
+            appHeirarchy.customerRecord.collectionNodeKey(),
             "customer");
         
         customer.surname = "thedog";
@@ -210,7 +210,7 @@ describe("buildIndex > nested collection", () => {
 
         await recordApi.save(invoice);
 
-        const indexKey = joinKey(customer.key, "invoices_index");
+        const indexKey = joinKey(customer.key, "invoice_index");
         await _deleteIndex(app, indexKey, false);
 
         const indexNode = getExactNodeForPath(appHeirarchy.root)(indexKey);
@@ -229,7 +229,7 @@ describe("buildIndex > nested collection", () => {
         );
 
         const customer = recordApi.getNew(
-            appHeirarchy.customersCollection.nodeKey(),
+            appHeirarchy.customerRecord.collectionNodeKey(),
             "customer");
         
         customer.surname = "thedog";
@@ -248,7 +248,7 @@ describe("buildIndex > nested collection", () => {
         await recordApi.save(invoice);
 
         const customer2 = recordApi.getNew(
-            appHeirarchy.customersCollection.nodeKey(),
+            appHeirarchy.customerRecord.collectionNodeKey(),
             "customer");
         
         customer2.surname = "thedog";
@@ -266,7 +266,7 @@ describe("buildIndex > nested collection", () => {
 
         await recordApi.save(invoice2);
 
-        const indexKey = joinKey(customer.key, "invoices_index");
+        const indexKey = joinKey(customer.key, "invoice_index");
         await _deleteIndex(app, indexKey, false);
 
         const indexNode = getExactNodeForPath(appHeirarchy.root)(indexKey);
@@ -278,7 +278,7 @@ describe("buildIndex > nested collection", () => {
         expect(some(indexItems, i => i.key === invoice.key)).toBeTruthy();
 
         const indexItems2 = await indexApi.listItems(
-            joinKey(customer2.key, "invoices_index")
+            joinKey(customer2.key, "invoice_index")
         );
 
         expect(indexItems2.length).toBe(1);
@@ -296,7 +296,7 @@ describe("buildIndex > sharded index", () => {
         );
 
         const customer = recordApi.getNew(
-            appHeirarchy.customersCollection.nodeKey(),
+            appHeirarchy.customerRecord.collectionNodeKey(),
             "customer");
         
         customer.surname = "thedog";
@@ -323,13 +323,13 @@ describe("buildIndex > sharded index", () => {
         );
 
         const customer1 = recordApi.getNew(
-            appHeirarchy.customersCollection.nodeKey(),
+            appHeirarchy.customerRecord.collectionNodeKey(),
             "customer");
         customer1.surname = "thedog";
         await recordApi.save(customer1);
 
         const customer2 = recordApi.getNew(
-            appHeirarchy.customersCollection.nodeKey(),
+            appHeirarchy.customerRecord.collectionNodeKey(),
             "customer");
         customer2.surname = "Zeecat";
         await recordApi.save(customer2);
@@ -355,7 +355,7 @@ describe("buildIndex > sharded index", () => {
         );
 
         const customer = recordApi.getNew(
-            appHeirarchy.customersCollection.nodeKey(),
+            appHeirarchy.customerRecord.collectionNodeKey(),
             "customer");
         customer.surname = "thedog";
         await recordApi.save(customer);

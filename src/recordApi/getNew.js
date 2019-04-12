@@ -1,4 +1,4 @@
-import {getExactNodeForPath} from "../templateApi/heirarchy";
+import {getNodeForCollectionPath} from "../templateApi/heirarchy";
 import {getNewFieldValue} from "../types";
 import {find, keyBy, mapValues, constant} from "lodash/fp";
 import {$, joinKey, safeKey, apiWrapperSync, events} from "../common";
@@ -20,9 +20,7 @@ const _getNew = (recordNode, collectionKey) =>
 
 const getRecordNode = (app, collectionKey, recordTypeName) => {
     collectionKey = safeKey(collectionKey);
-    const collectionNode = getExactNodeForPath(app.heirarchy)(collectionKey);
-    return find(c => c.name === recordTypeName)
-                (collectionNode.children);
+    return getNodeForCollectionPath(app.heirarchy)(collectionKey);
 }
 
 export const getNewChild = (app) => 

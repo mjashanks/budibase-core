@@ -1,6 +1,7 @@
 import {getAllIdsIterator} from "../indexing/allIds";
-import {getFlattenedHierarchy, getRecordNodeById,
-    getNodeByKeyOrNodeKey,getNode, isIndex, isRecord, isDecendant, getAllowedRecordNodesForIndex,
+import {getFlattenedHierarchy, getRecordNodeById, 
+    getCollectionNodeByKeyOrNodeKey, getNode, isIndex, 
+    isRecord, isDecendant, getAllowedRecordNodesForIndex,
     fieldReversesReferenceToIndex} from "../templateApi/heirarchy";
 import {find, filter, includes,
     some, map} from "lodash/fp";
@@ -59,7 +60,7 @@ const buildReverseReferenceIndex = async (app, indexNode) => {
 
         const iterateReferencingNodes = 
             await getAllIdsIterator(app)
-                    (referencingNode.parent().nodeKey());
+                    (referencingNode.collectionNodeKey());
 
         let referencingIdIterator = await iterateReferencingNodes();
         while(!referencingIdIterator.done) {
@@ -108,13 +109,11 @@ const buildHeirarchalIndex = async (app, indexNode) => {
     };
 
     
-    const collections = getAllowedParentCollectionNodes(
-        app.heirarchy, indexNode
-    );
+    const collectionRecords = getAllowedRecordNodesForIndex(app.heirarchy, indexNode);
 
-    for(let targetCollectionNode of collections) {
+    for(let targetCollectionRecordNode of collectionRecords) {
         const allIdsIterator = await  getAllIdsIterator(app)
-                                        (targetCollectionNode.nodeKey());
+                                        (targetCollectionRecordNode.collectionNodeKey());
         
         let allIds = await allIdsIterator();
         while(allIds.done === false) {
@@ -154,7 +153,9 @@ const applyAllDecendantRecords =
            currentIndexedDataKey, recordCount=0) => {
 
     const collectionNode = 
-        getNodeByKeyOrNodeKey(app.heirarchy, collection_Key_or_NodeKey);
+        getCollectionNodeByKeyOrNodeKey(
+            app.heirarchy, 
+            collection_Key_or_NodeKey);
 
     const allIdsIterator = await  getAllIdsIterator(app)
                                                    (collection_Key_or_NodeKey);
@@ -182,7 +183,7 @@ const applyAllDecendantRecords =
                 for(let childCollectionNode of recordNode.children) {
                     recordCount = await applyAllDecendantRecords(
                         app,
-                        joinKey(recordKey, childCollectionNode.name),
+                        joinKey(recordKey, childCollectionNode.collectionName),
                         indexNode, indexKey, currentIndexedData,
                         currentIndexedDataKey, recordCount);
                 }

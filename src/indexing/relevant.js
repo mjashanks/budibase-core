@@ -1,13 +1,11 @@
 import {joinKey, splitKey, isNonEmptyString,
     isNothing, $, isSomething} from "../common";
-import {orderBy, constant} from "lodash";
+import {orderBy} from "lodash";
 import {reduce, find, includes, flatten, union,
         filter, each, map} from "lodash/fp";
-import {getFlattenedHierarchy, isIndex, 
-        isCollection, getNode, getRecordNodeId,
+import {getFlattenedHierarchy, getNode, getRecordNodeId,
         getExactNodeForPath, recordNodeIdIsAllowed,
-        isRecord, isRoot,
-        isGlobalIndex} from "../templateApi/heirarchy";
+        isRecord, isGlobalIndex} from "../templateApi/heirarchy";
 import { indexTypes } from "../templateApi/indexes";
 
 export const getRelevantAncestorIndexes = (appHeirarchy, record) => {

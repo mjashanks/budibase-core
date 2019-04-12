@@ -21,7 +21,7 @@ describe("cleanup transactions", () => {
         await recordApi.save(record1);
         await recordApi.save(record2);
     
-        const records = await indexApi.listItems("/customers_index");
+        const records = await indexApi.listItems("/customer_index");
     
         // cleanup should be disabled as above
         expect(records.length).toBe(0);
@@ -42,7 +42,7 @@ describe("cleanup transactions", () => {
         
         await cleanup(app);
 
-        const records = await indexApi.listItems("/customers_index");
+        const records = await indexApi.listItems("/customer_index");
         expect(records.length).toBe(2);
         expect(some(records, r => r.surname === "Zeecat")).toBeTruthy();
         expect(some(records, r => r.surname === "Ledog")).toBeTruthy();
@@ -62,7 +62,7 @@ describe("cleanup transactions", () => {
         
         await cleanup(app);
 
-        const records = await indexApi.listItems("/customers_index");
+        const records = await indexApi.listItems("/customer_index");
         expect(records.length).toBe(1);
         expect(some(records, r => r.surname === "Zeecat")).toBeTruthy();
 
@@ -88,7 +88,7 @@ describe("cleanup transactions", () => {
         
         await cleanup(app);
 
-        const records = await indexApi.listItems("/customers_index");
+        const records = await indexApi.listItems("/customer_index");
         expect(records.length).toBe(1);
         expect(some(records, r => r.surname === "Lelapin")).toBeTruthy();
 
@@ -115,7 +115,7 @@ describe("cleanup transactions", () => {
         
         await cleanup(app);
 
-        const records = await indexApi.listItems("/customers_index");
+        const records = await indexApi.listItems("/customer_index");
         expect(records.length).toBe(1);
         expect(records[0].surname).toBe("Ledog");
 
@@ -145,7 +145,7 @@ describe("cleanup transactions", () => {
         
         await cleanup(app);
 
-        const records = await indexApi.listItems("/customers_index");
+        const records = await indexApi.listItems("/customer_index");
         expect(records.length).toBe(1);
         expect(records[0].surname).toBe("Ledog");
 
@@ -166,7 +166,7 @@ describe("cleanup transactions", () => {
         await recordApi.delete(savedRecord.key);
         await cleanup(app);
 
-        const records = await indexApi.listItems("/customers_index");
+        const records = await indexApi.listItems("/customer_index");
         expect(records.length).toBe(0);
     });
 
@@ -180,7 +180,7 @@ describe("cleanup transactions", () => {
         await recordApi.delete(savedRecord.key);
         await cleanup(app);
 
-        const records = await indexApi.listItems("/customers_index");
+        const records = await indexApi.listItems("/customer_index");
         expect(records.length).toBe(0);
     });
 
@@ -237,12 +237,12 @@ describe("cleanup transactions", () => {
 
         await cleanup(app);
         
-        let records = await indexApi.listItems("/customers_index");
+        let records = await indexApi.listItems("/customer_index");
         expect(records.length).toBe(0);
 
         await recordApi._storeHandle.deleteFile(LOCK_FILE_KEY);
         await cleanup(app);
-        records = await indexApi.listItems("/customers_index");
+        records = await indexApi.listItems("/customer_index");
         expect(records.length).toBe(1);
 
     });
@@ -260,7 +260,7 @@ describe("cleanup transactions", () => {
 
         await cleanup(app);
         
-        let records = await indexApi.listItems("/customers_index");
+        let records = await indexApi.listItems("/customer_index");
         expect(records.length).toBe(1);
 
     });
