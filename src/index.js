@@ -12,6 +12,7 @@ import {generateFullPermissions} from "./authApi/generateFullPermissions";
 import {getApplicationDefinition} from "./templateApi/getApplicationDefinition";
 import common from "./common";
 import {getBehaviourSources} from "./templateApi/getBehaviourSources";
+import heirarchy from "./templateApi/heirarchy";
 
 export const getAppApis = async (store, behaviourSources = null, 
                                 cleanupTransactions = null, 
@@ -100,7 +101,7 @@ export {setupDatastore} from "./appInitialise";
 export {getActionsApi} from "./actionsApi";
 export {initialiseData} from "./appInitialise/initialiseData";
 export {getDatabaseManager} from "./appInitialise/databaseManager";
-export {heirarchy} from "./templateApi/heirarchy";
+export {heirarchy};
 export {common};
 
 export default getAppApis;

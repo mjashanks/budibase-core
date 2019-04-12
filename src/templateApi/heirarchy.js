@@ -207,3 +207,15 @@ export const fieldReversesReferenceToIndex = indexNode => field =>
         ([indexNode.nodeKey()])
         .length > 0;
             
+export default {
+    getLastPartInKey, getNodesInPath, getExactNodeForPath, 
+    hasMatchingAncestor, getNode, getNodeByKeyOrNodeKey, isNode,
+    getActualKeyOfParent, getParentKey, isKeyAncestorOf, hasNoMatchingAncestors,
+    findField, isAncestor, isDecendant, getRecordNodeId, getRecordNodeIdFromId,
+    getRecordNodeById, recordNodeIdIsAllowed, recordNodeIsAllowed, 
+    getAllowedRecordNodesForIndex, getNodeFromNodeKeyHash, isRecord,
+    isCollection, isIndex, isaggregateGroup, isShardedIndex, isRoot,
+    isDecendantOfARecord, isGlobalIndex, isReferenceIndex, isAncestorIndex,
+    fieldReversesReferenceToNode, fieldReversesReferenceToIndex,
+    getFlattenedHierarchy,
+}
