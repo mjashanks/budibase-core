@@ -78,7 +78,7 @@ describe("buildIndex > Global index", () => {
         await recordApi.save(invoice);
 
         const partner = recordApi.getNew(
-            appHeirarchy.partnersCollection.nodeKey(),
+            appHeirarchy.partnerRecord.collectionNodeKey(),
             "partner");
         
         partner.surname = "thedog";
@@ -153,7 +153,7 @@ describe("buildIndex > TopLevelCollection", () => {
         );
 
         const partner = recordApi.getNew(
-            appHeirarchy.partnersCollection.nodeKey(),
+            appHeirarchy.partnerRecord.collectionNodeKey(),
             "partner");
         
         partner.surname = "thedog";

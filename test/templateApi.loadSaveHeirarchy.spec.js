@@ -3,8 +3,7 @@ import {permission} from "../src/authApi/permissions";
 const saveThreeLevelHeirarchy = async () => {
     const {templateApi, app} = await getMemoryTemplateApi();
     const root = templateApi.getNewRootLevel();
-    const collection = templateApi.getNewCollectionTemplate(root, "customers");
-    const record = templateApi.getNewRecordTemplate(collection);
+    const record = templateApi.getNewRecordTemplate(root);
     record.name = "customer";
     const surname = templateApi.getNewField("string");
     surname.name = "surname";
@@ -12,7 +11,7 @@ const saveThreeLevelHeirarchy = async () => {
     templateApi.addField(record, surname);
 
     await templateApi.saveApplicationHeirarchy(root);
-    return {templateApi, root, collection, app};
+    return {templateApi, root, record, app};
 };
 
 describe("Load & Save App Heirarchy", () => {
@@ -24,7 +23,6 @@ describe("Load & Save App Heirarchy", () => {
 
         expect(heirarchy.pathRegx).toBeDefined();
         expect(heirarchy.children[0].pathRegx).toBeDefined();
-        expect(heirarchy.children[0].children[0].pathRegx).toBeDefined();
 
     });
 
@@ -35,15 +33,14 @@ describe("Load & Save App Heirarchy", () => {
 
         expect(heirarchy.parent).toBeDefined();
         expect(heirarchy.children[0].parent).toBeDefined();
-        expect(heirarchy.children[0].children[0].parent).toBeDefined();
 
     });
 
 
     it("should throw error when validation fails", async () => {
 
-        const {templateApi, collection, root} = await saveThreeLevelHeirarchy();
-        collection.name = "";
+        const {templateApi, record, root} = await saveThreeLevelHeirarchy();
+        record.name = "";
         
         let err;
         try {

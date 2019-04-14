@@ -10,25 +10,25 @@ import {findCollectionDefaultIndex} from "./specHelpers";
 const createValidHeirarchy = () => {
     const root = createNodes.getNewRootLevel();
 
-    const customerCollection = createNodes.getNewCollectionTemplate(root, "customers");
+    const customerRecord = createNodes.getNewRecordTemplate(root, "customer");
+    customerRecord.collectionName = "customers";
 
-    const customersDefaultIndex = findCollectionDefaultIndex(customerCollection);
+    const customersDefaultIndex = findCollectionDefaultIndex(customerRecord);
     const customersNoGroupaggregateGroup = createNodes.getNewAggregateGroupTemplate(customersDefaultIndex);
     customersNoGroupaggregateGroup.name = "Customers Summary";
     const allCustomersOwedFunctions = createNodes.getNewAggregateTemplate(customersNoGroupaggregateGroup);
     allCustomersOwedFunctions.aggregatedValue = "return record.owed";
     allCustomersOwedFunctions.name = "all customers owed amount";
 
-    const partnersCollection = createNodes.getNewCollectionTemplate(root, "partners");
-
-    const partnerRecord = createNodes.getNewRecordTemplate(partnersCollection);
+    const partnerRecord = createNodes.getNewRecordTemplate(root, "partner");
+    partnerRecord.collectionName = "partners";
     partnerRecord.name = "partner";
     const businessName = getNewField("string");
     businessName.name = "businessname";
     businessName.label = "bn";
     addField(partnerRecord,businessName);
 
-    const customerRecord = createNodes.getNewRecordTemplate(customerCollection);
+    
     customerRecord.name = "customer";
     const surnameField = getNewField("string");
     surnameField.name = "surname";
@@ -56,7 +56,7 @@ const createValidHeirarchy = () => {
             (commonRecordValidationRules.fieldNotEmpty("surname"));
 
     return {
-        root, customerCollection, 
+        root,  
         customerRecord, customersDefaultIndex,
         customersNoGroupaggregateGroup,
         allCustomersOwedFunctions
@@ -81,10 +81,10 @@ describe("heirarchy validation", () => {
         const expectInvalidName = (node) => expectInvalidField(validationResult, "name", node, 1);
         
         heirarchy = createValidHeirarchy();
-        heirarchy.customerCollection.name = "";
+        heirarchy.customerRecord.name = "";
         let validationResult = validateAll(heirarchy.root);
-        expectInvalidName(heirarchy.customerCollection);
-        heirarchy.customerCollection.name = "customers";
+        expectInvalidName(heirarchy.customerRecord);
+        heirarchy.customerRecord.name = "customers";
 
         heirarchy = createValidHeirarchy();
         heirarchy.customerRecord.name = "";
@@ -121,18 +121,12 @@ describe("heirarchy validation", () => {
 
     });
 
-    it("collection > should return error when no children", () => {
-        const heirarchy = createValidHeirarchy();
-        heirarchy.customerCollection.children = [];
-        const validationResult = validateAll(heirarchy.root);
-        expectInvalidField(validationResult, "children", heirarchy.customerCollection);
-    });
-
     it("collection > should return error when duplicate names", () => {
         const heirarchy = createValidHeirarchy();
-        heirarchy.customerCollection.name = "partners"
+        heirarchy.customerRecord.collectionName = "partners"
+        heirarchy.customerRecord.name = "partner"
         const validationResult = validateAll(heirarchy.root);
-        expectInvalidField(validationResult, "name", heirarchy.customerCollection, 2);
+        expectInvalidField(validationResult, "name", heirarchy.customerRecord, 2);
     });
 
     it("index > should return error when index has no map", () => {

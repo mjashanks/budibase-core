@@ -7,7 +7,7 @@ describe("indexSchemGenerator", () => {
 
     it("should return mapped columns of single type, when accepts all in collection of one type", async () => {
         const {appHeirarchy} = await setup(false);
-        const schema = generateSchema(appHeirarchy.root, appHeirarchy.petsDefaultIndex);
+        const schema = generateSchema(appHeirarchy.root, appHeirarchy.petsIndex);
         schemaHasFieldOfType(schema, "key", "string");
         schemaHasFieldOfType(schema, "sortKey", "string");
         schemaHasFieldOfType(schema, "id", "string");
@@ -21,7 +21,7 @@ describe("indexSchemGenerator", () => {
 
     it("should return mapped columns of two types, when accepts all in collection or two typs", async () => {
         const {appHeirarchy} = await setup(true);
-        const schema = generateSchema(appHeirarchy.root, appHeirarchy.petsDefaultIndex);
+        const schema = generateSchema(appHeirarchy.root, appHeirarchy.petsIndex);
         schemaHasFieldOfType(schema, "key", "string");
         schemaHasFieldOfType(schema, "sortKey", "string");
         schemaHasFieldOfType(schema, "id", "string");
@@ -79,10 +79,8 @@ const setup = includeFish =>
 const createApp = (includeFish) => (templateApi) => {
     
     const root = templateApi.getNewRootLevel();
-    const pets = templateApi.getNewCollectionTemplate(root, "pets");
 
-    const dogRecord = templateApi.getNewRecordTemplate(pets);
-    dogRecord.name = "dog";
+    const dogRecord = templateApi.getNewRecordTemplate(root, "dog");
 
     const addField = (recordNode) => (name, type, typeOptions) => {
         const field = templateApi.getNewField(type);
@@ -92,6 +90,10 @@ const createApp = (includeFish) => (templateApi) => {
         return field;
     };
 
+    const petsIndex = templateApi.getNewIndexTemplate(root);
+    petsIndex.name = "allPets";
+    petsIndex.allowedRecordNodeIds = [dogRecord.recordNodeId];
+
     const addDogField = addField(dogRecord);      
     addDogField("name", "string");
     addDogField("dob", "datetime");
@@ -99,9 +101,8 @@ const createApp = (includeFish) => (templateApi) => {
 
     let fishStuff = {};
     if(includeFish) {
-        const fishRecord = templateApi.getNewRecordTemplate(pets);
+        const fishRecord = templateApi.getNewRecordTemplate(root, "fish");
         const addFishField = addField(fishRecord);
-        fishRecord.name = "lizard";
         addFishField("name", "string");
         addFishField("isAlive", "bool");
         addFishField("noOfGills", "number");
@@ -115,6 +116,8 @@ const createApp = (includeFish) => (templateApi) => {
         dogFriends.name = "dogFriends";
         fishStuff.dogFriends = dogFriends;
 
+        petsIndex.allowedRecordNodeIds.push(fishRecord.recordNodeId);
+
         const favFishField = addDogField("favouriteFish", "reference", {
             indexNodeKey : fishOnlyIndex.nodeKey(),
             reverseIndexNodeKeys : [dogFriends.nodeKey()],
@@ -124,7 +127,6 @@ const createApp = (includeFish) => (templateApi) => {
     }
 
     return ({
-        pets, petsDefaultIndex: findCollectionDefaultIndex(pets),
-        dogRecord, root, ...fishStuff
+        dogRecord, petsIndex, root, ...fishStuff
     })
 };

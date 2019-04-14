@@ -1,7 +1,4 @@
-import {appDefinitionFile} from "../common";
-import {join} from "lodash";
-import {map} from "lodash/fp";
-import {getNewCollectionTemplate, getNewRootLevel, 
+import {getNewRootLevel, 
         getNewRecordTemplate, getNewIndexTemplate,
         createNodeErrors, constructHeirarchy,
         getNewAggregateGroupTemplate, getNewSingleRecordTemplate,
@@ -24,7 +21,7 @@ const api = app => ({
     saveApplicationHeirarchy : saveApplicationHeirarchy(app),
     saveActionsAndTriggers : saveActionsAndTriggers(app),
     getBehaviourSources: () => getBehaviourSources(app.datastore),
-    getNewRootLevel, getNewCollectionTemplate, 
+    getNewRootLevel,  
     getNewIndexTemplate, getNewRecordTemplate,
     getNewField, validateField, addField, fieldErrors,
     getNewRecordValidationRule, commonRecordValidationRules, 
