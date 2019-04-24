@@ -9,7 +9,7 @@ and this might help: https://github.com/nodejs/node-gyp/issues/1278
 
 ### For node gyp on ubuntu
 
-##  `sudo apt-get install build-essentials`
+`sudo apt-get install build-essentials`
 
 Once you have this, try...
 
