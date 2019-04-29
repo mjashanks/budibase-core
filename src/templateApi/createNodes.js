@@ -98,7 +98,7 @@ const addToParent = obj => {
     return obj;
 };
 
-const constructNode = (parent, obj) =>
+export const constructNode = (parent, obj) =>
     $(obj, [
         construct(parent),
         validate(parent),

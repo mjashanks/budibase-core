@@ -2,7 +2,7 @@ import {getNewRootLevel,
         getNewRecordTemplate, getNewIndexTemplate,
         createNodeErrors, constructHeirarchy,
         getNewAggregateGroupTemplate, getNewSingleRecordTemplate,
-        getNewAggregateTemplate} 
+        getNewAggregateTemplate, constructNode} 
         from "./createNodes";
 import {getNewField, validateField, 
         addField, fieldErrors} from "./fields";
@@ -21,7 +21,7 @@ const api = app => ({
     saveApplicationHeirarchy : saveApplicationHeirarchy(app),
     saveActionsAndTriggers : saveActionsAndTriggers(app),
     getBehaviourSources: () => getBehaviourSources(app.datastore),
-    getNewRootLevel,  
+    getNewRootLevel, constructNode,
     getNewIndexTemplate, getNewRecordTemplate,
     getNewField, validateField, addField, fieldErrors,
     getNewRecordValidationRule, commonRecordValidationRules, 
