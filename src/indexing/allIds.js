@@ -32,7 +32,7 @@ export const getAllIdsShardNames = (appHeirarchy, collectionKey) => {
     const collectionRecordNode = getNodeForCollectionPath(appHeirarchy)
                                               (collectionKey);
     return $(collectionRecordNode,[
-        c => [c.recordNodeId],
+        c => [c.nodeId],
         map(i => 
             map(c => _allIdsShardKey(collectionKey, i, c))
                 (allIdsStringsForFactor(collectionRecordNode))

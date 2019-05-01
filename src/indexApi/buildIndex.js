@@ -129,11 +129,11 @@ const buildHeirarchalIndex = async (app, indexNode) => {
 }
 
 const chooseChildRecordNodeByKey = (collectionNode, recordId) => 
-    find(c => recordId.startsWith(c.recordNodeId))
+    find(c => recordId.startsWith(c.nodeId))
         (collectionNode.children);
 
 const recordNodeApplies = indexNode => recordNode => 
-    includes(recordNode.recordNodeId)(indexNode.allowedRecordNodeIds);
+    includes(recordNode.nodeId)(indexNode.allowedRecordNodeIds);
 
 const hasApplicableDecendant = (heirarchy, ancestorNode, indexNode) => 
     $(heirarchy, [

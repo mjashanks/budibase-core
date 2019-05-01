@@ -15,7 +15,7 @@ const ensureCollectionIsInitialised = async (datastore, node, parentKey) => {
             joinKey(
                 parentKey,
                 "allids",
-                node.recordNodeId.toString())
+                node.nodeId.toString())
         );
         
     }   

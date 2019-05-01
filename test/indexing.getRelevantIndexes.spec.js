@@ -91,7 +91,7 @@ describe("getRelevantIndexes", () => {
         const {recordApi, appHeirarchy} = await setupAppheirarchy(
         basicAppHeirarchyCreator_WithFields_AndIndexes);
 
-        const nodeid = appHeirarchy.customerRecord.recordNodeId;
+        const nodeid = appHeirarchy.customerRecord.nodeId;
         const invoice  = recordApi.getNew(`/customers/${nodeid}-1234/invoices`, "invoice")
 
         const indexes = getRelevantAncestorIndexes(

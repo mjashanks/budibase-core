@@ -12,7 +12,7 @@ export const getRelevantAncestorIndexes = (appHeirarchy, record) => {
 
     const key = record.key;
     const keyParts = splitKey(key);
-    const recordNodeId = getRecordNodeId(key);
+    const nodeId = getRecordNodeId(key);
 
     const flatHeirarchy = 
         orderBy(getFlattenedHierarchy(appHeirarchy),
@@ -40,7 +40,7 @@ export const getRelevantAncestorIndexes = (appHeirarchy, record) => {
             const indexes = $(nodeMatch.indexes, [
                 filter(i => i.indexType === indexTypes.ancestor && 
                         (i.allowedRecordNodeIds.length === 0
-                         || includes(recordNodeId)(i.allowedRecordNodeIds)))
+                         || includes(nodeId)(i.allowedRecordNodeIds)))
             ]);
 
             each(v => 
@@ -53,7 +53,7 @@ export const getRelevantAncestorIndexes = (appHeirarchy, record) => {
         (keyParts).nodesAndKeys;
     
     const rootIndexes = $(flatHeirarchy, [
-        filter(n => isGlobalIndex(n) && recordNodeIdIsAllowed(n)(recordNodeId)),
+        filter(n => isGlobalIndex(n) && recordNodeIdIsAllowed(n)(nodeId)),
         map(i => makeIndexNodeAndKey(i, i.nodeKey()))
     ]);
 
