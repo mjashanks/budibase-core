@@ -9,7 +9,7 @@ import {getNewField, validateField,
 import {getNewRecordValidationRule, commonRecordValidationRules,
         addRecordValidationRule} from "./recordValidationRules";
 import {createAction, createTrigger} from "./createActions";
-import {validateTriggers, validateTrigger, 
+import {validateTriggers, validateTrigger, validateNode,
         validateActions, validateAll} from "./validate";
 import {getApplicationDefinition} from "./getApplicationDefinition"
 import {saveApplicationHeirarchy} from "./saveApplicationHeirarchy";
@@ -29,7 +29,7 @@ const api = app => ({
     addRecordValidationRule, createAction, createTrigger, validateActions,
     validateTrigger, getNewAggregateGroupTemplate,
     getNewAggregateTemplate, constructHeirarchy, getNewSingleRecordTemplate,
-    allTypes:all
+    allTypes:all, validateNode, validateAll, validateTriggers
 });
 
 

@@ -35,7 +35,8 @@ const fieldRules = (allFields) => [
         f => isNonEmptyString(f.getUndefinedValue)),
     makerule("name", "field name is duplicated",
         f => isNothingOrEmpty(f.name) || 
-             countBy("name")(allFields)[f.name] === 1),
+             isNothing(allFields[f.name]) || 
+             countBy("name")(allFields)[f.name] <= 1),
     makerule("type", "type is unknown",
         f => isNothingOrEmpty(f.type) 
              || some(t => f.type === t)(allowedTypes())),
