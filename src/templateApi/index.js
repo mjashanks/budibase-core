@@ -14,6 +14,7 @@ import {validateTriggers, validateTrigger,
 import {getApplicationDefinition} from "./getApplicationDefinition"
 import {saveApplicationHeirarchy} from "./saveApplicationHeirarchy";
 import {saveActionsAndTriggers} from "./saveActionsAndTriggers";
+import {all} from "../types";
 
 const api = app => ({
     
@@ -27,7 +28,8 @@ const api = app => ({
     getNewRecordValidationRule, commonRecordValidationRules, 
     addRecordValidationRule, createAction, createTrigger, validateActions,
     validateTrigger, getNewAggregateGroupTemplate,
-    getNewAggregateTemplate, constructHeirarchy, getNewSingleRecordTemplate
+    getNewAggregateTemplate, constructHeirarchy, getNewSingleRecordTemplate,
+    allTypes:all
 });
 
 
