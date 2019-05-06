@@ -291,7 +291,7 @@ describe("save", () => {
 
         await recordApi.save(record);
 
-        const allIdsPath = `/customers/allids/${appHeirarchy.customerRecord.recordNodeId}/${record.id[2]}`;
+        const allIdsPath = `/customers/allids/${appHeirarchy.customerRecord.nodeId}/${record.id[2]}`;
         expect(await recordApi._storeHandle.exists(allIdsPath)).toBeTruthy();
         
     });

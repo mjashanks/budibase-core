@@ -160,15 +160,15 @@ export const getRecordNodeById = (heirarchy, recordId) =>
     $(heirarchy, [
         getFlattenedHierarchy,
         find(n => isRecord(n) 
-                    && n.recordNodeId === getRecordNodeIdFromId(recordId))
+                    && n.nodeId === getRecordNodeIdFromId(recordId))
     ]);
 
-export const recordNodeIdIsAllowed = (indexNode) => (recordNodeId) =>
+export const recordNodeIdIsAllowed = (indexNode) => (nodeId) =>
     indexNode.allowedRecordNodeIds.length === 0
-    || includes(recordNodeId)(indexNode.allowedRecordNodeIds);
+    || includes(nodeId)(indexNode.allowedRecordNodeIds);
 
 export const recordNodeIsAllowed = (indexNode) => (recordNode) =>
-    recordNodeIdIsAllowed(indexNode)(recordNode.recordNodeId);
+    recordNodeIdIsAllowed(indexNode)(recordNode.nodeId);
 
 export const getAllowedRecordNodesForIndex = (appHeirarchy, indexNode) => {
     const recordNodes = $(appHeirarchy, [

@@ -92,7 +92,7 @@ const createApp = (includeFish) => (templateApi) => {
 
     const petsIndex = templateApi.getNewIndexTemplate(root);
     petsIndex.name = "allPets";
-    petsIndex.allowedRecordNodeIds = [dogRecord.recordNodeId];
+    petsIndex.allowedRecordNodeIds = [dogRecord.nodeId];
 
     const addDogField = addField(dogRecord);      
     addDogField("name", "string");
@@ -109,14 +109,14 @@ const createApp = (includeFish) => (templateApi) => {
         fishStuff.fishRecord = fishRecord;
         const fishOnlyIndex = templateApi.getNewIndexTemplate(root);
         fishOnlyIndex.name = "fishOnly";
-        fishOnlyIndex.allowedRecordNodeIds = [fishRecord.recordNodeId];
+        fishOnlyIndex.allowedRecordNodeIds = [fishRecord.nodeId];
         fishStuff.fishOnlyIndex = fishOnlyIndex;
 
         const dogFriends = templateApi.getNewIndexTemplate(dogRecord, indexTypes.reference);
         dogFriends.name = "dogFriends";
         fishStuff.dogFriends = dogFriends;
 
-        petsIndex.allowedRecordNodeIds.push(fishRecord.recordNodeId);
+        petsIndex.allowedRecordNodeIds.push(fishRecord.nodeId);
 
         const favFishField = addDogField("favouriteFish", "reference", {
             indexNodeKey : fishOnlyIndex.nodeKey(),

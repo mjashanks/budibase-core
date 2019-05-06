@@ -2,18 +2,19 @@ import {getNewRootLevel,
         getNewRecordTemplate, getNewIndexTemplate,
         createNodeErrors, constructHeirarchy,
         getNewAggregateGroupTemplate, getNewSingleRecordTemplate,
-        getNewAggregateTemplate} 
+        getNewAggregateTemplate, constructNode} 
         from "./createNodes";
 import {getNewField, validateField, 
         addField, fieldErrors} from "./fields";
 import {getNewRecordValidationRule, commonRecordValidationRules,
         addRecordValidationRule} from "./recordValidationRules";
 import {createAction, createTrigger} from "./createActions";
-import {validateTriggers, validateTrigger, 
+import {validateTriggers, validateTrigger, validateNode,
         validateActions, validateAll} from "./validate";
 import {getApplicationDefinition} from "./getApplicationDefinition"
 import {saveApplicationHeirarchy} from "./saveApplicationHeirarchy";
 import {saveActionsAndTriggers} from "./saveActionsAndTriggers";
+import {all} from "../types";
 
 const api = app => ({
     
@@ -21,13 +22,14 @@ const api = app => ({
     saveApplicationHeirarchy : saveApplicationHeirarchy(app),
     saveActionsAndTriggers : saveActionsAndTriggers(app),
     getBehaviourSources: () => getBehaviourSources(app.datastore),
-    getNewRootLevel,  
+    getNewRootLevel, constructNode,
     getNewIndexTemplate, getNewRecordTemplate,
     getNewField, validateField, addField, fieldErrors,
     getNewRecordValidationRule, commonRecordValidationRules, 
     addRecordValidationRule, createAction, createTrigger, validateActions,
     validateTrigger, getNewAggregateGroupTemplate,
-    getNewAggregateTemplate, constructHeirarchy, getNewSingleRecordTemplate
+    getNewAggregateTemplate, constructHeirarchy, getNewSingleRecordTemplate,
+    allTypes:all, validateNode, validateAll, validateTriggers
 });
 
 

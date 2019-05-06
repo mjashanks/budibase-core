@@ -26,7 +26,7 @@ describe("initialiseData", () => {
         const {appDef, datastore, h} = getApplicationDefinition();
         await initialiseData(datastore, appDef);
 
-        const allIdsTypeFolder = "/customers/allids/" + h.customerRecord.recordNodeId;
+        const allIdsTypeFolder = "/customers/allids/" + h.customerRecord.nodeId;
         const allIdsFolder = "/customers/allids";
         expect(await datastore.exists(allIdsTypeFolder)).toBeTruthy();
         expect(await datastore.exists(allIdsFolder)).toBeTruthy();

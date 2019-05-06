@@ -23,7 +23,7 @@ const nodeKeyMaker = (node) => () =>
          n => joinKey(
                 node.parent().nodeKey(),
                 node.collectionName,
-                n.recordNodeId + "-{id}")],
+                n.nodeId + "-{id}")],
         
         [isRoot,
          constant("/")],
@@ -91,31 +91,27 @@ const addToParent = obj => {
                 parent.indexes, 
                 i => i.name === parent.name + "_index");
             if(!!defaultIndex) {
-                defaultIndex.allowedRecordNodeIds.push(obj.recordNodeId);
+                defaultIndex.allowedRecordNodeIds.push(obj.nodeId);
             } 
         }
     }
     return obj;
 };
 
-const constructNode = (parent, obj) =>
+export const constructNode = (parent, obj) =>
     $(obj, [
         construct(parent),
         validate(parent),
         addToParent
     ]);
 
-const getRecordNodeId = (parentNode) => {
+const getNodeId = (parentNode) => {
     // this case is handled better elsewhere 
     if(!parentNode) return null;
     const findRoot = n => isRoot(n) ? n : findRoot(n.parent());
     const root = findRoot(parentNode);
     
-    const records = filter(
-        getFlattenedHierarchy(root),
-        isRecord);
-
-    return records.length;    
+    return getFlattenedHierarchy(root).length;    
 }
 
 export const constructHeirarchy = (node, parent) => {
@@ -150,7 +146,8 @@ export const getNewRootLevel = () =>
         type:"root",
         children:[],
         pathMaps:[],
-        indexes:[]
+        indexes:[],
+        nodeId: 0,
     });
 
 const _getNewRecordTemplate = (parent, name, createDefaultIndex, isSingle) => {
@@ -160,7 +157,7 @@ const _getNewRecordTemplate = (parent, name, createDefaultIndex, isSingle) => {
         fields:[], 
         children:[],  
         validationRules:[],
-        recordNodeId: getRecordNodeId(parent),
+        nodeId: getNodeId(parent),
         indexes: [],
         allidsShardFactor: isRecord(parent) ? 1 : 64,
         collectionName: "",
@@ -170,7 +167,7 @@ const _getNewRecordTemplate = (parent, name, createDefaultIndex, isSingle) => {
     if(createDefaultIndex) {
         const defaultIndex = getNewIndexTemplate(parent);
         defaultIndex.name = name + "_index";
-        defaultIndex.allowedRecordNodeIds.push(node.recordNodeId);
+        defaultIndex.allowedRecordNodeIds.push(node.nodeId);
     }
 
     return node;
@@ -192,7 +189,8 @@ export const getNewIndexTemplate = (parent, type="ancestor") =>
         getShardName: "",
         getSortKey: "record.id",
         aggregateGroups: [],
-        allowedRecordNodeIds: []
+        allowedRecordNodeIds: [],
+        nodeId: getNodeId(parent)
     });
 
 export const getNewAggregateGroupTemplate = index => 
@@ -201,7 +199,8 @@ export const getNewAggregateGroupTemplate = index =>
         type:"aggregateGroup",
         groupBy: "",
         aggregates: [],
-        condition: ""
+        condition: "",
+        nodeId: getNodeId(index)
     });
 
 export const getNewAggregateTemplate = set => {

@@ -1,4 +1,4 @@
-import {$, isSomething} from ".";
+import {$, isSomething} from "./index";
 import {filter, map} from "lodash/fp";
 
 export const stringNotEmpty = s => isSomething(s) && s.trim().length > 0;

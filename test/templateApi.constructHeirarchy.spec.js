@@ -33,8 +33,8 @@ describe("heirarchy node creation", () => {
         record.collectionName = "records";
         expect(record.collectionNodeKey()).toBe("/records");
         expect(record.collectionPathRegx()).toBe("/records");
-        expect(record.nodeKey()).toBe(`/records/${record.recordNodeId}-{id}`);
-        expect(record.pathRegx()).toBe(`/records/${record.recordNodeId}-[a-zA-Z0-9_\-]+`);
+        expect(record.nodeKey()).toBe(`/records/${record.nodeId}-{id}`);
+        expect(record.pathRegx()).toBe(`/records/${record.nodeId}-[a-zA-Z0-9_\-]+`);
     });
 
     it("> getNewSingleRecordTemplate > should set isSingle = true", async () => {
@@ -67,8 +67,8 @@ describe("heirarchy node creation", () => {
         const root = templateApi.getNewRootLevel();
         const parentRecord = templateApi.getNewRecordTemplate(root);
         const record  = templateApi.getNewRecordTemplate(parentRecord);
-        expect(root.indexes[0].allowedRecordNodeIds).toEqual([parentRecord.recordNodeId]);
-        expect(parentRecord.indexes[0].allowedRecordNodeIds).toEqual([record.recordNodeId]);
+        expect(root.indexes[0].allowedRecordNodeIds).toEqual([parentRecord.nodeId]);
+        expect(parentRecord.indexes[0].allowedRecordNodeIds).toEqual([record.nodeId]);
     });
 
     it("> getNewrecordTemplate > should add itself to root's children", async () => {
