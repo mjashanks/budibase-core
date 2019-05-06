@@ -176,7 +176,7 @@ describe("common > pipe ($)", () => {
     it("combines single params functions and executes with given param", () => {
         const f1 = str => str + " hello";
         const f2 = str => str + " there";
-        const result = common.$("mike says", [f1,f2]);
+        const result = common.$("mike says", [f1, f2]);
         expect(result).toBe("mike says hello there");
     })
 })
@@ -189,7 +189,7 @@ describe("common > IsOneOf", () => {
         ).toBe(true);
 
         expect(
-            common.isOneOf(1,33,9)(9)
+            common.isOneOf(1, 33, 9)(9)
         ).toBe(true);
 
         expect(
@@ -203,7 +203,7 @@ describe("common > IsOneOf", () => {
         ).toBe(false);
 
         expect(
-            common.isOneOf(1,33,9)(999)
+            common.isOneOf(1, 33, 9)(999)
         ).toBe(false);
 
         expect(
@@ -216,16 +216,42 @@ describe("common > IsOneOf", () => {
 describe("defineError", () => {
 
     it("should prefix and exception with message, and rethrow", () => {
-        
+
         expect(() =>
             common.defineError(() => {
                 throw new Error("there")
             }, "hello"))
-        .toThrowError("hello : there");
+            .toThrowError("hello : there");
     });
 
     it("should return function value when no exception", () => {
         const result = common.defineError(() => 1, "no error");
         expect(result).toBe(1);
     });
+});
+
+describe("retry", async () => {
+
+    let counter = 0;
+
+    it("should retry once", async () => {
+        var result = await common.retry(async () => 1, 3, 50);
+        expect(result).toBe(1);
+    });
+
+    it("should retry twice", async () => {
+        var result = await common.retry(async () => {
+            counter++;
+            if (counter < 2) throw 'error';
+            return counter;
+        }, 3, 50);
+        expect(result).toBe(2);
+    });
+
+    it("throws error after 3 retries", async () => {
+        expect(
+            common.retry(async () => { counter++; throw counter; }, 3, 50)
+        ).rejects.toThrowError(4);
+    });
+
 });

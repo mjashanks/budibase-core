@@ -3,13 +3,13 @@ import { retry } from "../common/index";
 const loadJson = datastore => async (key, retries = 5, delay = 500) =>
     await retry(JSON.parse, retries, delay, await datastore.loadFile(key));
 
-const createJson = (originalCreateFile) => async (key, obj, retries = 5, delay = 500) =>
+const createJson = originalCreateFile => async (key, obj, retries = 5, delay = 500) =>
     await retry(originalCreateFile, retries, delay, key, JSON.stringify(obj));
 
 const updateJson = datastore => async (key, obj, retries = 5, delay = 500) =>
     await retry( datastore.updateFile, retries, delay, key, JSON.stringify(obj));
 
-const createNewFile = (originalCreateFile) => async (path, content, retries = 5, delay = 500) =>
+const createNewFile = originalCreateFile => async (path, content, retries = 5, delay = 500) =>
     await retry(originalCreateFile, retries, delay, path, content);
 
 export const setupDatastore = (datastore) => {

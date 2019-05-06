@@ -200,7 +200,6 @@ export const toNumberOrNull = s => isNull(s) ? null
 export const isArrayOfString = opts =>
     isArray(opts) && all(isString)(opts);
 
-
 export const pause = async (duration) => new Promise(res => setTimeout(res, duration));
 
 export const retry = async (fn, retries, delay, ...args) => {
@@ -208,7 +207,7 @@ export const retry = async (fn, retries, delay, ...args) => {
         return await fn(...args);
     } catch (err) {
         if (retries > 1) {
-            return await pause(delay).then(async () => await retry(retries - 1, delay, fn, args));
+            return await pause(delay).then(async () => await retry(fn, (retries - 1), delay, ...args));
         } else {
             throw err;
         }
@@ -238,6 +237,6 @@ export default {
     causesException, executesWithoutException, none, getHashCode,
     awEx, apiWrapper, events, isNothingOrEmpty, isSafeInteger,
     toNumber, toDate: toDateOrNull, toBool: toBoolOrNull,
-    isArrayOfString, getLock, NO_LOCK, isNolock, insensitiveEquals
+    isArrayOfString, getLock, NO_LOCK, isNolock, insensitiveEquals, pause, retry
 };
 
