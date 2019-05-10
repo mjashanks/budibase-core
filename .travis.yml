@@ -1,6 +1,6 @@
 sudo: required
 
 script: 
-npm install
-npm install -g jest
-jest
+- npm install
+- npm install -g jest
+- jest
