@@ -1,4 +1,4 @@
-import {some, map, filter, keys,
+import {some, map, filter, keys, includes,
         countBy, flatten} from "lodash/fp";
 import {isSomething, $, 
         isNonEmptyString, 
@@ -35,8 +35,7 @@ const fieldRules = (allFields) => [
         f => isNonEmptyString(f.getUndefinedValue)),
     makerule("name", "field name is duplicated",
         f => isNothingOrEmpty(f.name) || 
-             isNothing(allFields[f.name]) || 
-             countBy("name")(allFields)[f.name] <= 1),
+             countBy("name")(allFields)[f.name] === 1),
     makerule("type", "type is unknown",
         f => isNothingOrEmpty(f.type) 
              || some(t => f.type === t)(allowedTypes())),
@@ -61,8 +60,10 @@ const typeOptionsRules = field => {
     ]);
 }
 
-export const validateField = (allFields) => (field) =>
-    applyRuleSet([...fieldRules(allFields), ...typeOptionsRules(field)])(field);
+export const validateField = (allFields) => (field) => {
+    const everySingleField = includes(field)(allFields) ? allFields : [...allFields, field];
+    return applyRuleSet([...fieldRules(everySingleField), ...typeOptionsRules(field)])(field);
+}
 
 export const validateAllFields = (recordNode) => 
     $(recordNode.fields, [
