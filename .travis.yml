@@ -1,5 +1,7 @@
 sudo: required
 
+travis encrypt "budibase:Nx2QNi9CP87Nn7ah2A4Qdzyy" --add notifications.slack
+
 script: 
 - npm install
 - npm install -g jest
