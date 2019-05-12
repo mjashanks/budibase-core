@@ -1,0 +1,9 @@
+sudo: required
+
+notifications:
+  slack: budibase:Nx2QNi9CP87Nn7ah2A4Qdzyy
+  
+script: 
+- npm install
+- npm install -g jest
+- jest

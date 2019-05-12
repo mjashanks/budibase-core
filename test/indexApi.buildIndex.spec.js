@@ -567,8 +567,7 @@ describe("buildIndex > reverse reference index", () => {
     it.skip("should build record into index, when referencing and referenced records are in multiple nested collections", async () => {
 
         // this currently fails because it is currntly assumed that the reference index should be either
-        // - A Global index,
-        // - Top level collection index
+        // - Top level index
         // - An ancestor index
         // this test sets "customers/<id>/invoices/<id>/charges/<id>""to point to..
         //  "/partners/<id>/invoices/default"

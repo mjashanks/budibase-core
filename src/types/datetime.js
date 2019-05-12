@@ -28,13 +28,13 @@ const dateTryParse =
 
 const options = {
     maxValue: {
-        defaultValue: new Date(8640000000000000),
+        defaultValue: new Date(32503680000000),
         isValid: isDate,
         requirementDescription: "must be a valid date",
         parse: toDateOrNull
     },
     minValue: {
-        defaultValue: new Date(-8640000000000000), 
+        defaultValue: new Date(-8520336000000), 
         isValid: isDate,
         requirementDescription: "must be a valid date",
         parse: toDateOrNull

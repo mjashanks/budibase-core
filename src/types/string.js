@@ -20,19 +20,19 @@ const options = {
     maxLength: {
         defaultValue: null, 
         isValid: n => n === null || isSafeInteger(n) && n > 0,
-        requirementDescription: "must be null (no limit) or a greater than zero integer",
+        requirementDescription: "max length must be null (no limit) or a greater than zero integer",
         parse: toNumberOrNull
     },
     values: {
         defaultValue: null,
         isValid: v => v === null || (isArrayOfString(v) && v.length > 0 && v.length < 10000),
-        requirementDescription: "must be null (no values) or an arry of at least one string",
+        requirementDescription: "'values' must be null (no values) or an arry of at least one string",
         parse: s=>s
     },
     allowDeclaredValuesOnly: {
         defaultValue: false,
         isValid: isBoolean,
-        requirementDescription: "must be true or false",
+        requirementDescription: "allowDeclaredValuesOnly must be true or false",
         parse: toBoolOrNull
     }
 };

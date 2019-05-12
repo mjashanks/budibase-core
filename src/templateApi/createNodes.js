@@ -130,10 +130,15 @@ export const constructHeirarchy = (node, parent) => {
     }
     if(node.fields) {
         each(node.fields, 
-            f => each(f.typeOptions, (val, key) => 
-                    f.typeOptions[key] = all[f.type]
-                                         .optionDefinitions[key]
-                                         .parse(val))
+            f => each(f.typeOptions, (val, key) => {
+                    const def = all[f.type].optionDefinitions[key];
+                    if(!def) {
+                        // unknown typeOption
+                        delete f.typeOptions[key];
+                    } else {
+                        f.typeOptions[key] = def.parse(val);
+                    }
+            })
         );
     }
     return node;
