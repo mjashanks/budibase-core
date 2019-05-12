@@ -7,3 +7,4 @@ script:
 - npm install
 - npm install -g jest
 - jest
+
