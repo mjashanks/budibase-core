@@ -96,6 +96,7 @@ export {events, eventsList} from "./common/events";
 export {getTemplateApi} from "./templateApi";
 export {getRecordApi} from "./recordApi";
 export {getCollectionApi} from "./collectionApi";
+export {getAuthApi} from "./authApi";
 export {getIndexApi} from "./indexApi";
 export {setupDatastore} from "./appInitialise";
 export {getActionsApi} from "./actionsApi";

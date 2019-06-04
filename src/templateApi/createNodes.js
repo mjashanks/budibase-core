@@ -1,6 +1,7 @@
 import {switchCase, defaultCase, joinKey, 
     $, isNothing, isSomething} from "../common";
-import {each, constant, filter, find} from "lodash";
+import {each, constant, max, find} from "lodash";
+import {map} from "lodash/fp";
 import {isIndex, isRoot, isSingleRecord, isCollectionRecord,
         isRecord, isaggregateGroup, 
         getFlattenedHierarchy} from "./heirarchy";
@@ -111,7 +112,10 @@ const getNodeId = (parentNode) => {
     const findRoot = n => isRoot(n) ? n : findRoot(n.parent());
     const root = findRoot(parentNode);
     
-    return getFlattenedHierarchy(root).length;    
+    return ($(root, [
+                getFlattenedHierarchy,
+                map(n => n.nodeId),
+                max]) + 1);
 }
 
 export const constructHeirarchy = (node, parent) => {
