@@ -1,7 +1,7 @@
 import {switchCase, defaultCase, joinKey, 
     $, isNothing, isSomething} from "../common";
-import {each, constant, max, find} from "lodash";
-import {map} from "lodash/fp";
+import {each, constant, find} from "lodash";
+import {map, max} from "lodash/fp";
 import {isIndex, isRoot, isSingleRecord, isCollectionRecord,
         isRecord, isaggregateGroup, 
         getFlattenedHierarchy} from "./heirarchy";
