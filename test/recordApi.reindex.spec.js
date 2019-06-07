@@ -569,7 +569,7 @@ describe("recordApi > update > reindex", () => {
 
 });
 
-describe("referenced object changed", async () => {
+describe("referenced object changed", () => {
 
     it("should update the reference", async () => {
 

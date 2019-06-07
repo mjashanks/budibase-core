@@ -1,6 +1,6 @@
 import {userAuthFile, parseTemporaryCode} from "./authCommon";
 import {isSomething, $, apiWrapper, apiWrapperSync, events} from "../common";
-import {getUsers} from "./getUsers";
+import {_getUsers} from "./getUsers";
 import {find} from "lodash/fp";
 import {alwaysAuthorized} from "./permissions";
 
@@ -61,7 +61,7 @@ export const _setPasswordFromTemporaryCode = async (app, tempCode, newpassword) 
 
     const temp = parseTemporaryCode(tempCode);
 
-    const user = $(await getUsers(app)(), [
+    const user = $(await _getUsers(app), [
         find(u => u.temporaryAccessId === temp.id)
     ]);
 

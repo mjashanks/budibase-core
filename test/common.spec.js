@@ -230,7 +230,7 @@ describe("defineError", () => {
     });
 });
 
-describe("retry", async () => {
+describe("retry", () => {
 
     let counter = 0;
 

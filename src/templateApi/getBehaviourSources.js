@@ -1,3 +1,8 @@
 
-export const getBehaviourSources = async datastore => 
-    await datastore.loadFile("/.config/behaviourSources.js");
+export const getBehaviourSources = async datastore => {
+    try {
+        await datastore.loadFile("/.config/behaviourSources.js");
+    } catch(e) {
+        return;
+    }
+}

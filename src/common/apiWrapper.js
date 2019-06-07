@@ -60,7 +60,7 @@ export const apiWrapperSync = (app, eventNamespace, isAuthorized, eventContext, 
 }
 
 const handleNotAuthorized = (app, eventContext, eventNamespace) => {
-    const err = new Error("Unauthorized");
+    const err = new Error("Unauthorized: " + eventNamespace);
     publishError(app, eventContext, eventNamespace, () => 0, err);
     throw err;
 };
