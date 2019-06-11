@@ -6,6 +6,7 @@ import {save} from "./save";
 import {deleteRecord} from "./delete";
 import {uploadFile} from "./uploadFile";
 import {downloadFile} from "./downloadFile";
+import {customId, setCustomId} from "./customId";
 
 const api = app => {
     return ({
@@ -17,7 +18,9 @@ const api = app => {
         validate: validate(app),
         getContext: getContext(app),
         uploadFile: uploadFile(app),
-        downloadFile: downloadFile(app)
+        downloadFile: downloadFile(app),
+        customId: customId(app),
+        setCustomId: setCustomId(app)
     });
 };
 
