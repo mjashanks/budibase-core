@@ -1,9 +1,9 @@
 import {applyRuleSet, makerule, applyRule} from "../common/validationCommon";
 import {permissionTypes} from "./authCommon";
-import {values, includes, map, concat, isEmpty, uniqWith,
+import {values, includes, map, concat, isEmpty, uniqWith, some,
     flatten, filter} from "lodash/fp";
 import {$, isSomething, insensitiveEquals,
-    isNonEmptyString, apiWrapperSync, events} from "../common";
+    isNonEmptyString, apiWrapperSync, events, somethingOrDefault} from "../common";
 import {getNode} from "../templateApi/heirarchy";
 import {alwaysAuthorized} from "./permissions";
 
@@ -14,8 +14,14 @@ const isAllowedType = t =>
     ]);
 
 const isRecordOrIndexType = t => 
-    includes("record")(t) ||
-    includes("index")(t);
+    some(p => p === t)([
+        permissionTypes.CREATE_RECORD,
+        permissionTypes.UPDATE_RECORD,
+        permissionTypes.DELETE_RECORD,
+        permissionTypes.READ_RECORD,
+        permissionTypes.READ_INDEX,
+        permissionTypes.EXECUTE_ACTION
+    ])
 
 
 const permissionRules = app => ([

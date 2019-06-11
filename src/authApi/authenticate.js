@@ -1,9 +1,9 @@
-import {getUsers} from "./getUsers";
+import {_getUsers} from "./getUsers";
 import {find, filter, some, 
         map, flatten} from "lodash/fp";
 import {getUserByName, userAuthFile, 
     parseTemporaryCode} from "./authCommon";
-import {loadAccessLevels} from "./loadAccessLevels";
+import {_loadAccessLevels} from "./loadAccessLevels";
 import { isNothingOrEmpty, $, apiWrapper, events } from "../common";
 import {generate} from "shortid";
 import {alwaysAuthorized} from "./permissions";
@@ -23,7 +23,7 @@ export const _authenticate = async (app, username, password) => {
     if(isNothingOrEmpty(username) || isNothingOrEmpty(password))
         return null;
 
-    const allUsers = await getUsers(app)();
+    const allUsers = await _getUsers(app);
     let user = getUserByName(
                     allUsers,
                     username
@@ -64,7 +64,7 @@ export const authenticateTemporaryAccess = app => async (tempAccessCode) => {
         return null;
 
     const temp = parseTemporaryCode(tempAccessCode);
-    let user = $(await getUsers(app)(),[
+    let user = $(await _getUsers(app),[
         find(u => u.temporaryAccessId === temp.id)
     ]);
 
@@ -106,7 +106,7 @@ export const authenticateTemporaryAccess = app => async (tempAccessCode) => {
 }
 
 export const buildUserPermissions = async (app, userAccessLevels) => {
-    const allAccessLevels = await loadAccessLevels(app)();
+    const allAccessLevels = await _loadAccessLevels(app);
 
     return $(allAccessLevels.levels, [
         filter(l => some(ua => l.name === ua)(userAccessLevels)),

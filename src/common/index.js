@@ -6,7 +6,7 @@ import {
     split, includes, replace, isArray,
     isString, isInteger, isDate, toNumber
 } from "lodash";
-import { events } from "./events";
+import { events, eventsList } from "./events";
 import { apiWrapper } from "./apiWrapper";
 import { some } from "lodash/fp";
 import {
@@ -235,7 +235,7 @@ export default {
     somethingOrGetDefault, appDefinitionFile, isValue, all,
     isOneOf, memberMatches, defineError, anyTrue, isNonEmptyArray,
     causesException, executesWithoutException, none, getHashCode,
-    awEx, apiWrapper, events, isNothingOrEmpty, isSafeInteger,
+    awEx, apiWrapper, events, eventsList, isNothingOrEmpty, isSafeInteger,
     toNumber, toDate: toDateOrNull, toBool: toBoolOrNull,
     isArrayOfString, getLock, NO_LOCK, isNolock, insensitiveEquals, pause, retry
 };

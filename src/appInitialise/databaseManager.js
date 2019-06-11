@@ -2,63 +2,33 @@ import {isNothing} from "../common";
 
 export const getDatabaseManager = databaseManager => ({
     createEmptyMasterDb: createEmptyMasterDb(databaseManager),
-    createEmptyProductSetDb: createEmptyProductSetDb(databaseManager),
-    createEmptyProductInstanceDb: createEmptyProductInstanceDb(databaseManager),
-    getProductSetDbRootConfig: databaseManager.getProductSetDbRootConfig,
-    getProductInstanceDbRootConfig: databaseManager.getProductInstanceDbRootConfig,
+    createEmptyInstanceDb: createEmptyInstanceDb(databaseManager),
+    getInstanceDbRootConfig: databaseManager.getInstanceDbRootConfig,
     masterDatastoreConfig: getMasterDatastoreConfig(databaseManager),
-    getProductSetDatastoreConfig: getProductSetDatastoreConfig(databaseManager),
-    getProductInstanceDatastoreConfig: getProductInstanceDatastoreConfig(databaseManager)
+    getInstanceDatastoreConfig: getInstanceDatastoreConfig(databaseManager)
 });
 
 const getMasterDatastoreConfig = databaseManager => 
-    databaseManager.getDatastoreConfig(
-        databaseManager.getMasterDbRootConfig,
-        "master"
-    );
+    databaseManager.getDatastoreConfig("master");
 
-const getProductSetDatastoreConfig = databaseManager => 
-                                    (dbRootConfig, productSetId) => 
-    databaseManager.getDatastoreConfig(
-        dbRootConfig, "productset", productSetId
-    );
 
-const getProductInstanceDatastoreConfig = databaseManager => 
-                            (dbRootConfig, productSetId, productId, productInstanceId) => 
+const getInstanceDatastoreConfig = databaseManager => 
+                                (applicationId, instanceId) => 
     databaseManager.getDatastoreConfig(
-        dbRootConfig, "productinstance",
-        productSetId, productId, productInstanceId
+        applicationId, instanceId
     );
 
 const createEmptyMasterDb = databaseManager => async () =>  
-    await databaseManager.createEmptyDb(
-        databaseManager.getMasterDbRootConfig(),
-        "master"
-    );
+    await databaseManager.createEmptyDb("master");
 
-
-const createEmptyProductSetDb = databaseManager => async (productSetId) => {
+const createEmptyInstanceDb = databaseManager => async (applicationId, instanceId) => {
     
-    if(isNothing(productSetId))
-        throw new Error("CreateDb: Product Set Id not supplied");
-    
-    return await databaseManager.createEmptyDb(
-        databaseManager.getProductSetDbRootConfig(productSetId), 
-        "productset", productSetId);
-}
-
-
-const createEmptyProductInstanceDb = databaseManager => async (productSetId, productId, productInstanceId) => {
-    
-    if(isNothing(productSetId))
-        throw new Error("CreateDb: Product Set Id not supplied");
-    if(isNothing(productId))
-        throw new Error("CreateDb: Product Id not supplied");
-    if(isNothing(productInstanceId))
-        throw new Error("CreateDb: Product Instance Id not supplied");
+    if(isNothing(applicationId))
+        throw new Error("CreateDb: application id not supplied");
+    if(isNothing(instanceId))
+        throw new Error("CreateDb: instance id not supplied");
 
     return await databaseManager.createEmptyDb(
-        databaseManager.getProductInstanceDbRootConfig(productSetId, productId, productInstanceId), 
-        "productinstance", 
-        productSetId, productId, productInstanceId);
+        applicationId,
+        instanceId);
 }

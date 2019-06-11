@@ -105,8 +105,18 @@ describe("aggregates", () => {
 
     it("should throw error when user user does not have permission", async () => {
         const {app, indexApi} = await setup();
-        app.removePermission(permission.readIndex.get("customer_index"));
-        expect(indexApi.aggregates("/customer_index")).rejects.toThrow(/Unauthorized/);
+        app.removePermission(permission.readIndex.get("/customer_index"));
+
+        let err;
+        try {
+            await indexApi.aggregates("/customer_index");
+        } catch(e) {
+            err = e;
+        }
+
+        expect(err).toBeDefined();
+        expect(err.message.startsWith("Unauthorized")).toBeTruthy();
+        //expect(indexApi.aggregates("/customer_index")).rejects.toThrow(/Unauthorized/);
     });
 
     it("should not depend on having any other permissions", async () => {
