@@ -46,7 +46,7 @@ const initialiseRootSingleRecords = async(datastore, hierachy) => {
         filter(isSingleRecord)
     ]);
 
-    for (let record of singleRecords) {
+    /* for (let record of singleRecords) {
         const result = getNew({ datastore: datastore, hierarchy: appDefinition.hierarchy })
             (record.nodeKey(),
                 record.name
@@ -55,5 +55,5 @@ const initialiseRootSingleRecords = async(datastore, hierachy) => {
         _save({ datastore: datastore, hierarchy: appDefinition.hierarchy },
             result
         );
-    }
+    } */ 
 }
