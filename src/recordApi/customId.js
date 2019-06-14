@@ -1,6 +1,6 @@
 import {getFlattenedHierarchy} from "../templateApi/heirarchy";
-import {$} from "../common";
-import {find} from "lodash/fp";
+import {$, splitKey, joinKey} from "../common";
+import {find, take, union} from "lodash/fp";
 
 export const customId = app => (nodeName, id) => {
     var node = $(app.heirarchy, [
@@ -15,5 +15,14 @@ export const customId = app => (nodeName, id) => {
 
 export const setCustomId = app => (record, id) => {
     record.id = customId(app)(record.type, id);
+
+    const keyParts = splitKey(record.key);
+
+    record.key = $(keyParts, [
+        take(keyParts.length - 1),
+        union([record.id]),
+        joinKey
+    ])
+
     return record;
 }
