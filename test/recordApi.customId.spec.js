@@ -27,6 +27,7 @@ describe("set customId", () => {
 
         recordApi.setCustomId(customer, "my_custom_id");
         expect(customer.id).toBe(`${appHeirarchy.customerRecord.nodeId}-my_custom_id`)
+        expect(customer.key).toBe(`/customers/${appHeirarchy.customerRecord.nodeId}-my_custom_id`)
     })
 })
 

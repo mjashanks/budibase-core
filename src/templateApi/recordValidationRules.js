@@ -33,7 +33,7 @@ export const commonRecordValidationRules = ({
         getNewRecordValidationRule(
             [fieldName],
             `${fieldName} must be greater than ${min.toString()} and ${max.toString()}`,
-            `record['\gvfieldName}'] >= ${getStaticValue(min)}  `)
+            `record['${fieldName}'] >= ${getStaticValue(min)}  `)
 }); 
 
 export const addRecordValidationRule = recordNode => rule => 
