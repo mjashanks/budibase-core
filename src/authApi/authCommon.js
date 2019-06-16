@@ -1,7 +1,7 @@
 import {joinKey, $} from "../common";
 import {clone, find, split} from "lodash/fp";
 // 5 minutes
-export const tempCodeExpiryLength = 5 * 60 * 60;
+export const tempCodeExpiryLength = 5 * 60 * 1000;
 
 export const AUTH_FOLDER = "/.auth";
 export const USERS_LIST_FILE = joinKey(AUTH_FOLDER, "users.json");
