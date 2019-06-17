@@ -48,7 +48,7 @@ export const getAppApis = async (store, behaviourSources = null,
 
     app.cleanupTransactions = isSomething(cleanupTransactions) 
                               ? cleanupTransactions
-                              : async () => cleanup(app);
+                              : async () => await cleanup(app);
 
     app.getEpochTime = isSomething(getEpochTime)
                        ? getEpochTime
