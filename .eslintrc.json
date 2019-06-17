@@ -3,5 +3,9 @@
         "browser": true,
         "es6": true
     },
-    "extends": "airbnb"
+    "extends": "eslint:recommended",
+    "parser": "babel-eslint",
+    "parserOptions": {
+        "sourceType": "module"
+    }
 }
