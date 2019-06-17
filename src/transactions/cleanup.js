@@ -1,48 +1,49 @@
-import {retrieve} from "./retrieve";
-import {executeTransactions} from "./execute";
-import {map} from "lodash/fp";
-import {generate} from "shortid";
-import {$, joinKey, getLock, isNolock, releaseLock} from "../common";
-import {LOCK_FILE_KEY, TRANSACTIONS_FOLDER, 
-    timeoutMilliseconds, parseLockFileContent, 
-    getLockFileContent, getTransactionId,
-    maxLockRetries} from "./transactionsCommon";
+import { map } from 'lodash/fp';
+import { generate } from 'shortid';
+import { retrieve } from './retrieve';
+import { executeTransactions } from './execute';
+import {
+  $, joinKey, getLock, isNolock, releaseLock,
+} from '../common';
+import {
+  LOCK_FILE_KEY, TRANSACTIONS_FOLDER,
+  timeoutMilliseconds, parseLockFileContent,
+  getLockFileContent, getTransactionId,
+  maxLockRetries,
+} from './transactionsCommon';
 
-export const cleanup = async app => {
+export const cleanup = async (app) => {
+  const lock = await getTransactionLock(app);
+  if (isNolock(lock)) return;
 
-    const lock = await getTransactionLock(app);
-    if(isNolock(lock)) return;
+  try {
+    const transactions = await retrieve(app);
+    if (transactions.length > 0) {
+      await executeTransactions(app)(transactions);
 
-    try {
-        const transactions = await retrieve(app);
-        if(transactions.length > 0) {
-            await executeTransactions(app)(transactions);
-            
-            const folder = transactions.folderKey 
-                           ? transactions.folderKey 
-                           : TRANSACTIONS_FOLDER;
+      const folder = transactions.folderKey
+        ? transactions.folderKey
+        : TRANSACTIONS_FOLDER;
 
-            const deleteFiles = $(transactions, [
-                map(t => joinKey(
-                    folder,
-                    getTransactionId(
-                    t.recordId, t.transactionType,
-                    t.uniqueId)
-                )),
-                map(app.datastore.deleteFile)
-            ]);
+      const deleteFiles = $(transactions, [
+        map(t => joinKey(
+          folder,
+          getTransactionId(
+            t.recordId, t.transactionType,
+            t.uniqueId,
+          ),
+        )),
+        map(app.datastore.deleteFile),
+      ]);
 
-            await Promise.all(deleteFiles);
-        }
+      await Promise.all(deleteFiles);
     }
-    finally {
-        await releaseLock(app, lock);
-    }
-    
-}
+  } finally {
+    await releaseLock(app, lock);
+  }
+};
 
-const getTransactionLock = async app => 
-    await getLock(
-        app, LOCK_FILE_KEY,
-        timeoutMilliseconds, maxLockRetries
-    );
+const getTransactionLock = async app => await getLock(
+  app, LOCK_FILE_KEY,
+  timeoutMilliseconds, maxLockRetries,
+);
