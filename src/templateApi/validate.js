@@ -1,184 +1,183 @@
-import {$, isSomething, switchCase
-        ,anyTrue, isNonEmptyArray, executesWithoutException
-        , isNonEmptyString, defaultCase} from "../common";
-import {isRecord, isRoot, isaggregateGroup,
-        isIndex, getFlattenedHierarchy} from "./heirarchy";
-import {filter, union, constant, 
-        map, flatten, every, uniqBy,
-        some, includes, isEmpty} from "lodash/fp";
-import {has} from "lodash";
-import {eventsList} from "../common/events";
-import {compileExpression, compileCode} from "@nx-js/compiler-util";
-import {validateAllFields} from "./fields";
-import {applyRuleSet, makerule, stringNotEmpty, 
-        validationError} from "../common/validationCommon";
-import {indexRuleSet} from "./indexes";
-import {validateAllAggregates} from "./validateAggregate";
+import {
+  filter, union, constant,
+  map, flatten, every, uniqBy,
+  some, includes, isEmpty,
+} from 'lodash/fp';
+import { has } from 'lodash';
+import { compileExpression, compileCode } from '@nx-js/compiler-util';
+import {
+  $, isSomething, switchCase,
+  anyTrue, isNonEmptyArray, executesWithoutException,
+  isNonEmptyString, defaultCase,
+} from '../common';
+import {
+  isRecord, isRoot, isaggregateGroup,
+  isIndex, getFlattenedHierarchy,
+} from './heirarchy';
+import { eventsList } from '../common/events';
+import { validateAllFields } from './fields';
+import {
+  applyRuleSet, makerule, stringNotEmpty,
+  validationError,
+} from '../common/validationCommon';
+import { indexRuleSet } from './indexes';
+import { validateAllAggregates } from './validateAggregate';
 
-export const ruleSet = (...sets) => 
-    constant(flatten([...sets]));
+export const ruleSet = (...sets) => constant(flatten([...sets]));
 
 const commonRules = [
-    makerule("name", "node name is not set", 
-         node => stringNotEmpty(node.name)),
-    makerule("type", "node type not recognised",
-        anyTrue(isRecord, isRoot, isIndex, isaggregateGroup ))
+  makerule('name', 'node name is not set',
+    node => stringNotEmpty(node.name)),
+  makerule('type', 'node type not recognised',
+    anyTrue(isRecord, isRoot, isIndex, isaggregateGroup)),
 ];
 
 const recordRules = [
-    makerule("fields", "no fields have been added to the record",
-        node => isNonEmptyArray(node.fields)),
-    makerule("validationRules", "validation rule is missing a 'messageWhenValid' member",
-        node => every(r => has(r, "messageWhenInvalid"))
-                (node.validationRules)),
-    makerule("validationRules", "validation rule is missing a 'expressionWhenValid' member",
-        node => every(r => has(r, "expressionWhenValid"))
-                (node.validationRules)),
+  makerule('fields', 'no fields have been added to the record',
+    node => isNonEmptyArray(node.fields)),
+  makerule('validationRules', "validation rule is missing a 'messageWhenValid' member",
+    node => every(r => has(r, 'messageWhenInvalid'))(node.validationRules)),
+  makerule('validationRules', "validation rule is missing a 'expressionWhenValid' member",
+    node => every(r => has(r, 'expressionWhenValid'))(node.validationRules)),
 ];
 
 
 const aggregateGroupRules = [
-    makerule("condition", "condition does not compile",
-        a => isEmpty(a.condition)
+  makerule('condition', 'condition does not compile',
+    a => isEmpty(a.condition)
              || executesWithoutException(
-                    () => compileExpression(a.condition))),
+               () => compileExpression(a.condition),
+             )),
 ];
 
-const getRuleSet = node => 
-    switchCase(
+const getRuleSet = node => switchCase(
 
-        [isRecord, ruleSet(
-                    commonRules, 
-                    recordRules)],
+  [isRecord, ruleSet(
+    commonRules,
+    recordRules,
+  )],
 
-        [isIndex, ruleSet(
-                      commonRules, 
-                      indexRuleSet)],
+  [isIndex, ruleSet(
+    commonRules,
+    indexRuleSet,
+  )],
 
-        [isaggregateGroup, ruleSet(
-                            commonRules,
-                            aggregateGroupRules)],
+  [isaggregateGroup, ruleSet(
+    commonRules,
+    aggregateGroupRules,
+  )],
 
-        [defaultCase, ruleSet(commonRules, [])]
-    )(node);
+  [defaultCase, ruleSet(commonRules, [])],
+)(node);
 
-export const validateNode = node => 
-    applyRuleSet(getRuleSet(node))(node);
+export const validateNode = node => applyRuleSet(getRuleSet(node))(node);
 
-export const validateAll = appHeirarchy => {
-    
-    var flattened = getFlattenedHierarchy(
-        appHeirarchy
-    );
+export const validateAll = (appHeirarchy) => {
+  const flattened = getFlattenedHierarchy(
+    appHeirarchy,
+  );
 
-    const duplicateNameRule = makerule(
-        "name", "node names must be unique under shared parent",
-        n => filter(f => f.parent() === n.parent()
-                          && f.name === n.name) 
-                    (flattened).length === 1
-    );
+  const duplicateNameRule = makerule(
+    'name', 'node names must be unique under shared parent',
+    n => filter(f => f.parent() === n.parent()
+                          && f.name === n.name)(flattened).length === 1,
+  );
 
-    const duplicateNodeKeyErrors = $(flattened, [
-        map(n => applyRuleSet([duplicateNameRule])(n)),
-        filter(isSomething),
-        flatten
-    ]);
+  const duplicateNodeKeyErrors = $(flattened, [
+    map(n => applyRuleSet([duplicateNameRule])(n)),
+    filter(isSomething),
+    flatten,
+  ]);
 
-    const fieldErrors = $(flattened, [
-        filter(isRecord),
-        map(validateAllFields),
-        flatten
-    ]);
+  const fieldErrors = $(flattened, [
+    filter(isRecord),
+    map(validateAllFields),
+    flatten,
+  ]);
 
-    const aggregateErrors = $(flattened, [
-        filter(isaggregateGroup),
-        map(s => validateAllAggregates(
-                    s.aggregates)),
-        flatten
-    ]);
+  const aggregateErrors = $(flattened, [
+    filter(isaggregateGroup),
+    map(s => validateAllAggregates(
+      s.aggregates,
+    )),
+    flatten,
+  ]);
 
-    return $(flattened, [
-        map(validateNode),
-        flatten,
-        union(duplicateNodeKeyErrors),
-        union(fieldErrors),
-        union(aggregateErrors)
-    ]);
+  return $(flattened, [
+    map(validateNode),
+    flatten,
+    union(duplicateNodeKeyErrors),
+    union(fieldErrors),
+    union(aggregateErrors),
+  ]);
 };
 
 const actionRules = [
-    makerule("name", "action must have a name", 
-        a => isNonEmptyString(a.name)),
-    makerule("behaviourName", "must supply a behaviour name to the action",
-        a => isNonEmptyString(a.behaviourName)),
-    makerule("behaviourSource", "must supply a behaviour source for the action",
-        a => isNonEmptyString(a.behaviourSource)),
+  makerule('name', 'action must have a name',
+    a => isNonEmptyString(a.name)),
+  makerule('behaviourName', 'must supply a behaviour name to the action',
+    a => isNonEmptyString(a.behaviourName)),
+  makerule('behaviourSource', 'must supply a behaviour source for the action',
+    a => isNonEmptyString(a.behaviourSource)),
 ];
 
-const duplicateActionRule = 
-    makerule("", "action name must be unique", () =>{});
+const duplicateActionRule = makerule('', 'action name must be unique', () => {});
 
-const validateAction = action => 
-    applyRuleSet(actionRules)(action);
+const validateAction = action => applyRuleSet(actionRules)(action);
 
 
 export const validateActions = (allActions) => {
-    
-    const duplicateActions = $(allActions, [
-        filter(a => filter(a2 => a2.name === a.name)
-                          (allActions).length > 1),
-        map(a => validationError(duplicateActionRule, a))
-    ]);
-    
-    const errors = $(allActions, [
-        map(validateAction),
-        flatten,
-        union(duplicateActions),
-        uniqBy("name")
-    ]);
+  const duplicateActions = $(allActions, [
+    filter(a => filter(a2 => a2.name === a.name)(allActions).length > 1),
+    map(a => validationError(duplicateActionRule, a)),
+  ]);
 
-    return errors;
+  const errors = $(allActions, [
+    map(validateAction),
+    flatten,
+    union(duplicateActions),
+    uniqBy('name'),
+  ]);
+
+  return errors;
 };
 
 const triggerRules = actions => ([
-    makerule("actionName", "must specify an action", 
-        t => isNonEmptyString(t.actionName)),
-    makerule("eventName", "must specify and event",
-        t => isNonEmptyString(t.eventName)),
-    makerule("actionName", "specified action not supplied",
-        t => !t.actionName 
+  makerule('actionName', 'must specify an action',
+    t => isNonEmptyString(t.actionName)),
+  makerule('eventName', 'must specify and event',
+    t => isNonEmptyString(t.eventName)),
+  makerule('actionName', 'specified action not supplied',
+    t => !t.actionName
              || some(a => a.name === t.actionName)(actions)),
-    makerule("eventName", "invalid Event Name",
-        t => !t.eventName 
+  makerule('eventName', 'invalid Event Name',
+    t => !t.eventName
              || includes(t.eventName)(eventsList)),
-    makerule("optionsCreator", "Options Creator does not compile - check your expression",
-        t => {
-            if(!t.optionsCreator) return true;
-            try { 
-                compileCode(t.optionsCreator);
-                return true;
-            } catch(_) { return false; }
-        }),
-    makerule("condition", "Trigger condition does not compile - check your expression",
-        t => {
-            if(!t.condition) return true;
-            try { 
-                compileExpression(t.condition);
-                return true;
-            } catch(_) { return false; }
-        })
+  makerule('optionsCreator', 'Options Creator does not compile - check your expression',
+    (t) => {
+      if (!t.optionsCreator) return true;
+      try {
+        compileCode(t.optionsCreator);
+        return true;
+      } catch (_) { return false; }
+    }),
+  makerule('condition', 'Trigger condition does not compile - check your expression',
+    (t) => {
+      if (!t.condition) return true;
+      try {
+        compileExpression(t.condition);
+        return true;
+      } catch (_) { return false; }
+    }),
 ]);
 
 export const validateTrigger = (trigger, allActions) => {
+  const errors = applyRuleSet(triggerRules(allActions))(trigger);
 
-    const errors = applyRuleSet(triggerRules(allActions))(trigger);
-
-    return errors;
+  return errors;
 };
 
-export const validateTriggers = (triggers, allActions) => 
-    $(triggers, [
-        map(t => validateTrigger(t, allActions)),
-        flatten
-    ]);
-    
+export const validateTriggers = (triggers, allActions) => $(triggers, [
+  map(t => validateTrigger(t, allActions)),
+  flatten,
+]);
