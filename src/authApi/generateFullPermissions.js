@@ -1,42 +1,45 @@
-import {permission} from "./permissions";
-import {getFlattenedHierarchy, 
-    isIndex, isRecord} from "../templateApi/heirarchy";
-import {filter, values, each, keys} from "lodash/fp";
-import {$} from "../common";
+import {
+  filter, values, each, keys,
+} from 'lodash/fp';
+import { permission } from './permissions';
+import {
+  getFlattenedHierarchy,
+  isIndex, isRecord,
+} from '../templateApi/heirarchy';
+import { $ } from '../common';
 
-export const generateFullPermissions = app => {
+export const generateFullPermissions = (app) => {
+  const allNodes = getFlattenedHierarchy(app.heirarchy);
+  const accessLevel = { permissions: [] };
 
-    const allNodes = getFlattenedHierarchy(app.heirarchy);
-    const accessLevel = {permissions:[]};
+  const recordNodes = $(allNodes, [
+    filter(isRecord),
+  ]);
 
-    const recordNodes = $(allNodes, [
-        filter(isRecord)
-    ]);
+  for (const n of recordNodes) {
+    permission.createRecord.add(n.nodeKey(), accessLevel);
+    permission.updateRecord.add(n.nodeKey(), accessLevel);
+    permission.deleteRecord.add(n.nodeKey(), accessLevel);
+    permission.readRecord.add(n.nodeKey(), accessLevel);
+  }
 
-    for(let n of recordNodes) {
-        permission.createRecord.add(n.nodeKey(), accessLevel);
-        permission.updateRecord.add(n.nodeKey(), accessLevel);
-        permission.deleteRecord.add(n.nodeKey(), accessLevel);
-        permission.readRecord.add(n.nodeKey(), accessLevel);
-    }
+  const indexNodes = $(allNodes, [
+    filter(isIndex),
+  ]);
 
-    const indexNodes = $(allNodes, [
-        filter(isIndex)
-    ]);
+  for (const n of indexNodes) {
+    permission.readIndex.add(n.nodeKey(), accessLevel);
+  }
 
-    for(let n of indexNodes) {
-        permission.readIndex.add(n.nodeKey(), accessLevel);
-    }
+  for (const a of keys(app.actions)) {
+    permission.executeAction.add(a, accessLevel);
+  }
 
-    for(let a of keys(app.actions)) {
-        permission.executeAction.add(a, accessLevel);
-    }
+  $(permission, [
+    values,
+    filter(p => !p.isNode),
+    each(p => p.add(accessLevel)),
+  ]);
 
-    $(permission, [
-        values,
-        filter(p => !p.isNode),
-        each(p => p.add(accessLevel))
-    ]);
-
-    return accessLevel.permissions;
+  return accessLevel.permissions;
 };
