@@ -92,13 +92,13 @@ const mergeShardAggregate = (totals, shard) => {
 const getAggregates = async (heirarchy, datastore, index, indexedDataKey) => {
     const aggregateResult = {}
     const doRead = iterateIndex(
-        item => {
+        async item => {
             applyItemToAggregateResult(
                 index, aggregateResult, item
             );
             return CONTINUE_READING_RECORDS;
         },
-        () => aggregateResult
+        async () => aggregateResult
     );
 
     return await doRead(heirarchy, datastore, index, indexedDataKey);

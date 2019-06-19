@@ -6,15 +6,16 @@ import {createIndexFile} from "../indexing/sharding";
 import {generateSchema} from "../indexing/indexSchemaCreator";
 import {getIndexReader, CONTINUE_READING_RECORDS} from "./serializer";
 import lunr from "lunr";
+import {promiseReadableStream} from "./promiseReadableStream";
 
 export const readIndex = async (heirarchy, datastore, index, indexedDataKey) => {
     const records = [];
     const doRead = iterateIndex(
-        item => {
+        async item => {
             records.push(item);
             return CONTINUE_READING_RECORDS;
         },
-        () => records
+        async () => records
     )
 
     return await doRead(heirarchy, datastore, index, indexedDataKey);
@@ -24,7 +25,7 @@ export const searchIndex = async (heirarchy, datastore, index, indexedDataKey, s
     const records = [];
     const schema = generateSchema(heirarchy, index);
     const doRead = iterateIndex(
-        item => {
+        async item => {
             const idx = lunr(function () {
                 this.ref('key');
                 for(let field of schema) {
@@ -39,7 +40,7 @@ export const searchIndex = async (heirarchy, datastore, index, indexedDataKey, s
             }
             return CONTINUE_READING_RECORDS;
         },
-        () => records
+        async () => records
     )
 
     return await doRead(heirarchy, datastore, index, indexedDataKey);
@@ -77,9 +78,12 @@ export const getIndexedDataKey = (decendantKey, indexNode) => {
 
 export const iterateIndex = (onGetItem, getFinalResult) => async (heirarchy, datastore, index, indexedDataKey) => {
     try {
-        const readableStream = await datastore.readableFileStream(indexedDataKey);
-        const read = getIndexReader(heirarchy, index, () => readableStream.read());
-        read(onGetItem);
+        const readableStream = promiseReadableStream(
+            await datastore.readableFileStream(indexedDataKey)
+        );
+
+        const read = getIndexReader(heirarchy, index, readableStream);
+        await read(onGetItem);
         return getFinalResult();
     } catch(e) {
         if(await datastore.exists(indexedDataKey)) {

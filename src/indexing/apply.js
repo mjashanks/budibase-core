@@ -1,7 +1,8 @@
 import {getShardMapKey, ensureShardNameIsInShardMap} from "./sharding";
 import {getIndexWriter} from "./serializer";
 import { isShardedIndex } from "../templateApi/heirarchy";
-
+import {promiseWriteableStream} from "./promiseWritableStream";
+import {promiseReadableStream} from "./promiseReadableStream";
 
 export const applyToShard = async (heirarchy, store, indexKey, 
         indexNode, indexShardKey, recordsToWrite, keysToRemove) => {
@@ -10,7 +11,7 @@ export const applyToShard = async (heirarchy, store, indexKey,
     const writer = await getWriter(heirarchy, store, indexKey, indexShardKey, indexNode, createIfNotExists);
     if(writer === SHARD_DELETED) return;
     
-    writer.updateIndex(recordsToWrite, keysToRemove);
+    await writer.updateIndex(recordsToWrite, keysToRemove);
     await swapTempFileIn(store, indexShardKey); 
 
 }
@@ -20,7 +21,9 @@ const getWriter = async (heirarchy, store, indexKey, indexedDataKey, indexNode, 
 
     let readableStream = null;
     try {
-        readableStream = await store.readableFileStream(indexedDataKey);
+        readableStream = promiseReadableStream(
+            await store.readableFileStream(indexedDataKey)
+        );
     } catch(e) {
         if(await store.exists(indexedDataKey)) {
             throw e;
@@ -29,7 +32,10 @@ const getWriter = async (heirarchy, store, indexKey, indexedDataKey, indexNode, 
                 await store.createFile(indexedDataKey, "");
             else
                 return SHARD_DELETED;
-            readableStream = await store.readableFileStream(indexedDataKey);
+
+            readableStream = promiseReadableStream(
+                await store.readableFileStream(indexedDataKey)
+            );
         }
     }
 
@@ -37,14 +43,20 @@ const getWriter = async (heirarchy, store, indexKey, indexedDataKey, indexNode, 
         await ensureShardNameIsInShardMap(store, indexKey, indexedDataKey);
     }
 
-    const writableStream = await store.writableFileStream(indexedDataKey + ".temp");
+    const writableStream = promiseWriteableStream(
+        await store.writableFileStream(indexedDataKey + ".temp")
+    );
     
     return getIndexWriter(
         heirarchy, indexNode, 
-        () => readableStream.read(),
-        (buffer) => writableStream.write(buffer)
+        readableStream, writableStream
     );
 };
+
+const writeStreamPromise = (stream) => (buffer) => 
+    new Promise((resolve, reject) => {
+        stream.write(buffer, )
+    });
 
 const swapTempFileIn = async (store, indexedDataKey, isRetry=false) => {
     const tempFile = indexedDataKey + ".temp";
@@ -59,6 +71,8 @@ const swapTempFileIn = async (store, indexedDataKey, isRetry=false) => {
         // retrying in case delete failure was for some other reason
         if(!isRetry) {
             await swapTempFileIn(store, indexedDataKey, true);
+        } else {
+            throw e;
         }
 
     }

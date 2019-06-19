@@ -11,26 +11,26 @@ export const CONTINUE_READING_RECORDS = "CONTINUE_READING";
 export const READ_REMAINING_TEXT = "READ_REMAINING";
 export const CANCEL_READ = "CANCEL";
 
-export const getIndexWriter = (heirarchy, indexNode, getNextInputBytes, flushOutputBuffer) => {
+export const getIndexWriter = (heirarchy, indexNode, readableStream, writableStream, end) => {
     const schema = generateSchema(heirarchy, indexNode);
 
     return ({
-        read: read(getNextInputBytes, schema),
-        updateIndex: updateIndex(getNextInputBytes, flushOutputBuffer, schema)
+        read: read(readableStream, schema),
+        updateIndex: updateIndex(readableStream, writableStream, schema, end)
     });
 };
 
-export const getIndexReader = (heirarchy, indexNode, getNextInputBytes) => 
+export const getIndexReader = (heirarchy, indexNode, readableStream) => 
     read(
-        getNextInputBytes, 
+        readableStream, 
         generateSchema(heirarchy, indexNode)
     );
 
-const updateIndex = (getNextInputBytes, flushOutputBuffer, schema) => (itemsToWrite, keysToRemove) => {
-    const write = newOutputWriter(BUFFER_MAX_BYTES, flushOutputBuffer);
+const updateIndex = (readableStream, writableStream, schema) => async (itemsToWrite, keysToRemove) => {
+    const write = newOutputWriter(BUFFER_MAX_BYTES, writableStream);
     const writtenItems = []; 
-    read(getNextInputBytes, schema)(
-        indexedItem => {
+    await read(readableStream, schema)(
+        async indexedItem => {
             const updated = find(i => indexedItem.key === i.key)(itemsToWrite);
             const removed = find(k => indexedItem.key === k)(keysToRemove);
             
@@ -39,10 +39,10 @@ const updateIndex = (getNextInputBytes, flushOutputBuffer, schema) => (itemsToWr
 
             if(isSomething(updated)) {
                 const serializedItem =  serializeItem(schema, updated);
-                write(serializedItem);
+                await write(serializedItem);
                 writtenItems.push(updated);
             } else {
-                write(
+                await write(
                     serializeItem(schema, indexedItem)
                 );
             } 
@@ -50,32 +50,33 @@ const updateIndex = (getNextInputBytes, flushOutputBuffer, schema) => (itemsToWr
             return CONTINUE_READING_RECORDS;
 
         },
-        text => write(text)
+        async text => await write(text)
     );
 
     if(writtenItems.length !== itemsToWrite.length) {
         const toAdd = difference(itemsToWrite, writtenItems);
         for(let added of toAdd) {
-            write(
+            await write(
                 serializeItem(schema, added)
             );
         }
     } else if(writtenItems.length === 0) {
         // potentially are no records
-        write("");
+        await write("");
     }
 
-    write();
+    await write();
+    await writableStream.end();
 };
 
-const read = (getNextInputBytes, schema) => (onGetItem, onGetText) => {
-    const readInput = newInputReader(getNextInputBytes);
-    let text = readInput();
+const read = (readableStream, schema) => async (onGetItem, onGetText) => {
+    const readInput = newInputReader(readableStream);
+    let text = await readInput();
     let status = CONTINUE_READING_RECORDS;
     while(text.length > 0) {
 
         if(status === READ_REMAINING_TEXT) {
-            onGetText(text);
+            await onGetText(text);
             hasContent = true;
             continue;
         }
@@ -89,7 +90,7 @@ const read = (getNextInputBytes, schema) => (onGetItem, onGetText) => {
         for(let currentChar of text) {
             rowText += currentChar;
             if(currentChar === "\r") {
-                status = onGetItem(
+                status = await onGetItem(
                     deserializeRow(schema, rowText)
                 );
                 rowText = "";
@@ -101,18 +102,21 @@ const read = (getNextInputBytes, schema) => (onGetItem, onGetText) => {
         }
 
         if(currentCharIndex < text.length -1) {
-            onGetText(text.substring(currentCharIndex + 1));
+            await onGetText(text.substring(currentCharIndex + 1));
         }
 
-        text = readInput();
+        text = await readInput();
     }
+
+    await readableStream.destroy();
+
 };
 
-const newOutputWriter = (flushBoundary, flush) => {
+const newOutputWriter = (flushBoundary, writableStream) => {
     
     let currentBuffer = null;
 
-    return (text) => {
+    return async (text) => {
 
         if(isString(text) && currentBuffer === null)
             currentBuffer = Buffer.from(text, "utf8");
@@ -126,19 +130,19 @@ const newOutputWriter = (flushBoundary, flush) => {
             (currentBuffer.length > flushBoundary
              || !isString(text))) {
 
-            flush(currentBuffer);
+            await writableStream.write(currentBuffer);
             currentBuffer = null;
         }
     }
 };
 
-const newInputReader = (getNextInputBytes) => {
+const newInputReader = (readableStream) => {
 
     const decoder = new StringDecoder('utf8');
     let remainingBytes = [];
 
-    return () => {
-        const nextBytes = getNextInputBytes();
+    return async () => {
+        const nextBytes = await readableStream.read();
         const frombytes = [...remainingBytes, ...(!nextBytes ? [] : nextBytes)];
         if(frombytes.length === remainingBytes.length)
             return "";
