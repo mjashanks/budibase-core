@@ -23,6 +23,7 @@ import { getApplicationDefinition } from './getApplicationDefinition';
 import { saveApplicationHeirarchy } from './saveApplicationHeirarchy';
 import { saveActionsAndTriggers } from './saveActionsAndTriggers';
 import { all } from '../types';
+import { getBehaviourSources } from "./getBehaviourSources";
 
 const api = app => ({
 

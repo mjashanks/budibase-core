@@ -39,7 +39,9 @@ export const getLock = async (app, lockFile, timeoutMilliseconds, maxLockRetries
 
     try {
       await app.datastore.deleteFile(lockFile);
-    } catch (_) {}
+    } catch (_) {
+      //empty
+    }
 
     await sleepForRetry();
 
@@ -67,7 +69,9 @@ export const releaseLock = async (app, lock) => {
   if (currentEpochTime < (lock.timeout - lockOverlapMilliseconds)) {
     try {
       await app.datastore.deleteFile(lock.key);
-    } catch (_) {}
+    } catch (_) {
+      //empty
+    }
   }
 };
 
@@ -82,7 +86,9 @@ export const extendLock = async (app, lock) => {
         getLockFileContent(lock.totalTimeout, lock.timeout),
       );
       return lock;
-    } catch (_) {}
+    } catch (_) {
+      //empty
+    }
   }
   return NO_LOCK;
 };
