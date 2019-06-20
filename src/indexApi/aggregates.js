@@ -1,7 +1,7 @@
 import { has, isNumber, isUndefined } from 'lodash/fp';
 import { compileExpression, compileCode } from '@nx-js/compiler-util';
 import {
-  safeKey, apiWrapper, $,
+  safeKey, apiWrapper,
   events, isNonEmptyString,
 } from '../common';
 import { iterateIndex } from '../indexing/read';

@@ -1,5 +1,5 @@
 import {
-  find, keyBy, mapValues, constant,
+  keyBy, mapValues,
 } from 'lodash/fp';
 import { generate } from 'shortid';
 import { getNodeForCollectionPath } from '../templateApi/heirarchy';
@@ -22,12 +22,13 @@ export const getNew = app => (collectionKey, recordTypeName) => {
 
 const _getNew = (recordNode, collectionKey) => constructRecord(recordNode, getNewFieldValue, collectionKey);
 
-const getRecordNode = (app, collectionKey, recordTypeName) => {
+const getRecordNode = (app, collectionKey) => {
   collectionKey = safeKey(collectionKey);
   return getNodeForCollectionPath(app.heirarchy)(collectionKey);
 };
 
-export const getNewChild = app => (recordKey, collectionName, recordTypeName) => getNew(app)(joinKey(recordKey, collectionName), recordTypeName);
+export const getNewChild = app => (recordKey, collectionName, recordTypeName) => 
+  getNew(app)(joinKey(recordKey, collectionName), recordTypeName);
 
 export const constructRecord = (recordNode, getFieldValue, collectionKey) => {
   const record = $(recordNode.fields, [

@@ -102,7 +102,7 @@ const doSet = async (app, auth, username, newpassword) => {
   );
 };
 
-export const scorePassword = password => apiWrapperSync(
+export const scorePassword = app => password => apiWrapperSync(
   app,
   events.authApi.scorePassword,
   alwaysAuthorized,

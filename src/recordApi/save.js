@@ -1,7 +1,5 @@
 import {
   cloneDeep,
-  constant,
-  isEqual,
   flatten,
   map,
   filter,
@@ -14,14 +12,11 @@ import {
 } from '../common';
 import {
   getFlattenedHierarchy,
-  getLastPartInKey,
   getExactNodeForPath,
   isRecord,
   getNode,
   fieldReversesReferenceToNode,
 } from '../templateApi/heirarchy';
-import { mapRecord } from '../indexing/evaluate';
-import { listItems } from '../indexApi/listItems';
 import { addToAllIds } from '../indexing/allIds';
 import {
   transactionForCreateRecord,
@@ -121,59 +116,6 @@ const initialiseReverseReferenceIndexes = async (app, record) => {
     await initialiseIndex(
       app.datastore, record.key, indexNode,
     );
-  }
-};
-
-const maintainReferentialIntegrity = async (app, indexingApi, oldRecord, newRecord) => {
-  /*
-        FOREACH Field that reference this object
-        - options Index node that for field
-        - has options index changed for referenced record?
-        - FOREACH reverse index of field
-          - FOREACH referencingRecord in reverse index
-            - Is field value still pointing to referencedRecord
-            - Update referencingRecord.fieldName to new value
-            - Save
-        */
-  const recordNode = getExactNodeForPath(app.heirarchy)(newRecord.key);
-  const referenceFields = fieldsThatReferenceThisRecord(
-    app, recordNode,
-  );
-
-  const updates = $(referenceFields, [
-    map(f => ({
-      node: getNode(
-        app.heirarchy, f.typeOptions.indexNodeKey,
-      ),
-      field: f,
-    })),
-    map(n => ({
-      old: mapRecord(oldRecord, n.node),
-      new: mapRecord(newRecord, n.node),
-      indexNode: n.node,
-      field: n.field,
-      reverseIndexKeys: $(n.field.typeOptions.reverseIndexNodeKeys, [
-        map(k => joinKey(
-          newRecord.key,
-          getLastPartInKey(k),
-        )),
-      ]),
-    })),
-    filter(diff => !isEqual(diff.old)(diff.new)),
-  ]);
-
-  for (const update of updates) {
-    for (const reverseIndexKey of update.reverseIndexKeys) {
-      const rows = await listItems(app)(reverseIndexKey);
-
-      for (const key of map(r => r.key)(rows)) {
-        const record = await _load(app, key);
-        if (record[update.field.name].key === newRecord.key) {
-          record[update.field.name] = update.new;
-          await _save(app, indexingApi, record, undefined, true);
-        }
-      }
-    }
   }
 };
 

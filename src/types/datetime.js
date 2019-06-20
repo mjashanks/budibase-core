@@ -2,11 +2,11 @@ import {
   constant, isDate, isString, isNull,
 } from 'lodash';
 import {
-  makerule, typeFunctions, getNewValue,
+  makerule, typeFunctions,
   parsedFailed, parsedSuccess, getDefaultExport,
 } from './typeHelpers';
 import {
-  switchCase, defaultCase, $, toDateOrNull,
+  switchCase, defaultCase, toDateOrNull,
 } from '../common';
 
 const dateFunctions = typeFunctions({

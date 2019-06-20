@@ -1,5 +1,5 @@
 import {
-  constant, isString, isArray,
+  constant, isString,
   isNull, includes, isBoolean,
 } from 'lodash';
 import {
@@ -48,7 +48,7 @@ const typeConstraints = [
   makerule(async (val, opts) => val === null
                            || opts.allowDeclaredValuesOnly === false
                            || includes(opts.values, val),
-  (val, opts) => `"${val}" does not exist in the list of allowed values`),
+  (val) => `"${val}" does not exist in the list of allowed values`),
 ];
 
 export default getDefaultExport(

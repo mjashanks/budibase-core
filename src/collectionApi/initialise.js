@@ -1,10 +1,8 @@
 import { filter } from 'lodash/fp';
 import {
   getFlattenedHierarchy,
-  hasNoMatchingAncestors,
   isCollectionRecord,
   isRoot,
-  isRecord,
   getExactNodeForPath,
 } from '../templateApi/heirarchy';
 import { $, allTrue, joinKey } from '../common';

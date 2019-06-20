@@ -9,7 +9,7 @@ import {
   $$, isSafeInteger,
 } from '../common';
 
-const arrayFunctions = type => typeFunctions({
+const arrayFunctions = () => typeFunctions({
   default: constant([]),
 });
 

@@ -1,5 +1,4 @@
 import { generate } from 'shortid';
-import { split } from 'lodash/fp';
 import {
   tempCodeExpiryLength, USERS_LOCK_FILE,
   USERS_LIST_FILE, userAuthFile,

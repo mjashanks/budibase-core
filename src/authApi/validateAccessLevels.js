@@ -2,11 +2,11 @@ import {
   values, includes, map, concat, isEmpty, uniqWith, some,
   flatten, filter,
 } from 'lodash/fp';
-import { applyRuleSet, makerule, applyRule } from '../common/validationCommon';
+import { applyRuleSet, makerule } from '../common/validationCommon';
 import { permissionTypes } from './authCommon';
 import {
   $, isSomething, insensitiveEquals,
-  isNonEmptyString, apiWrapperSync, events, somethingOrDefault,
+  isNonEmptyString, apiWrapperSync, events,
 } from '../common';
 import { getNode } from '../templateApi/heirarchy';
 import { alwaysAuthorized } from './permissions';

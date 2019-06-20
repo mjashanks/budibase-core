@@ -1,6 +1,6 @@
 import {
-  find, filter, includes,
-  some, map,
+  find, filter, 
+  includes, some,
 } from 'lodash/fp';
 import { getAllIdsIterator } from '../indexing/allIds';
 import {
@@ -80,10 +80,6 @@ const buildReverseReferenceIndex = async (app, indexNode) => {
     await createTransactionsForReferencingNode(referencingNode);
   }
 };
-
-const getAllowedParentCollectionNodes = (heirarchy, indexNode) => $(getAllowedRecordNodesForIndex(heirarchy, indexNode), [
-  map(n => n.parent()),
-]);
 
 const buildHeirarchalIndex = async (app, indexNode) => {
   let recordCount = 0;

@@ -1,5 +1,4 @@
 import {
-  apiWrapper, events,
   tryAwaitOrIgnore,
 } from '../common';
 import {

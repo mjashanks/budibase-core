@@ -1,4 +1,3 @@
-import { map } from 'lodash/fp';
 import { getNodeForCollectionPath } from '../templateApi/heirarchy';
 import {
   isNothing, safeKey, apiWrapperSync, events,
@@ -12,7 +11,6 @@ export const getAllowedRecordTypes = app => key => apiWrapperSync(
   { key },
   _getAllowedRecordTypes, app, key,
 );
-
 
 const _getAllowedRecordTypes = (app, key) => {
   key = safeKey(key);

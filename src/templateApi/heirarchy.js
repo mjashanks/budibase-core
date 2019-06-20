@@ -110,9 +110,6 @@ export const getActualKeyOfParent = (parentNodeKey, actualChildKey) => $(actualC
 ]);
 
 export const getParentKey = (key) => {
-  const split = splitKey(key);
-  const taken = take(splitKey(key).length - 1)(split);
-  const joined = joinKey(...taken);
   return $(key, [
     splitKey,
     take(splitKey(key).length - 1),

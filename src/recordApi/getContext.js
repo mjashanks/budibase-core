@@ -6,7 +6,7 @@ import {
 } from '../templateApi/heirarchy';
 import { listItems } from '../indexApi/listItems';
 import {
-  $, apiWrapperSync, events, joinKey,
+  $, apiWrapperSync, events,
 } from '../common';
 import { getIndexKey_BasedOnDecendant } from '../indexing/sharding';
 import { permission } from '../authApi/permissions';

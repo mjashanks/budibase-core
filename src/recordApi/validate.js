@@ -8,7 +8,6 @@ import { getExactNodeForPath } from '../templateApi/heirarchy';
 import { validateFieldParse, validateTypeConstraints } from '../types';
 import { $, isNothing, isNonEmptyString } from '../common';
 import { _getContext } from './getContext';
-import { permission } from '../authApi/permissions';
 
 const fieldParseError = (fieldName, value) => ({
   fields: [fieldName],

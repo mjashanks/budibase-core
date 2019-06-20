@@ -21,12 +21,10 @@ export const uploadFile = app => async (recordKey, readableStream, relativePath)
   _uploadFile, app, recordKey, readableStream, relativePath,
 );
 
-
 const _uploadFile = async (app, recordKey, readableStream, relativePath) => {
   if (isNothing(recordKey)) { throw new Error('Record Key not supplied'); }
   if (isNothing(relativePath)) { throw new Error('file path not supplied'); }
   if (!isLegalFilename(relativePath)) { throw new Error('Illegal filename'); }
-
 
   const record = await _load(app, recordKey);
 
@@ -50,7 +48,8 @@ const _uploadFile = async (app, recordKey, readableStream, relativePath) => {
     await app.datastore.getFileSize(tempFilePath),
   );
 
-  if (!isExpectedFileSize) { throw new Error(`Fields for ${relativeFilePath} do not have expected size: ${join(',')(incorrectFields)}`); }
+  if (!isExpectedFileSize) { throw new Error(
+    `Fields for ${relativeFilePath} do not have expected size: ${join(',')(incorrectFields)}`); }
 
   await tryAwaitOrIgnore(app.datastore.deleteFile, fullFilePath);
 

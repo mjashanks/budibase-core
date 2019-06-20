@@ -1,14 +1,11 @@
-import { map, flatten, filter } from 'lodash/fp';
 import {
-  safeKey, apiWrapper, isSomething,
-  events, joinKey, $,
+  safeKey, apiWrapper,
+  events, joinKey,
 } from '../common';
 import { _load, getRecordFileName } from './load';
 import { _deleteCollection } from '../collectionApi/delete';
 import {
   getExactNodeForPath,
-  getFlattenedHierarchy, getNode,
-  fieldReversesReferenceToNode,
 } from '../templateApi/heirarchy';
 import { _deleteIndex } from '../indexApi/delete';
 import { transactionForDeleteRecord } from '../transactions/create';
@@ -31,14 +28,12 @@ export const _deleteRecord = async (app, key, disableCleanup) => {
   const record = await _load(app, key);
   await transactionForDeleteRecord(app, record);
 
-
   for (const collectionRecord of node.children) {
     const collectionKey = joinKey(
       key, collectionRecord.collectionName,
     );
     await _deleteCollection(app, collectionKey, true);
   }
-
 
   await app.datastore.deleteFile(
     getRecordFileName(key),
@@ -56,25 +51,6 @@ export const _deleteRecord = async (app, key, disableCleanup) => {
 
 const deleteIndexes = async (app, key) => {
   const node = getExactNodeForPath(app.heirarchy)(key);
-  /* const reverseIndexKeys = $(app.heirarchy, [
-        getFlattenedHierarchy,
-        map(n => n.fields),
-        flatten,
-        filter(isSomething),
-        filter(fieldReversesReferenceToNode(node)),
-        map(f => $(f.typeOptions.reverseIndexNodeKeys, [
-                    map(n => getNode(
-                                app.heirarchy,
-                                n))
-                ])
-        ),
-        flatten,
-        map(n => joinKey(key, n.name))
-    ]);
-
-    for(let i of reverseIndexKeys) {
-        await _deleteIndex(app, i, true);
-    } */
 
   for (const index of node.indexes) {
     const indexKey = joinKey(key, index.name);

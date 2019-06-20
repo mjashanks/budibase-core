@@ -9,7 +9,7 @@ export const getNewUser = app => () => apiWrapperSync(
   _getNewUser, app,
 );
 
-export const _getNewUser = app => ({
+export const _getNewUser = () => ({
   name: '',
   accessLevels: [],
   enabled: true,
@@ -24,7 +24,7 @@ export const getNewUserAuth = app => () => apiWrapperSync(
   _getNewUserAuth, app,
 );
 
-export const _getNewUserAuth = app => ({
+export const _getNewUserAuth = () => ({
   passwordHash: '',
   temporaryAccessHash: '',
   temporaryAccessExpiryEpoch: 0,

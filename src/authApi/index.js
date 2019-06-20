@@ -12,7 +12,7 @@ import { getUsers } from './getUsers';
 import { isAuthorized } from './isAuthorized';
 import { saveAccessLevels } from './saveAccessLevels';
 import {
-  changeMyPassword, changePassword,
+  changeMyPassword,
   scorePassword, setPasswordFromTemporaryCode,
   isValidPassword,
 } from './setPassword';
