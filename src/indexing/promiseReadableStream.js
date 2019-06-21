@@ -77,7 +77,7 @@ export const promiseReadableStream = stream => {
       }
     };
   
-    return {read, destroy};
+    return {read, destroy, stream};
   }
   
   export default promiseReadableStream

@@ -142,13 +142,28 @@ const newInputReader = (readableStream) => {
     let remainingBytes = [];
 
     return async () => {
-        const nextBytes = await readableStream.read();
-        const frombytes = [...remainingBytes, ...(!nextBytes ? [] : nextBytes)];
-        if(frombytes.length === remainingBytes.length)
-            return "";
-        const buffer = Buffer.from(frombytes);
+
+        let nextBytesBuffer = await readableStream.read(BUFFER_MAX_BYTES);
+        const remainingBuffer = Buffer.from(remainingBytes);
+
+        if(!nextBytesBuffer) nextBytesBuffer = Buffer.from([]);
+
+        const moreToRead = nextBytesBuffer.length === BUFFER_MAX_BYTES;
+
+        const buffer = Buffer.concat(
+            [remainingBuffer, nextBytesBuffer],
+            remainingBuffer.length + nextBytesBuffer.length);
+
         const text = decoder.write(buffer);
         remainingBytes = decoder.end(buffer);
+
+        if(!moreToRead && remainingBytes.length > 0) {
+            // if for any reason, we have remaining bytes at the end
+            // of the stream, just discard - dont see why this should
+            // ever happen, but if it does, it could cause a stack overflow
+            remainingBytes = [];
+        }
+
         return text;
     };
 };
