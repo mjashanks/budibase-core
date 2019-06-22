@@ -10,36 +10,48 @@ export const applyToShard = async (heirarchy, store, indexKey,
   const writer = await getWriter(heirarchy, store, indexKey, indexShardKey, indexNode, createIfNotExists);
   if (writer === SHARD_DELETED) return;
 
-    await writer.updateIndex(recordsToWrite, keysToRemove);
+  await writer.updateIndex(recordsToWrite, keysToRemove);
   await swapTempFileIn(store, indexShardKey);
 };
 
 const SHARD_DELETED = 'SHARD_DELETED';
 const getWriter = async (heirarchy, store, indexKey, indexedDataKey, indexNode, createIfNotExists) => {
   let readableStream = null;
-  try {
-        readableStream = promiseReadableStream(
-            await store.readableFileStream(indexedDataKey)
-        );
-  } catch (e) {
-    if (await store.exists(indexedDataKey)) {
-      throw e;
-    } else {
-      if (createIfNotExists) { await store.createFile(indexedDataKey, ''); } else { return SHARD_DELETED; }
-
-            readableStream = promiseReadableStream(
-                await store.readableFileStream(indexedDataKey)
-            );
-    }
-  }
 
   if (isShardedIndex(indexNode)) {
     await ensureShardNameIsInShardMap(store, indexKey, indexedDataKey);
+    if(!await store.exists(indexedDataKey)) {
+      await store.createFile(indexedDataKey, "");
+    }
   }
 
-    const writableStream = promiseWriteableStream(
-        await store.writableFileStream(indexedDataKey + ".temp")
+  try {
+
+    readableStream = promiseReadableStream(
+        await store.readableFileStream(indexedDataKey)
     );
+
+  } catch (e) {
+
+    if (await store.exists(indexedDataKey)) {
+      throw e;
+    } else {
+      if (createIfNotExists) { 
+        await store.createFile(indexedDataKey, ''); 
+      } else { 
+        return SHARD_DELETED; 
+      }
+
+      readableStream = promiseReadableStream(
+          await store.readableFileStream(indexedDataKey)
+      );
+
+    }
+  }
+
+  const writableStream = promiseWriteableStream(
+      await store.writableFileStream(indexedDataKey + ".temp")
+  );
 
   return getIndexWriter(
     heirarchy, indexNode,
@@ -60,8 +72,8 @@ const swapTempFileIn = async (store, indexedDataKey, isRetry = false) => {
     // retrying in case delete failure was for some other reason
     if (!isRetry) {
       await swapTempFileIn(store, indexedDataKey, true);
-        } else {
-            throw e;
+    } else {
+      throw new Error("Failed to swap in index filed: " + e.message);
     }
   }
 };

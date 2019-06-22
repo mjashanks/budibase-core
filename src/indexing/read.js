@@ -78,12 +78,12 @@ export const getIndexedDataKey = (decendantKey, indexNode) => {
 export const iterateIndex = (onGetItem, getFinalResult) => 
   async (heirarchy, datastore, index, indexedDataKey) => {
   try {
-        const readableStream = promiseReadableStream(
-            await datastore.readableFileStream(indexedDataKey)
-        );
+    const readableStream = promiseReadableStream(
+        await datastore.readableFileStream(indexedDataKey)
+    );
 
-        const read = getIndexReader(heirarchy, index, readableStream);
-        await read(onGetItem);
+    const read = getIndexReader(heirarchy, index, readableStream);
+    await read(onGetItem);
     return getFinalResult();
   } catch (e) {
     if (await datastore.exists(indexedDataKey)) {

@@ -10,7 +10,7 @@ export const enableUser = app => async username => apiWrapper(
   app,
   events.authApi.enableUser,
   permission.enableDisableUser.isAuthorized,
-  { app, username },
+  { username },
   _enableUser, app, username,
 );
 
