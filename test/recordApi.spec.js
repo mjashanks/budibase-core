@@ -1,4 +1,4 @@
-import {setupAppheirarchy, basicAppHeirarchyCreator_WithFields, 
+import {setupApphierarchy, basicAppHierarchyCreator_WithFields, 
     getNewFieldAndAdd, stubEventHandler} from "./specHelpers";
 import {events, isNonEmptyString} from "../src/common";
 import { isBoolean } from "util";
@@ -7,7 +7,7 @@ import {permission} from "../src/authApi/permissions";
 describe("recordApi > getNew", () => {
 
     it("should get object with generated id and key (full path)", async () => {
-        const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const record = recordApi.getNew("/customers", "customer");
 
         expect(record.id).toBeDefined();
@@ -19,7 +19,7 @@ describe("recordApi > getNew", () => {
     });
 
     it("should create object with all declared fields, using default values", async () => {
-        const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
 
         const newRecord = recordApi.getNew("/customers", "customer")
 
@@ -30,9 +30,9 @@ describe("recordApi > getNew", () => {
     });
 
     it("should create object with all declared fields, and use inital values", async () => {
-        const {recordApi} = await setupAppheirarchy(templateApi => {
-            const heirarchy = basicAppHeirarchyCreator_WithFields(templateApi);
-            const {root, customerRecord} = heirarchy;
+        const {recordApi} = await setupApphierarchy(templateApi => {
+            const hierarchy = basicAppHierarchyCreator_WithFields(templateApi);
+            const {root, customerRecord} = hierarchy;
 
             customerRecord.fields = [];
 
@@ -41,7 +41,7 @@ describe("recordApi > getNew", () => {
             newField("isalive", "bool", "true");
             newField("age", "number", "999");
         
-            return heirarchy;
+            return hierarchy;
         });
 
         const newRecord = recordApi.getNew("/customers", "customer")
@@ -52,7 +52,7 @@ describe("recordApi > getNew", () => {
     });
 
     it("should add a function 'isNew' which always returns true", async () => {
-        const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const record = recordApi.getNew("/customers", "customer");
 
         expect(record.isNew).toBeDefined();
@@ -61,7 +61,7 @@ describe("recordApi > getNew", () => {
     });
 
     it("should add a function 'type' returns type", async () => {
-        const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const record = recordApi.getNew("/customers", "customer");
 
         expect(record.type).toBeDefined();
@@ -70,14 +70,14 @@ describe("recordApi > getNew", () => {
     });
 
     it("should throw error, user user does not have permission", async () => {
-        const {recordApi, app, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
-        app.removePermission(permission.createRecord.get(appHeirarchy.customerRecord.nodeKey()));
+        const {recordApi, app, appHierarchy} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
+        app.removePermission(permission.createRecord.get(appHierarchy.customerRecord.nodeKey()));
         expect(() => recordApi.getNew("/customers", "customer")).toThrow(/Unauthorized/);
     });
 
     it("should not depend on having any other permissions", async () => {
-        const {recordApi, app, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
-        app.withOnlyThisPermission(permission.createRecord.get(appHeirarchy.customerRecord.nodeKey()));
+        const {recordApi, app, appHierarchy} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
+        app.withOnlyThisPermission(permission.createRecord.get(appHierarchy.customerRecord.nodeKey()));
         recordApi.getNew("/customers", "customer");
     });
 });
@@ -85,7 +85,7 @@ describe("recordApi > getNew", () => {
 describe('recordApi > save then load', () => {
     
     it('should save all field values on create new record', async () => {
-        const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const record = recordApi.getNew("/customers", "customer");
 
         record.surname = "Ledog";
@@ -105,7 +105,7 @@ describe('recordApi > save then load', () => {
     });
 
     it('should create values for fields when undefined', async () => {
-        const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const record = recordApi.getNew("/customers", "customer");
 
         record.age = 9;
@@ -123,7 +123,7 @@ describe('recordApi > save then load', () => {
     });
 
     it('loaded record isNew() always return false', async () => {
-        const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const record = recordApi.getNew("/customers", "customer");
 
         record.age = 9;
@@ -138,7 +138,7 @@ describe('recordApi > save then load', () => {
     });
 
     it('loaded record id() and key() should work', async () => {
-        const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const record = recordApi.getNew("/customers", "customer");
 
         record.age = 9;
@@ -157,7 +157,7 @@ describe('recordApi > save then load', () => {
 
     
     it('loaded record type() should be a function', async () => {
-        const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const record = recordApi.getNew("/customers", "customer");
 
         record.age = 9;
@@ -172,7 +172,7 @@ describe('recordApi > save then load', () => {
     });
 
     it('update existing should update field', async () => {
-        const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const record = recordApi.getNew("/customers", "customer");
 
         record.surname = "Ledog";
@@ -194,7 +194,7 @@ describe('recordApi > save then load', () => {
 describe("save", () => {
 
     it("IsNew() should return false after save", async () => {
-        const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";
 
@@ -203,7 +203,7 @@ describe("save", () => {
     });
 
     it("should publish onbegin and oncomplete events", async () => {
-        const {recordApi, subscribe} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi, subscribe} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const handler = stubEventHandler();
         subscribe(events.recordApi.save.onBegin, handler.handle);
         subscribe(events.recordApi.save.onComplete, handler.handle);
@@ -225,7 +225,7 @@ describe("save", () => {
     });
 
     it("should publish create on create and update on update", async () => {
-        const {recordApi, subscribe} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi, subscribe} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const handler = stubEventHandler();
         subscribe(events.recordApi.save.onRecordCreated, handler.handle);
         subscribe(events.recordApi.save.onRecordUpdated, handler.handle);
@@ -254,7 +254,7 @@ describe("save", () => {
     });
 
     it("should create folder and index for subcollection", async () => {
-        const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";
 
@@ -265,7 +265,7 @@ describe("save", () => {
     });
 
     it("should create index folder and shardMap for sharded reverse reference index", async () => {
-        const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";
 
@@ -275,7 +275,7 @@ describe("save", () => {
     });
 
     it("should create folder for record", async () => {
-        const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";
 
@@ -285,44 +285,44 @@ describe("save", () => {
     });
 
     it("should create allids file", async () => {
-        const {recordApi, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi, appHierarchy} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";
 
         await recordApi.save(record);
 
-        const allIdsPath = `/customers/allids/${appHeirarchy.customerRecord.nodeId}/${record.id[2]}`;
+        const allIdsPath = `/customers/allids/${appHierarchy.customerRecord.nodeId}/${record.id[2]}`;
         expect(await recordApi._storeHandle.exists(allIdsPath)).toBeTruthy();
         
     });
 
     it("create should throw error, user user does not have permission", async () => {
-        const {recordApi, app, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi, app, appHierarchy} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const record = recordApi.getNew("/customers", "customer");
-        app.removePermission(permission.createRecord.get(appHeirarchy.customerRecord.nodeKey()));
+        app.removePermission(permission.createRecord.get(appHierarchy.customerRecord.nodeKey()));
         expect(recordApi.save(record)).rejects.toThrow(/Unauthorized/);
     });
 
     it("create should not depend on having any other permissions", async () => {
-        const {recordApi, app, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
-        app.withOnlyThisPermission(permission.createRecord.get(appHeirarchy.customerRecord.nodeKey()));
+        const {recordApi, app, appHierarchy} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
+        app.withOnlyThisPermission(permission.createRecord.get(appHierarchy.customerRecord.nodeKey()));
         const record = recordApi.getNew("/customers", "customer");
         await recordApi.save(record);
     });
 
     it("update should throw error, user user does not have permission", async () => {
-        const {recordApi, app, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi, app, appHierarchy} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const record = recordApi.getNew("/customers", "customer");
-        app.removePermission(permission.updateRecord.get(appHeirarchy.customerRecord.nodeKey()));
+        app.removePermission(permission.updateRecord.get(appHierarchy.customerRecord.nodeKey()));
         const created = await recordApi.save(record);
         expect(recordApi.save(created)).rejects.toThrow(/Unauthorized/);
     });
 
     it("update should not depend on having any other permissions", async () => {
-        const {recordApi, app, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi, app, appHierarchy} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const record = recordApi.getNew("/customers", "customer");
         const saved = await recordApi.save(record);
-        app.withOnlyThisPermission(permission.updateRecord.get(appHeirarchy.customerRecord.nodeKey()));
+        app.withOnlyThisPermission(permission.updateRecord.get(appHierarchy.customerRecord.nodeKey()));
         await recordApi.save(saved);
     });
 })
@@ -330,18 +330,18 @@ describe("save", () => {
 describe("recordApi > load", () => {
 
     it("should throw error when user user does not have permission", async () => {
-        const {recordApi, app, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi, app, appHierarchy} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const record = recordApi.getNew("/customers", "customer");
         const created = await recordApi.save(record);
-        app.removePermission(permission.readRecord.get(appHeirarchy.customerRecord.nodeKey()));
+        app.removePermission(permission.readRecord.get(appHierarchy.customerRecord.nodeKey()));
         expect(recordApi.load(created.key)).rejects.toThrow(/Unauthorized/);
     });
 
     it("should not depend on having any other permissions", async () => {
-        const {recordApi, app, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi, app, appHierarchy} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const record = recordApi.getNew("/customers", "customer");
         const saved = await recordApi.save(record);
-        app.withOnlyThisPermission(permission.readRecord.get(appHeirarchy.customerRecord.nodeKey()));
+        app.withOnlyThisPermission(permission.readRecord.get(appHierarchy.customerRecord.nodeKey()));
         await recordApi.load(saved.key);
     });
 

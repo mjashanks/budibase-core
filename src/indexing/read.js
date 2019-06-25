@@ -6,13 +6,13 @@ import {
 import {
   getActualKeyOfParent,
   isGlobalIndex,
-} from '../templateApi/heirarchy';
+} from '../templateApi/hierarchy';
 import {promiseReadableStream} from "./promiseReadableStream";
 import { createIndexFile } from './sharding';
 import { generateSchema } from './indexSchemaCreator';
 import { getIndexReader, CONTINUE_READING_RECORDS } from './serializer';
 
-export const readIndex = async (heirarchy, datastore, index, indexedDataKey) => {
+export const readIndex = async (hierarchy, datastore, index, indexedDataKey) => {
   const records = [];
   const doRead = iterateIndex(
         async item => {
@@ -22,12 +22,12 @@ export const readIndex = async (heirarchy, datastore, index, indexedDataKey) => 
         async () => records
   );
 
-  return await doRead(heirarchy, datastore, index, indexedDataKey);
+  return await doRead(hierarchy, datastore, index, indexedDataKey);
 };
 
-export const searchIndex = async (heirarchy, datastore, index, indexedDataKey, searchPhrase) => {
+export const searchIndex = async (hierarchy, datastore, index, indexedDataKey, searchPhrase) => {
   const records = [];
-  const schema = generateSchema(heirarchy, index);
+  const schema = generateSchema(hierarchy, index);
   const doRead = iterateIndex(
         async item => {
       const idx = lunr(function () {
@@ -47,7 +47,7 @@ export const searchIndex = async (heirarchy, datastore, index, indexedDataKey, s
         async () => records
   );
 
-  return await doRead(heirarchy, datastore, index, indexedDataKey);
+  return await doRead(hierarchy, datastore, index, indexedDataKey);
 };
 
 export const getIndexedDataKey_fromIndexKey = (indexKey, record) => `${indexKey}${indexKey.endsWith('.csv') ? '' : '.csv'}`;
@@ -74,13 +74,13 @@ export const getIndexedDataKey = (decendantKey, indexNode) => {
   );
 };
 
-export const iterateIndex = (onGetItem, getFinalResult) => async (heirarchy, datastore, index, indexedDataKey) => {
+export const iterateIndex = (onGetItem, getFinalResult) => async (hierarchy, datastore, index, indexedDataKey) => {
   try {
     const readableStream = promiseReadableStream(
         await datastore.readableFileStream(indexedDataKey)
     );
 
-    const read = getIndexReader(heirarchy, index, readableStream);
+    const read = getIndexReader(hierarchy, index, readableStream);
     await read(onGetItem);
     return getFinalResult();
   } catch (e) {

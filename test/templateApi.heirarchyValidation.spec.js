@@ -4,10 +4,10 @@ import {some} from "lodash";
 import {getNewField, addField} from "../src/templateApi/fields";
 import {getNewRecordValidationRule, commonRecordValidationRules,
     addRecordValidationRule} from "../src/templateApi/recordValidationRules";
-import { findField } from "../src/templateApi/heirarchy";
+import { findField } from "../src/templateApi/hierarchy";
 import {findCollectionDefaultIndex} from "./specHelpers";
 
-const createValidHeirarchy = () => {
+const createValidHierarchy = () => {
     const root = createNodes.getNewRootLevel();
 
     const customerRecord = createNodes.getNewRecordTemplate(root, "customer");
@@ -63,333 +63,333 @@ const createValidHeirarchy = () => {
     }
 };
 
-describe("heirarchy validation", () => {
+describe("hierarchy validation", () => {
 
     const expectInvalidField = (validationResult, fieldName, expectedNode, count = 1) => {
         expect(validationResult.length).toBe(count);
         expect(some(validationResult, r => r.field === fieldName && r.item === expectedNode)).toBe(true);
     }
 
-    it("should return no errors when heirarchy is valid", () => {
-        const heirarchy = createValidHeirarchy();
-        const validationResult = validateAll(heirarchy.root);
+    it("should return no errors when hierarchy is valid", () => {
+        const hierarchy = createValidHierarchy();
+        const validationResult = validateAll(hierarchy.root);
         expect(validationResult).toEqual([]);
     });
 
     it("should return an error on name field, when name not set, on all nodes types", () => {
-        let heirarchy = createValidHeirarchy();
+        let hierarchy = createValidHierarchy();
         const expectInvalidName = (node) => expectInvalidField(validationResult, "name", node, 1);
         
-        heirarchy = createValidHeirarchy();
-        heirarchy.customerRecord.name = "";
-        let validationResult = validateAll(heirarchy.root);
-        expectInvalidName(heirarchy.customerRecord);
-        heirarchy.customerRecord.name = "customers";
+        hierarchy = createValidHierarchy();
+        hierarchy.customerRecord.name = "";
+        let validationResult = validateAll(hierarchy.root);
+        expectInvalidName(hierarchy.customerRecord);
+        hierarchy.customerRecord.name = "customers";
 
-        heirarchy = createValidHeirarchy();
-        heirarchy.customerRecord.name = "";
-        validationResult = validateAll(heirarchy.root);
-        expectInvalidName(heirarchy.customerRecord); 
-        heirarchy.customerRecord.name = "customer";
+        hierarchy = createValidHierarchy();
+        hierarchy.customerRecord.name = "";
+        validationResult = validateAll(hierarchy.root);
+        expectInvalidName(hierarchy.customerRecord); 
+        hierarchy.customerRecord.name = "customer";
 
     });
 
     it("record > should return an error on fields member if empty", () => {
-        const heirarchy = createValidHeirarchy();
-        heirarchy.customerRecord.fields = [];
-        const validationResult = validateAll(heirarchy.root);
-        expectInvalidField(validationResult, "fields", heirarchy.customerRecord); 
+        const hierarchy = createValidHierarchy();
+        hierarchy.customerRecord.fields = [];
+        const validationResult = validateAll(hierarchy.root);
+        expectInvalidField(validationResult, "fields", hierarchy.customerRecord); 
     });
 
     it("record > should return an error on unrecognised type", () => {
-        const heirarchy = createValidHeirarchy();
-        heirarchy.customerRecord.type = "notatype";
-        const validationResult = validateAll(heirarchy.root);
-        expectInvalidField(validationResult, "type", heirarchy.customerRecord); 
+        const hierarchy = createValidHierarchy();
+        hierarchy.customerRecord.type = "notatype";
+        const validationResult = validateAll(hierarchy.root);
+        expectInvalidField(validationResult, "type", hierarchy.customerRecord); 
     });
 
     it("record > should return an error when validation rules do not have correct members", () => {
-        let heirarchy = createValidHeirarchy();
-        delete heirarchy.customerRecord.validationRules[0].expressionWhenValid;
-        let validationResult  = validateAll(heirarchy.root);
-        expectInvalidField(validationResult, "validationRules", heirarchy.customerRecord); 
+        let hierarchy = createValidHierarchy();
+        delete hierarchy.customerRecord.validationRules[0].expressionWhenValid;
+        let validationResult  = validateAll(hierarchy.root);
+        expectInvalidField(validationResult, "validationRules", hierarchy.customerRecord); 
 
-        heirarchy = createValidHeirarchy();
-        delete heirarchy.customerRecord.validationRules[0].messageWhenInvalid;
-        validationResult  = validateAll(heirarchy.root);
-        expectInvalidField(validationResult, "validationRules", heirarchy.customerRecord); 
+        hierarchy = createValidHierarchy();
+        delete hierarchy.customerRecord.validationRules[0].messageWhenInvalid;
+        validationResult  = validateAll(hierarchy.root);
+        expectInvalidField(validationResult, "validationRules", hierarchy.customerRecord); 
 
     });
 
     it("collection > should return error when duplicate names", () => {
-        const heirarchy = createValidHeirarchy();
-        heirarchy.customerRecord.collectionName = "partners"
-        heirarchy.customerRecord.name = "partner"
-        const validationResult = validateAll(heirarchy.root);
-        expectInvalidField(validationResult, "name", heirarchy.customerRecord, 2);
+        const hierarchy = createValidHierarchy();
+        hierarchy.customerRecord.collectionName = "partners"
+        hierarchy.customerRecord.name = "partner"
+        const validationResult = validateAll(hierarchy.root);
+        expectInvalidField(validationResult, "name", hierarchy.customerRecord, 2);
     });
 
     it("index > should return error when index has no map", () => {
-        const heirarchy = createValidHeirarchy();
-        heirarchy.customersDefaultIndex.map = "";
-        const validationResult = validateAll(heirarchy.root);
-        expectInvalidField(validationResult, "map", heirarchy.customersDefaultIndex);
+        const hierarchy = createValidHierarchy();
+        hierarchy.customersDefaultIndex.map = "";
+        const validationResult = validateAll(hierarchy.root);
+        expectInvalidField(validationResult, "map", hierarchy.customersDefaultIndex);
     });
 
     it("index > should return error when index map function does not compile", () => {
-        const heirarchy = createValidHeirarchy();
-        heirarchy.customersDefaultIndex.map = "invalid js!!";
-        const validationResult = validateAll(heirarchy.root);
-        expectInvalidField(validationResult, "map", heirarchy.customersDefaultIndex);
+        const hierarchy = createValidHierarchy();
+        hierarchy.customersDefaultIndex.map = "invalid js!!";
+        const validationResult = validateAll(hierarchy.root);
+        expectInvalidField(validationResult, "map", hierarchy.customersDefaultIndex);
     });
 
     it("index > should return error when index filter function does not compile", () => {
-        const heirarchy = createValidHeirarchy();
-        heirarchy.customersDefaultIndex.filter = "invalid js!!";
-        const validationResult = validateAll(heirarchy.root);
-        expectInvalidField(validationResult, "filter", heirarchy.customersDefaultIndex);
+        const hierarchy = createValidHierarchy();
+        hierarchy.customersDefaultIndex.filter = "invalid js!!";
+        const validationResult = validateAll(hierarchy.root);
+        expectInvalidField(validationResult, "filter", hierarchy.customersDefaultIndex);
     });
 
     it("index > should return error when index type is not one of allowed values", () => {
-        const heirarchy = createValidHeirarchy();
-        heirarchy.customersDefaultIndex.indexType = "";
-        const validationResult = validateAll(heirarchy.root);
-        expectInvalidField(validationResult, "indexType", heirarchy.customersDefaultIndex);
+        const hierarchy = createValidHierarchy();
+        hierarchy.customersDefaultIndex.indexType = "";
+        const validationResult = validateAll(hierarchy.root);
+        expectInvalidField(validationResult, "indexType", hierarchy.customersDefaultIndex);
 
-        heirarchy.customersDefaultIndex.indexType = "should not be allowed";
-        const validationResult2 = validateAll(heirarchy.root);
-        expectInvalidField(validationResult2, "indexType", heirarchy.customersDefaultIndex);
+        hierarchy.customersDefaultIndex.indexType = "should not be allowed";
+        const validationResult2 = validateAll(hierarchy.root);
+        expectInvalidField(validationResult2, "indexType", hierarchy.customersDefaultIndex);
     });
 
     it("index > should return error when reference index's parent is not a record", () => {
-        const heirarchy = createValidHeirarchy();
-        heirarchy.customersDefaultIndex.indexType = "reference";
-        const validationResult = validateAll(heirarchy.root);
-        expectInvalidField(validationResult, "indexType", heirarchy.customersDefaultIndex);
+        const hierarchy = createValidHierarchy();
+        hierarchy.customersDefaultIndex.indexType = "reference";
+        const validationResult = validateAll(hierarchy.root);
+        expectInvalidField(validationResult, "indexType", hierarchy.customersDefaultIndex);
     });
 
     it("field > should return error when a field is invalid", () => {
-        const heirarchy = createValidHeirarchy();
-        const invalidField =heirarchy.customerRecord.fields[0];
+        const hierarchy = createValidHierarchy();
+        const invalidField =hierarchy.customerRecord.fields[0];
         invalidField.name = "";
-        const validationResult = validateAll(heirarchy.root);
+        const validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "name", invalidField);
     });
 
     it("aggregateGroup > should return error when name is not supplied", () => {
-        const heirarchy = createValidHeirarchy();
-        heirarchy.customersNoGroupaggregateGroup.name = "";
-        const validationResult = validateAll(heirarchy.root);
-        expectInvalidField(validationResult, "name", heirarchy.customersNoGroupaggregateGroup);
+        const hierarchy = createValidHierarchy();
+        hierarchy.customersNoGroupaggregateGroup.name = "";
+        const validationResult = validateAll(hierarchy.root);
+        expectInvalidField(validationResult, "name", hierarchy.customersNoGroupaggregateGroup);
     });
 
     it("aggregate > should return error when name note set", () => {
-        const heirarchy = createValidHeirarchy();
-        heirarchy.allCustomersOwedFunctions.name = "";
-        const validationResult = validateAll(heirarchy.root);
-        expectInvalidField(validationResult, "name", heirarchy.allCustomersOwedFunctions);
+        const hierarchy = createValidHierarchy();
+        hierarchy.allCustomersOwedFunctions.name = "";
+        const validationResult = validateAll(hierarchy.root);
+        expectInvalidField(validationResult, "name", hierarchy.allCustomersOwedFunctions);
     });
 
     it("aggregate > should return error when condition does not compile", () => {
-        const heirarchy = createValidHeirarchy();
-        heirarchy.customersNoGroupaggregateGroup.condition = "invalid condition";
-        const validationResult = validateAll(heirarchy.root);
-        expectInvalidField(validationResult, "condition", heirarchy.customersNoGroupaggregateGroup);
+        const hierarchy = createValidHierarchy();
+        hierarchy.customersNoGroupaggregateGroup.condition = "invalid condition";
+        const validationResult = validateAll(hierarchy.root);
+        expectInvalidField(validationResult, "condition", hierarchy.customersNoGroupaggregateGroup);
     });
 
     it("aggregate > should return error when aggregatedValue does not compile", () => {
-        const heirarchy = createValidHeirarchy();
-        heirarchy.allCustomersOwedFunctions.aggregatedValue = "invalid value";
-        const validationResult = validateAll(heirarchy.root);
-        expectInvalidField(validationResult, "aggregatedValue", heirarchy.allCustomersOwedFunctions);
+        const hierarchy = createValidHierarchy();
+        hierarchy.allCustomersOwedFunctions.aggregatedValue = "invalid value";
+        const validationResult = validateAll(hierarchy.root);
+        expectInvalidField(validationResult, "aggregatedValue", hierarchy.allCustomersOwedFunctions);
     });
 
     it("aggregate > should be valid when valid condition and aggregatedValue supplied", () => {
-        const heirarchy = createValidHeirarchy();
-        heirarchy.allCustomersOwedFunctions.aggregatedValue = "return record.owed;";
-        heirarchy.allCustomersOwedFunctions.condition = "record.owed > 0;";
-        const validationResult = validateAll(heirarchy.root);
+        const hierarchy = createValidHierarchy();
+        hierarchy.allCustomersOwedFunctions.aggregatedValue = "return record.owed;";
+        hierarchy.allCustomersOwedFunctions.condition = "record.owed > 0;";
+        const validationResult = validateAll(hierarchy.root);
         expect(validationResult.length).toBe(0);
     });
 
     it("field.typeOptions > string > should return error when maxLength <= 0", () => {
-        const heirarchy = createValidHeirarchy();
-        const invalidField = findField(heirarchy.customerRecord, "surname");
+        const hierarchy = createValidHierarchy();
+        const invalidField = findField(hierarchy.customerRecord, "surname");
         invalidField.typeOptions.maxLength = -1;
-        let validationResult = validateAll(heirarchy.root);
+        let validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.maxLength", invalidField);
 
         invalidField.typeOptions.maxLength = 0;
-        validationResult = validateAll(heirarchy.root);
+        validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.maxLength", invalidField);
 
         invalidField.typeOptions.maxLength = 1;
-        validationResult = validateAll(heirarchy.root);
+        validationResult = validateAll(hierarchy.root);
         validationResult.length === 0;
     });
 
     it("field.typeOptions > string > should return error allowDeclaredValues only is not a bool", () => {
-        const heirarchy = createValidHeirarchy();
-        const invalidField = findField(heirarchy.customerRecord, "surname");
+        const hierarchy = createValidHierarchy();
+        const invalidField = findField(hierarchy.customerRecord, "surname");
         invalidField.typeOptions.allowDeclaredValuesOnly = null;
-        let validationResult = validateAll(heirarchy.root);
+        let validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.allowDeclaredValuesOnly", invalidField);
 
         invalidField.typeOptions.allowDeclaredValuesOnly = "";
-        validationResult = validateAll(heirarchy.root);
+        validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.allowDeclaredValuesOnly", invalidField);
 
     });
 
     it("field.typeOptions > string > should return error when values contains non-string", () => {
-        const heirarchy = createValidHeirarchy();
-        const invalidField = findField(heirarchy.customerRecord, "surname");
+        const hierarchy = createValidHierarchy();
+        const invalidField = findField(hierarchy.customerRecord, "surname");
         invalidField.typeOptions.values = [1];
-        const validationResult = validateAll(heirarchy.root);
+        const validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.values", invalidField);
     });
 
     it("field.typeOptions > bool > should return error when allowNulls is not a bool", () => {
-        const heirarchy = createValidHeirarchy();
-        const invalidField = findField(heirarchy.customerRecord, "isalive");
+        const hierarchy = createValidHierarchy();
+        const invalidField = findField(hierarchy.customerRecord, "isalive");
         invalidField.typeOptions.allowNulls = "1";
-        let validationResult = validateAll(heirarchy.root);
+        let validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.allowNulls", invalidField);
 
         invalidField.typeOptions.allowNulls = null;
-        validationResult = validateAll(heirarchy.root);
+        validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.allowNulls", invalidField);
     });
 
     it("field.typeOptions > datetime > should return error when maxValue is not a date", () => {
-        const heirarchy = createValidHeirarchy();
-        const invalidField = findField(heirarchy.customerRecord, "createddate");
+        const hierarchy = createValidHierarchy();
+        const invalidField = findField(hierarchy.customerRecord, "createddate");
         invalidField.typeOptions.maxValue = "1";
-        let validationResult = validateAll(heirarchy.root);
+        let validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.maxValue", invalidField);
 
         invalidField.typeOptions.maxValue = null;
-        validationResult = validateAll(heirarchy.root);
+        validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.maxValue", invalidField);
     });
 
     it("field.typeOptions > datetime > should return error when minValue is not a date", () => {
-        const heirarchy = createValidHeirarchy();
-        const invalidField = findField(heirarchy.customerRecord, "createddate");
+        const hierarchy = createValidHierarchy();
+        const invalidField = findField(hierarchy.customerRecord, "createddate");
         invalidField.typeOptions.minValue = "1";
-        let validationResult = validateAll(heirarchy.root);
+        let validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.minValue", invalidField);
 
         invalidField.typeOptions.minValue = null;
-        validationResult = validateAll(heirarchy.root);
+        validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.minValue", invalidField);
     });
 
     it("field.typeOptions > number > should return error when minValue is not an integer", () => {
-        const heirarchy = createValidHeirarchy();
-        const invalidField = findField(heirarchy.customerRecord, "age");
+        const hierarchy = createValidHierarchy();
+        const invalidField = findField(hierarchy.customerRecord, "age");
         invalidField.typeOptions.minValue = "hello";
-        let validationResult = validateAll(heirarchy.root);
+        let validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.minValue", invalidField);
 
         invalidField.typeOptions.minValue = null;
-        validationResult = validateAll(heirarchy.root);
+        validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.minValue", invalidField);
 
         invalidField.typeOptions.minValue = 1.1;
-        validationResult = validateAll(heirarchy.root);
+        validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.minValue", invalidField);
     });
 
     it("field.typeOptions > number > should return error when maxValue is not an integer", () => {
-        const heirarchy = createValidHeirarchy();
-        const invalidField = findField(heirarchy.customerRecord, "age");
+        const hierarchy = createValidHierarchy();
+        const invalidField = findField(hierarchy.customerRecord, "age");
         invalidField.typeOptions.maxValue = "hello";
-        let validationResult = validateAll(heirarchy.root);
+        let validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.maxValue", invalidField);
 
         invalidField.typeOptions.maxValue = null;
-        validationResult = validateAll(heirarchy.root);
+        validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.maxValue", invalidField);
 
         invalidField.typeOptions.maxValue = 1.1;
-        validationResult = validateAll(heirarchy.root);
+        validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.maxValue", invalidField);
     });
 
     it("field.typeOptions > number > should return error when decimal places is not a positive integer", () => {
-        const heirarchy = createValidHeirarchy();
-        const invalidField = findField(heirarchy.customerRecord, "age");
+        const hierarchy = createValidHierarchy();
+        const invalidField = findField(hierarchy.customerRecord, "age");
         invalidField.typeOptions.decimalPlaces = "hello";
-        let validationResult = validateAll(heirarchy.root);
+        let validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.decimalPlaces", invalidField);
 
         invalidField.typeOptions.decimalPlaces = null;
-        validationResult = validateAll(heirarchy.root);
+        validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.decimalPlaces", invalidField);
 
         invalidField.typeOptions.decimalPlaces = -1;
-        validationResult = validateAll(heirarchy.root);
+        validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.decimalPlaces", invalidField);
 
         invalidField.typeOptions.decimalPlaces = 1.1;
-        validationResult = validateAll(heirarchy.root);
+        validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.decimalPlaces", invalidField);
     });
 
     it("field.typeOptions > reference > should return error when indexNodeKey is not a compmleted string", () => {
-        const heirarchy = createValidHeirarchy();
-        const invalidField = findField(heirarchy.customerRecord, "partner");
+        const hierarchy = createValidHierarchy();
+        const invalidField = findField(hierarchy.customerRecord, "partner");
         invalidField.typeOptions.indexNodeKey = null;
-        let validationResult = validateAll(heirarchy.root);
+        let validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.indexNodeKey", invalidField);
 
         invalidField.typeOptions.indexNodeKey = "";
-        validationResult = validateAll(heirarchy.root);
+        validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.indexNodeKey", invalidField);
 
         invalidField.typeOptions.indexNodeKey = 1;
-        validationResult = validateAll(heirarchy.root);
+        validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.indexNodeKey", invalidField);
     });
 
     it("field.typeOptions > reference > should return error when reverseIndexNodeKeys is not a string array of >0 length", () => {
-        const heirarchy = createValidHeirarchy();
-        const invalidField = findField(heirarchy.customerRecord, "partner");
+        const hierarchy = createValidHierarchy();
+        const invalidField = findField(hierarchy.customerRecord, "partner");
         invalidField.typeOptions.reverseIndexNodeKeys = null;
-        let validationResult = validateAll(heirarchy.root);
+        let validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.reverseIndexNodeKeys", invalidField);
 
         invalidField.typeOptions.reverseIndexNodeKeys = "";
-        validationResult = validateAll(heirarchy.root);
+        validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.reverseIndexNodeKeys", invalidField);
 
         invalidField.typeOptions.reverseIndexNodeKeys = [];
-        validationResult = validateAll(heirarchy.root);
+        validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.reverseIndexNodeKeys", invalidField);
 
         invalidField.typeOptions.reverseIndexNodeKeys = "/not/an/array";
-        validationResult = validateAll(heirarchy.root);
+        validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.reverseIndexNodeKeys", invalidField);
 
         invalidField.typeOptions.reverseIndexNodeKeys = ["/some/key/here"];
-        validationResult = validateAll(heirarchy.root);
+        validationResult = validateAll(hierarchy.root);
         expect(validationResult.length).toBe(0);
     });
 
     it("field.typeOptions > reference > should return error when displayValue is not a compmleted string", () => {
-        const heirarchy = createValidHeirarchy();
-        const invalidField = findField(heirarchy.customerRecord, "partner");
+        const hierarchy = createValidHierarchy();
+        const invalidField = findField(hierarchy.customerRecord, "partner");
         invalidField.typeOptions.displayValue = null;
-        let validationResult = validateAll(heirarchy.root);
+        let validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.displayValue", invalidField);
 
         invalidField.typeOptions.displayValue = "";
-        validationResult = validateAll(heirarchy.root);
+        validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.displayValue", invalidField);
 
         invalidField.typeOptions.displayValue = 1;
-        validationResult = validateAll(heirarchy.root);
+        validationResult = validateAll(hierarchy.root);
         expectInvalidField(validationResult, "typeOptions.displayValue", invalidField);
     });
 

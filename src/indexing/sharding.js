@@ -6,7 +6,7 @@ import {
   getActualKeyOfParent, isGlobalIndex,
   getParentKey, isShardedIndex,
   getExactNodeForPath,
-} from '../templateApi/heirarchy';
+} from '../templateApi/hierarchy';
 import {
   joinKey, isNonEmptyString, splitKey, $,
 } from '../common';
@@ -22,7 +22,7 @@ export const getIndexedDataKey = (indexNode, indexKey, record) => {
 };
 
 export const getShardKeysInRange = async (app, indexKey, startRecord = null, endRecord = null) => {
-  const indexNode = getExactNodeForPath(app.heirarchy)(indexKey);
+  const indexNode = getExactNodeForPath(app.hierarchy)(indexKey);
 
   const startShardName = !startRecord
     ? null

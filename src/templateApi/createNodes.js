@@ -8,7 +8,7 @@ import {
   isIndex, isRoot, isSingleRecord, isCollectionRecord,
   isRecord, isaggregateGroup,
   getFlattenedHierarchy,
-} from './heirarchy';
+} from './hierarchy';
 import { all } from '../types';
 
 export const createNodeErrors = {
@@ -114,19 +114,19 @@ const getNodeId = (parentNode) => {
     max]) + 1);
 };
 
-export const constructHeirarchy = (node, parent) => {
+export const constructHierarchy = (node, parent) => {
   construct(parent)(node);
   if (node.indexes) {
     each(node.indexes,
-      child => constructHeirarchy(child, node));
+      child => constructHierarchy(child, node));
   }
   if (node.aggregateGroups) {
     each(node.aggregateGroups,
-      child => constructHeirarchy(child, node));
+      child => constructHierarchy(child, node));
   }
   if (node.children && node.children.length > 0) {
     each(node.children,
-      child => constructHeirarchy(child, node));
+      child => constructHierarchy(child, node));
   }
   if (node.fields) {
     each(node.fields,
@@ -216,7 +216,7 @@ export default {
   getNewRecordTemplate,
   getNewIndexTemplate,
   createNodeErrors,
-  constructHeirarchy,
+  constructHierarchy,
   getNewAggregateGroupTemplate,
   getNewAggregateTemplate,
 };

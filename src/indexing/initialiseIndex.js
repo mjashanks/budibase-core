@@ -1,4 +1,4 @@
-import { isShardedIndex } from '../templateApi/heirarchy';
+import { isShardedIndex } from '../templateApi/hierarchy';
 import { joinKey } from '../common';
 import { getShardMapKey, getUnshardedIndexDataKey, createIndexFile } from './sharding';
 

@@ -9,7 +9,7 @@ import {
   apiWrapper, events, splitKey,
   $, joinKey, isNothing, tryAwaitOrIgnore,
 } from '../common';
-import { getExactNodeForPath } from '../templateApi/heirarchy';
+import { getExactNodeForPath } from '../templateApi/hierarchy';
 import { permission } from '../authApi/permissions';
 import { isLegalFilename } from '../types/file';
 
@@ -58,7 +58,7 @@ const _uploadFile = async (app, recordKey, readableStream, relativePath) => {
 };
 
 const checkFileSizeAgainstFields = (app, record, relativeFilePath, expectedSize) => {
-  const recordNode = getExactNodeForPath(app.heirarchy)(record.key);
+  const recordNode = getExactNodeForPath(app.hierarchy)(record.key);
 
   const incorrectFileFields = $(recordNode.fields, [
     filter(f => f.type === 'file'

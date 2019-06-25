@@ -33,7 +33,7 @@ const subscribeTriggers = (subscribe, behaviourSources, actions, triggers) => {
     return shouldRun({ context: eventContext });
   };
 
-  for (const trig of triggers) {
+  for (let trig of triggers) {
     subscribe(trig.eventName, (ev, ctx) => {
       if (shouldRunTrigger(trig, ctx)) {
         _executeAction(

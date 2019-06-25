@@ -3,7 +3,7 @@ import { permissionTypes } from './authCommon';
 import {
   $, isNothing, apiWrapperSync, events,
 } from '../common';
-import { getNodeByKeyOrNodeKey, isNode } from '../templateApi/heirarchy';
+import { getNodeByKeyOrNodeKey, isNode } from '../templateApi/hierarchy';
 import { alwaysAuthorized } from './permissions';
 
 export const isAuthorized = app => (permissionType, resourceKey) => apiWrapperSync(
@@ -31,9 +31,9 @@ export const _isAuthorized = (app, permissionType, resourceKey) => {
   const permMatchesResource = (userperm) => {
     const nodeKey = isNothing(resourceKey)
       ? null
-      : isNode(app.heirarchy, resourceKey)
+      : isNode(app.hierarchy, resourceKey)
         ? getNodeByKeyOrNodeKey(
-          app.heirarchy, resourceKey,
+          app.hierarchy, resourceKey,
         ).nodeKey()
         : resourceKey;
 

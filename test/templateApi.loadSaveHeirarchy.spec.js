@@ -1,6 +1,6 @@
 import {getMemoryTemplateApi} from "./specHelpers";
 import {permission} from "../src/authApi/permissions";
-const saveThreeLevelHeirarchy = async () => {
+const saveThreeLevelHierarchy = async () => {
     const {templateApi, app} = await getMemoryTemplateApi();
     const root = templateApi.getNewRootLevel();
     const record = templateApi.getNewRecordTemplate(root);
@@ -10,41 +10,41 @@ const saveThreeLevelHeirarchy = async () => {
     surname.label = "surname";
     templateApi.addField(record, surname);
 
-    await templateApi.saveApplicationHeirarchy(root);
+    await templateApi.saveApplicationHierarchy(root);
     return {templateApi, root, record, app};
 };
 
-describe("Load & Save App Heirarchy", () => {
+describe("Load & Save App Hierarchy", () => {
 
     it("should rehydrate json objects with pathRegx methods", async () => {
 
-        const {templateApi} = await saveThreeLevelHeirarchy();
-        const {heirarchy} = await templateApi.getApplicationDefinition();
+        const {templateApi} = await saveThreeLevelHierarchy();
+        const {hierarchy} = await templateApi.getApplicationDefinition();
 
-        expect(heirarchy.pathRegx).toBeDefined();
-        expect(heirarchy.children[0].pathRegx).toBeDefined();
+        expect(hierarchy.pathRegx).toBeDefined();
+        expect(hierarchy.children[0].pathRegx).toBeDefined();
 
     });
 
     it("should rehydrate json objects with parent methods", async () => {
 
-        const {templateApi} = await saveThreeLevelHeirarchy();
-        const {heirarchy} = await templateApi.getApplicationDefinition();
+        const {templateApi} = await saveThreeLevelHierarchy();
+        const {hierarchy} = await templateApi.getApplicationDefinition();
 
-        expect(heirarchy.parent).toBeDefined();
-        expect(heirarchy.children[0].parent).toBeDefined();
+        expect(hierarchy.parent).toBeDefined();
+        expect(hierarchy.children[0].parent).toBeDefined();
 
     });
 
 
     it("should throw error when validation fails", async () => {
 
-        const {templateApi, record, root} = await saveThreeLevelHeirarchy();
+        const {templateApi, record, root} = await saveThreeLevelHierarchy();
         record.name = "";
         
         let err;
         try {
-            await templateApi.saveApplicationHeirarchy(root);
+            await templateApi.saveApplicationHierarchy(root);
         } catch(e) {
             err = e;
         }
@@ -52,12 +52,12 @@ describe("Load & Save App Heirarchy", () => {
         
     });
 
-    it("should load heirarchy with exactly the same members - balls deep", async () => {
+    it("should load hierarchy with exactly the same members - balls deep", async () => {
 
-        const {templateApi, root} = await saveThreeLevelHeirarchy();
-        const {heirarchy} = await templateApi.getApplicationDefinition();
+        const {templateApi, root} = await saveThreeLevelHierarchy();
+        const {hierarchy} = await templateApi.getApplicationDefinition();
 
-        expect(JSON.stringify(heirarchy))
+        expect(JSON.stringify(hierarchy))
         .toEqual(JSON.stringify(root));
     });
 
@@ -73,20 +73,20 @@ describe("Load & Save App Heirarchy", () => {
     });
 
     it("should create .config folder on first save ", async () => {
-        const {templateApi} = await saveThreeLevelHeirarchy();
+        const {templateApi} = await saveThreeLevelHierarchy();
         expect(await templateApi._storeHandle.exists("/.config")).toBeTruthy();
     });
 
     it("should throw error when user user does not have permission", async () => {
-        const {templateApi, app, root} = await saveThreeLevelHeirarchy();
+        const {templateApi, app, root} = await saveThreeLevelHierarchy();
         app.removePermission(permission.writeTemplates.get());
-        expect(templateApi.saveApplicationHeirarchy(root)).rejects.toThrow(/Unauthorized/);
+        expect(templateApi.saveApplicationHierarchy(root)).rejects.toThrow(/Unauthorized/);
     });
 
     it("should not depend on having any other permissions", async () => {
-        const {templateApi, app, root} = await saveThreeLevelHeirarchy();
+        const {templateApi, app, root} = await saveThreeLevelHierarchy();
         app.withOnlyThisPermission(permission.writeTemplates.get());
-        await templateApi.saveApplicationHeirarchy(root);
+        await templateApi.saveApplicationHierarchy(root);
     });
 
 });
@@ -94,7 +94,7 @@ describe("Load & Save App Heirarchy", () => {
 describe("save load actions", () => {
 
     const appDefinitionWithTriggersAndActions = async () => {
-        const {templateApi, app} = await saveThreeLevelHeirarchy();
+        const {templateApi, app} = await saveThreeLevelHierarchy();
         
         const logAction = templateApi.createAction();
         logAction.behaviourName = "log";

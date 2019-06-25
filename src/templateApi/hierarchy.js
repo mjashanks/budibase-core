@@ -10,10 +10,10 @@ import {
 } from '../common';
 import { indexTypes } from './indexes';
 
-export const getFlattenedHierarchy = (appHeirarchy, useCached = true) => {
-  if (isSomething(appHeirarchy.getFlattenedHeirarchy) && useCached) { return appHeirarchy.getFlattenedHeirarchy(); }
+export const getFlattenedHierarchy = (appHierarchy, useCached = true) => {
+  if (isSomething(appHierarchy.getFlattenedHierarchy) && useCached) { return appHierarchy.getFlattenedHierarchy(); }
 
-  const flattenHeirarchy = (currentNode, flattened) => {
+  const flattenHierarchy = (currentNode, flattened) => {
     flattened.push(currentNode);
     if ((!currentNode.children
             || currentNode.children.length === 0)
@@ -33,28 +33,28 @@ export const getFlattenedHierarchy = (appHeirarchy, useCached = true) => {
     ]);
 
     for (const child of children) {
-      flattenHeirarchy(child, flattened);
+      flattenHierarchy(child, flattened);
     }
     return flattened;
   };
 
-  appHeirarchy.getFlattenedHeirarchy = () => flattenHeirarchy(appHeirarchy, []);
-  return appHeirarchy.getFlattenedHeirarchy();
+  appHierarchy.getFlattenedHierarchy = () => flattenHierarchy(appHierarchy, []);
+  return appHierarchy.getFlattenedHierarchy();
 };
 
 export const getLastPartInKey = key => last(splitKey(key));
 
-export const getNodesInPath = appHeirarchy => key => $(appHeirarchy, [
+export const getNodesInPath = appHierarchy => key => $(appHierarchy, [
   getFlattenedHierarchy,
   filter(n => new RegExp(`${n.pathRegx()}`).test(key)),
 ]);
 
-export const getExactNodeForPath = appHeirarchy => key => $(appHeirarchy, [
+export const getExactNodeForPath = appHierarchy => key => $(appHierarchy, [
   getFlattenedHierarchy,
   find(n => new RegExp(`${n.pathRegx()}$`).test(key)),
 ]);
 
-export const getNodeForCollectionPath = appHeirarchy => collectionKey => $(appHeirarchy, [
+export const getNodeForCollectionPath = appHierarchy => collectionKey => $(appHierarchy, [
   getFlattenedHierarchy,
   find(n => (isCollectionRecord(n)
                    && new RegExp(`${n.collectionPathRegx()}$`).test(collectionKey))),
@@ -73,35 +73,35 @@ export const hasMatchingAncestor = ancestorPredicate => decendantNode => switchC
 
 )(decendantNode);
 
-export const getNode = (appHeirarchy, nodeKey) => $(appHeirarchy, [
+export const getNode = (appHierarchy, nodeKey) => $(appHierarchy, [
   getFlattenedHierarchy,
   find(n => n.nodeKey() === nodeKey
                   || (isCollectionRecord(n)
                       && n.collectionNodeKey() === nodeKey)),
 ]);
 
-export const getCollectionNode = (appHeirarchy, nodeKey) => $(appHeirarchy, [
+export const getCollectionNode = (appHierarchy, nodeKey) => $(appHierarchy, [
   getFlattenedHierarchy,
   find(n => (isCollectionRecord(n)
                     && n.collectionNodeKey() === nodeKey)),
 ]);
 
-export const getNodeByKeyOrNodeKey = (appHeirarchy, keyOrNodeKey) => {
-  const nodeByKey = getExactNodeForPath(appHeirarchy)(keyOrNodeKey);
+export const getNodeByKeyOrNodeKey = (appHierarchy, keyOrNodeKey) => {
+  const nodeByKey = getExactNodeForPath(appHierarchy)(keyOrNodeKey);
   return isNothing(nodeByKey)
-    ? getNode(appHeirarchy, keyOrNodeKey)
+    ? getNode(appHierarchy, keyOrNodeKey)
     : nodeByKey;
 };
 
-export const getCollectionNodeByKeyOrNodeKey = (appHeirarchy, keyOrNodeKey) => {
-  const nodeByKey = getNodeForCollectionPath(appHeirarchy)(keyOrNodeKey);
+export const getCollectionNodeByKeyOrNodeKey = (appHierarchy, keyOrNodeKey) => {
+  const nodeByKey = getNodeForCollectionPath(appHierarchy)(keyOrNodeKey);
   return isNothing(nodeByKey)
-    ? getCollectionNode(appHeirarchy, keyOrNodeKey)
+    ? getCollectionNode(appHierarchy, keyOrNodeKey)
     : nodeByKey;
 };
 
 
-export const isNode = (appHeirarchy, key) => isSomething(getExactNodeForPath(appHeirarchy)(key));
+export const isNode = (appHierarchy, key) => isSomething(getExactNodeForPath(appHierarchy)(key));
 
 export const getActualKeyOfParent = (parentNodeKey, actualChildKey) => $(actualChildKey, [
   splitKey,
@@ -138,7 +138,7 @@ export const getRecordNodeId = recordKey => $(recordKey, [
 
 export const getRecordNodeIdFromId = recordId => $(recordId, [split('-'), first, parseInt]);
 
-export const getRecordNodeById = (heirarchy, recordId) => $(heirarchy, [
+export const getRecordNodeById = (hierarchy, recordId) => $(hierarchy, [
   getFlattenedHierarchy,
   find(n => isRecord(n)
                     && n.nodeId === getRecordNodeIdFromId(recordId)),
@@ -149,8 +149,8 @@ export const recordNodeIdIsAllowed = indexNode => nodeId => indexNode.allowedRec
 
 export const recordNodeIsAllowed = indexNode => recordNode => recordNodeIdIsAllowed(indexNode)(recordNode.nodeId);
 
-export const getAllowedRecordNodesForIndex = (appHeirarchy, indexNode) => {
-  const recordNodes = $(appHeirarchy, [
+export const getAllowedRecordNodesForIndex = (appHierarchy, indexNode) => {
+  const recordNodes = $(appHierarchy, [
     getFlattenedHierarchy,
     filter(isRecord),
   ]);
@@ -176,7 +176,7 @@ export const getAllowedRecordNodesForIndex = (appHeirarchy, indexNode) => {
   }
 };
 
-export const getNodeFromNodeKeyHash = heirarchy => hash => $(heirarchy, [
+export const getNodeFromNodeKeyHash = hierarchy => hash => $(hierarchy, [
   getFlattenedHierarchy,
   find(n => getHashCode(n.nodeKey()) === hash),
 ]);

@@ -1,9 +1,9 @@
 import { find, take, union } from 'lodash/fp';
-import { getFlattenedHierarchy } from '../templateApi/heirarchy';
+import { getFlattenedHierarchy } from '../templateApi/hierarchy';
 import { $, splitKey, joinKey } from '../common';
 
 export const customId = app => (nodeName, id) => {
-  const node = $(app.heirarchy, [
+  const node = $(app.hierarchy, [
     getFlattenedHierarchy,
     find(n => n.name === nodeName),
   ]);

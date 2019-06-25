@@ -1,5 +1,5 @@
-import {setupAppheirarchy, basicAppHeirarchyCreator_WithFields,
-    basicAppHeirarchyCreator_WithFields_AndIndexes} from "./specHelpers";
+import {setupApphierarchy, basicAppHierarchyCreator_WithFields,
+    basicAppHierarchyCreator_WithFields_AndIndexes} from "./specHelpers";
 import {includes, union} from "lodash";
 import {joinKey} from "../src/common";
 
@@ -8,7 +8,7 @@ describe("collectionApi > getAllowedRecordTypes", () => {
 
     it("should list names of a collection's children", async () => {
         const {collectionApi} = 
-            await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+            await setupApphierarchy(basicAppHierarchyCreator_WithFields);
 
         const allowedTypes = collectionApi.getAllowedRecordTypes("/customers");
         expect(allowedTypes).toEqual(["customer"]);
@@ -20,17 +20,17 @@ describe("collectionApi > getAllowedRecordTypes", () => {
 describe("collectionApi > allids", () => {
 
     it("should add new record to comma separated, sharded allids file, then read back as id array", async () => {
-        const {collectionApi, recordApi, appHeirarchy} = 
-            await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {collectionApi, recordApi, appHierarchy} = 
+            await setupApphierarchy(basicAppHierarchyCreator_WithFields);
 
         const customer1 = await recordApi.getNew(
-            appHeirarchy.customerRecord.collectionNodeKey(), "customer");
+            appHierarchy.customerRecord.collectionNodeKey(), "customer");
         customer1.surname = "thedog";
         
         await recordApi.save(customer1);
         
         const customer2 = await recordApi.getNew(
-            appHeirarchy.customerRecord.collectionNodeKey(), "customer");
+            appHierarchy.customerRecord.collectionNodeKey(), "customer");
         customer2.surname = "thedog";
         
         await recordApi.save(customer2);
@@ -51,17 +51,17 @@ describe("collectionApi > allids", () => {
     });
 
     it("delete record should remove id from allids shard", async () => {
-        const {collectionApi, recordApi, appHeirarchy} = 
-            await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {collectionApi, recordApi, appHierarchy} = 
+            await setupApphierarchy(basicAppHierarchyCreator_WithFields);
 
         const customer1 = await recordApi.getNew(
-            appHeirarchy.customerRecord.collectionNodeKey(), "customer");
+            appHierarchy.customerRecord.collectionNodeKey(), "customer");
         customer1.surname = "thedog";
         
         await recordApi.save(customer1);
         
         const customer2 = await recordApi.getNew(
-            appHeirarchy.customerRecord.collectionNodeKey(), "customer");
+            appHierarchy.customerRecord.collectionNodeKey(), "customer");
         customer2.surname = "thedog";
         
         await recordApi.save(customer2);
@@ -86,14 +86,14 @@ describe("collectionApi > allids", () => {
 
         const allIdChars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-".split("");
 
-        const {collectionApi, recordApi, appHeirarchy} = 
-            await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {collectionApi, recordApi, appHierarchy} = 
+            await setupApphierarchy(basicAppHierarchyCreator_WithFields);
 
         for(let c of allIdChars) {
             const customer = await recordApi.getNew(
-                appHeirarchy.customerRecord.collectionNodeKey(), "customer");
+                appHierarchy.customerRecord.collectionNodeKey(), "customer");
             customer.surname = "thedog";   
-            const id = `${appHeirarchy.customerRecord.nodeId}-${c}${customer.id.replace("0-","")}`;
+            const id = `${appHierarchy.customerRecord.nodeId}-${c}${customer.id.replace("0-","")}`;
             customer.id = id;
             await recordApi.save(customer); 
         }        
@@ -111,11 +111,11 @@ describe("collectionApi > allids", () => {
     });
 
     it("should add nested record and read back", async () => {
-        const {collectionApi, recordApi, appHeirarchy} = 
-            await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {collectionApi, recordApi, appHierarchy} = 
+            await setupApphierarchy(basicAppHierarchyCreator_WithFields);
 
         const customer = await recordApi.getNew(
-            appHeirarchy.customerRecord.collectionNodeKey(), "customer");
+            appHierarchy.customerRecord.collectionNodeKey(), "customer");
         customer.surname = "thedog";
         
         await recordApi.save(customer);
@@ -130,7 +130,7 @@ describe("collectionApi > allids", () => {
         await recordApi.save(invoice);
 
         const allIdsIterator = await collectionApi.getAllIdsIterator(
-            appHeirarchy.invoiceRecord.collectionNodeKey());
+            appHierarchy.invoiceRecord.collectionNodeKey());
 
         let allIds = [];
 
@@ -146,11 +146,11 @@ describe("collectionApi > allids", () => {
     });
 
     it("should add double nested record, and read back", async () => {
-        const {collectionApi, recordApi, appHeirarchy} = 
-        await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {collectionApi, recordApi, appHierarchy} = 
+        await setupApphierarchy(basicAppHierarchyCreator_WithFields);
 
         const customer = await recordApi.getNew(
-            appHeirarchy.customerRecord.collectionNodeKey(), "customer");
+            appHierarchy.customerRecord.collectionNodeKey(), "customer");
         customer.surname = "thedog";
         
         await recordApi.save(customer);
@@ -174,7 +174,7 @@ describe("collectionApi > allids", () => {
         await recordApi.save(charge);
 
         const allIdsIterator = await collectionApi.getAllIdsIterator(
-            appHeirarchy.chargeRecord.collectionNodeKey());
+            appHierarchy.chargeRecord.collectionNodeKey());
 
         let allIds = [];
 

@@ -9,7 +9,7 @@ import {
   getExactNodeForPath,
   getFlattenedHierarchy, getNode,
   fieldReversesReferenceToNode,
-} from '../templateApi/heirarchy';
+} from '../templateApi/hierarchy';
 import { _deleteIndex } from '../indexApi/delete';
 import { transactionForDeleteRecord } from '../transactions/create';
 import { removeFromAllIds } from '../indexing/allIds';
@@ -26,7 +26,7 @@ export const deleteRecord = (app, disableCleanup = false) => async key => apiWra
 // called deleteRecord because delete is a keyword
 export const _deleteRecord = async (app, key, disableCleanup) => {
   key = safeKey(key);
-  const node = getExactNodeForPath(app.heirarchy)(key);
+  const node = getExactNodeForPath(app.hierarchy)(key);
 
   const record = await _load(app, key);
   await transactionForDeleteRecord(app, record);
@@ -46,7 +46,7 @@ export const _deleteRecord = async (app, key, disableCleanup) => {
 
   await deleteFiles(app, key);
 
-  await removeFromAllIds(app.heirarchy, app.datastore)(record);
+  await removeFromAllIds(app.hierarchy, app.datastore)(record);
 
   if (!disableCleanup) { await app.cleanupTransactions(); }
 
@@ -55,8 +55,8 @@ export const _deleteRecord = async (app, key, disableCleanup) => {
 };
 
 const deleteIndexes = async (app, key) => {
-  const node = getExactNodeForPath(app.heirarchy)(key);
-  /* const reverseIndexKeys = $(app.heirarchy, [
+  const node = getExactNodeForPath(app.hierarchy)(key);
+  /* const reverseIndexKeys = $(app.hierarchy, [
         getFlattenedHierarchy,
         map(n => n.fields),
         flatten,
@@ -64,7 +64,7 @@ const deleteIndexes = async (app, key) => {
         filter(fieldReversesReferenceToNode(node)),
         map(f => $(f.typeOptions.reverseIndexNodeKeys, [
                     map(n => getNode(
-                                app.heirarchy,
+                                app.hierarchy,
                                 n))
                 ])
         ),

@@ -11,15 +11,15 @@ import {
   getFlattenedHierarchy, getNode, getRecordNodeId,
   getExactNodeForPath, recordNodeIdIsAllowed,
   isRecord, isGlobalIndex,
-} from '../templateApi/heirarchy';
+} from '../templateApi/hierarchy';
 import { indexTypes } from '../templateApi/indexes';
 
-export const getRelevantAncestorIndexes = (appHeirarchy, record) => {
+export const getRelevantAncestorIndexes = (appHierarchy, record) => {
   const key = record.key;
   const keyParts = splitKey(key);
   const nodeId = getRecordNodeId(key);
 
-  const flatHeirarchy = orderBy(getFlattenedHierarchy(appHeirarchy),
+  const flatHierarchy = orderBy(getFlattenedHierarchy(appHierarchy),
     [node => node.pathRegx().length],
     ['desc']);
 
@@ -29,7 +29,7 @@ export const getRelevantAncestorIndexes = (appHeirarchy, record) => {
     const currentIndexKey = joinKey(acc.lastIndexKey, part);
     acc.lastIndexKey = currentIndexKey;
     const testPathRegx = p => new RegExp(`${p.pathRegx()}$`).test(currentIndexKey);
-    const nodeMatch = find(testPathRegx)(flatHeirarchy);
+    const nodeMatch = find(testPathRegx)(flatHierarchy);
 
     if (isNothing(nodeMatch)) { return acc; }
 
@@ -49,7 +49,7 @@ export const getRelevantAncestorIndexes = (appHeirarchy, record) => {
     return acc;
   }, { lastIndexKey: '', nodesAndKeys: [] })(keyParts).nodesAndKeys;
 
-  const rootIndexes = $(flatHeirarchy, [
+  const rootIndexes = $(flatHierarchy, [
     filter(n => isGlobalIndex(n) && recordNodeIdIsAllowed(n)(nodeId)),
     map(i => makeIndexNodeAndKey(i, i.nodeKey())),
   ]);
@@ -57,15 +57,15 @@ export const getRelevantAncestorIndexes = (appHeirarchy, record) => {
   return union(traverseAncestorIndexesInPath())(rootIndexes);
 };
 
-export const getRelevantReverseReferenceIndexes = (appHeirarchy, record) => $(record.key, [
-  getExactNodeForPath(appHeirarchy),
+export const getRelevantReverseReferenceIndexes = (appHierarchy, record) => $(record.key, [
+  getExactNodeForPath(appHierarchy),
   n => n.fields,
   filter(f => f.type === 'reference'
                     && isSomething(record[f.name])
                     && isNonEmptyString(record[f.name].key)),
   map(f => $(f.typeOptions.reverseIndexNodeKeys, [
     map(n => ({
-      recordNode: getNode(appHeirarchy, n),
+      recordNode: getNode(appHierarchy, n),
       field: f,
     })),
   ])),

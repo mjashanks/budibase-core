@@ -11,8 +11,8 @@ export const CONTINUE_READING_RECORDS = "CONTINUE_READING";
 export const READ_REMAINING_TEXT = "READ_REMAINING";
 export const CANCEL_READ = "CANCEL";
 
-export const getIndexWriter = (heirarchy, indexNode, readableStream, writableStream, end) => {
-    const schema = generateSchema(heirarchy, indexNode);
+export const getIndexWriter = (hierarchy, indexNode, readableStream, writableStream, end) => {
+    const schema = generateSchema(hierarchy, indexNode);
 
     return ({
         read: read(readableStream, schema),
@@ -20,10 +20,10 @@ export const getIndexWriter = (heirarchy, indexNode, readableStream, writableStr
     });
 };
 
-export const getIndexReader = (heirarchy, indexNode, readableStream) => 
+export const getIndexReader = (hierarchy, indexNode, readableStream) => 
     read(
         readableStream, 
-        generateSchema(heirarchy, indexNode)
+        generateSchema(hierarchy, indexNode)
     );
 
 const updateIndex = (readableStream, writableStream, schema) => async (itemsToWrite, keysToRemove) => {

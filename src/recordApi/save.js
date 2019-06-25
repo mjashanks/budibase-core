@@ -19,7 +19,7 @@ import {
   isRecord,
   getNode,
   fieldReversesReferenceToNode,
-} from '../templateApi/heirarchy';
+} from '../templateApi/hierarchy';
 import { mapRecord } from '../indexing/evaluate';
 import { listItems } from '../indexApi/listItems';
 import { addToAllIds } from '../indexing/allIds';
@@ -52,7 +52,7 @@ export const _save = async (app, record, context, skipValidation = false) => {
   }
 
   if (recordClone.isNew) {
-    await addToAllIds(app.heirarchy, app.datastore)(recordClone);
+    await addToAllIds(app.hierarchy, app.datastore)(recordClone);
     const transaction = await transactionForCreateRecord(
       app, recordClone,
     );
@@ -96,7 +96,7 @@ export const _save = async (app, record, context, skipValidation = false) => {
 };
 
 const initialiseAncestorIndexes = async (app, record) => {
-  const recordNode = getExactNodeForPath(app.heirarchy)(record.key);
+  const recordNode = getExactNodeForPath(app.hierarchy)(record.key);
 
   for (const index of recordNode.indexes) {
     const indexKey = joinKey(record.key, index.name);
@@ -105,12 +105,12 @@ const initialiseAncestorIndexes = async (app, record) => {
 };
 
 const initialiseReverseReferenceIndexes = async (app, record) => {
-  const recordNode = getExactNodeForPath(app.heirarchy)(record.key);
+  const recordNode = getExactNodeForPath(app.hierarchy)(record.key);
 
   const indexNodes = $(fieldsThatReferenceThisRecord(app, recordNode), [
     map(f => $(f.typeOptions.reverseIndexNodeKeys, [
       map(n => getNode(
-        app.heirarchy,
+        app.hierarchy,
         n,
       )),
     ])),
@@ -135,7 +135,7 @@ const maintainReferentialIntegrity = async (app, indexingApi, oldRecord, newReco
             - Update referencingRecord.fieldName to new value
             - Save
         */
-  const recordNode = getExactNodeForPath(app.heirarchy)(newRecord.key);
+  const recordNode = getExactNodeForPath(app.hierarchy)(newRecord.key);
   const referenceFields = fieldsThatReferenceThisRecord(
     app, recordNode,
   );
@@ -143,7 +143,7 @@ const maintainReferentialIntegrity = async (app, indexingApi, oldRecord, newReco
   const updates = $(referenceFields, [
     map(f => ({
       node: getNode(
-        app.heirarchy, f.typeOptions.indexNodeKey,
+        app.hierarchy, f.typeOptions.indexNodeKey,
       ),
       field: f,
     })),
@@ -177,7 +177,7 @@ const maintainReferentialIntegrity = async (app, indexingApi, oldRecord, newReco
   }
 };
 
-const fieldsThatReferenceThisRecord = (app, recordNode) => $(app.heirarchy, [
+const fieldsThatReferenceThisRecord = (app, recordNode) => $(app.hierarchy, [
   getFlattenedHierarchy,
   filter(isRecord),
   map(n => n.fields),

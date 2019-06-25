@@ -1,7 +1,7 @@
 import {
   getNewRootLevel,
   getNewRecordTemplate, getNewIndexTemplate,
-  createNodeErrors, constructHeirarchy,
+  createNodeErrors, constructHierarchy,
   getNewAggregateGroupTemplate, getNewSingleRecordTemplate,
   getNewAggregateTemplate, constructNode,
 }
@@ -20,14 +20,14 @@ import {
   validateActions, validateAll,
 } from './validate';
 import { getApplicationDefinition } from './getApplicationDefinition';
-import { saveApplicationHeirarchy } from './saveApplicationHeirarchy';
+import { saveApplicationHierarchy } from './saveApplicationHierarchy';
 import { saveActionsAndTriggers } from './saveActionsAndTriggers';
 import { all } from '../types';
 
 const api = app => ({
 
   getApplicationDefinition: getApplicationDefinition(app.datastore),
-  saveApplicationHeirarchy: saveApplicationHeirarchy(app),
+  saveApplicationHierarchy: saveApplicationHierarchy(app),
   saveActionsAndTriggers: saveActionsAndTriggers(app),
   getBehaviourSources: () => getBehaviourSources(app.datastore),
   getNewRootLevel,
@@ -47,7 +47,7 @@ const api = app => ({
   validateTrigger,
   getNewAggregateGroupTemplate,
   getNewAggregateTemplate,
-  constructHeirarchy,
+  constructHierarchy,
   getNewSingleRecordTemplate,
   allTypes: all,
   validateNode,

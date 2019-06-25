@@ -4,7 +4,7 @@ import { TRANSACTIONS_FOLDER } from '../transactions/transactionsCommon';
 import { AUTH_FOLDER, USERS_LIST_FILE, ACCESS_LEVELS_FILE } from '../authApi/authCommon';
 import { initialiseRootCollections } from '../collectionApi/initialise';
 import { initialiseIndex } from '../indexing/initialiseIndex';
-import { getFlattenedHierarchy, isGlobalIndex, isSingleRecord } from '../templateApi/heirarchy';
+import { getFlattenedHierarchy, isGlobalIndex, isSingleRecord } from '../templateApi/hierarchy';
 import { _save } from '../recordApi/save';
 import { getNew } from '../recordApi/getNew';
 
@@ -12,10 +12,10 @@ export const initialiseData = async (datastore, applicationDefinition) => {
   await datastore.createFolder(configFolder);
   await datastore.createJson(appDefinitionFile, applicationDefinition);
 
-  await initialiseRootCollections(datastore, applicationDefinition.heirarchy);
-  await initialiseRootIndexes(datastore, applicationDefinition.heirarchy);
+  await initialiseRootCollections(datastore, applicationDefinition.hierarchy);
+  await initialiseRootIndexes(datastore, applicationDefinition.hierarchy);
 
-  await initialiseRootSingleRecords(datastore, applicationDefinition.heirarchy);
+  await initialiseRootSingleRecords(datastore, applicationDefinition.hierarchy);
 
   await datastore.createFolder(TRANSACTIONS_FOLDER);
 
@@ -26,9 +26,9 @@ export const initialiseData = async (datastore, applicationDefinition) => {
   await datastore.createJson(ACCESS_LEVELS_FILE, { version: 0, levels: [] });
 };
 
-const initialiseRootIndexes = async (datastore, heirarchy) => {
-  const flatheirarchy = getFlattenedHierarchy(heirarchy);
-  const globalIndexes = $(flatheirarchy, [
+const initialiseRootIndexes = async (datastore, hierarchy) => {
+  const flathierarchy = getFlattenedHierarchy(hierarchy);
+  const globalIndexes = $(flathierarchy, [
     filter(isGlobalIndex),
   ]);
 
@@ -38,8 +38,8 @@ const initialiseRootIndexes = async (datastore, heirarchy) => {
 };
 
 const initialiseRootSingleRecords = async (datastore, hierachy) => {
-  const flatheirarchy = getFlattenedHierarchy(hierachy);
-  const singleRecords = $(flatheirarchy, [
+  const flathierarchy = getFlattenedHierarchy(hierachy);
+  const singleRecords = $(flathierarchy, [
     filter(isSingleRecord),
   ]);
 

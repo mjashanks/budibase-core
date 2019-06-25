@@ -3,7 +3,7 @@ import { map, isString } from 'lodash/fp';
 import {
   getExactNodeForPath,
   findField, getNode, isGlobalIndex,
-} from '../templateApi/heirarchy';
+} from '../templateApi/hierarchy';
 import { listItems } from '../indexApi/listItems';
 import {
   $, apiWrapperSync, events, joinKey,
@@ -20,7 +20,7 @@ export const getContext = app => recordKey => apiWrapperSync(
 );
 
 export const _getContext = (app, recordKey) => {
-  const recordNode = getExactNodeForPath(app.heirarchy)(recordKey);
+  const recordNode = getExactNodeForPath(app.hierarchy)(recordKey);
 
   const cachedReferenceIndexes = {};
 
@@ -58,7 +58,7 @@ export const _getContext = (app, recordKey) => {
 };
 
 const readReferenceIndex = async (app, recordKey, typeOptions) => {
-  const indexNode = getNode(app.heirarchy, typeOptions.indexNodeKey);
+  const indexNode = getNode(app.hierarchy, typeOptions.indexNodeKey);
   const indexKey = isGlobalIndex(indexNode)
     ? indexNode.nodeKey()
     : getIndexKey_BasedOnDecendant(

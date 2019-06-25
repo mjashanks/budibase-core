@@ -52,7 +52,7 @@ const _events = {
     setUserAccessLevels: common(),
   },
   templateApi: {
-    saveApplicationHeirarchy: common(),
+    saveApplicationHierarchy: common(),
     saveActionsAndTriggers: common(),
   },
   actionsApi: {

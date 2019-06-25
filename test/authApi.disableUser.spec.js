@@ -1,5 +1,5 @@
-import {setupAppheirarchy, validUser,
-    basicAppHeirarchyCreator_WithFields} from "./specHelpers";
+import {setupApphierarchy, validUser,
+    basicAppHierarchyCreator_WithFields} from "./specHelpers";
 import { parseTemporaryCode,
     USERS_LOCK_FILE,
     USERS_LIST_FILE,
@@ -11,7 +11,7 @@ import {permission} from "../src/authApi/permissions";
 describe("authApi > enableUser", () => {
 
     it("should enable a user when disabled", async () => {
-        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi, app} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const u = await validUser(app, authApi, "firstpassword", false);
         await authApi.enableUser(u.name);
         const loadedUser = await getUser(app, authApi, u.name);
@@ -20,7 +20,7 @@ describe("authApi > enableUser", () => {
     });
 
     it("should do nothing when user already enabled", async () => {
-        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi, app} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const u = await validUser(app, authApi, "firstpassword", true);
         await authApi.enableUser(u.name);
         const loadedUser = await getUser(app, authApi, u.name);
@@ -28,7 +28,7 @@ describe("authApi > enableUser", () => {
     });
 
     it("should throw en error when user does not exist", async () => {
-        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi, app} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const u = await validUser(app, authApi, "firstpassword", false);
         let ex;
         try {
@@ -40,7 +40,7 @@ describe("authApi > enableUser", () => {
     });
 
     it("should throw en error when users file is locked", async () => {
-        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi, app} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const u = await validUser(app, authApi, "firstpassword", false);
         await getLock(app, USERS_LOCK_FILE, 10000, 0, 0);
         let ex;
@@ -53,14 +53,14 @@ describe("authApi > enableUser", () => {
     });
 
     it("should throw error when user user does not have permission", async () => {
-        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi, app} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const u = await validUser(app, authApi, "firstpassword", false);
         app.removePermission(permission.enableDisableUser.get());
         expect(authApi.enableUser(u)).rejects.toThrow(/Unauthorized/);
     });
 
     it("should not depend on having any other permissions", async () => {
-        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi, app} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const u = await validUser(app, authApi, "firstpassword", false);
         app.withOnlyThisPermission(permission.enableDisableUser.get());
         await authApi.enableUser(u.name);
@@ -71,7 +71,7 @@ describe("authApi > enableUser", () => {
 describe("authApi > disableUser", () => {
 
     it("should disable a user when enabled", async () => {
-        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi, app} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const u = await validUser(app, authApi, "firstpassword", true);
         await authApi.disableUser(u.name);
         const loadedUser = await getUser(app, authApi, u.name);
@@ -80,7 +80,7 @@ describe("authApi > disableUser", () => {
     });
 
     it("should do nothing when user already enabled", async () => {
-        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi, app} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const u = await validUser(app, authApi, "firstpassword", false);
         await authApi.disableUser(u.name);
         const loadedUser = await getUser(app, authApi, u.name);
@@ -88,7 +88,7 @@ describe("authApi > disableUser", () => {
     });
 
     it("should throw en error when user does not exist", async () => {
-        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi, app} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const u = await validUser(app, authApi, "firstpassword", false);
         let ex;
         try {
@@ -100,7 +100,7 @@ describe("authApi > disableUser", () => {
     });
 
     it("should throw en error when users file is locked", async () => {
-        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi, app} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const u = await validUser(app, authApi, "firstpassword", false);
         await getLock(app, USERS_LOCK_FILE, 10000, 0, 0);
         let ex;
@@ -113,14 +113,14 @@ describe("authApi > disableUser", () => {
     });
 
     it("should throw error when user user does not have permission", async () => {
-        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi, app} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const u = await validUser(app, authApi, "firstpassword", false);
         app.removePermission(permission.enableDisableUser.get());
         expect(authApi.disableUser(u)).rejects.toThrow(/Unauthorized/);
     });
 
     it("should not depend on having any other permissions", async () => {
-        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi, app} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const u = await validUser(app, authApi, "firstpassword", false);
         app.withOnlyThisPermission(permission.enableDisableUser.get());
         await authApi.disableUser(u.name);

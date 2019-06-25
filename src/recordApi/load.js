@@ -2,7 +2,7 @@ import {
   keyBy, mapValues, filter, map, includes,
   constant, last,
 } from 'lodash/fp';
-import { getExactNodeForPath } from '../templateApi/heirarchy';
+import { getExactNodeForPath } from '../templateApi/hierarchy';
 import { safeParseField } from '../types';
 import {
   $, splitKey, safeKey, isNonEmptyString,
@@ -23,7 +23,7 @@ export const load = app => async key => apiWrapper(
 
 export const _load = async (app, key, keyStack = []) => {
   key = safeKey(key);
-  const recordNode = getExactNodeForPath(app.heirarchy)(key);
+  const recordNode = getExactNodeForPath(app.hierarchy)(key);
   const storedData = await app.datastore.loadJson(
     getRecordFileName(key),
   );
@@ -43,7 +43,7 @@ export const _load = async (app, key, keyStack = []) => {
                     && !includes(loadedRecord[f.name].key)(newKeyStack)),
     map(f => ({
       promise: _load(app, loadedRecord[f.name].key, newKeyStack),
-      index: getExactNodeForPath(app.heirarchy)(f.typeOptions.indexNodeKey),
+      index: getExactNodeForPath(app.hierarchy)(f.typeOptions.indexNodeKey),
       field: f,
     })),
   ]);

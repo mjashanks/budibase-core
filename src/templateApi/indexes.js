@@ -5,7 +5,7 @@ import { join, keys } from 'lodash';
 import { applyRuleSet, makerule } from '../common/validationCommon';
 import { compileFilter, compileMap } from '../indexing/evaluate';
 import { isNonEmptyString, executesWithoutException, $ } from '../common';
-import { isRecord } from './heirarchy';
+import { isRecord } from './hierarchy';
 
 export const indexTypes = { reference: 'reference', ancestor: 'ancestor' };
 

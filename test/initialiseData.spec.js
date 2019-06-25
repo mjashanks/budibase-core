@@ -1,4 +1,4 @@
-import {getMemoryTemplateApi, basicAppHeirarchyCreator_WithFields_AndIndexes} from "./specHelpers";
+import {getMemoryTemplateApi, basicAppHierarchyCreator_WithFields_AndIndexes} from "./specHelpers";
 import {initialiseData} from "../src/appInitialise/initialiseData";
 import {TRANSACTIONS_FOLDER} from "../src/transactions/transactionsCommon";
 import {AUTH_FOLDER, USERS_LIST_FILE, ACCESS_LEVELS_FILE} from "../src/authApi/authCommon";
@@ -58,8 +58,8 @@ describe("initialiseData", () => {
 
     const getApplicationDefinition = () => {
         const {templateApi, app} = getMemoryTemplateApi();
-        const h = basicAppHeirarchyCreator_WithFields_AndIndexes(templateApi);
-        return {appDef:{heirarchy:h.root, actions:[], triggers:[]}, datastore:app.datastore, h};
+        const h = basicAppHierarchyCreator_WithFields_AndIndexes(templateApi);
+        return {appDef:{hierarchy:h.root, actions:[], triggers:[]}, datastore:app.datastore, h};
     }
 
 });

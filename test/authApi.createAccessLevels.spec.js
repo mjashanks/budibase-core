@@ -1,5 +1,5 @@
-import {setupAppheirarchy, 
-    basicAppHeirarchyCreator_WithFields} from "./specHelpers";
+import {setupApphierarchy, 
+    basicAppHierarchyCreator_WithFields} from "./specHelpers";
 import { permissionTypes, 
     ACCESS_LEVELS_FILE, 
     ACCESS_LEVELS_LOCK_FILE} from "../src/authApi/authCommon";
@@ -10,7 +10,7 @@ import {getLock} from "../src/common/lock";
 describe("getNewAccessLevel", () => {
 
     it("should create item with correct properties", async () => {
-        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const accLev = authApi.getNewAccessLevel();
         expect(accLev.name).toBe("");
         expect(accLev.permissions).toEqual([]);
@@ -21,14 +21,14 @@ describe("getNewAccessLevel", () => {
 describe("validateAccessLevels", () => {
 
     it("should return no errors with valid access level", async () => {
-        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const accessLevel = validAccessLevel(authApi);
         const errs = authApi.validateAccessLevels([accessLevel]);
         expect(errs).toEqual([]);
     });
 
     it("should error when access level name not set", async () => {
-        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const accessLevel = validAccessLevel(authApi);
         accessLevel.name = "";
         const errs = authApi.validateAccessLevels([accessLevel]);
@@ -37,7 +37,7 @@ describe("validateAccessLevels", () => {
     });
 
     it("should error when 2 access levels with the same name", async () => {
-        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const accessLevel1 = validAccessLevel(authApi);
         const accessLevel2 = validAccessLevel(authApi);
         const errs = authApi.validateAccessLevels([accessLevel1, accessLevel2]);
@@ -49,7 +49,7 @@ describe("validateAccessLevels", () => {
     });
 
     it("should error when permission is not recognised", async () => {
-        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const accessLevel = validAccessLevel(authApi);
         accessLevel.permissions[0].type = "not valid";
         const errs = authApi.validateAccessLevels([accessLevel]);
@@ -59,7 +59,7 @@ describe("validateAccessLevels", () => {
     });
 
     it("should error when record permision has invalid nodeKey", async () => {
-        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const accessLevel = validAccessLevel(authApi);
         accessLevel.permissions[0].type = permissionTypes.CREATE_RECORD;
         accessLevel.permissions[0].nodeKey = "nota a valid node key";
@@ -73,7 +73,7 @@ describe("validateAccessLevels", () => {
 describe("save and load access level", () => {
 
     it("should save and load valid access levels", async () => {
-        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const levels = validAccessLevels(authApi);
         await authApi.saveAccessLevels(levels);
         const loadedLevels = await authApi.loadAccessLevels();
@@ -84,7 +84,7 @@ describe("save and load access level", () => {
     });
 
     it("should not save invalid access levels", async () => {
-        const {authApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const levels = validAccessLevels(authApi);
         levels.levels[0].name = "";
         let e;
@@ -101,7 +101,7 @@ describe("save and load access level", () => {
     });
 
     it("should not save access level when version has increased since loading", async () => {
-        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi, app} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const levels = validAccessLevels(authApi);
         const updatedLevels = cloneDeep(levels);
         updatedLevels.version = 1;
@@ -121,7 +121,7 @@ describe("save and load access level", () => {
     });
 
     it("should not save access level when locked", async () => {
-        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi, app} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const levels = validAccessLevels(authApi);
 
         await getLock(app, 
@@ -143,21 +143,21 @@ describe("save and load access level", () => {
 
 
     it("save should throw error when user user does not have permission", async () => {
-        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi, app} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const levels = validAccessLevels(authApi);
         app.removePermission(permission.writeAccessLevels.get());
         expect(authApi.saveAccessLevels(levels)).rejects.toThrow(/Unauthorized/);
     });
 
     it("save should not depend on having any other permissions", async () => {
-        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi, app} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const levels = validAccessLevels(authApi);
         app.withOnlyThisPermission(permission.writeAccessLevels.get());
         await authApi.saveAccessLevels(levels)
     });
 
     it("load should throw error when user user does not have permission", async () => {
-        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi, app} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const levels = validAccessLevels(authApi);
         await authApi.saveAccessLevels(levels)
         app.removePermission(permission.listAccessLevels.get());
@@ -165,7 +165,7 @@ describe("save and load access level", () => {
     });
 
     it("load should not depend on having any other permissions", async () => {
-        const {authApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {authApi, app} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const levels = validAccessLevels(authApi);
         await authApi.saveAccessLevels(levels)
         app.withOnlyThisPermission(permission.listAccessLevels.get());

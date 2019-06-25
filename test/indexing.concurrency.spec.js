@@ -1,5 +1,5 @@
-import {setupAppheirarchy,
-    basicAppHeirarchyCreator_WithFields_AndIndexes} from "./specHelpers";
+import {setupApphierarchy,
+    basicAppHierarchyCreator_WithFields_AndIndexes} from "./specHelpers";
 import {joinKey} from "../src/common";
 import {getLockFileContent} from "../src/common/lock";
 import {some, isArray} from "lodash";
@@ -11,7 +11,7 @@ describe("cleanup transactions", () => {
 
     it("testing disable of cleanupTransactions, just for test purposes", async () => {
         const {recordApi, app,
-            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes, true);
+            indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes, true);
         const record1 = recordApi.getNew("/customers", "customer");
         record1.surname = "Zeecat";
     
@@ -30,7 +30,7 @@ describe("cleanup transactions", () => {
     it("should index 2 new create transactions", async () => {
         // cleanup is disabled, with true parameter
         const {recordApi, app,
-                indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes, true);
+                indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes, true);
         const record1 = recordApi.getNew("/customers", "customer");
         record1.surname = "Zeecat";
 
@@ -51,7 +51,7 @@ describe("cleanup transactions", () => {
     it("when create and update transaction for the same record, index should be latest record", async () => {
 
         const {recordApi, app,
-            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes, true);
+            indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes, true);
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";
 
@@ -71,7 +71,7 @@ describe("cleanup transactions", () => {
     it("should choose current version of record when multiple update transactions found", async () => {
 
         const {recordApi, app,
-            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes, true);
+            indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes, true);
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";
 
@@ -97,7 +97,7 @@ describe("cleanup transactions", () => {
     it("should not reindex when transactionId does not match that of the record", async () => {
 
         const {recordApi, app,
-            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes, true);
+            indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes, true);
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";
 
@@ -124,7 +124,7 @@ describe("cleanup transactions", () => {
     it("should not reindex when transactionId does not match that of the record, and has multiple transactions", async () => {
 
         const {recordApi, app,
-            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes, true);
+            indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes, true);
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";
 
@@ -153,7 +153,7 @@ describe("cleanup transactions", () => {
 
     it("should remove from index when delete and update transactions exists", async () => {
         const {recordApi, app,
-            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes, true);
+            indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes, true);
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";
 
@@ -172,7 +172,7 @@ describe("cleanup transactions", () => {
 
     it("should not add to index when create and delete found", async () => {
         const {recordApi, app,
-            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes, true);
+            indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes, true);
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";
 
@@ -186,7 +186,7 @@ describe("cleanup transactions", () => {
 
     it("should correctly remove from indexes, when multiple update transactions exist", async() => {
         const {recordApi, app,
-            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes, true);
+            indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes, true);
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";
         record.isalive = false;
@@ -208,7 +208,7 @@ describe("cleanup transactions", () => {
 
     it("should not add to index when created, then updated to be filtered out of index", async() => {
         const {recordApi, app,
-            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes, true);
+            indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes, true);
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";
         record.isalive = false;
@@ -225,7 +225,7 @@ describe("cleanup transactions", () => {
 
     it("should do nothing when lockfile exists", async() => {
         const {recordApi, app,
-            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes, true);
+            indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes, true);
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";
         const savedRecord = await recordApi.save(record);
@@ -249,7 +249,7 @@ describe("cleanup transactions", () => {
 
     it("should take control when lockfile is timedout", async() => {
         const {recordApi, app,
-            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes, true);
+            indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes, true);
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";
         const savedRecord = await recordApi.save(record);

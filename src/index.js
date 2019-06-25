@@ -12,7 +12,7 @@ import {generateFullPermissions} from "./authApi/generateFullPermissions";
 import {getApplicationDefinition} from "./templateApi/getApplicationDefinition";
 import common from "./common";
 import {getBehaviourSources} from "./templateApi/getBehaviourSources";
-import hierarchy from "./templateApi/heirarchy";
+import hierarchy from "./templateApi/hierarchy";
 
 export const getAppApis = async (store, behaviourSources = null, 
                                 cleanupTransactions = null, 
@@ -34,7 +34,7 @@ export const getAppApis = async (store, behaviourSources = null,
         datastore:store,
         crypto,
         publish:eventAggregator.publish,
-        heirarchy:appDefinition.heirarchy,
+        hierarchy:appDefinition.hierarchy,
         actions:appDefinition.actions
     };
 
