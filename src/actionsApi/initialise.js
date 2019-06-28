@@ -7,9 +7,9 @@ import { compileExpression, compileCode } from '@nx-js/compiler-util';
 import { $ } from '../common';
 import { _executeAction } from './execute';
 
-export const initialiseActions = (subscribe, behaviourSources, actions, triggers) => {
+export const initialiseActions = (subscribe, behaviourSources, actions, triggers, apis) => {
   validateSources(behaviourSources, actions);
-  subscribeTriggers(subscribe, behaviourSources, actions, triggers);
+  subscribeTriggers(subscribe, behaviourSources, actions, triggers, apis);
   return createActionsCollection(behaviourSources, actions);
 };
 
@@ -20,11 +20,11 @@ const createActionsCollection = (behaviourSources, actions) => $(actions, [
   }, {}),
 ]);
 
-const subscribeTriggers = (subscribe, behaviourSources, actions, triggers) => {
+const subscribeTriggers = (subscribe, behaviourSources, actions, triggers, apis) => {
   const createOptions = (optionsCreator, eventContext) => {
     if (!optionsCreator) return {};
     const create = compileCode(optionsCreator);
-    return create({ context: eventContext });
+    return create({ context: eventContext, apis });
   };
 
   const shouldRunTrigger = (trigger, eventContext) => {

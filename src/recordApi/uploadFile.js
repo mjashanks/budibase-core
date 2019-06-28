@@ -36,13 +36,30 @@ const _uploadFile = async (app, recordKey, readableStream, relativePath) => {
 
   const tempFilePath = `${fullFilePath}_${generate()}.temp`;
 
-  const fileStream = await app.datastore.writableFileStream(
+  const outputStream = await app.datastore.writableFileStream(
     tempFilePath,
   );
 
-  readableStream.pipe(fileStream);
+  return new Promise((resolve,reject) => {
+    readableStream.pipe(outputStream);
+    outputStream.on('error', reject);
+    outputStream.on('finish', resolve);
+  })
+  .then(() => app.datastore.getFileSize(tempFilePath))
+  .then(size => {
+    const isExpectedFileSize = checkFileSizeAgainstFields(
+      app, record, relativePath, size
+    );  
+    if (!isExpectedFileSize) { throw new Error(`Fields for ${relativeFilePath} do not have expected size: ${join(',')(incorrectFields)}`); }  
 
-  await new Promise(fulfill => fileStream.on('finish', fulfill));
+  })
+  .then(() => tryAwaitOrIgnore(app.datastore.deleteFile, fullFilePath))
+  .then(() => app.datastore.renameFile(tempFilePath, fullFilePath));
+
+  /*
+  readableStream.pipe(outputStream);
+
+  await new Promise(fulfill => outputStream.on('finish', fulfill));
 
   const isExpectedFileSize = checkFileSizeAgainstFields(
     app,
@@ -55,6 +72,7 @@ const _uploadFile = async (app, recordKey, readableStream, relativePath) => {
   await tryAwaitOrIgnore(app.datastore.deleteFile, fullFilePath);
 
   await app.datastore.renameFile(tempFilePath, fullFilePath);
+  */
 };
 
 const checkFileSizeAgainstFields = (app, record, relativeFilePath, expectedSize) => {

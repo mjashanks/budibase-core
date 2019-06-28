@@ -40,12 +40,6 @@ export const getAppApis = async (store, behaviourSources = null,
 
     const templateApi = getTemplateApi(app);    
 
-    const actions = initialiseActions(
-        eventAggregator.subscribe,
-        behaviourSources,
-        appDefinition.actions,
-        appDefinition.triggers);
-
     app.cleanupTransactions = isSomething(cleanupTransactions) 
                               ? cleanupTransactions
                               : async () => await cleanup(app);
@@ -77,7 +71,9 @@ export const getAppApis = async (store, behaviourSources = null,
         app.user = user
     };
 
-    return ({
+    
+
+    let apis = {
         recordApi, 
         templateApi,
         collectionApi,
@@ -85,11 +81,20 @@ export const getAppApis = async (store, behaviourSources = null,
         authApi,
         actionsApi,
         subscribe: eventAggregator.subscribe,
-        actions,
         authenticateAs,
         withFullAccess,
         asUser
-    });
+    };
+
+    apis.actions = initialiseActions(
+        eventAggregator.subscribe,
+        behaviourSources,
+        appDefinition.actions,
+        appDefinition.triggers,
+        apis);
+
+
+    return apis;
 };
 
 export {events, eventsList} from "./common/events";
