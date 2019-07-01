@@ -2,7 +2,7 @@ import {
   keyBy, mapValues, filter, map, includes,
   constant, last,
 } from 'lodash/fp';
-import { getExactNodeForPath } from '../templateApi/hierarchy';
+import { getExactNodeForPath, getNode } from '../templateApi/hierarchy';
 import { safeParseField } from '../types';
 import {
   $, splitKey, safeKey, isNonEmptyString,
@@ -43,7 +43,7 @@ export const _load = async (app, key, keyStack = []) => {
                     && !includes(loadedRecord[f.name].key)(newKeyStack)),
     map(f => ({
       promise: _load(app, loadedRecord[f.name].key, newKeyStack),
-      index: getExactNodeForPath(app.hierarchy)(f.typeOptions.indexNodeKey),
+      index: getNode(app.hierarchy, f.typeOptions.indexNodeKey),
       field: f,
     })),
   ]);

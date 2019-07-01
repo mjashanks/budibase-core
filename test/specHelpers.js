@@ -361,7 +361,7 @@ export const setupApphierarchy = async (creator, disableCleanupTransactions=fals
     recordApi._storeHandle = app.datastore;
     actionsApi._app = app;
 
-    return ({
+    const apis = {
         recordApi,
         collectionApi,
         templateApi,
@@ -371,7 +371,9 @@ export const setupApphierarchy = async (creator, disableCleanupTransactions=fals
         appHierarchy:hierarchy,
         subscribe:templateApi._eventAggregator.subscribe, 
         app
-    });
+    };
+
+    return apis;
 };
 
 const disableCleanupTransactions = app => {
