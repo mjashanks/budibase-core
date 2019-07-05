@@ -45,7 +45,7 @@ export const _save = async (app, record, context, skipValidation = false) => {
   if (!skipValidation) {
     const validationResult = await validate(app)(recordClone, context);
     if (!validationResult.isValid) {
-      app.publish(events.recordApi.save.onInvalid, { record, validationResult });
+      await app.publish(events.recordApi.save.onInvalid, { record, validationResult });
       throw new Error(`Save : Record Invalid : ${
         JSON.stringify(validationResult.errors)}`);
     }
@@ -68,7 +68,7 @@ export const _save = async (app, record, context, skipValidation = false) => {
     await initialiseReverseReferenceIndexes(app, record);
     await initialiseAncestorIndexes(app, record);
     await initialiseChildCollections(app, recordClone.key);
-    app.publish(events.recordApi.save.onRecordCreated, {
+    await app.publish(events.recordApi.save.onRecordCreated, {
       record: recordClone,
     });
   } else {
@@ -82,7 +82,7 @@ export const _save = async (app, record, context, skipValidation = false) => {
       recordClone,
     );
 
-    app.publish(events.recordApi.save.onRecordUpdated, {
+    await app.publish(events.recordApi.save.onRecordUpdated, {
       old: oldRecord,
       new: recordClone,
     });

@@ -3,7 +3,7 @@ import {
   uniqBy, keys, difference,
   join, reduce, find,
 } from 'lodash/fp';
-import { compileExpression, compileCode } from '@nx-js/compiler-util';
+import { compileExpression, compileCode } from '../common/compileCode';
 import { $ } from '../common';
 import { _executeAction } from './execute';
 
@@ -34,9 +34,9 @@ const subscribeTriggers = (subscribe, behaviourSources, actions, triggers, apis)
   };
 
   for (let trig of triggers) {
-    subscribe(trig.eventName, (ev, ctx) => {
+    subscribe(trig.eventName, async (ev, ctx) => {
       if (shouldRunTrigger(trig, ctx)) {
-        _executeAction(
+        await _executeAction(
           behaviourSources,
           find(a => a.name === trig.actionName)(actions),
           createOptions(trig.optionsCreator, ctx),

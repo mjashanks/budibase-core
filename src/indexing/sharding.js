@@ -12,7 +12,16 @@ import {
 } from '../common';
 
 export const getIndexedDataKey = (indexNode, indexKey, record) => {
-  const getShardName = (indexNode, record) => compileCode(indexNode.getShardName)({ record });
+  const getShardName = (indexNode, record) => {
+    const shardNameFunc = compileCode(indexNode.getShardName);
+    try {
+      return shardNameFunc({ record });
+    } catch(e) {
+      const errorDetails = `shardCode: ${indexNode.getShardName} :: record: ${JSON.stringify(record)} :: `
+      e.message = "Error running index shardname func: " + errorDetails + e.message;
+      throw e;
+    }
+  };
 
   const shardName = isNonEmptyString(indexNode.getShardName)
     ? `${getShardName(indexNode, record)}.csv`

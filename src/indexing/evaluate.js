@@ -1,7 +1,7 @@
 import { compileExpression, compileCode } from '@nx-js/compiler-util';
 import {
-  isUndefined, keys, has,
-  clone, isFunction,
+  isUndefined, keys, 
+  cloneDeep, isFunction,
 } from 'lodash';
 import { defineError } from '../common';
 
@@ -40,7 +40,7 @@ export const passesFilter = (record, index) => {
 };
 
 export const mapRecord = (record, index) => {
-  const recordClone = clone(record);
+  const recordClone = cloneDeep(record);
   const context = { record: recordClone };
 
   const map = index.map ? index.map : 'return {...record};';
