@@ -8,7 +8,7 @@ import {
   getCollectionNodeByKeyOrNodeKey, getNode, isIndex,
   isRecord, isDecendant, getAllowedRecordNodesForIndex,
   fieldReversesReferenceToIndex,
-} from '../templateApi/heirarchy';
+} from '../templateApi/hierarchy';
 import {
   joinKey, apiWrapper, events, $, allTrue,
 } from '../common';
@@ -32,7 +32,7 @@ export const buildIndex = app => async indexNodeKey => apiWrapper(
 );
 
 const _buildIndex = async (app, indexNodeKey) => {
-  const indexNode = getNode(app.heirarchy, indexNodeKey);
+  const indexNode = getNode(app.hierarchy, indexNodeKey);
 
   await createBuildIndexFolder(app.datastore, indexNodeKey);
 
@@ -55,7 +55,7 @@ const buildReverseReferenceIndex = async (app, indexNode) => {
   // Iterate through all referencING records,
   // and update referenced index for each record
   let recordCount = 0;
-  const referencingNodes = $(app.heirarchy, [
+  const referencingNodes = $(app.hierarchy, [
     getFlattenedHierarchy,
     filter(n => isRecord(n)
                     && some(fieldReversesReferenceToIndex(indexNode))(n.fields)),
@@ -81,6 +81,10 @@ const buildReverseReferenceIndex = async (app, indexNode) => {
   }
 };
 
+const getAllowedParentCollectionNodes = (hierarchy, indexNode) => $(getAllowedRecordNodesForIndex(hierarchy, indexNode), [
+  map(n => n.parent()),
+]);
+
 const buildHeirarchalIndex = async (app, indexNode) => {
   let recordCount = 0;
 
@@ -89,7 +93,7 @@ const buildHeirarchalIndex = async (app, indexNode) => {
       const recordKey = joinKey(collectionKey, recordId);
 
       const recordNode = getRecordNodeById(
-        app.heirarchy,
+        app.hierarchy,
         recordId,
       );
 
@@ -104,7 +108,7 @@ const buildHeirarchalIndex = async (app, indexNode) => {
   };
 
 
-  const collectionRecords = getAllowedRecordNodesForIndex(app.heirarchy, indexNode);
+  const collectionRecords = getAllowedRecordNodesForIndex(app.hierarchy, indexNode);
 
   for (const targetCollectionRecordNode of collectionRecords) {
     const allIdsIterator = await getAllIdsIterator(app)(targetCollectionRecordNode.collectionNodeKey());
@@ -126,7 +130,7 @@ const chooseChildRecordNodeByKey = (collectionNode, recordId) => find(c => recor
 
 const recordNodeApplies = indexNode => recordNode => includes(recordNode.nodeId)(indexNode.allowedRecordNodeIds);
 
-const hasApplicableDecendant = (heirarchy, ancestorNode, indexNode) => $(heirarchy, [
+const hasApplicableDecendant = (hierarchy, ancestorNode, indexNode) => $(hierarchy, [
   getFlattenedHierarchy,
   filter(
     allTrue(
@@ -141,7 +145,7 @@ const applyAllDecendantRecords = async (app, collection_Key_or_NodeKey,
   indexNode, indexKey, currentIndexedData,
   currentIndexedDataKey, recordCount = 0) => {
   const collectionNode = getCollectionNodeByKeyOrNodeKey(
-    app.heirarchy,
+    app.hierarchy,
     collection_Key_or_NodeKey,
   );
 
@@ -165,7 +169,7 @@ const applyAllDecendantRecords = async (app, collection_Key_or_NodeKey,
         recordCount++;
       }
 
-      if (hasApplicableDecendant(app.heirarchy, recordNode, indexNode)) {
+      if (hasApplicableDecendant(app.hierarchy, recordNode, indexNode)) {
         for (const childCollectionNode of recordNode.children) {
           recordCount = await applyAllDecendantRecords(
             app,

@@ -1,13 +1,13 @@
 import {generateSchema} from "../src/indexing/indexSchemaCreator";
-import {setupAppheirarchy, findCollectionDefaultIndex} from "./specHelpers";
+import {setupApphierarchy, findCollectionDefaultIndex} from "./specHelpers";
 import {find} from "lodash";
 import {indexTypes} from "../src/templateApi/indexes";
 
 describe("indexSchemGenerator", () => {
 
     it("should return mapped columns of single type, when accepts all in collection of one type", async () => {
-        const {appHeirarchy} = await setup(false);
-        const schema = generateSchema(appHeirarchy.root, appHeirarchy.petsIndex);
+        const {appHierarchy} = await setup(false);
+        const schema = generateSchema(appHierarchy.root, appHierarchy.petsIndex);
         schemaHasFieldOfType(schema, "key", "string");
         schemaHasFieldOfType(schema, "sortKey", "string");
         schemaHasFieldOfType(schema, "id", "string");
@@ -20,8 +20,8 @@ describe("indexSchemGenerator", () => {
     });
 
     it("should return mapped columns of two types, when accepts all in collection or two typs", async () => {
-        const {appHeirarchy} = await setup(true);
-        const schema = generateSchema(appHeirarchy.root, appHeirarchy.petsIndex);
+        const {appHierarchy} = await setup(true);
+        const schema = generateSchema(appHierarchy.root, appHierarchy.petsIndex);
         schemaHasFieldOfType(schema, "key", "string");
         schemaHasFieldOfType(schema, "sortKey", "string");
         schemaHasFieldOfType(schema, "id", "string");
@@ -36,8 +36,8 @@ describe("indexSchemGenerator", () => {
     });
 
     it("should return mapped columns of one types, when accepts only onw of two types", async () => {
-        const {appHeirarchy} = await setup(true);
-        const schema = generateSchema(appHeirarchy.root, appHeirarchy.fishOnlyIndex);
+        const {appHierarchy} = await setup(true);
+        const schema = generateSchema(appHierarchy.root, appHierarchy.fishOnlyIndex);
         schemaHasFieldOfType(schema, "key", "string");
         schemaHasFieldOfType(schema, "sortKey", "string");
         schemaHasFieldOfType(schema, "id", "string");
@@ -50,8 +50,8 @@ describe("indexSchemGenerator", () => {
     });
 
     it("should return mapped columns type, for reverse reference index", async () => {
-        const {appHeirarchy} = await setup(true);
-        const schema = generateSchema(appHeirarchy.root, appHeirarchy.dogFriends);
+        const {appHierarchy} = await setup(true);
+        const schema = generateSchema(appHierarchy.root, appHierarchy.dogFriends);
         schemaHasFieldOfType(schema, "key", "string");
         schemaHasFieldOfType(schema, "sortKey", "string");
         schemaHasFieldOfType(schema, "id", "string");
@@ -74,7 +74,7 @@ const schemaHasFieldOfType = (schema, fieldname, type) => {
 }
 
 const setup = includeFish => 
-    setupAppheirarchy(createApp(includeFish));
+    setupApphierarchy(createApp(includeFish));
 
 const createApp = (includeFish) => (templateApi) => {
     

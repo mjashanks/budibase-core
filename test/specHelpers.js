@@ -51,7 +51,7 @@ export const getMemoryTemplateApi = () => {
 export const appFromTempalteApi = async (templateApi, disableCleanupTransactions=false) => {
     const appDef = await templateApi.getApplicationDefinition();
     const app = {
-        heirarchy:appDef.heirarchy, 
+        hierarchy:appDef.hierarchy, 
         datastore:templateApi._storeHandle,
         publish:templateApi._eventAggregator.publish,
         _eventAggregator: templateApi._eventAggregator,
@@ -108,7 +108,7 @@ export const findIndex = (parentNode, name) =>
 export const findCollectionDefaultIndex = (recordCollectionNode) => 
     findIndex(recordCollectionNode.parent(), recordCollectionNode.name + "_index");
 
-export const heirarchyFactory = (...additionalFeatures) => templateApi => {
+export const hierarchyFactory = (...additionalFeatures) => templateApi => {
     const root = templateApi.getNewRootLevel();
 
     const settingsRecord = templateApi.getNewSingleRecordTemplate(root);
@@ -132,23 +132,23 @@ export const heirarchyFactory = (...additionalFeatures) => templateApi => {
     const chargeRecord = templateApi.getNewRecordTemplate(invoiceRecord, "charge");
     chargeRecord.collectionName = "charges";
 
-    const heirarchy = ({root, customerRecord,
+    const hierarchy = ({root, customerRecord,
             invoiceRecord, partnerRecord, 
             partnerInvoiceRecord, chargeRecord, settingsRecord});
 
     for(let feature of additionalFeatures) {
-        feature(heirarchy, templateApi);
+        feature(hierarchy, templateApi);
     }
-    return heirarchy;
+    return hierarchy;
 };
 
-export const basicAppHeirarchyCreator = templateApis =>
-    heirarchyFactory()(templateApis);
+export const basicAppHierarchyCreator = templateApis =>
+    hierarchyFactory()(templateApis);
 
-export const withFields = (heirarchy, templateApi) => {
+export const withFields = (hierarchy, templateApi) => {
     const {customerRecord, invoiceRecord, 
         partnerInvoiceRecord, chargeRecord,
-        partnerRecord, settingsRecord, root} = heirarchy;
+        partnerRecord, settingsRecord, root} = hierarchy;
 
     getNewFieldAndAdd(templateApi, settingsRecord)("appName", "string", "");
     
@@ -165,7 +165,7 @@ export const withFields = (heirarchy, templateApi) => {
     partnerCustomersReverseIndex.map = "return {...record};";
     partnerCustomersReverseIndex.filter = "record.isalive === true"
     partnerCustomersReverseIndex.allowedRecordNodeIds = [customerRecord.nodeId];
-    heirarchy.partnerCustomersReverseIndex = partnerCustomersReverseIndex;
+    hierarchy.partnerCustomersReverseIndex = partnerCustomersReverseIndex;
 
     newCustomerField("surname", "string");
     newCustomerField("isalive", "bool", "true");
@@ -184,7 +184,7 @@ export const withFields = (heirarchy, templateApi) => {
     referredToCustomersReverseIndex.map = "return {...record};";
     referredToCustomersReverseIndex.getShardName = "return !record.surname ? 'null' : record.surname.substring(0,1);"   
     referredToCustomersReverseIndex.allowedRecordNodeIds = [customerRecord.nodeId];
-    heirarchy.referredToCustomersReverseIndex = referredToCustomersReverseIndex;
+    hierarchy.referredToCustomersReverseIndex = referredToCustomersReverseIndex;
 
     const customerReferredByField = newCustomerField("referredBy", "reference", undefined, {
         indexNodeKey : "/customer_index",
@@ -192,7 +192,7 @@ export const withFields = (heirarchy, templateApi) => {
         reverseIndexNodeKeys : [joinKey(
             customerRecord.nodeKey(), "referredToCustomers")]
     });
-    heirarchy.customerReferredByField = customerReferredByField;
+    hierarchy.customerReferredByField = customerReferredByField;
 
     const newInvoiceField = getNewFieldAndAdd(templateApi, invoiceRecord);
 
@@ -228,9 +228,9 @@ export const withFields = (heirarchy, templateApi) => {
     partnerChargesReverseIndex.name = "partnerCharges";
     partnerChargesReverseIndex.map = "return {...record};";
     partnerChargesReverseIndex.allowedRecordNodeIds = [chargeRecord];
-    heirarchy.partnerChargesReverseIndex = partnerChargesReverseIndex;
+    hierarchy.partnerChargesReverseIndex = partnerChargesReverseIndex;
 
-    const customersReferenceIndex = templateApi.getNewIndexTemplate(heirarchy.root);
+    const customersReferenceIndex = templateApi.getNewIndexTemplate(hierarchy.root);
     customersReferenceIndex.name = "customersReference";
     customersReferenceIndex.map = "return {name:record.surname}";
     customersReferenceIndex.filter = "record.isalive === true";
@@ -243,10 +243,10 @@ export const withFields = (heirarchy, templateApi) => {
     });
 }
 
-export const withIndexes = (heirarchy, templateApi) => {
+export const withIndexes = (hierarchy, templateApi) => {
     const {root, customerRecord,
         partnerInvoiceRecord, invoiceRecord, 
-        partnerRecord, chargeRecord } = heirarchy;
+        partnerRecord, chargeRecord } = hierarchy;
     const deceasedCustomersIndex = getNewIndexTemplate(root);
     deceasedCustomersIndex.name = "deceased";
     deceasedCustomersIndex.map = "return {surname: record.surname, age:record.age};";
@@ -328,30 +328,30 @@ export const withIndexes = (heirarchy, templateApi) => {
     allInvoicesTotalAmountAggregate_Sharded.name = "totalIncVat";
     allInvoicesTotalAmountAggregate_Sharded.aggregatedValue = "return record.totalIncVat";
 
-    heirarchy.allInvoicesByType = allInvoicesByType;
-    heirarchy.allInvoicesTotalAmountAggregate = allInvoicesTotalAmountAggregate;
-    heirarchy.allInvoicesPaidAmountAggregate = allInvoicesPaidAmountAggregate;
-    heirarchy.customersDefaultIndex = customersDefaultIndex;
-    heirarchy.allCustomersAgeFunctions = allCustomersAgeFunctions;
-    heirarchy.customersNoGroupaggregateGroup = customersNoGroupaggregateGroup;
-    heirarchy.invoicesByOutstandingIndex = invoicesByOutstandingIndex;
-    heirarchy.customersBySurnameIndex = customersBySurnameIndex;
-    heirarchy.outstandingInvoicesIndex = outstandingInvoicesIndex;
-    heirarchy.deceasedCustomersIndex = deceasedCustomersIndex;
-    heirarchy.customerInvoicesIndex = customerInvoicesIndex;
+    hierarchy.allInvoicesByType = allInvoicesByType;
+    hierarchy.allInvoicesTotalAmountAggregate = allInvoicesTotalAmountAggregate;
+    hierarchy.allInvoicesPaidAmountAggregate = allInvoicesPaidAmountAggregate;
+    hierarchy.customersDefaultIndex = customersDefaultIndex;
+    hierarchy.allCustomersAgeFunctions = allCustomersAgeFunctions;
+    hierarchy.customersNoGroupaggregateGroup = customersNoGroupaggregateGroup;
+    hierarchy.invoicesByOutstandingIndex = invoicesByOutstandingIndex;
+    hierarchy.customersBySurnameIndex = customersBySurnameIndex;
+    hierarchy.outstandingInvoicesIndex = outstandingInvoicesIndex;
+    hierarchy.deceasedCustomersIndex = deceasedCustomersIndex;
+    hierarchy.customerInvoicesIndex = customerInvoicesIndex;
 };
 
-export const basicAppHeirarchyCreator_WithFields = templateApi => 
-    heirarchyFactory(withFields)(templateApi);
+export const basicAppHierarchyCreator_WithFields = templateApi => 
+    hierarchyFactory(withFields)(templateApi);
     
-export const basicAppHeirarchyCreator_WithFields_AndIndexes = templateApi => 
-    heirarchyFactory(withFields, withIndexes)(templateApi);
+export const basicAppHierarchyCreator_WithFields_AndIndexes = templateApi => 
+    hierarchyFactory(withFields, withIndexes)(templateApi);
 
-export const setupAppheirarchy = async (creator, disableCleanupTransactions=false) => {
+export const setupApphierarchy = async (creator, disableCleanupTransactions=false) => {
     const {templateApi} = getMemoryTemplateApi();
-    const heirarchy = creator(templateApi);
-    await initialiseData(templateApi._storeHandle, {heirarchy:heirarchy.root, actions:[], triggers:[]});
-    await templateApi.saveApplicationHeirarchy(heirarchy.root);
+    const hierarchy = creator(templateApi);
+    await initialiseData(templateApi._storeHandle, {hierarchy:hierarchy.root, actions:[], triggers:[]});
+    await templateApi.saveApplicationHierarchy(hierarchy.root);
     const app = await appFromTempalteApi(templateApi, disableCleanupTransactions);
     const collectionApi = getCollectionApi(app);
     const indexApi = getIndexApi(app);
@@ -361,17 +361,19 @@ export const setupAppheirarchy = async (creator, disableCleanupTransactions=fals
     recordApi._storeHandle = app.datastore;
     actionsApi._app = app;
 
-    return ({
+    const apis = {
         recordApi,
         collectionApi,
         templateApi,
         indexApi,
         authApi,
         actionsApi,
-        appHeirarchy:heirarchy,
+        appHierarchy:hierarchy,
         subscribe:templateApi._eventAggregator.subscribe, 
         app
-    });
+    };
+
+    return apis;
 };
 
 const disableCleanupTransactions = app => {
@@ -454,16 +456,16 @@ export const createValidActionsAndTriggers = () => {
 
 export const createAppDefinitionWithActionsAndTriggers = async () => {
 
-    const {appHeirarchy, templateApi, app, actionsApi} = await setupAppheirarchy(
-        basicAppHeirarchyCreator_WithFields
+    const {appHierarchy, templateApi, app, actionsApi} = await setupApphierarchy(
+        basicAppHierarchyCreator_WithFields
     );
 
     // adding validation rule so it can fail when we save it 
-    templateApi.addRecordValidationRule(appHeirarchy.customerRecord)(
+    templateApi.addRecordValidationRule(appHierarchy.customerRecord)(
         templateApi.commonRecordValidationRules.fieldNotEmpty("surname")
     );
 
-    await templateApi.saveApplicationHeirarchy(appHeirarchy.root);
+    await templateApi.saveApplicationHierarchy(appHierarchy.root);
     
     const actionsAndTriggers = createValidActionsAndTriggers();
     const {allActions, allTriggers, behaviourSources} = actionsAndTriggers;
@@ -476,7 +478,7 @@ export const createAppDefinitionWithActionsAndTriggers = async () => {
     app.user.permissions = generateFullPermissions(app);
     app.behaviourSources = behaviourSources;
     const appDefinition = await templateApi.getApplicationDefinition();
-    return {templateApi, appDefinition, ...actionsAndTriggers, ...appHeirarchy, app, actionsApi};
+    return {templateApi, appDefinition, ...actionsAndTriggers, ...appHierarchy, app, actionsApi};
 };
 
 

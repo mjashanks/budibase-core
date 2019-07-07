@@ -1,5 +1,5 @@
-import {setupAppheirarchy,
-    basicAppHeirarchyCreator_WithFields_AndIndexes} from "./specHelpers";
+import {setupApphierarchy,
+    basicAppHierarchyCreator_WithFields_AndIndexes} from "./specHelpers";
 import {permission} from "../src/authApi/permissions";
 
 describe("indexApi > listItems", () => {
@@ -7,7 +7,7 @@ describe("indexApi > listItems", () => {
     it("should pull items from one shard when only startRange and endRange params are equal", async () => {
 
         const {recordApi,
-        indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+        indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes);
         
         const record1 = recordApi.getNew("/customers", "customer");
         record1.surname = "Ledog";
@@ -38,7 +38,7 @@ describe("indexApi > listItems", () => {
     it("should pull items from one shard when shard is within startRange and endRange params", async () => {
 
         const {recordApi,
-        indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+        indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes);
         
         const record1 = recordApi.getNew("/customers", "customer");
         record1.surname = "Ledog";
@@ -61,7 +61,7 @@ describe("indexApi > listItems", () => {
     it("should pull items from multiple shards are withing startRange and endRange params", async () => {
 
         const {recordApi,
-        indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+        indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes);
         
         const record1 = recordApi.getNew("/customers", "customer");
         record1.surname = "Ledog";
@@ -83,7 +83,7 @@ describe("indexApi > listItems", () => {
 
     it("should filter items by given search phrase", async () => {
         const {recordApi,
-            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+            indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes);
         
         const record1 = recordApi.getNew("/customers", "customer");
         record1.surname = "Ledog";
@@ -100,7 +100,7 @@ describe("indexApi > listItems", () => {
 
     it("should filter items by given search phrase, accross sharded whole index", async () => {
         const {recordApi,
-            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+            indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes);
         
         const record1 = recordApi.getNew("/customers", "customer");
         record1.surname = "Ledog";
@@ -117,7 +117,7 @@ describe("indexApi > listItems", () => {
 
     it("should filter items by given search phrase, in single shard ", async () => {
         const {recordApi,
-            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+            indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes);
         
         const record1 = recordApi.getNew("/customers", "customer");
         record1.surname = "Lecat";
@@ -141,13 +141,13 @@ describe("indexApi > listItems", () => {
     });
 
     it("should throw error when user user does not have permission", async () => {
-        const {indexApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+        const {indexApi, app} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes);
         app.removePermission(permission.readIndex.get("/customersBySurname"));
         expect(indexApi.listItems("/customersBySurname")).rejects.toThrow(/Unauthorized/);
     });
 
     it("should not depend on having any other permissions", async () => {
-        const {app, indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+        const {app, indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes);
         app.withOnlyThisPermission(permission.readIndex.get("/customersBySurname"));
         await indexApi.listItems("/customersBySurname");
     });

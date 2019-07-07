@@ -5,19 +5,19 @@ import { validateAll } from './validate';
 import { apiWrapper } from '../common/apiWrapper';
 import { events } from '../common/events';
 
-export const saveApplicationHeirarchy = app => async heirarchy => apiWrapper(
+export const saveApplicationHierarchy = app => async hierarchy => apiWrapper(
   app,
-  events.templateApi.saveApplicationHeirarchy,
+  events.templateApi.saveApplicationHierarchy,
   permission.writeTemplates.isAuthorized,
-  { heirarchy },
-  _saveApplicationHeirarchy, app.datastore, heirarchy,
+  { hierarchy },
+  _saveApplicationHierarchy, app.datastore, hierarchy,
 );
 
 
-export const _saveApplicationHeirarchy = async (datastore, heirarchy) => {
-  const validationErrors = await validateAll(heirarchy);
+export const _saveApplicationHierarchy = async (datastore, hierarchy) => {
+  const validationErrors = await validateAll(hierarchy);
   if (validationErrors.length > 0) {
-    throw new Error(`Heirarchy is invalid: ${join(
+    throw new Error(`Hierarchy is invalid: ${join(
       validationErrors.map(e => `${e.item.nodeKey ? e.item.nodeKey() : ''} : ${e.error}`),
       ',',
     )}`);
@@ -25,11 +25,11 @@ export const _saveApplicationHeirarchy = async (datastore, heirarchy) => {
 
   if (await datastore.exists(appDefinitionFile)) {
     const appDefinition = await datastore.loadJson(appDefinitionFile);
-    appDefinition.heirarchy = heirarchy;
+    appDefinition.hierarchy = hierarchy;
     await datastore.updateJson(appDefinitionFile, appDefinition);
   } else {
     await datastore.createFolder('/.config');
-    const appDefinition = { actions: [], triggers: [], heirarchy };
+    const appDefinition = { actions: [], triggers: [], hierarchy };
     await datastore.createJson(appDefinitionFile, appDefinition);
   }
 };

@@ -4,14 +4,14 @@ import {
 import {
   isIndex, isShardedIndex,
   getExactNodeForPath,
-} from '../templateApi/heirarchy';
+} from '../templateApi/hierarchy';
 import {
   getAllShardKeys, getShardMapKey,
   getUnshardedIndexDataKey,
 } from '../indexing/sharding';
 
 export const _deleteIndex = async (app, indexKey, includeFolder) => {
-  const indexNode = getExactNodeForPath(app.heirarchy)(indexKey);
+  const indexNode = getExactNodeForPath(app.hierarchy)(indexKey);
 
   if (!isIndex(indexNode)) { throw new Error('Supplied key is not an index'); }
 

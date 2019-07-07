@@ -12,7 +12,7 @@ import {
 import {
   getExactNodeForPath, isIndex,
   isShardedIndex,
-} from '../templateApi/heirarchy';
+} from '../templateApi/hierarchy';
 import { CONTINUE_READING_RECORDS } from '../indexing/serializer';
 import { permission } from '../authApi/permissions';
 
@@ -26,7 +26,7 @@ export const aggregates = app => async (indexKey, rangeStartParams = null, range
 
 const _aggregates = async (app, indexKey, rangeStartParams, rangeEndParams) => {
   indexKey = safeKey(indexKey);
-  const indexNode = getExactNodeForPath(app.heirarchy)(indexKey);
+  const indexNode = getExactNodeForPath(app.hierarchy)(indexKey);
 
   if (!isIndex(indexNode)) { throw new Error('supplied key is not an index'); }
 
@@ -36,7 +36,7 @@ const _aggregates = async (app, indexKey, rangeStartParams, rangeEndParams) => {
     );
     let aggregateResult = null;
     for (const k of shardKeys) {
-      const shardResult = await getAggregates(app.heirarchy, app.datastore, indexNode, k);
+      const shardResult = await getAggregates(app.hierarchy, app.datastore, indexNode, k);
       if (aggregateResult === null) {
         aggregateResult = shardResult;
       } else {
@@ -49,7 +49,7 @@ const _aggregates = async (app, indexKey, rangeStartParams, rangeEndParams) => {
     return aggregateResult;
   }
   return await getAggregates(
-    app.heirarchy,
+    app.hierarchy,
     app.datastore,
     indexNode,
     getUnshardedIndexDataKey(indexKey),
@@ -90,7 +90,7 @@ const mergeShardAggregate = (totals, shard) => {
   return totals;
 };
 
-const getAggregates = async (heirarchy, datastore, index, indexedDataKey) => {
+const getAggregates = async (hierarchy, datastore, index, indexedDataKey) => {
   const aggregateResult = {};
   const doRead = iterateIndex(
         async item => {
@@ -102,7 +102,7 @@ const getAggregates = async (heirarchy, datastore, index, indexedDataKey) => {
         async () => aggregateResult
   );
 
-  return await doRead(heirarchy, datastore, index, indexedDataKey);
+  return await doRead(hierarchy, datastore, index, indexedDataKey);
 };
 
 

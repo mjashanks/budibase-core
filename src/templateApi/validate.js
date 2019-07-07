@@ -13,7 +13,7 @@ import {
 import {
   isRecord, isRoot, isaggregateGroup,
   isIndex, getFlattenedHierarchy,
-} from './heirarchy';
+} from './hierarchy';
 import { eventsList } from '../common/events';
 import { validateAllFields } from './fields';
 import {
@@ -72,9 +72,9 @@ const getRuleSet = node => switchCase(
 
 export const validateNode = node => applyRuleSet(getRuleSet(node))(node);
 
-export const validateAll = (appHeirarchy) => {
+export const validateAll = (appHierarchy) => {
   const flattened = getFlattenedHierarchy(
-    appHeirarchy,
+    appHierarchy,
   );
 
   const duplicateNameRule = makerule(

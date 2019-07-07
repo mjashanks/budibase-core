@@ -1,13 +1,13 @@
 import { ensureShardNameIsInShardMap } from './sharding';
 import { getIndexWriter } from './serializer';
-import { isShardedIndex } from '../templateApi/heirarchy';
+import { isShardedIndex } from '../templateApi/hierarchy';
 import {promiseWriteableStream} from "./promiseWritableStream";
 import {promiseReadableStream} from "./promiseReadableStream";
 
-export const applyToShard = async (heirarchy, store, indexKey,
+export const applyToShard = async (hierarchy, store, indexKey,
   indexNode, indexShardKey, recordsToWrite, keysToRemove) => {
   const createIfNotExists = recordsToWrite.length > 0;
-  const writer = await getWriter(heirarchy, store, indexKey, indexShardKey, indexNode, createIfNotExists);
+  const writer = await getWriter(hierarchy, store, indexKey, indexShardKey, indexNode, createIfNotExists);
   if (writer === SHARD_DELETED) return;
 
   await writer.updateIndex(recordsToWrite, keysToRemove);
@@ -15,7 +15,7 @@ export const applyToShard = async (heirarchy, store, indexKey,
 };
 
 const SHARD_DELETED = 'SHARD_DELETED';
-const getWriter = async (heirarchy, store, indexKey, indexedDataKey, indexNode, createIfNotExists) => {
+const getWriter = async (hierarchy, store, indexKey, indexedDataKey, indexNode, createIfNotExists) => {
   let readableStream = null;
 
   if (isShardedIndex(indexNode)) {
@@ -54,7 +54,7 @@ const getWriter = async (heirarchy, store, indexKey, indexedDataKey, indexNode, 
   );
 
   return getIndexWriter(
-    heirarchy, indexNode,
+    hierarchy, indexNode,
         readableStream, writableStream
   );
 };

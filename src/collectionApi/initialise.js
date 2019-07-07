@@ -4,7 +4,7 @@ import {
   isCollectionRecord,
   isRoot,
   getExactNodeForPath,
-} from '../templateApi/heirarchy';
+} from '../templateApi/hierarchy';
 import { $, allTrue, joinKey } from '../common';
 
 const ensureCollectionIsInitialised = async (datastore, node, parentKey) => {
@@ -23,15 +23,15 @@ const ensureCollectionIsInitialised = async (datastore, node, parentKey) => {
   }
 };
 
-export const initialiseRootCollections = async (datastore, heirarchy) => {
+export const initialiseRootCollections = async (datastore, hierarchy) => {
   const rootCollectionRecord = allTrue(
     n => isRoot(n.parent()),
     isCollectionRecord,
   );
 
-  const flatheirarchy = getFlattenedHierarchy(heirarchy);
+  const flathierarchy = getFlattenedHierarchy(hierarchy);
 
-  const collectionRecords = $(flatheirarchy, [
+  const collectionRecords = $(flathierarchy, [
     filter(rootCollectionRecord),
   ]);
 
@@ -46,7 +46,7 @@ export const initialiseRootCollections = async (datastore, heirarchy) => {
 
 export const initialiseChildCollections = async (app, recordKey) => {
   const childCollectionRecords = $(recordKey, [
-    getExactNodeForPath(app.heirarchy),
+    getExactNodeForPath(app.hierarchy),
     n => n.children,
     filter(isCollectionRecord),
   ]);

@@ -70,13 +70,13 @@ Date:   Fri Apr 12 12:52:51 2019 +0000
 Author: = <mshanks@scileads.com>
 Date:   Fri Apr 12 09:15:28 2019 +0100
 
-    exporting all heirarchy methods
+    exporting all hierarchy methods
 
 [33mcommit 5b13e86e30d482b250c15e7d0444be5686a6f351[m
 Author: = <mshanks@scileads.com>
 Date:   Fri Apr 12 09:08:45 2019 +0100
 
-    exporting heirarchy ethods
+    exporting hierarchy ethods
 
 [33mcommit 7bbf6ef76d41cbca43e0987c011c860cf869e027[m
 Merge: d9d8d1f 215947c
@@ -89,7 +89,7 @@ Date:   Wed Apr 10 22:37:41 2019 +0100
 Author: = <mshanks@scileads.com>
 Date:   Wed Apr 10 22:36:18 2019 +0100
 
-    exposed constructHeirarchy
+    exposed constructHierarchy
 
 [33mcommit 215947cb454fc01042c83ffe05d266d18fde99ab[m
 Author: Michael Shanks <mike@budibase.com>
@@ -251,7 +251,7 @@ Date:   Sat Mar 9 22:18:52 2019 +0000
 Author: Michael Shanks <mjashanks@hotmail.com>
 Date:   Fri Mar 8 22:48:17 2019 +0000
 
-    auth tests on app heirarchy
+    auth tests on app hierarchy
 
 [33mcommit 63affd0056eddf775a157eefa414d6c378fc371e[m
 Author: Michael Shanks <mjashanks@hotmail.com>
@@ -719,7 +719,7 @@ Date:   Fri Dec 28 22:11:13 2018 +0000
 Author: Michael Shanks <mjashanks@hotmail.com>
 Date:   Tue Dec 18 22:05:41 2018 +0000
 
-    bugfix.. reloading of heirarchy not rehydrating aggregates
+    bugfix.. reloading of hierarchy not rehydrating aggregates
 
 [33mcommit f7053af9e503e86a12fc873b04fdc58c6573343e[m
 Author: Michael Shanks <mjashanks@hotmail.com>
@@ -791,7 +791,7 @@ Date:   Mon Dec 3 21:40:16 2018 +0000
 Author: Michael Shanks <mjashanks@hotmail.com>
 Date:   Thu Nov 29 09:20:10 2018 +0000
 
-    fields validated on heirarchy validation
+    fields validated on hierarchy validation
 
 [33mcommit 603382aa3067d1b429ea5761bd005dd3a69cdb59[m
 Author: Michael Shanks <mjashanks@hotmail.com>
@@ -881,7 +881,7 @@ Date:   Fri Nov 16 22:39:40 2018 +0000
 Author: Michael Shanks <mjashanks@hotmail.com>
 Date:   Fri Nov 16 19:00:56 2018 +0000
 
-    calling validate on save heirarchy
+    calling validate on save hierarchy
 
 [33mcommit 4015a29e7f9f69c26fb87af328aaa2d1dfee9008[m
 Author: Michael Shanks <mjashanks@hotmail.com>
@@ -948,7 +948,7 @@ Date:   Fri Nov 9 18:44:53 2018 +0000
 Author: Michael Shanks <mjashanks@hotmail.com>
 Date:   Fri Nov 9 18:44:40 2018 +0000
 
-    appHeirarchy > appDefinition (inc. actions)
+    appHierarchy > appDefinition (inc. actions)
 
 [33mcommit d1d9c869cc99a9da46dbbdf1efa2233743297ea6[m
 Author: Michael Shanks <mike@budibase.com>
@@ -1086,7 +1086,7 @@ Date:   Mon Oct 22 21:43:02 2018 +0100
 Author: Michael Shanks <mjashanks@hotmail.com>
 Date:   Sun Oct 21 21:54:53 2018 +0100
 
-    throwing error when app heirarchy does not exists - and everything breaks
+    throwing error when app hierarchy does not exists - and everything breaks
 
 [33mcommit 5c081caf28f197b1445035df9e752a644809a122[m
 Author: Michael Shanks <mjashanks@hotmail.com>
@@ -1122,7 +1122,7 @@ Date:   Thu Oct 18 22:23:35 2018 +0100
 Author: Michael Shanks <mjashanks@hotmail.com>
 Date:   Thu Oct 18 21:36:06 2018 +0100
 
-    removing UI from heirarchy
+    removing UI from hierarchy
 
 [33mcommit a97d65d7b1d802322fc263e49fd8440e1ef4d4df[m
 Author: Michael Shanks <mjashanks@hotmail.com>

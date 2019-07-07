@@ -3,13 +3,13 @@ import {
   uniqBy, keys, difference,
   join, reduce, find,
 } from 'lodash/fp';
-import { compileExpression, compileCode } from '@nx-js/compiler-util';
+import { compileExpression, compileCode } from '../common/compileCode';
 import { $ } from '../common';
 import { _executeAction } from './execute';
 
-export const initialiseActions = (subscribe, behaviourSources, actions, triggers) => {
+export const initialiseActions = (subscribe, behaviourSources, actions, triggers, apis) => {
   validateSources(behaviourSources, actions);
-  subscribeTriggers(subscribe, behaviourSources, actions, triggers);
+  subscribeTriggers(subscribe, behaviourSources, actions, triggers, apis);
   return createActionsCollection(behaviourSources, actions);
 };
 
@@ -20,11 +20,11 @@ const createActionsCollection = (behaviourSources, actions) => $(actions, [
   }, {}),
 ]);
 
-const subscribeTriggers = (subscribe, behaviourSources, actions, triggers) => {
+const subscribeTriggers = (subscribe, behaviourSources, actions, triggers, apis) => {
   const createOptions = (optionsCreator, eventContext) => {
     if (!optionsCreator) return {};
     const create = compileCode(optionsCreator);
-    return create({ context: eventContext });
+    return create({ context: eventContext, apis });
   };
 
   const shouldRunTrigger = (trigger, eventContext) => {
@@ -33,10 +33,10 @@ const subscribeTriggers = (subscribe, behaviourSources, actions, triggers) => {
     return shouldRun({ context: eventContext });
   };
 
-  for (const trig of triggers) {
-    subscribe(trig.eventName, (ev, ctx) => {
+  for (let trig of triggers) {
+    subscribe(trig.eventName, async (ev, ctx) => {
       if (shouldRunTrigger(trig, ctx)) {
-        _executeAction(
+        await _executeAction(
           behaviourSources,
           find(a => a.name === trig.actionName)(actions),
           createOptions(trig.optionsCreator, ctx),

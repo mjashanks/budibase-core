@@ -8,7 +8,7 @@ import {
   apiWrapper, events, splitKey,
   $, joinKey, isNothing, tryAwaitOrIgnore,
 } from '../common';
-import { getExactNodeForPath } from '../templateApi/heirarchy';
+import { getExactNodeForPath } from '../templateApi/hierarchy';
 import { permission } from '../authApi/permissions';
 import { isLegalFilename } from '../types/file';
 
@@ -33,13 +33,30 @@ const _uploadFile = async (app, recordKey, readableStream, relativeFilePath) => 
 
   const tempFilePath = `${fullFilePath}_${generate()}.temp`;
 
-  const fileStream = await app.datastore.writableFileStream(
+  const outputStream = await app.datastore.writableFileStream(
     tempFilePath,
   );
 
-  readableStream.pipe(fileStream);
+  return new Promise((resolve,reject) => {
+    readableStream.pipe(outputStream);
+    outputStream.on('error', reject);
+    outputStream.on('finish', resolve);
+  })
+  .then(() => app.datastore.getFileSize(tempFilePath))
+  .then(size => {
+    const isExpectedFileSize = checkFileSizeAgainstFields(
+      app, record, relativeFilePath, size
+    );  
+    if (!isExpectedFileSize) { throw new Error(`Fields for ${relativeFilePath} do not have expected size: ${join(',')(incorrectFields)}`); }  
 
-  await new Promise(fulfill => fileStream.on('finish', fulfill));
+  })
+  .then(() => tryAwaitOrIgnore(app.datastore.deleteFile, fullFilePath))
+  .then(() => app.datastore.renameFile(tempFilePath, fullFilePath));
+
+  /*
+  readableStream.pipe(outputStream);
+
+  await new Promise(fulfill => outputStream.on('finish', fulfill));
 
   const isExpectedFileSize = checkFileSizeAgainstFields(
     app,
@@ -55,10 +72,11 @@ const _uploadFile = async (app, recordKey, readableStream, relativeFilePath) => 
   await tryAwaitOrIgnore(app.datastore.deleteFile, fullFilePath);
 
   await app.datastore.renameFile(tempFilePath, fullFilePath);
+  */
 };
 
 const checkFileSizeAgainstFields = (app, record, relativeFilePath, expectedSize) => {
-  const recordNode = getExactNodeForPath(app.heirarchy)(record.key);
+  const recordNode = getExactNodeForPath(app.hierarchy)(record.key);
 
   const incorrectFileFields = $(recordNode.fields, [
     filter(f => f.type === 'file'

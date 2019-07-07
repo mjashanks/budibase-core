@@ -1,6 +1,6 @@
 import { generate } from 'shortid';
 import { joinKey } from '../common';
-import { getLastPartInKey } from '../templateApi/heirarchy';
+import { getLastPartInKey } from '../templateApi/hierarchy';
 import {
   IndexNodeKeyFolder, BUILDINDEX_BATCH_COUNT,
   IndexNodeKeyBatchFolder, TRANSACTIONS_FOLDER, getTransactionId, CREATE_RECORD_TRANSACTION, UPDATE_RECORD_TRANSACTION,

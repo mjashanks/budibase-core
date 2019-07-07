@@ -1,5 +1,5 @@
-import {setupAppheirarchy,
-    basicAppHeirarchyCreator_WithFields_AndIndexes} from "./specHelpers";
+import {setupApphierarchy,
+    basicAppHierarchyCreator_WithFields_AndIndexes} from "./specHelpers";
 import {permission} from "../src/authApi/permissions";
 
 describe("aggregates", () => {
@@ -129,7 +129,7 @@ describe("aggregates", () => {
 
 const setup = async () => {
     const {recordApi, app,
-        indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+        indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes);
     
     const customer = recordApi.getNew("/customers", "customer");
     await recordApi.save(customer);

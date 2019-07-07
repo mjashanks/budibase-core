@@ -1,5 +1,5 @@
-import {setupAppheirarchy, 
-    basicAppHeirarchyCreator_WithFields, getNewFieldAndAdd} from "./specHelpers";
+import {setupApphierarchy, 
+    basicAppHierarchyCreator_WithFields, getNewFieldAndAdd} from "./specHelpers";
 import {joinKey} from "../src/common";
 import {isFunction, isArray} from "lodash";
 
@@ -7,10 +7,10 @@ describe("recordApi > getContext", () => {
 
     it("'referenceExists()' should return true when the reference is in the index", async () => {
 
-        const {recordApi, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi, appHierarchy} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
 
         const customer = recordApi.getNew(
-            appHeirarchy.customerRecord.collectionNodeKey(),
+            appHierarchy.customerRecord.collectionNodeKey(),
             "customer");
         customer.isalive = true;
         await recordApi.save(customer);
@@ -27,10 +27,10 @@ describe("recordApi > getContext", () => {
 
     it("'referenceExists()' should return false when the reference is not in the index", async () => {
 
-        const {recordApi, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi, appHierarchy} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
 
         const customer = recordApi.getNew(
-            appHeirarchy.customerRecord.collectionNodeKey(),
+            appHierarchy.customerRecord.collectionNodeKey(),
             "customer");
         customer.isalive = true;
         await recordApi.save(customer);
@@ -46,10 +46,10 @@ describe("recordApi > getContext", () => {
 
     it("referenceOptions() should return list of indexed {key, value}", async () => {
 
-        const {recordApi, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi, appHierarchy} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
 
         const customer = recordApi.getNew(
-            appHeirarchy.customerRecord.collectionNodeKey(),
+            appHierarchy.customerRecord.collectionNodeKey(),
             "customer");
         customer.surname = "Leedog";
         customer.isalive = true;
@@ -70,10 +70,10 @@ describe("recordApi > getContext", () => {
 
     it("referenceOptions() should return an empty list when no records are in the index", async () => {
 
-        const {recordApi, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi, appHierarchy} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
 
         const customer = recordApi.getNew(
-            appHeirarchy.customerRecord.collectionNodeKey(),
+            appHierarchy.customerRecord.collectionNodeKey(),
             "customer");
         customer.surname = "Leedog";
         customer.isalive = false;

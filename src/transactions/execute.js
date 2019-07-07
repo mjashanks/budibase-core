@@ -25,14 +25,14 @@ import {
   getActualKeyOfParent,
   isGlobalIndex, fieldReversesReferenceToIndex, isReferenceIndex,
   getExactNodeForPath,
-} from '../templateApi/heirarchy';
+} from '../templateApi/hierarchy';
 
 export const executeTransactions = app => async (transactions) => {
-  const recordsByShard = mappedRecordsByIndexShard(app.heirarchy, transactions);
+  const recordsByShard = mappedRecordsByIndexShard(app.hierarchy, transactions);
 
   for (const shard of keys(recordsByShard)) {
     await applyToShard(
-      app.heirarchy, app.datastore,
+      app.hierarchy, app.datastore,
       recordsByShard[shard].indexKey,
       recordsByShard[shard].indexNode,
       shard,
@@ -42,20 +42,20 @@ export const executeTransactions = app => async (transactions) => {
   }
 };
 
-const mappedRecordsByIndexShard = (heirarchy, transactions) => {
+const mappedRecordsByIndexShard = (hierarchy, transactions) => {
   const updates = getUpdateTransactionsByShard(
-    heirarchy, transactions,
+    hierarchy, transactions,
   );
 
   const created = getCreateTransactionsByShard(
-    heirarchy, transactions,
+    hierarchy, transactions,
   );
   const deletes = getDeleteTransactionsByShard(
-    heirarchy, transactions,
+    hierarchy, transactions,
   );
 
   const indexBuild = getBuildIndexTransactionsByShard(
-    heirarchy,
+    hierarchy,
     transactions,
   );
 
@@ -101,7 +101,7 @@ const mappedRecordsByIndexShard = (heirarchy, transactions) => {
   return transByShard;
 };
 
-const getUpdateTransactionsByShard = (heirarchy, transactions) => {
+const getUpdateTransactionsByShard = (hierarchy, transactions) => {
   const updateTransactions = $(transactions, [filter(isUpdate)]);
 
   const evaluateIndex = (record, indexNodeAndPath) => {
@@ -144,11 +144,11 @@ const getUpdateTransactionsByShard = (heirarchy, transactions) => {
 
   for (const t of updateTransactions) {
     const ancestorIdxs = getRelevantAncestorIndexes(
-      heirarchy, t.record,
+      hierarchy, t.record,
     );
 
     const referenceChanges = diffReverseRefForUpdate(
-      heirarchy, t.oldRecord, t.record,
+      hierarchy, t.oldRecord, t.record,
     );
 
     // old records to remove (filtered out)
@@ -214,7 +214,7 @@ const getUpdateTransactionsByShard = (heirarchy, transactions) => {
   });
 };
 
-const getBuildIndexTransactionsByShard = (heirarchy, transactions) => {
+const getBuildIndexTransactionsByShard = (hierarchy, transactions) => {
   const buildTransactions = $(transactions, [filter(isBuildIndex)]);
   if (!isNonEmptyArray(buildTransactions)) return [];
   const indexNode = transactions.indexNode;
@@ -225,7 +225,7 @@ const getBuildIndexTransactionsByShard = (heirarchy, transactions) => {
     }
 
     if (isReferenceIndex(indexNode)) {
-      const recordNode = getExactNodeForPath(heirarchy)(t.record.key);
+      const recordNode = getExactNodeForPath(hierarchy)(t.record.key);
       const refFields = $(recordNode.fields, [
         filter(fieldReversesReferenceToIndex(indexNode)),
       ]);
@@ -277,7 +277,7 @@ const getBuildIndexTransactionsByShard = (heirarchy, transactions) => {
   ]);
 };
 
-const get_Create_Delete_TransactionsByShard = pred => (heirarchy, transactions) => {
+const get_Create_Delete_TransactionsByShard = pred => (hierarchy, transactions) => {
   const createTransactions = $(transactions, [filter(pred)]);
 
   const getIndexNodesToApply = (t, indexes) => $(indexes, [
@@ -300,8 +300,8 @@ const get_Create_Delete_TransactionsByShard = pred => (heirarchy, transactions) 
   const allToApply = [];
 
   for (const t of createTransactions) {
-    const ancestorIdxs = getRelevantAncestorIndexes(heirarchy, t.record);
-    const reverseRef = getRelevantReverseReferenceIndexes(heirarchy, t.record);
+    const ancestorIdxs = getRelevantAncestorIndexes(hierarchy, t.record);
+    const reverseRef = getRelevantReverseReferenceIndexes(hierarchy, t.record);
 
     allToApply.push(
       getIndexNodesToApply(t, ancestorIdxs),
@@ -318,12 +318,12 @@ const getDeleteTransactionsByShard = get_Create_Delete_TransactionsByShard(isDel
 
 const getCreateTransactionsByShard = get_Create_Delete_TransactionsByShard(isCreate);
 
-const diffReverseRefForUpdate = (appHeirarchy, oldRecord, newRecord) => {
+const diffReverseRefForUpdate = (appHierarchy, oldRecord, newRecord) => {
   const oldIndexes = getRelevantReverseReferenceIndexes(
-    appHeirarchy, oldRecord,
+    appHierarchy, oldRecord,
   );
   const newIndexes = getRelevantReverseReferenceIndexes(
-    appHeirarchy, newRecord,
+    appHierarchy, newRecord,
   );
 
   const unReferenced = differenceBy(

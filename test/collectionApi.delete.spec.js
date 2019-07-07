@@ -1,4 +1,4 @@
-import {setupAppheirarchy, basicAppHeirarchyCreator_WithFields} from "./specHelpers";
+import {setupApphierarchy, basicAppHierarchyCreator_WithFields} from "./specHelpers";
 import {$, splitKey} from "../src/common";
 import {keys, filter} from "lodash/fp";
 import {permission} from "../src/authApi/permissions";
@@ -6,7 +6,7 @@ import {permission} from "../src/authApi/permissions";
 describe("collectionApi > delete", () => {
 
     it("should remove every key in collection's path", async () => {
-        const {recordApi, collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi, collectionApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const record1 = recordApi.getNew("/customers", "customer");
         record1.surname = "Ledog";
 
@@ -32,7 +32,7 @@ describe("collectionApi > delete", () => {
     });
 
     it("should not delete anything that is not in its path", async () => {
-        const {recordApi, collectionApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi, collectionApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const customer = recordApi.getNew("/customers", "customer");
         customer.surname = "Ledog";
     
@@ -57,13 +57,13 @@ describe("collectionApi > delete", () => {
     });
 
     it("should throw error when user user does not have permission", async () => {
-        const {collectionApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {collectionApi, app} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         app.removePermission(permission.manageCollection.get("/customers"));
         expect(collectionApi.delete("/customers")).rejects.toThrow(/Unauthorized/);
     });
 
     it("should not depend on having any other permissions", async () => {
-        const {collectionApi, app} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {collectionApi, app} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         app.withOnlyThisPermission(permission.manageCollection.get("/customers"));
         await collectionApi.delete("/customers");
     });

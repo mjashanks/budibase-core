@@ -1,5 +1,5 @@
-import {setupAppheirarchy,
-    basicAppHeirarchyCreator_WithFields} from "./specHelpers";
+import {setupApphierarchy,
+    basicAppHierarchyCreator_WithFields} from "./specHelpers";
 import {keys, filter} from "lodash/fp";
 import {$} from "../src/common";
 import {permission} from "../src/authApi/permissions";
@@ -33,7 +33,7 @@ const getFile = () => {
 describe("recordApi > files", () => {
  
     it("upload should fail when files size does not equal stream size", async () => {
-        const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const {file, stream, content} = getFile();
         file.size = file.size - 1;
         const record = recordApi.getNew("/customers", "customer");
@@ -44,7 +44,7 @@ describe("recordApi > files", () => {
     });
 
     it("upload should fail when record does not exist", async () => {
-        const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const {file, stream, content} = getFile();
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";
@@ -54,7 +54,7 @@ describe("recordApi > files", () => {
     });
 
     it("download should get an uploaded file", async () => {
-        const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const {file, stream, content} = getFile();
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";
@@ -69,7 +69,7 @@ describe("recordApi > files", () => {
     });
     
     it("upload should fail when filename contains invalid characters", async () => {
-        const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const {file, stream, content} = getFile();
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";
@@ -86,7 +86,7 @@ describe("recordApi > files", () => {
 
 
     it("upload should fail when path contains '..' ", async () => {
-        const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const {file, stream, content} = getFile();
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";

@@ -1,5 +1,5 @@
 import { includes } from 'lodash/fp';
-import { getNodeForCollectionPath } from '../templateApi/heirarchy';
+import { getNodeForCollectionPath } from '../templateApi/hierarchy';
 import {
   safeKey, apiWrapper,
   events, joinKey,
@@ -19,7 +19,7 @@ export const deleteCollection = (app, disableCleanup = false) => async key => ap
 
 export const _deleteCollection = async (app, key, disableCleanup) => {
   key = safeKey(key);
-  const node = getNodeForCollectionPath(app.heirarchy)(key);
+  const node = getNodeForCollectionPath(app.hierarchy)(key);
 
   await deleteRecords(app, key);
   await deleteAllIdsFolders(app, node, key);
@@ -47,7 +47,7 @@ const deleteRecords = async (app, key) => {
   const deletedAllIdsShards = [];
   const deleteAllIdsShard = async (recordId) => {
     const shardKey = getAllIdsShardKey(
-      app.heirarchy, key, recordId,
+      app.hierarchy, key, recordId,
     );
 
     if (includes(shardKey)(deletedAllIdsShards)) {

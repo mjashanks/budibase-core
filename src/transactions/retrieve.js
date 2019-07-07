@@ -10,7 +10,7 @@ import {
 import {
   joinKey, $, none, isSomething,
 } from '../common';
-import { getLastPartInKey, getNodeFromNodeKeyHash } from '../templateApi/heirarchy';
+import { getLastPartInKey, getNodeFromNodeKeyHash } from '../templateApi/hierarchy';
 import { _load } from '../recordApi/load';
 
 export const retrieve = async (app) => {
@@ -81,7 +81,7 @@ const retrieveBuildIndexTransactions = async (app, buildIndexFolder) => {
   transactions.indexNode = $(buildIndexFolder, [
     getLastPartInKey,
     nodeKeyHashFromBuildFolder,
-    getNodeFromNodeKeyHash(app.heirarchy),
+    getNodeFromNodeKeyHash(app.hierarchy),
   ]);
 
   transactions.folderKey = transactionFiles.childFolderKey;

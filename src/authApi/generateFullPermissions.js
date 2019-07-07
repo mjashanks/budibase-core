@@ -5,11 +5,11 @@ import { permission } from './permissions';
 import {
   getFlattenedHierarchy,
   isIndex, isRecord,
-} from '../templateApi/heirarchy';
+} from '../templateApi/hierarchy';
 import { $ } from '../common';
 
 export const generateFullPermissions = (app) => {
-  const allNodes = getFlattenedHierarchy(app.heirarchy);
+  const allNodes = getFlattenedHierarchy(app.hierarchy);
   const accessLevel = { permissions: [] };
 
   const recordNodes = $(allNodes, [

@@ -6,13 +6,22 @@ import {
   getActualKeyOfParent, isGlobalIndex,
   getParentKey, isShardedIndex,
   getExactNodeForPath,
-} from '../templateApi/heirarchy';
+} from '../templateApi/hierarchy';
 import {
   joinKey, isNonEmptyString, splitKey, $,
 } from '../common';
 
 export const getIndexedDataKey = (indexNode, indexKey, record) => {
-  const getShardName = (indexNode, record) => compileCode(indexNode.getShardName)({ record });
+  const getShardName = (indexNode, record) => {
+    const shardNameFunc = compileCode(indexNode.getShardName);
+    try {
+      return shardNameFunc({ record });
+    } catch(e) {
+      const errorDetails = `shardCode: ${indexNode.getShardName} :: record: ${JSON.stringify(record)} :: `
+      e.message = "Error running index shardname func: " + errorDetails + e.message;
+      throw e;
+    }
+  };
 
   const shardName = isNonEmptyString(indexNode.getShardName)
     ? `${getShardName(indexNode, record)}.csv`
@@ -22,7 +31,7 @@ export const getIndexedDataKey = (indexNode, indexKey, record) => {
 };
 
 export const getShardKeysInRange = async (app, indexKey, startRecord = null, endRecord = null) => {
-  const indexNode = getExactNodeForPath(app.heirarchy)(indexKey);
+  const indexNode = getExactNodeForPath(app.hierarchy)(indexKey);
 
   const startShardName = !startRecord
     ? null

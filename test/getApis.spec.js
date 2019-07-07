@@ -8,7 +8,7 @@ describe("getAppApis", () => {
     const getMemoryAppApis = async () => {
         const {templateApi} = getMemoryTemplateApi();
         const rootNode = templateApi.getNewRootLevel();
-        await templateApi.saveApplicationHeirarchy(rootNode);
+        await templateApi.saveApplicationHierarchy(rootNode);
 
         return await getAppApis(templateApi._storeHandle, {});
     }

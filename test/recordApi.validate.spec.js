@@ -1,6 +1,6 @@
-import {setupAppheirarchy, stubEventHandler,
-    basicAppHeirarchyCreator_WithFields, basicAppHeirarchyCreator_WithFields_AndIndexes,
-    heirarchyFactory, withFields} from "./specHelpers";
+import {setupApphierarchy, stubEventHandler,
+    basicAppHierarchyCreator_WithFields, basicAppHierarchyCreator_WithFields_AndIndexes,
+    hierarchyFactory, withFields} from "./specHelpers";
 import {find} from "lodash";
 import {addHours} from "date-fns";
 import {events} from "../src/common"
@@ -9,7 +9,7 @@ describe("recordApi > validate", () => {
 
     it("should return errors when any fields do not parse", async () => {
 
-        const {recordApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        const {recordApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         const record = recordApi.getNew("/customers", "customer");
 
         record.surname = "Ledog";
@@ -24,14 +24,14 @@ describe("recordApi > validate", () => {
     });
 
     it("should return errors when mandatory field is empty", async () => {
-        const withValidationRule = (heirarchy, templateApi) => {
-            templateApi.addRecordValidationRule(heirarchy.customerRecord)
+        const withValidationRule = (hierarchy, templateApi) => {
+            templateApi.addRecordValidationRule(hierarchy.customerRecord)
             (templateApi.commonRecordValidationRules.fieldNotEmpty("surname"));
         };
 
-        const heirarchyCreator = heirarchyFactory(withFields, withValidationRule);
+        const hierarchyCreator = hierarchyFactory(withFields, withValidationRule);
         const {recordApi} = 
-            await setupAppheirarchy(heirarchyCreator);
+            await setupApphierarchy(hierarchyCreator);
 
         
         const record = recordApi.getNew("/customers", "customer");
@@ -45,14 +45,14 @@ describe("recordApi > validate", () => {
     });
 
     it("should return error when string field is beyond maxLength", async () => {
-        const withFieldWithMaxLength = (heirarchy, templateApi) => {
-            const surname = find(heirarchy.customerRecord.fields, f => f.name === "surname");
+        const withFieldWithMaxLength = (hierarchy, templateApi) => {
+            const surname = find(hierarchy.customerRecord.fields, f => f.name === "surname");
             surname.typeOptions.maxLength = 5;
         };
 
-        const heirarchyCreator = heirarchyFactory(withFields, withFieldWithMaxLength);
-        const {recordApi, appHeirarchy} = 
-            await setupAppheirarchy(heirarchyCreator);
+        const hierarchyCreator = hierarchyFactory(withFields, withFieldWithMaxLength);
+        const {recordApi, appHierarchy} = 
+            await setupApphierarchy(hierarchyCreator);
 
         
         const record = recordApi.getNew("/customers", "customer");
@@ -64,15 +64,15 @@ describe("recordApi > validate", () => {
     });
 
     it("should return error when number field is > maxValue", async () => {
-        const withFieldWithMaxLength = (heirarchy, templateApi) => {
-            const age = find(heirarchy.customerRecord.fields, f => f.name === "age");
+        const withFieldWithMaxLength = (hierarchy, templateApi) => {
+            const age = find(hierarchy.customerRecord.fields, f => f.name === "age");
             age.typeOptions.maxValue = 10;
             age.typeOptions.minValue = 5
         };
 
-        const heirarchyCreator = heirarchyFactory(withFields, withFieldWithMaxLength);
-        const {recordApi, appHeirarchy} = 
-            await setupAppheirarchy(heirarchyCreator);
+        const hierarchyCreator = hierarchyFactory(withFields, withFieldWithMaxLength);
+        const {recordApi, appHierarchy} = 
+            await setupApphierarchy(hierarchyCreator);
 
         
         const tooOldRecord = recordApi.getNew("/customers", "customer");
@@ -85,14 +85,14 @@ describe("recordApi > validate", () => {
     });
 
     it("should return error when number field is < minValue", async () => {
-        const withFieldWithMaxLength = (heirarchy, templateApi) => {
-            const age = find(heirarchy.customerRecord.fields, f => f.name === "age");
+        const withFieldWithMaxLength = (hierarchy, templateApi) => {
+            const age = find(hierarchy.customerRecord.fields, f => f.name === "age");
             age.typeOptions.minValue = 5
         };
 
-        const heirarchyCreator = heirarchyFactory(withFields, withFieldWithMaxLength);
-        const {recordApi, appHeirarchy} = 
-            await setupAppheirarchy(heirarchyCreator);
+        const hierarchyCreator = hierarchyFactory(withFields, withFieldWithMaxLength);
+        const {recordApi, appHierarchy} = 
+            await setupApphierarchy(hierarchyCreator);
 
         const tooYoungRecord = recordApi.getNew("/customers", "customer");
         tooYoungRecord.age = 3
@@ -103,14 +103,14 @@ describe("recordApi > validate", () => {
     });
 
     it("should return error when number has too many decimal places", async () => {
-        const withFieldWithMaxLength = (heirarchy, templateApi) => {
-            const age = find(heirarchy.customerRecord.fields, f => f.name === "age");
+        const withFieldWithMaxLength = (hierarchy, templateApi) => {
+            const age = find(hierarchy.customerRecord.fields, f => f.name === "age");
             age.typeOptions.decimalPlaces = 2;
         };
 
-        const heirarchyCreator = heirarchyFactory(withFields, withFieldWithMaxLength);
-        const {recordApi, appHeirarchy} = 
-            await setupAppheirarchy(heirarchyCreator);
+        const hierarchyCreator = hierarchyFactory(withFields, withFieldWithMaxLength);
+        const {recordApi, appHierarchy} = 
+            await setupApphierarchy(hierarchyCreator);
 
         const record = recordApi.getNew("/customers", "customer");
         record.age = 3.123
@@ -121,14 +121,14 @@ describe("recordApi > validate", () => {
     });
 
     it("should return error when datetime field is > maxValue", async () => {
-        const withFieldWithMaxLength = (heirarchy, templateApi) => {
-            const createddate = find(heirarchy.customerRecord.fields, f => f.name === "createddate");
+        const withFieldWithMaxLength = (hierarchy, templateApi) => {
+            const createddate = find(hierarchy.customerRecord.fields, f => f.name === "createddate");
             createddate.typeOptions.maxValue = new Date();
         };
 
-        const heirarchyCreator = heirarchyFactory(withFields, withFieldWithMaxLength);
-        const {recordApi, appHeirarchy} = 
-            await setupAppheirarchy(heirarchyCreator);
+        const hierarchyCreator = hierarchyFactory(withFields, withFieldWithMaxLength);
+        const {recordApi, appHierarchy} = 
+            await setupApphierarchy(hierarchyCreator);
 
         
         const record = recordApi.getNew("/customers", "customer");
@@ -141,14 +141,14 @@ describe("recordApi > validate", () => {
     });
 
     it("should return error when number field is < minValue", async () => {
-        const withFieldWithMaxLength = (heirarchy, templateApi) => {
-            const createddate = find(heirarchy.customerRecord.fields, f => f.name === "createddate");
+        const withFieldWithMaxLength = (hierarchy, templateApi) => {
+            const createddate = find(hierarchy.customerRecord.fields, f => f.name === "createddate");
             createddate.typeOptions.minValue = addHours(new Date(), 1);
         };
 
-        const heirarchyCreator = heirarchyFactory(withFields, withFieldWithMaxLength);
-        const {recordApi, appHeirarchy} = 
-            await setupAppheirarchy(heirarchyCreator);
+        const hierarchyCreator = hierarchyFactory(withFields, withFieldWithMaxLength);
+        const {recordApi, appHierarchy} = 
+            await setupApphierarchy(hierarchyCreator);
 
         
         const record = recordApi.getNew("/customers", "customer");
@@ -160,15 +160,15 @@ describe("recordApi > validate", () => {
     });
 
     it("should return error when string IS NOT one of declared values, and only declared values are allowed", async () => {
-        const withFieldWithMaxLength = (heirarchy, templateApi) => {
-            const surname = find(heirarchy.customerRecord.fields, f => f.name === "surname");
+        const withFieldWithMaxLength = (hierarchy, templateApi) => {
+            const surname = find(hierarchy.customerRecord.fields, f => f.name === "surname");
             surname.typeOptions.allowDeclaredValuesOnly = true
             surname.typeOptions.values = ["thedog"];
         };
 
-        const heirarchyCreator = heirarchyFactory(withFields, withFieldWithMaxLength);
-        const {recordApi, appHeirarchy} = 
-            await setupAppheirarchy(heirarchyCreator);
+        const hierarchyCreator = hierarchyFactory(withFields, withFieldWithMaxLength);
+        const {recordApi, appHierarchy} = 
+            await setupApphierarchy(hierarchyCreator);
 
         
         const record = recordApi.getNew("/customers", "customer");
@@ -180,15 +180,15 @@ describe("recordApi > validate", () => {
     });
 
     it("should not return error when string IS one of declared values, and only declared values are allowed", async () => {
-        const withFieldWithMaxLength = (heirarchy, templateApi) => {
-            const surname = find(heirarchy.customerRecord.fields, f => f.name === "surname");
+        const withFieldWithMaxLength = (hierarchy, templateApi) => {
+            const surname = find(hierarchy.customerRecord.fields, f => f.name === "surname");
             surname.typeOptions.allowDeclaredValuesOnly = true
             surname.typeOptions.values = ["thedog"];
         };
 
-        const heirarchyCreator = heirarchyFactory(withFields, withFieldWithMaxLength);
-        const {recordApi, appHeirarchy} = 
-            await setupAppheirarchy(heirarchyCreator);
+        const hierarchyCreator = hierarchyFactory(withFields, withFieldWithMaxLength);
+        const {recordApi, appHierarchy} = 
+            await setupApphierarchy(hierarchyCreator);
 
         
         const record = recordApi.getNew("/customers", "customer");
@@ -200,15 +200,15 @@ describe("recordApi > validate", () => {
     });
 
     it("should not return error when string IS NOT one of declared values, but any values are allowed", async () => {
-        const withFieldWithMaxLength = (heirarchy, templateApi) => {
-            const surname = find(heirarchy.customerRecord.fields, f => f.name === "surname");
+        const withFieldWithMaxLength = (hierarchy, templateApi) => {
+            const surname = find(hierarchy.customerRecord.fields, f => f.name === "surname");
             surname.typeOptions.allowDeclaredValuesOnly = false
             surname.typeOptions.values = ["thedog"];
         };
 
-        const heirarchyCreator = heirarchyFactory(withFields, withFieldWithMaxLength);
-        const {recordApi, appHeirarchy} = 
-            await setupAppheirarchy(heirarchyCreator);
+        const hierarchyCreator = hierarchyFactory(withFields, withFieldWithMaxLength);
+        const {recordApi, appHierarchy} = 
+            await setupApphierarchy(hierarchyCreator);
 
         
         const record = recordApi.getNew("/customers", "customer");
@@ -220,8 +220,8 @@ describe("recordApi > validate", () => {
     });
 
     it("should return error when reference field does not exist in options index", async () => {
-        const {recordApi, appHeirarchy} = 
-            await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+        const {recordApi, appHierarchy} = 
+            await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes);
 
         const partner = recordApi.getNew("/partners", "partner");
         partner.businessName = "ACME Inc";
@@ -236,14 +236,14 @@ describe("recordApi > validate", () => {
     });
 
     it("should publish invalid events", async () => {
-        const withValidationRule = (heirarchy, templateApi) => {
-            templateApi.addRecordValidationRule(heirarchy.customerRecord)
+        const withValidationRule = (hierarchy, templateApi) => {
+            templateApi.addRecordValidationRule(hierarchy.customerRecord)
             (templateApi.commonRecordValidationRules.fieldNotEmpty("surname"));
         };
 
-        const heirarchyCreator = heirarchyFactory(withFields, withValidationRule);
+        const hierarchyCreator = hierarchyFactory(withFields, withValidationRule);
 
-        const {recordApi, subscribe} = await setupAppheirarchy(heirarchyCreator);
+        const {recordApi, subscribe} = await setupApphierarchy(hierarchyCreator);
         const handler = stubEventHandler();
         subscribe(events.recordApi.save.onInvalid, 
                   handler.handle);

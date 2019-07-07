@@ -1,6 +1,6 @@
-import {setupAppheirarchy,
-    basicAppHeirarchyCreator_WithFields, 
-    basicAppHeirarchyCreator_WithFields_AndIndexes} from "./specHelpers";
+import {setupApphierarchy,
+    basicAppHierarchyCreator_WithFields, 
+    basicAppHierarchyCreator_WithFields_AndIndexes} from "./specHelpers";
 import {joinKey} from "../src/common";
 import {some, isArray} from "lodash";
 
@@ -9,7 +9,7 @@ describe("recordApi > create > reindex", () => {
     it("should add to default index, when record created", async () => {
 
         const {recordApi,
-        indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+        indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes);
         const record = recordApi.getNew("/customers", "customer");
 
         record.surname = "Ledog";
@@ -30,7 +30,7 @@ describe("recordApi > create > reindex", () => {
     it("should add to index with filter, when record created and passes filter", async () => {
 
         const {recordApi,
-            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+            indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes);
         const record = recordApi.getNew("/customers", "customer");
 
         record.surname = "Ledog";
@@ -51,7 +51,7 @@ describe("recordApi > create > reindex", () => {
     it("should not add to index with filter, when record created and fails filter", async () => {
 
         const {recordApi,
-            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+            indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes);
         const record = recordApi.getNew("/customers", "customer");
 
         record.surname = "Ledog";
@@ -69,7 +69,7 @@ describe("recordApi > create > reindex", () => {
 
     it("should be able to add to and list subcollection, after save (i.e. save initialiieses collection)", async () => {
         const {recordApi, indexApi} = 
-            await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+            await setupApphierarchy(basicAppHierarchyCreator_WithFields);
         
         const customer = recordApi.getNew("/customers", "customer");
         await recordApi.save(customer);
@@ -91,7 +91,7 @@ describe("recordApi > create > reindex", () => {
 
     it("should add to global index, when required", async () => {
         const {recordApi, indexApi} = 
-            await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+            await setupApphierarchy(basicAppHierarchyCreator_WithFields);
 
         const customer = recordApi.getNew("/customers", "customer");
         customer.surname = "Ledog";
@@ -109,7 +109,7 @@ describe("recordApi > create > reindex", () => {
 
     it("should add to reverse reference index, when required", async () => {
         const {recordApi, indexApi} = 
-            await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+            await setupApphierarchy(basicAppHierarchyCreator_WithFields);
 
         const referredByCustomer = recordApi.getNew("/customers", "customer");
         referredByCustomer.surname = "Ledog";
@@ -140,7 +140,7 @@ describe("recordApi > create > reindex", () => {
     it("should add to sharded index, when record created, and should add into correct shards", async () => {
 
         const {recordApi,
-            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+            indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes);
         
         const record1 = recordApi.getNew("/customers", "customer");
         record1.surname = "Ledog";
@@ -166,7 +166,7 @@ describe("recordApi > delete > reindex", () => {
 
     it("should remove from default index", async () => {
         const {recordApi,
-            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+            indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes);
         const record = recordApi.getNew("/customers", "customer");
 
         record.surname = "Ledog";
@@ -184,7 +184,7 @@ describe("recordApi > delete > reindex", () => {
     
     it("should remove from sharded index", async () => {
         const {recordApi,
-            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+            indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes);
         
         const record1 = recordApi.getNew("/customers", "customer");
         record1.surname = "Ledog";
@@ -203,7 +203,7 @@ describe("recordApi > delete > reindex", () => {
 
     it("should remove from all indexes", async () => {
         const {recordApi,
-            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+            indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes);
         
         const referredBy = recordApi.getNew("/customers", "customer");
         referredBy.surname = "Zeecat";
@@ -239,7 +239,7 @@ describe("recordApi > delete > reindex", () => {
 
     it("should only remove relevant record from all indexes", async () => {
         const {recordApi,
-            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+            indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes);
         const record = recordApi.getNew("/customers", "customer");
 
         record.surname = "Ledog";
@@ -271,7 +271,7 @@ describe("recordApi > delete > reindex", () => {
 
     it("should remove from global index", async () => {
         const {recordApi, indexApi} = 
-            await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+            await setupApphierarchy(basicAppHierarchyCreator_WithFields);
 
         const customer = recordApi.getNew("/customers", "customer");
         customer.surname = "Ledog";
@@ -291,7 +291,7 @@ describe("recordApi > update > reindex", () => {
 
     it("should update values in indexes", async () => {
         const {recordApi,
-            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+            indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes);
         const record = recordApi.getNew("/customers", "customer");
 
         record.surname = "Ledog";
@@ -313,7 +313,7 @@ describe("recordApi > update > reindex", () => {
 
     it("should update values in sharded index", async () => {
         const {recordApi,
-            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+            indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes);
         const record = recordApi.getNew("/customers", "customer");
         record.surname = "Ledog";
         await recordApi.save(record);
@@ -330,7 +330,7 @@ describe("recordApi > update > reindex", () => {
 
     it("should only update values of relevant item", async () => {
         const {recordApi,
-            indexApi} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+            indexApi} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes);
         const record = recordApi.getNew("/customers", "customer");
 
         record.surname = "Ledog";
@@ -365,7 +365,7 @@ describe("recordApi > update > reindex", () => {
 
     it("should update global index", async () => {
         const {recordApi, indexApi} = 
-            await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+            await setupApphierarchy(basicAppHierarchyCreator_WithFields);
 
         const customer = recordApi.getNew("/customers", "customer");
         customer.surname = "Ledog";
@@ -386,7 +386,7 @@ describe("recordApi > update > reindex", () => {
 
     it("should remove from one reference index and add to another when field changed", async () => {
         const {recordApi, indexApi} = 
-        await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        await setupApphierarchy(basicAppHierarchyCreator_WithFields);
 
         const partner1 = recordApi.getNew("/partners", "partner");
         partner1.businessName = "ACME inc";
@@ -421,7 +421,7 @@ describe("recordApi > update > reindex", () => {
 
     it("should remove from reference index when reference blanked", async () => {
         const {recordApi, indexApi} = 
-        await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        await setupApphierarchy(basicAppHierarchyCreator_WithFields);
 
         const partner1 = recordApi.getNew("/partners", "partner");
         partner1.businessName = "ACME inc";
@@ -448,7 +448,7 @@ describe("recordApi > update > reindex", () => {
 
     it("should remove from reference index when filter no longer passes", async () => {
         const {recordApi, indexApi} = 
-        await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        await setupApphierarchy(basicAppHierarchyCreator_WithFields);
 
         const partner1 = recordApi.getNew("/partners", "partner");
         partner1.businessName = "ACME inc";
@@ -473,7 +473,7 @@ describe("recordApi > update > reindex", () => {
 
     it("should not add to reference index when filter does not pass", async () => {
         const {recordApi, indexApi} = 
-        await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        await setupApphierarchy(basicAppHierarchyCreator_WithFields);
 
         const partner1 = recordApi.getNew("/partners", "partner");
         partner1.businessName = "ACME inc";
@@ -496,7 +496,7 @@ describe("recordApi > update > reindex", () => {
 
     it("should remove from reference index, and not re-added when no longer passes filter, but reference is changed", async () => {
         const {recordApi, indexApi} = 
-        await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        await setupApphierarchy(basicAppHierarchyCreator_WithFields);
 
         const partner1 = recordApi.getNew("/partners", "partner");
         partner1.businessName = "ACME inc";
@@ -532,7 +532,7 @@ describe("recordApi > update > reindex", () => {
 
     it("should add to reference index, when reference is changed, and did not previsouly pass filter", async () => {
         const {recordApi, indexApi} = 
-        await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        await setupApphierarchy(basicAppHierarchyCreator_WithFields);
 
         const partner1 = recordApi.getNew("/partners", "partner");
         partner1.businessName = "ACME inc";
@@ -574,7 +574,7 @@ describe("referenced object changed", () => {
     it("should update the reference", async () => {
 
         const {recordApi, indexApi} = 
-        await setupAppheirarchy(basicAppHeirarchyCreator_WithFields);
+        await setupApphierarchy(basicAppHierarchyCreator_WithFields);
 
         const partner1 = recordApi.getNew("/partners", "partner");
         partner1.businessName = "ACME inc";

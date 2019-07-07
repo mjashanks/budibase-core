@@ -2,7 +2,7 @@ import {
   keyBy, mapValues,
 } from 'lodash/fp';
 import { generate } from 'shortid';
-import { getNodeForCollectionPath } from '../templateApi/heirarchy';
+import { getNodeForCollectionPath } from '../templateApi/hierarchy';
 import { getNewFieldValue } from '../types';
 import {
   $, joinKey, safeKey, apiWrapperSync, events,
@@ -24,7 +24,7 @@ const _getNew = (recordNode, collectionKey) => constructRecord(recordNode, getNe
 
 const getRecordNode = (app, collectionKey) => {
   collectionKey = safeKey(collectionKey);
-  return getNodeForCollectionPath(app.heirarchy)(collectionKey);
+  return getNodeForCollectionPath(app.hierarchy)(collectionKey);
 };
 
 export const getNewChild = app => (recordKey, collectionName, recordTypeName) => 

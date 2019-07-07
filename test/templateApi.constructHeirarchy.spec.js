@@ -1,7 +1,7 @@
 import {getMemoryTemplateApi} from "./specHelpers";
 import {errors} from "../src/templateApi";
 
-describe("heirarchy node creation", () => {
+describe("hierarchy node creation", () => {
 
     it("> getNewRootLevel > should be initialised with correct members", async () => {
         const {templateApi} = await getMemoryTemplateApi();

@@ -1,10 +1,10 @@
 import { has } from 'lodash';
 
-const publish = handlers => (eventName, context = {}) => {
+const publish = handlers => async (eventName, context = {}) => {
   if (!has(handlers, eventName)) return;
 
   for (const handler of handlers[eventName]) {
-    handler(eventName, context);
+    await handler(eventName, context);
   }
 };
 

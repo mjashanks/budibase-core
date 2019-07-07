@@ -1,20 +1,20 @@
-import {setupAppheirarchy, findCollectionDefaultIndex,
-    basicAppHeirarchyCreator_WithFields_AndIndexes} from "./specHelpers";
+import {setupApphierarchy, findCollectionDefaultIndex,
+    basicAppHierarchyCreator_WithFields_AndIndexes} from "./specHelpers";
 import { joinKey } from "../src/common";
 import {some} from "lodash";
 import {_deleteIndex} from "../src/indexApi/delete";
 import {permission} from "../src/authApi/permissions";
-import { getExactNodeForPath } from "../src/templateApi/heirarchy";
+import { getExactNodeForPath } from "../src/templateApi/hierarchy";
 
 describe("buildIndex > Global index", () => {
 
     it("should index a record when record node is not decendant", async () => {
-        const {recordApi, indexApi, appHeirarchy, app} = await setupAppheirarchy(
-            basicAppHeirarchyCreator_WithFields_AndIndexes
+        const {recordApi, indexApi, appHierarchy, app} = await setupApphierarchy(
+            basicAppHierarchyCreator_WithFields_AndIndexes
         );
 
         const customer = recordApi.getNew(
-            appHeirarchy.customerRecord.collectionNodeKey(),
+            appHierarchy.customerRecord.collectionNodeKey(),
             "customer");
         
         customer.surname = "thedog";
@@ -43,7 +43,7 @@ describe("buildIndex > Global index", () => {
 
         await recordApi.save(paidInvoice);
 
-        const indexKey = appHeirarchy.outstandingInvoicesIndex.nodeKey();
+        const indexKey = appHierarchy.outstandingInvoicesIndex.nodeKey();
         await _deleteIndex(app, indexKey, false);
 
         await indexApi.buildIndex(indexKey);
@@ -54,12 +54,12 @@ describe("buildIndex > Global index", () => {
     });
 
     it("should index records from 2 seperate tree branches", async () => {
-        const {recordApi, indexApi, appHeirarchy, app} = await setupAppheirarchy(
-            basicAppHeirarchyCreator_WithFields_AndIndexes
+        const {recordApi, indexApi, appHierarchy, app} = await setupApphierarchy(
+            basicAppHierarchyCreator_WithFields_AndIndexes
         );
 
         const customer = recordApi.getNew(
-            appHeirarchy.customerRecord.collectionNodeKey(),
+            appHierarchy.customerRecord.collectionNodeKey(),
             "customer");
         
         customer.surname = "thedog";
@@ -78,7 +78,7 @@ describe("buildIndex > Global index", () => {
         await recordApi.save(invoice);
 
         const partner = recordApi.getNew(
-            appHeirarchy.partnerRecord.collectionNodeKey(),
+            appHierarchy.partnerRecord.collectionNodeKey(),
             "partner");
         
         partner.surname = "thedog";
@@ -96,7 +96,7 @@ describe("buildIndex > Global index", () => {
 
         await recordApi.save(partnerInvoice);
 
-        const indexKey = appHeirarchy.outstandingInvoicesIndex.nodeKey();
+        const indexKey = appHierarchy.outstandingInvoicesIndex.nodeKey();
         await _deleteIndex(app, indexKey, false);
 
         await indexApi.buildIndex(indexKey);
@@ -113,12 +113,12 @@ describe("buildIndex > Global index", () => {
 describe("buildIndex > TopLevelCollection", () => {
 
     it("should index a record when it is a nested decendant of the collection node", async() => {
-        const {recordApi, indexApi, appHeirarchy, app} = await setupAppheirarchy(
-            basicAppHeirarchyCreator_WithFields_AndIndexes
+        const {recordApi, indexApi, appHierarchy, app} = await setupApphierarchy(
+            basicAppHierarchyCreator_WithFields_AndIndexes
         );
 
         const customer = recordApi.getNew(
-            appHeirarchy.customerRecord.collectionNodeKey(),
+            appHierarchy.customerRecord.collectionNodeKey(),
             "customer");
         
         customer.surname = "thedog";
@@ -136,7 +136,7 @@ describe("buildIndex > TopLevelCollection", () => {
 
         await recordApi.save(invoice);
 
-        const indexKey = appHeirarchy.customerInvoicesIndex.nodeKey();
+        const indexKey = appHierarchy.customerInvoicesIndex.nodeKey();
         await _deleteIndex(app, indexKey, false);
 
         await indexApi.buildIndex(indexKey);
@@ -148,12 +148,12 @@ describe("buildIndex > TopLevelCollection", () => {
     });
 
     it("should not index a record when it is not decendant", async() => {
-        const {recordApi, indexApi, appHeirarchy, app} = await setupAppheirarchy(
-            basicAppHeirarchyCreator_WithFields_AndIndexes
+        const {recordApi, indexApi, appHierarchy, app} = await setupApphierarchy(
+            basicAppHierarchyCreator_WithFields_AndIndexes
         );
 
         const partner = recordApi.getNew(
-            appHeirarchy.partnerRecord.collectionNodeKey(),
+            appHierarchy.partnerRecord.collectionNodeKey(),
             "partner");
         
         partner.surname = "thedog";
@@ -171,7 +171,7 @@ describe("buildIndex > TopLevelCollection", () => {
 
         await recordApi.save(invoice);
 
-        const indexKey = appHeirarchy.customerInvoicesIndex.nodeKey();
+        const indexKey = appHierarchy.customerInvoicesIndex.nodeKey();
         await _deleteIndex(app, indexKey, false);
 
         await indexApi.buildIndex(indexKey);
@@ -187,12 +187,12 @@ describe("buildIndex > nested collection", () => {
 
     it("should build a single record into index", async () => {
 
-        const {recordApi, indexApi, appHeirarchy, app} = await setupAppheirarchy(
-            basicAppHeirarchyCreator_WithFields_AndIndexes
+        const {recordApi, indexApi, appHierarchy, app} = await setupApphierarchy(
+            basicAppHierarchyCreator_WithFields_AndIndexes
         );
 
         const customer = recordApi.getNew(
-            appHeirarchy.customerRecord.collectionNodeKey(),
+            appHierarchy.customerRecord.collectionNodeKey(),
             "customer");
         
         customer.surname = "thedog";
@@ -213,7 +213,7 @@ describe("buildIndex > nested collection", () => {
         const indexKey = joinKey(customer.key, "invoice_index");
         await _deleteIndex(app, indexKey, false);
 
-        const indexNode = getExactNodeForPath(appHeirarchy.root)(indexKey);
+        const indexNode = getExactNodeForPath(appHierarchy.root)(indexKey);
         await indexApi.buildIndex(indexNode.nodeKey());
         const indexItems = await indexApi.listItems(indexKey);
 
@@ -224,12 +224,12 @@ describe("buildIndex > nested collection", () => {
 
     it("should build multiple records, from different parents into index", async () => {
 
-        const {recordApi, indexApi, appHeirarchy, app} = await setupAppheirarchy(
-            basicAppHeirarchyCreator_WithFields_AndIndexes
+        const {recordApi, indexApi, appHierarchy, app} = await setupApphierarchy(
+            basicAppHierarchyCreator_WithFields_AndIndexes
         );
 
         const customer = recordApi.getNew(
-            appHeirarchy.customerRecord.collectionNodeKey(),
+            appHierarchy.customerRecord.collectionNodeKey(),
             "customer");
         
         customer.surname = "thedog";
@@ -248,7 +248,7 @@ describe("buildIndex > nested collection", () => {
         await recordApi.save(invoice);
 
         const customer2 = recordApi.getNew(
-            appHeirarchy.customerRecord.collectionNodeKey(),
+            appHierarchy.customerRecord.collectionNodeKey(),
             "customer");
         
         customer2.surname = "thedog";
@@ -269,7 +269,7 @@ describe("buildIndex > nested collection", () => {
         const indexKey = joinKey(customer.key, "invoice_index");
         await _deleteIndex(app, indexKey, false);
 
-        const indexNode = getExactNodeForPath(appHeirarchy.root)(indexKey);
+        const indexNode = getExactNodeForPath(appHierarchy.root)(indexKey);
         await indexApi.buildIndex(
             indexNode.nodeKey());
         const indexItems = await indexApi.listItems(indexKey);
@@ -291,19 +291,19 @@ describe("buildIndex > nested collection", () => {
 describe("buildIndex > sharded index", () => {
 
     it("should index a record into a sharded index", async() => {
-        const {recordApi, indexApi, appHeirarchy, app} = await setupAppheirarchy(
-            basicAppHeirarchyCreator_WithFields_AndIndexes
+        const {recordApi, indexApi, appHierarchy, app} = await setupApphierarchy(
+            basicAppHierarchyCreator_WithFields_AndIndexes
         );
 
         const customer = recordApi.getNew(
-            appHeirarchy.customerRecord.collectionNodeKey(),
+            appHierarchy.customerRecord.collectionNodeKey(),
             "customer");
         
         customer.surname = "thedog";
         
         await recordApi.save(customer);
 
-        const indexKey = appHeirarchy
+        const indexKey = appHierarchy
                             .customersBySurnameIndex
                             .nodeKey();
 
@@ -318,23 +318,23 @@ describe("buildIndex > sharded index", () => {
     });
 
     it("should index multiple record into a sharded index", async() => {
-        const {recordApi, indexApi, appHeirarchy, app} = await setupAppheirarchy(
-            basicAppHeirarchyCreator_WithFields_AndIndexes
+        const {recordApi, indexApi, appHierarchy, app} = await setupApphierarchy(
+            basicAppHierarchyCreator_WithFields_AndIndexes
         );
 
         const customer1 = recordApi.getNew(
-            appHeirarchy.customerRecord.collectionNodeKey(),
+            appHierarchy.customerRecord.collectionNodeKey(),
             "customer");
         customer1.surname = "thedog";
         await recordApi.save(customer1);
 
         const customer2 = recordApi.getNew(
-            appHeirarchy.customerRecord.collectionNodeKey(),
+            appHierarchy.customerRecord.collectionNodeKey(),
             "customer");
         customer2.surname = "Zeecat";
         await recordApi.save(customer2);
 
-        const indexKey = appHeirarchy
+        const indexKey = appHierarchy
                             .customersBySurnameIndex
                             .nodeKey();
 
@@ -350,12 +350,12 @@ describe("buildIndex > sharded index", () => {
     });
 
     it("should index multiple records into a sharded and nested index", async() => {
-        const {recordApi, indexApi, appHeirarchy, app} = await setupAppheirarchy(
-            basicAppHeirarchyCreator_WithFields_AndIndexes
+        const {recordApi, indexApi, appHierarchy, app} = await setupApphierarchy(
+            basicAppHierarchyCreator_WithFields_AndIndexes
         );
 
         const customer = recordApi.getNew(
-            appHeirarchy.customerRecord.collectionNodeKey(),
+            appHierarchy.customerRecord.collectionNodeKey(),
             "customer");
         customer.surname = "thedog";
         await recordApi.save(customer);
@@ -381,12 +381,12 @@ describe("buildIndex > sharded index", () => {
 
         const indexKey = joinKey(
             customer.key, 
-            appHeirarchy.invoicesByOutstandingIndex.name);
+            appHierarchy.invoicesByOutstandingIndex.name);
 
         await _deleteIndex(app, indexKey, false);
 
         await indexApi.buildIndex(
-            appHeirarchy.invoicesByOutstandingIndex.nodeKey());
+            appHierarchy.invoicesByOutstandingIndex.nodeKey());
         const indexItems = await indexApi.listItems(indexKey);
 
         expect(indexItems.length).toBe(2);
@@ -403,9 +403,9 @@ describe("buildIndex > sharded index", () => {
     });
 
     it("should build reverse reference index", async () => {
-        const {recordApi, indexApi, appHeirarchy, app} = 
-            await setupAppheirarchy(
-                basicAppHeirarchyCreator_WithFields_AndIndexes
+        const {recordApi, indexApi, appHierarchy, app} = 
+            await setupApphierarchy(
+                basicAppHierarchyCreator_WithFields_AndIndexes
             );
 
         const referencedCustomer = recordApi.getNew("/customers", "customer");
@@ -426,7 +426,7 @@ describe("buildIndex > sharded index", () => {
         await _deleteIndex(app, indexKey, false);
 
         await indexApi.buildIndex(
-            appHeirarchy.referredToCustomersReverseIndex.nodeKey());
+            appHierarchy.referredToCustomersReverseIndex.nodeKey());
 
         const indexItems = await indexApi.listItems(indexKey);
 
@@ -439,9 +439,9 @@ describe("buildIndex > sharded index", () => {
 describe("buildIndex > reverse reference index", () => {
 
     it("should build a single record into index", async () => {
-        const {recordApi, indexApi, appHeirarchy, app} = 
-            await setupAppheirarchy(
-                basicAppHeirarchyCreator_WithFields_AndIndexes
+        const {recordApi, indexApi, appHierarchy, app} = 
+            await setupApphierarchy(
+                basicAppHierarchyCreator_WithFields_AndIndexes
             );
 
         const partner1 = recordApi.getNew("/partners", "partner");
@@ -462,7 +462,7 @@ describe("buildIndex > reverse reference index", () => {
         await _deleteIndex(app, indexKey, false);
 
         await indexApi.buildIndex(
-            appHeirarchy.partnerCustomersReverseIndex.nodeKey());
+            appHierarchy.partnerCustomersReverseIndex.nodeKey());
         const indexItems = await indexApi.listItems(indexKey);
 
         expect(indexItems.length).toBe(1);
@@ -470,9 +470,9 @@ describe("buildIndex > reverse reference index", () => {
     });
 
     it("should build multiple records into an index, when referencing same record", async () => {
-        const {recordApi, indexApi, appHeirarchy, app} = 
-            await setupAppheirarchy(
-                basicAppHeirarchyCreator_WithFields_AndIndexes
+        const {recordApi, indexApi, appHierarchy, app} = 
+            await setupApphierarchy(
+                basicAppHierarchyCreator_WithFields_AndIndexes
             );
 
         const partner1 = recordApi.getNew("/partners", "partner");
@@ -502,7 +502,7 @@ describe("buildIndex > reverse reference index", () => {
         await _deleteIndex(app, indexKey, false);
 
         await indexApi.buildIndex(
-            appHeirarchy.partnerCustomersReverseIndex.nodeKey());
+            appHierarchy.partnerCustomersReverseIndex.nodeKey());
         const indexItems = await indexApi.listItems(indexKey);
 
         expect(indexItems.length).toBe(2);
@@ -512,9 +512,9 @@ describe("buildIndex > reverse reference index", () => {
 
 
     it("should build multiple records into seperate indexes, when referencing different records", async () => {
-        const {recordApi, indexApi, appHeirarchy, app} = 
-            await setupAppheirarchy(
-                basicAppHeirarchyCreator_WithFields_AndIndexes
+        const {recordApi, indexApi, appHierarchy, app} = 
+            await setupApphierarchy(
+                basicAppHierarchyCreator_WithFields_AndIndexes
             );
 
         const partner1 = recordApi.getNew("/partners", "partner");
@@ -551,7 +551,7 @@ describe("buildIndex > reverse reference index", () => {
         await _deleteIndex(app, indexKey2, false);
 
         await indexApi.buildIndex(
-            appHeirarchy.partnerCustomersReverseIndex.nodeKey());
+            appHierarchy.partnerCustomersReverseIndex.nodeKey());
 
         const indexItems1 = await indexApi.listItems(indexKey1);
 
@@ -576,9 +576,9 @@ describe("buildIndex > reverse reference index", () => {
         //  - customer.partner.key + /invoices/default
         // bearing in mind that the customer is an ancestor.
 
-        const {recordApi, indexApi, appHeirarchy, app} = 
-            await setupAppheirarchy(
-                basicAppHeirarchyCreator_WithFields_AndIndexes
+        const {recordApi, indexApi, appHierarchy, app} = 
+            await setupApphierarchy(
+                basicAppHierarchyCreator_WithFields_AndIndexes
             );
 
         const partner = recordApi.getNew("/partners", "partner");
@@ -614,7 +614,7 @@ describe("buildIndex > reverse reference index", () => {
         await _deleteIndex(app, indexKey, false);
 
         await indexApi.buildIndex(
-            appHeirarchy.partnerChargesReverseIndex.nodeKey());
+            appHierarchy.partnerChargesReverseIndex.nodeKey());
 
         const indexItems = await indexApi.listItems(indexKey);
 
@@ -623,17 +623,17 @@ describe("buildIndex > reverse reference index", () => {
     });
 
     it("should throw error when user user does not have permission", async () => {
-        const {indexApi, app, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+        const {indexApi, app, appHierarchy} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes);
         app.removePermission(permission.manageIndex.get());
         expect(
-            indexApi.buildIndex(appHeirarchy.partnerCustomersReverseIndex.nodeKey())
+            indexApi.buildIndex(appHierarchy.partnerCustomersReverseIndex.nodeKey())
         ).rejects.toThrow(/Unauthorized/);
     });
 
     it("should not depend on having any other permissions", async () => {
-        const {app, indexApi, appHeirarchy} = await setupAppheirarchy(basicAppHeirarchyCreator_WithFields_AndIndexes);
+        const {app, indexApi, appHierarchy} = await setupApphierarchy(basicAppHierarchyCreator_WithFields_AndIndexes);
         app.withOnlyThisPermission(permission.manageIndex.get());
-        await indexApi.buildIndex(appHeirarchy.partnerCustomersReverseIndex.nodeKey());
+        await indexApi.buildIndex(appHierarchy.partnerCustomersReverseIndex.nodeKey());
     });
 
 });

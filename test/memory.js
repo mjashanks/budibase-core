@@ -3,7 +3,7 @@ import {take} from "lodash/fp";
 import {Readable, Writable} from "readable-stream";
 import { Buffer } from "safe-buffer";
 import {splitKey, joinKey, $} from "../src/common"; 
-import {getLastPartInKey} from "../src/templateApi/heirarchy";
+import {getLastPartInKey} from "../src/templateApi/hierarchy";
 
 const folderMarker = "OH-YES-ITSA-FOLDER-";
 const isFolder = val => val.includes(folderMarker);

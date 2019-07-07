@@ -13,17 +13,18 @@ export const apiWrapper = async (app, eventNamespace, isAuthorized, eventContext
   const elapsed = () => (Date.now() - startDate);
 
   try {
-    app.publish(
+    await app.publish(
       eventNamespace.onBegin,
       eventContext,
     );
 
     const result = await func(...params);
 
-    publishComplete(app, eventContext, eventNamespace, elapsed, result);
+    await publishComplete(app, eventContext, eventNamespace, elapsed, result);
     return result;
   } catch (error) {
-    publishError(app, eventContext, eventNamespace, elapsed, error);
+    await publishError(app, eventContext, eventNamespace, elapsed, error);
+    throw error;
   }
 };
 
@@ -50,6 +51,7 @@ export const apiWrapperSync = (app, eventNamespace, isAuthorized, eventContext, 
     return result;
   } catch (error) {
     publishError(app, eventContext, eventNamespace, elapsed, error);
+    throw error;
   }
 };
 
@@ -87,23 +89,22 @@ const popCallStack = (app) => {
   }
 };
 
-const publishError = (app, eventContext, eventNamespace, elapsed, err) => {
+const publishError = async (app, eventContext, eventNamespace, elapsed, err) => {
   const ctx = cloneDeep(eventContext);
   ctx.error = err;
   ctx.elapsed = elapsed();
-  app.publish(
+  await app.publish(
     eventNamespace.onError,
     ctx,
   );
   popCallStack(app);
-  throw err;
 };
 
-const publishComplete = (app, eventContext, eventNamespace, elapsed, result) => {
+const publishComplete = async (app, eventContext, eventNamespace, elapsed, result) => {
   const endcontext = cloneDeep(eventContext);
   endcontext.result = result;
   endcontext.elapsed = elapsed();
-  app.publish(
+  await app.publish(
     eventNamespace.onComplete,
     endcontext,
   );

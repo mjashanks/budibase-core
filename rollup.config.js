@@ -9,7 +9,7 @@ const lodash_fp_exports = ["union", "reduce", "isUndefined", "cloneDeep", "split
 
 const lodash_exports = ["toNumber", "flow", "isArray", "join", "replace", "trim", "dropRight", "takeRight", "head", "isUndefined", "isNull", "isNaN", "reduce", "isEmpty", 
 "constant", "tail", "includes", "startsWith", "findIndex", "isInteger", "isDate", "isString", "split", "clone", "keys", "isFunction", "merge", "has", "isBoolean", "isNumber", 
-"isObjectLike", "assign", "some", "each", "find", "orderBy", "union"];
+"isObjectLike", "assign", "some", "each", "find", "orderBy", "union", "cloneDeep"];
 
 module.exports = {
     input: 'src/index.js',

@@ -11,7 +11,7 @@ import {
 import {
   getExactNodeForPath, isIndex,
   isShardedIndex,
-} from '../templateApi/heirarchy';
+} from '../templateApi/hierarchy';
 import { permission } from '../authApi/permissions';
 
 export const listItems = app => async (indexKey, options) => apiWrapper(
@@ -32,21 +32,21 @@ const _listItems = async (app, indexKey, options = defaultOptions) => {
 
   const getItems = async key => (isNonEmptyString(searchPhrase)
     ? await searchIndex(
-      app.heirarchy,
+      app.hierarchy,
       app.datastore,
       indexNode,
       key,
       searchPhrase,
     )
     : await readIndex(
-      app.heirarchy,
+      app.hierarchy,
       app.datastore,
       indexNode,
       key,
     ));
 
   indexKey = safeKey(indexKey);
-  const indexNode = getExactNodeForPath(app.heirarchy)(indexKey);
+  const indexNode = getExactNodeForPath(app.hierarchy)(indexKey);
 
   if (!isIndex(indexNode)) { throw new Error('supplied key is not an index'); }
 

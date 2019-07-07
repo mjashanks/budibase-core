@@ -2,14 +2,14 @@ import {
   has, keys, map, orderBy,
   filter, concat, reverse,
 } from 'lodash/fp';
-import { getAllowedRecordNodesForIndex } from '../templateApi/heirarchy';
+import { getAllowedRecordNodesForIndex } from '../templateApi/hierarchy';
 import { mapRecord } from './evaluate';
 import { constructRecord } from '../recordApi/getNew';
 import { getSampleFieldValue, detectType, all } from '../types';
 import { $ } from '../common';
 
-export const generateSchema = (heirarchy, indexNode) => {
-  const recordNodes = getAllowedRecordNodesForIndex(heirarchy, indexNode);
+export const generateSchema = (hierarchy, indexNode) => {
+  const recordNodes = getAllowedRecordNodesForIndex(hierarchy, indexNode);
   const mappedRecords = $(recordNodes, [
     map(n => mapRecord(createSampleRecord(n), indexNode)),
   ]);

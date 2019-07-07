@@ -8,7 +8,7 @@ import {
   $, isSomething, insensitiveEquals,
   isNonEmptyString, apiWrapperSync, events,
 } from '../common';
-import { getNode } from '../templateApi/heirarchy';
+import { getNode } from '../templateApi/hierarchy';
 import { alwaysAuthorized } from './permissions';
 
 const isAllowedType = t => $(permissionTypes, [
@@ -31,7 +31,7 @@ const permissionRules = app => ([
     p => isAllowedType(p.type)),
   makerule('nodeKey', 'record and index permissions must include a valid nodeKey',
     p => (!isRecordOrIndexType(p.type))
-             || isSomething(getNode(app.heirarchy, p.nodeKey))),
+             || isSomething(getNode(app.hierarchy, p.nodeKey))),
 ]);
 
 const applyPermissionRules = app => applyRuleSet(permissionRules(app));

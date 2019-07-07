@@ -1,7 +1,7 @@
 import {
   joinKey, keySep, getHashCode,
 } from '../common';
-import { getLastPartInKey } from '../templateApi/heirarchy';
+import { getLastPartInKey } from '../templateApi/hierarchy';
 
 export const TRANSACTIONS_FOLDER = `${keySep}.transactions`;
 export const LOCK_FILENAME = 'lock';
