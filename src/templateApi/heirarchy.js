@@ -100,7 +100,6 @@ export const getCollectionNodeByKeyOrNodeKey = (appHeirarchy, keyOrNodeKey) => {
     : nodeByKey;
 };
 
-
 export const isNode = (appHeirarchy, key) => isSomething(getExactNodeForPath(appHeirarchy)(key));
 
 export const getActualKeyOfParent = (parentNodeKey, actualChildKey) => $(actualChildKey, [
@@ -151,7 +150,6 @@ export const getAllowedRecordNodesForIndex = (appHeirarchy, indexNode) => {
     getFlattenedHierarchy,
     filter(isRecord),
   ]);
-
 
   if (isGlobalIndex(indexNode)) {
     return $(recordNodes, [
