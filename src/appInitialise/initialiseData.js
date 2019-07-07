@@ -8,7 +8,7 @@ import { getFlattenedHierarchy, isGlobalIndex, isSingleRecord } from '../templat
 import { _save } from '../recordApi/save';
 import { getNew } from '../recordApi/getNew';
 
-export const initialiseData = async (datastore, applicationDefinition) => {
+export const initialiseData = async (datastore, applicationDefinition, accessLevels) => {
   await datastore.createFolder(configFolder);
   await datastore.createJson(appDefinitionFile, applicationDefinition);
 
@@ -23,7 +23,9 @@ export const initialiseData = async (datastore, applicationDefinition) => {
 
   await datastore.createJson(USERS_LIST_FILE, []);
 
-  await datastore.createJson(ACCESS_LEVELS_FILE, { version: 0, levels: [] });
+  await datastore.createJson(
+    ACCESS_LEVELS_FILE, 
+    accessLevels ? accessLevels : { version: 0, levels: [] });
 };
 
 const initialiseRootIndexes = async (datastore, hierarchy) => {

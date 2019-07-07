@@ -56,6 +56,15 @@ describe("initialiseData", () => {
         expect(await datastore.exists(ACCESS_LEVELS_FILE)).toBeTruthy();
     });
 
+    it("should create access levels file, with supplied object", async () => {
+        const {appDef, datastore} = getApplicationDefinition();
+        await initialiseData(datastore, appDef, { version: 0, levels: [{
+            name:"owner", permissions:[{type:"create user"}]
+        }] });
+        const levels = await datastore.loadJson(ACCESS_LEVELS_FILE);
+        expect(levels.levels[0].name).toBe("owner");
+    });
+
     const getApplicationDefinition = () => {
         const {templateApi, app} = getMemoryTemplateApi();
         const h = basicAppHierarchyCreator_WithFields_AndIndexes(templateApi);
