@@ -4,7 +4,7 @@ import {
   filter, find,
 } from 'lodash/fp';
 import {
-  getExactNodeForPath, getParentKey,
+  getParentKey,
   getFlattenedHierarchy,
   getCollectionNodeByKeyOrNodeKey, getNodeForCollectionPath,
   isCollectionRecord, isAncestor,

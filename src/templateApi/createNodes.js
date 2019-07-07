@@ -18,7 +18,7 @@ export const createNodeErrors = {
   aggregateParentMustBeAnIndex: 'aggregateGroup parent must be an index',
 };
 
-const pathRegxMaker = node => () => node.nodeKey().replace(/{id}/g, '[a-zA-Z0-9_\-]+');
+const pathRegxMaker = node => () => node.nodeKey().replace(/{id}/g, '[a-zA-Z0-9_-]+');
 
 const nodeKeyMaker = node => () => switchCase(
 

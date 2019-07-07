@@ -11,7 +11,7 @@ import { events, eventsList } from './events';
 import { apiWrapper } from './apiWrapper';
 import {
   getLock, NO_LOCK,
-  isNolock, releaseLock, extendLock,
+  isNolock
 } from './lock';
 
 // this is the combinator function

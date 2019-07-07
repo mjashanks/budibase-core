@@ -6,9 +6,9 @@ export const downloadFile = app => async (recordKey, relativePath) => apiWrapper
   app,
   events.recordApi.uploadFile,
   permission.readRecord.isAuthorized(recordKey),
-  { recordKey, recordKey, relativePath },
+  { recordKey, relativePath },//remove dupe key 'recordKey' from object
   _downloadFile, app, recordKey, relativePath,
-);
+); 
 
 
 const _downloadFile = async (app, recordKey, relativePath) => {

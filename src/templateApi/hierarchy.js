@@ -100,7 +100,6 @@ export const getCollectionNodeByKeyOrNodeKey = (appHierarchy, keyOrNodeKey) => {
     : nodeByKey;
 };
 
-
 export const isNode = (appHierarchy, key) => isSomething(getExactNodeForPath(appHierarchy)(key));
 
 export const getActualKeyOfParent = (parentNodeKey, actualChildKey) => $(actualChildKey, [
@@ -110,9 +109,6 @@ export const getActualKeyOfParent = (parentNodeKey, actualChildKey) => $(actualC
 ]);
 
 export const getParentKey = (key) => {
-  const split = splitKey(key);
-  const taken = take(splitKey(key).length - 1)(split);
-  const joined = joinKey(...taken);
   return $(key, [
     splitKey,
     take(splitKey(key).length - 1),
@@ -154,7 +150,6 @@ export const getAllowedRecordNodesForIndex = (appHierarchy, indexNode) => {
     getFlattenedHierarchy,
     filter(isRecord),
   ]);
-
 
   if (isGlobalIndex(indexNode)) {
     return $(recordNodes, [

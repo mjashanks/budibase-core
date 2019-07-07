@@ -1,5 +1,5 @@
 import {
-  isEmpty, countBy, flatten, includes,
+  map, isEmpty, countBy, flatten, includes,
 } from 'lodash/fp';
 import { join, keys } from 'lodash';
 import { applyRuleSet, makerule } from '../common/validationCommon';

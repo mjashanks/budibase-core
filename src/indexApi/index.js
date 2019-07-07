@@ -1,6 +1,5 @@
 import { buildIndex } from './buildIndex';
 import { listItems } from './listItems';
-import { deleteIndex } from './delete';
 import { aggregates } from './aggregates';
 
 export const getIndexApi = app => ({

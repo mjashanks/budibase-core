@@ -1,5 +1,4 @@
 import { map } from 'lodash/fp';
-import { generate } from 'shortid';
 import { retrieve } from './retrieve';
 import { executeTransactions } from './execute';
 import {
@@ -7,8 +6,7 @@ import {
 } from '../common';
 import {
   LOCK_FILE_KEY, TRANSACTIONS_FOLDER,
-  timeoutMilliseconds, parseLockFileContent,
-  getLockFileContent, getTransactionId,
+  timeoutMilliseconds, getTransactionId,
   maxLockRetries,
 } from './transactionsCommon';
 

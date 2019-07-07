@@ -1,7 +1,5 @@
 import {
   cloneDeep,
-  constant,
-  isEqual,
   flatten,
   map,
   filter,
@@ -14,7 +12,6 @@ import {
 } from '../common';
 import {
   getFlattenedHierarchy,
-  getLastPartInKey,
   getExactNodeForPath,
   isRecord,
   getNode,

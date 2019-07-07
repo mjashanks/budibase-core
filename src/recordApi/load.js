@@ -1,6 +1,6 @@
 import {
-  keyBy, mapValues, filter, map, includes,
-  constant, last,
+  keyBy, mapValues, filter, 
+  map, includes, last,
 } from 'lodash/fp';
 import { getExactNodeForPath, getNode } from '../templateApi/hierarchy';
 import { safeParseField } from '../types';
@@ -27,8 +27,6 @@ export const _load = async (app, key, keyStack = []) => {
   const storedData = await app.datastore.loadJson(
     getRecordFileName(key),
   );
-
-  const { type } = storedData;
 
   const loadedRecord = $(recordNode.fields, [
     keyBy('name'),

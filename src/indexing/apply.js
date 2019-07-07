@@ -1,4 +1,4 @@
-import { getShardMapKey, ensureShardNameIsInShardMap } from './sharding';
+import { ensureShardNameIsInShardMap } from './sharding';
 import { getIndexWriter } from './serializer';
 import { isShardedIndex } from '../templateApi/hierarchy';
 import {promiseWriteableStream} from "./promiseWritableStream";
@@ -58,7 +58,6 @@ const getWriter = async (hierarchy, store, indexKey, indexedDataKey, indexNode, 
         readableStream, writableStream
   );
 };
-
 
 const swapTempFileIn = async (store, indexedDataKey, isRetry = false) => {
   const tempFile = `${indexedDataKey}.temp`;

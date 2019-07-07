@@ -39,7 +39,9 @@ export const getLock = async (app, lockFile, timeoutMilliseconds, maxLockRetries
 
     try {
       await app.datastore.deleteFile(lockFile);
-    } catch (_) {}
+    } catch (_) {
+      //empty
+    }
 
     await sleepForRetry();
 
@@ -48,8 +50,6 @@ export const getLock = async (app, lockFile, timeoutMilliseconds, maxLockRetries
       maxLockRetries, retryCount + 1,
     );
   }
-
-  return NO_LOCK;
 };
 
 export const getLockFileContent = (totalTimeout, epochTime) => `${totalTimeout}:${epochTime.toString()}`;
@@ -69,7 +69,9 @@ export const releaseLock = async (app, lock) => {
   if (currentEpochTime < (lock.timeout - lockOverlapMilliseconds)) {
     try {
       await app.datastore.deleteFile(lock.key);
-    } catch (_) {}
+    } catch (_) {
+      //empty
+    }
   }
 };
 
@@ -78,13 +80,15 @@ export const extendLock = async (app, lock) => {
   // only release if not timedout
   if (currentEpochTime < (lock.timeout - lockOverlapMilliseconds)) {
     try {
-      lock.timeout = currentEpochTime + timeoutMilliseconds;
+      lock.timeout = currentEpochTime + lock.timeoutMilliseconds;
       await app.datastore.updateFile(
         lock.key,
-        getLockFileContent(lock.totalTimeout, timeout),
+        getLockFileContent(lock.totalTimeout, lock.timeout),
       );
       return lock;
-    } catch (_) {}
+    } catch (_) {
+      //empty
+    }
   }
   return NO_LOCK;
 };

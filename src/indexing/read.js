@@ -1,7 +1,7 @@
 import lunr from 'lunr';
 import {
   getHashCode,
-  joinKey, $,
+  joinKey
 } from '../common';
 import {
   getActualKeyOfParent,
@@ -50,7 +50,8 @@ export const searchIndex = async (hierarchy, datastore, index, indexedDataKey, s
   return await doRead(hierarchy, datastore, index, indexedDataKey);
 };
 
-export const getIndexedDataKey_fromIndexKey = (indexKey, record) => `${indexKey}${indexKey.endsWith('.csv') ? '' : '.csv'}`;
+export const getIndexedDataKey_fromIndexKey = (indexKey) => 
+  `${indexKey}${indexKey.endsWith('.csv') ? '' : '.csv'}`;
 
 export const uniqueIndexName = index => `idx_${
   getHashCode(`${index.filter}${index.map}`)

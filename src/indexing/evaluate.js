@@ -9,7 +9,7 @@ export const filterEval = 'FILTER_EVALUATE';
 export const filterCompile = 'FILTER_COMPILE';
 export const mapEval = 'MAP_EVALUATE';
 export const mapCompile = 'MAP_COMPILE';
-export const removeUndeclaredFields = 'REMO\VE_UNDECLARED_FIELDS';
+export const removeUndeclaredFields = 'REMOVE_UNDECLARED_FIELDS';
 export const addUnMappedFields = 'ADD_UNMAPPED_FIELDS';
 export const addTheKey = 'ADD_KEY';
 

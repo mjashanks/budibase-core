@@ -1,9 +1,9 @@
 import { flatten, map } from 'lodash/fp';
-import { isEmpty, difference } from 'lodash';
-import { compileExpression, compileCode } from '@nx-js/compiler-util';
+import { isEmpty } from 'lodash';
+import { compileCode } from '@nx-js/compiler-util';
 import {
-  isNonEmptyString, executesWithoutException,
-  $, isNonEmptyArray,
+  isNonEmptyString, 
+  executesWithoutException, $, 
 } from '../common';
 import { applyRuleSet, makerule } from '../common/validationCommon';
 

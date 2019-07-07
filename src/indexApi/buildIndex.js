@@ -1,6 +1,6 @@
 import {
-  find, filter, includes,
-  some, map,
+  find, filter, 
+  includes, some,
 } from 'lodash/fp';
 import { getAllIdsIterator } from '../indexing/allIds';
 import {

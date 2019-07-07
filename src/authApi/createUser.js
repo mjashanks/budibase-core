@@ -1,4 +1,4 @@
-import { join, some, clone } from 'lodash/fp';
+import { join, some } from 'lodash/fp';
 import { validateUser } from './validateUser';
 import { getNewUserAuth } from './getNewUser';
 import {
