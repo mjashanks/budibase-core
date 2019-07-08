@@ -11,7 +11,7 @@ import {
 import { getExactNodeForPath } from '../templateApi/hierarchy';
 import { permission } from '../authApi/permissions';
 import { isLegalFilename } from '../types/file';
-import { ForbiddenError } from '../common/errors';
+import { BadRequestError, ForbiddenError } from '../common/errors';
 
 export const uploadFile = app => async (recordKey, readableStream, relativeFilePath) => apiWrapper(
   app,

@@ -15,6 +15,7 @@ import datetime from './datetime';
 import array from './array';
 import reference from './reference';
 import file from './file';
+import { BadRequestError } from '../common/errors';
 
 const allTypes = () => {
   const basicTypes = {

@@ -5,6 +5,7 @@ import { validateTriggers, validateActions } from './validate';
 import { apiWrapper } from '../common/apiWrapper';
 import { events } from '../common/events';
 import { permission } from '../authApi/permissions';
+import { BadRequestError } from '../common/errors';
 
 export const saveActionsAndTriggers = app => async (actions, triggers) => apiWrapper(
   app,
