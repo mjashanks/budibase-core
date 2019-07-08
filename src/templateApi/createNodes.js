@@ -10,6 +10,7 @@ import {
   getFlattenedHierarchy,
 } from './hierarchy';
 import { all } from '../types';
+import { BadRequestError } from '../common/errors';
 
 export const createNodeErrors = {
   indexCannotBeParent: 'Index template cannot be a parent',
@@ -43,16 +44,16 @@ const validate = parent => (node) => {
         && isSomething(parent)
         && !isRoot(parent)
         && !isRecord(parent)) {
-    throw new Error(createNodeErrors.indexParentMustBeRecordOrRoot);
+    throw BadRequestError(createNodeErrors.indexParentMustBeRecordOrRoot);
   }
 
   if (isaggregateGroup(node)
         && isSomething(parent)
         && !isIndex(parent)) {
-    throw new Error(createNodeErrors.aggregateParentMustBeAnIndex);
+    throw BadRequestError(createNodeErrors.aggregateParentMustBeAnIndex);
   }
 
-  if (isNothing(parent) && !isRoot(node)) { throw new Error(createNodeErrors.allNonRootNodesMustHaveParent); }
+  if (isNothing(parent) && !isRoot(node)) { throw BadRequestError(createNodeErrors.allNonRootNodesMustHaveParent); }
 
   return node;
 };

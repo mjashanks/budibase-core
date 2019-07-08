@@ -10,6 +10,7 @@ import {
 } from '../common';
 import { all, getDefaultOptions } from '../types';
 import { applyRuleSet, makerule } from '../common/validationCommon';
+import { BadRequestError } from '../common/errors';
 
 export const fieldErrors = {
   AddFieldValidationFailed: 'Add field validation: ',
@@ -80,7 +81,7 @@ export const addField = (recordTemplate, field) => {
   const validationMessages = validateField([...recordTemplate.fields, field])(field);
   if (validationMessages.length > 0) {
     const errors = map(m => m.error)(validationMessages);
-    throw new Error(`${fieldErrors.AddFieldValidationFailed} ${errors.join(', ')}`);
+    throw BadRequestError(`${fieldErrors.AddFieldValidationFailed} ${errors.join(', ')}`);
   }
   recordTemplate.fields.push(field);
 };

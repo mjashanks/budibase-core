@@ -10,7 +10,6 @@ export const getDatabaseManager = databaseManager => ({
 
 const getMasterDatastoreConfig = databaseManager => databaseManager.getDatastoreConfig('master');
 
-
 const getInstanceDatastoreConfig = databaseManager => (applicationId, instanceId) => databaseManager.getDatastoreConfig(
   applicationId, instanceId,
 );

@@ -1,6 +1,7 @@
 import { apiWrapper, events, isNothing } from '../common';
 import { permission } from '../authApi/permissions';
 import { safeGetFullFilePath } from './uploadFile';
+import { BadRequestError } from '../common/errors';
 
 export const downloadFile = app => async (recordKey, relativePath) => apiWrapper(
   app,
@@ -12,8 +13,8 @@ export const downloadFile = app => async (recordKey, relativePath) => apiWrapper
 
 
 const _downloadFile = async (app, recordKey, relativePath) => {
-  if (isNothing(recordKey)) { throw new Error('Record Key not supplied'); }
-  if (isNothing(relativePath)) { throw new Error('file path not supplied'); }
+  if (isNothing(recordKey)) { throw BadRequestError('Record Key not supplied'); }
+  if (isNothing(relativePath)) { throw BadRequestError('file path not supplied'); }
 
   return await app.datastore.readableFileStream(
     safeGetFullFilePath(

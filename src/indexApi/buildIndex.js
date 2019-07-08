@@ -17,6 +17,7 @@ import {
   transactionForBuildIndex,
 } from '../transactions/create';
 import { permission } from '../authApi/permissions';
+import { BadRequestError } from '../common/errors';
 
 
 /** rebuilds an index
@@ -36,7 +37,7 @@ const _buildIndex = async (app, indexNodeKey) => {
 
   await createBuildIndexFolder(app.datastore, indexNodeKey);
 
-  if (!isIndex(indexNode)) { throw new Error('BuildIndex: must supply a indexnode'); }
+  if (!isIndex(indexNode)) { throw BadRequestError('BuildIndex: must supply an indexnode'); }
 
   if (indexNode.indexType === 'reference') {
     await buildReverseReferenceIndex(

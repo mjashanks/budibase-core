@@ -23,17 +23,17 @@ export const _saveActionsAndTriggers = async (datastore, actions, triggers) => {
     const actionValidErrs = map(e => e.error)(validateActions(actions));
 
     if (actionValidErrs.length > 0) {
-      throw new Error(`Actions are in valid: ${join(actionValidErrs, ', ')}`);
+      throw BadRequestError(`Actions are invalid: ${join(actionValidErrs, ', ')}`);
     }
 
     const triggerValidErrs = map(e => e.error)(validateTriggers(triggers, actions));
 
     if (triggerValidErrs.length > 0) {
-      throw new Error(`Triggers are in valid: ${join(triggerValidErrs, ', ')}`);
+      throw BadRequestError(`Triggers are invalid: ${join(triggerValidErrs, ', ')}`);
     }
 
     await datastore.updateJson(appDefinitionFile, appDefinition);
   } else {
-    throw new Error('Cannot save actions: Application definition does not exist');
+    throw BadRequestError('Cannot save actions: Application definition does not exist');
   }
 };

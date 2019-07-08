@@ -1,6 +1,7 @@
 import { find, take, union } from 'lodash/fp';
 import { getFlattenedHierarchy } from '../templateApi/hierarchy';
 import { $, splitKey, joinKey } from '../common';
+import { NotFoundError } from '../common/errors';
 
 export const customId = app => (nodeName, id) => {
   const node = $(app.hierarchy, [
@@ -8,7 +9,7 @@ export const customId = app => (nodeName, id) => {
     find(n => n.name === nodeName),
   ]);
 
-  if (!node) throw new Error(`Cannot find node ${nodeName}`);
+  if (!node) throw NotFoundError(`Cannot find node ${nodeName}`);
 
   return `${node.nodeId}-${id}`;
 };
