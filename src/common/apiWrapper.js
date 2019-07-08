@@ -1,6 +1,6 @@
 import { cloneDeep, isUndefined } from 'lodash/fp';
 import { generate } from 'shortid';
-import { UnauthorisedError } from './errors';
+import { unauthorisedError } from './errors';
 
 export const apiWrapper = async (app, eventNamespace, isAuthorized, eventContext, func, ...params) => {
   pushCallStack(app, eventNamespace);
@@ -57,7 +57,7 @@ export const apiWrapperSync = (app, eventNamespace, isAuthorized, eventContext, 
 };
 
 const handleNotAuthorized = (app, eventContext, eventNamespace) => {
-  const err = UnauthorisedError(`Unauthorized: ${eventNamespace}`);
+  const err = unauthorisedError(`Unauthorized: ${eventNamespace}`);
   publishError(app, eventContext, eventNamespace, () => 0, err);
   throw err;
 };

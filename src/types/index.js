@@ -15,7 +15,7 @@ import datetime from './datetime';
 import array from './array';
 import reference from './reference';
 import file from './file';
-import { BadRequestError } from '../common/errors';
+import { badRequestError } from '../common/errors';
 
 const allTypes = () => {
   const basicTypes = {
@@ -40,7 +40,7 @@ const allTypes = () => {
 export const all = allTypes();
 
 export const getType = (typeName) => {
-  if (!has(all, typeName)) throw BadRequestError(`Do not recognise type ${typeName}`);
+  if (!has(all, typeName)) throw badRequestError(`Do not recognise type ${typeName}`);
   return all[typeName];
 };
 
@@ -71,5 +71,5 @@ export const detectType = (value) => {
         && has(value, 'relativePath')
         && has(value, 'size')) return file;
 
-  throw BadRequestError(`cannot determine type: ${JSON.stringify(value)}`);
+  throw badRequestError(`cannot determine type: ${JSON.stringify(value)}`);
 };

@@ -6,7 +6,7 @@ import {
 import { compileExpression, compileCode } from '../common/compileCode';
 import { $ } from '../common';
 import { _executeAction } from './execute';
-import { BadRequestError, NotFoundError } from '../common/errors';
+import { badRequestError, notFoundError } from '../common/errors';
 
 export const initialiseActions = (subscribe, behaviourSources, actions, triggers, apis) => {
   validateSources(behaviourSources, actions);
@@ -60,7 +60,7 @@ const validateSources = (behaviourSources, actions) => {
   );
 
   if (missingSources.length > 0) {
-    throw BadRequestError(`Declared behaviour sources are not supplied: ${join(', ', missingSources)}`);
+    throw badRequestError(`Declared behaviour sources are not supplied: ${join(', ', missingSources)}`);
   }
 
   const missingBehaviours = $(actions, [
@@ -69,6 +69,6 @@ const validateSources = (behaviourSources, actions) => {
   ]);
 
   if (missingBehaviours.length > 0) {
-    throw NotFoundError(`Missing behaviours: could not find behaviour functions: ${join(', ', missingBehaviours)}`);
+    throw notFoundError(`Missing behaviours: could not find behaviour functions: ${join(', ', missingBehaviours)}`);
   }
 };

@@ -1,11 +1,11 @@
 import { has } from 'lodash';
-import { ConflictError } from '../common/errors';
+import { conflictError } from '../common/errors';
 
 export const createBehaviourSources = () => {
   const sources = {};
   const register = (name, funcsObj) => {
     if (has(sources, name)) {
-      throw ConflictError(`Source '${name}' already exists`);
+      throw conflictError(`Source '${name}' already exists`);
     }
 
     sources[name] = funcsObj;

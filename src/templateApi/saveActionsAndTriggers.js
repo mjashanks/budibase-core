@@ -5,7 +5,7 @@ import { validateTriggers, validateActions } from './validate';
 import { apiWrapper } from '../common/apiWrapper';
 import { events } from '../common/events';
 import { permission } from '../authApi/permissions';
-import { BadRequestError } from '../common/errors';
+import { badRequestError } from '../common/errors';
 
 export const saveActionsAndTriggers = app => async (actions, triggers) => apiWrapper(
   app,
@@ -24,17 +24,17 @@ export const _saveActionsAndTriggers = async (datastore, actions, triggers) => {
     const actionValidErrs = map(e => e.error)(validateActions(actions));
 
     if (actionValidErrs.length > 0) {
-      throw BadRequestError(`Actions are invalid: ${join(actionValidErrs, ', ')}`);
+      throw badRequestError(`Actions are invalid: ${join(actionValidErrs, ', ')}`);
     }
 
     const triggerValidErrs = map(e => e.error)(validateTriggers(triggers, actions));
 
     if (triggerValidErrs.length > 0) {
-      throw BadRequestError(`Triggers are invalid: ${join(triggerValidErrs, ', ')}`);
+      throw badRequestError(`Triggers are invalid: ${join(triggerValidErrs, ', ')}`);
     }
 
     await datastore.updateJson(appDefinitionFile, appDefinition);
   } else {
-    throw BadRequestError('Cannot save actions: Application definition does not exist');
+    throw badRequestError('Cannot save actions: Application definition does not exist');
   }
 };
