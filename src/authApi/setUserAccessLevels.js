@@ -8,6 +8,7 @@ import {
   getUserByName, USERS_LIST_FILE,
 } from './authCommon';
 import { permission } from './permissions';
+import { NotFoundError } from '../common/errors';
 
 export const setUserAccessLevels = app => async (userName, accessLevels) => apiWrapper(
   app,
@@ -38,7 +39,7 @@ export const _setUserAccessLevels = async (app, username, accessLevels) => {
   try {
     const users = await app.datastore.loadJson(USERS_LIST_FILE);
     const user = getUserByName(users, username);
-    if (!user) { throw new Error(`Could not find user to ${username}`); }
+    if (!user) { throw NotFoundError(`Could not find user with ${username}`); }
 
     user.accessLevels = accessLevels;
     await app.datastore.updateJson(USERS_LIST_FILE, users);

@@ -15,6 +15,7 @@ import {
 } from '../templateApi/hierarchy';
 import { CONTINUE_READING_RECORDS } from '../indexing/serializer';
 import { permission } from '../authApi/permissions';
+import { BadRequestError } from '../common/errors';
 
 export const aggregates = app => async (indexKey, rangeStartParams = null, rangeEndParams = null) => apiWrapper(
   app,
@@ -28,7 +29,7 @@ const _aggregates = async (app, indexKey, rangeStartParams, rangeEndParams) => {
   indexKey = safeKey(indexKey);
   const indexNode = getExactNodeForPath(app.hierarchy)(indexKey);
 
-  if (!isIndex(indexNode)) { throw new Error('supplied key is not an index'); }
+  if (!isIndex(indexNode)) { throw BadRequestError('supplied key is not an index'); }
 
   if (isShardedIndex(indexNode)) {
     const shardKeys = await getShardKeysInRange(

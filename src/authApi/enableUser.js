@@ -5,6 +5,7 @@ import {
 import { USERS_LOCK_FILE, USERS_LIST_FILE, getUserByName } from './authCommon';
 import { apiWrapper, events } from '../common';
 import { permission } from './permissions';
+import { NotFoundError } from '../common/errors';
 
 export const enableUser = app => async username => apiWrapper(
   app,
@@ -36,7 +37,7 @@ const toggleUser = async (app, username, enabled) => {
   try {
     const users = await app.datastore.loadJson(USERS_LIST_FILE);
     const user = getUserByName(users, username);
-    if (!user) { throw new Error(`Could not find user to ${actionName}`); }
+    if (!user) { throw NotFoundError(`Could not find user to ${actionName}`); }
 
     if (user.enabled === !enabled) {
       user.enabled = enabled;
