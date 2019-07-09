@@ -13,8 +13,8 @@ export const downloadFile = app => async (recordKey, relativePath) => apiWrapper
 
 
 const _downloadFile = async (app, recordKey, relativePath) => {
-  if (isNothing(recordKey)) { throw BadRequestError('Record Key not supplied'); }
-  if (isNothing(relativePath)) { throw BadRequestError('file path not supplied'); }
+  if (isNothing(recordKey)) { throw new BadRequestError('Record Key not supplied'); }
+  if (isNothing(relativePath)) { throw new BadRequestError('file path not supplied'); }
 
   return await app.datastore.readableFileStream(
     safeGetFullFilePath(

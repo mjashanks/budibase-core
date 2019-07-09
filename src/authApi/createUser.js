@@ -32,7 +32,7 @@ export const _createUser = async (app, user, password = null) => {
   const users = await app.datastore.loadJson(USERS_LIST_FILE);
 
   const userErrors = validateUser(app)([...users, user], user);
-  if (userErrors.length > 0) { throw BadRequestError(`User is invalid. ${join('; ')(userErrors)}`); }
+  if (userErrors.length > 0) { throw new BadRequestError(`User is invalid. ${join('; ')(userErrors)}`); }
 
   const { auth, tempCode, temporaryAccessId } = await getAccess(
     app, password,
@@ -41,7 +41,7 @@ export const _createUser = async (app, user, password = null) => {
   user.temporaryAccessId = temporaryAccessId;
 
   if (some(u => insensitiveEquals(u.name, user.name))(users)) { 
-    throw BadRequestError('User already exists'); 
+    throw new BadRequestError('User already exists'); 
   }
 
   users.push(
@@ -81,7 +81,7 @@ const getAccess = async (app, password) => {
       auth.temporaryAccessExpiryEpoch = 0;
       return { auth };
     }
-    throw BadRequestError('Password does not meet requirements');
+    throw new BadRequestError('Password does not meet requirements');
   } else {
     const tempAccess = await getTemporaryCode(app);
     auth.temporaryAccessHash = tempAccess.temporaryAccessHash;

@@ -22,9 +22,9 @@ export const uploadFile = app => async (recordKey, readableStream, relativeFileP
 );
 
 const _uploadFile = async (app, recordKey, readableStream, relativeFilePath) => {
-  if (isNothing(recordKey)) { throw BadRequestError('Record Key not supplied'); }
-  if (isNothing(relativeFilePath)) { throw BadRequestError('file path not supplied'); }
-  if (!isLegalFilename(relativeFilePath)) { throw BadRequestError('Illegal filename'); }
+  if (isNothing(recordKey)) { throw new BadRequestError('Record Key not supplied'); }
+  if (isNothing(relativeFilePath)) { throw new BadRequestError('file path not supplied'); }
+  if (!isLegalFilename(relativeFilePath)) { throw new BadRequestError('Illegal filename'); }
 
   const record = await _load(app, recordKey);
 

@@ -44,16 +44,16 @@ const validate = parent => (node) => {
         && isSomething(parent)
         && !isRoot(parent)
         && !isRecord(parent)) {
-    throw BadRequestError(createNodeErrors.indexParentMustBeRecordOrRoot);
+    throw new BadRequestError(createNodeErrors.indexParentMustBeRecordOrRoot);
   }
 
   if (isaggregateGroup(node)
         && isSomething(parent)
         && !isIndex(parent)) {
-    throw BadRequestError(createNodeErrors.aggregateParentMustBeAnIndex);
+    throw new BadRequestError(createNodeErrors.aggregateParentMustBeAnIndex);
   }
 
-  if (isNothing(parent) && !isRoot(node)) { throw BadRequestError(createNodeErrors.allNonRootNodesMustHaveParent); }
+  if (isNothing(parent) && !isRoot(node)) { throw new BadRequestError(createNodeErrors.allNonRootNodesMustHaveParent); }
 
   return node;
 };

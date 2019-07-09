@@ -40,7 +40,7 @@ const allTypes = () => {
 export const all = allTypes();
 
 export const getType = (typeName) => {
-  if (!has(all, typeName)) throw BadRequestError(`Do not recognise type ${typeName}`);
+  if (!has(all, typeName)) throw new BadRequestError(`Do not recognise type ${typeName}`);
   return all[typeName];
 };
 
@@ -71,5 +71,5 @@ export const detectType = (value) => {
         && has(value, 'relativePath')
         && has(value, 'size')) return file;
 
-  throw BadRequestError(`cannot determine type: ${JSON.stringify(value)}`);
+  throw new BadRequestError(`cannot determine type: ${JSON.stringify(value)}`);
 };

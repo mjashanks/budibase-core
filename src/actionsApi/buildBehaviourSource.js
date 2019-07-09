@@ -5,7 +5,7 @@ export const createBehaviourSources = () => {
   const sources = {};
   const register = (name, funcsObj) => {
     if (has(sources, name)) {
-      throw ConflictError(`Source '${name}' already exists`);
+      throw new ConflictError(`Source '${name}' already exists`);
     }
 
     sources[name] = funcsObj;

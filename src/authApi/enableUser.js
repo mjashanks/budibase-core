@@ -37,7 +37,7 @@ const toggleUser = async (app, username, enabled) => {
   try {
     const users = await app.datastore.loadJson(USERS_LIST_FILE);
     const user = getUserByName(users, username);
-    if (!user) { throw NotFoundError(`Could not find user to ${actionName}`); }
+    if (!user) { throw new NotFoundError(`Could not find user to ${actionName}`); }
 
     if (user.enabled === !enabled) {
       user.enabled = enabled;

@@ -37,7 +37,7 @@ const _buildIndex = async (app, indexNodeKey) => {
 
   await createBuildIndexFolder(app.datastore, indexNodeKey);
 
-  if (!isIndex(indexNode)) { throw BadRequestError('BuildIndex: must supply an indexnode'); }
+  if (!isIndex(indexNode)) { throw new BadRequestError('BuildIndex: must supply an indexnode'); }
 
   if (indexNode.indexType === 'reference') {
     await buildReverseReferenceIndex(

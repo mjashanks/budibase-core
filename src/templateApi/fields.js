@@ -81,7 +81,7 @@ export const addField = (recordTemplate, field) => {
   const validationMessages = validateField([...recordTemplate.fields, field])(field);
   if (validationMessages.length > 0) {
     const errors = map(m => m.error)(validationMessages);
-    throw BadRequestError(`${fieldErrors.AddFieldValidationFailed} ${errors.join(', ')}`);
+    throw new BadRequestError(`${fieldErrors.AddFieldValidationFailed} ${errors.join(', ')}`);
   }
   recordTemplate.fields.push(field);
 };

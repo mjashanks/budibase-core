@@ -29,7 +29,7 @@ const _aggregates = async (app, indexKey, rangeStartParams, rangeEndParams) => {
   indexKey = safeKey(indexKey);
   const indexNode = getExactNodeForPath(app.hierarchy)(indexKey);
 
-  if (!isIndex(indexNode)) { throw BadRequestError('supplied key is not an index'); }
+  if (!isIndex(indexNode)) { throw new BadRequestError('supplied key is not an index'); }
 
   if (isShardedIndex(indexNode)) {
     const shardKeys = await getShardKeysInRange(

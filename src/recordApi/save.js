@@ -44,7 +44,7 @@ export const _save = async (app, record, context, skipValidation = false) => {
     const validationResult = await validate(app)(recordClone, context);
     if (!validationResult.isValid) {
       await app.publish(events.recordApi.save.onInvalid, { record, validationResult });
-      throw BadRequestError(`Save : Record Invalid : ${
+      throw new BadRequestError(`Save : Record Invalid : ${
         JSON.stringify(validationResult.errors)}`);
     }
   }
