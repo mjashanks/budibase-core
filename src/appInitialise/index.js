@@ -1,5 +1,5 @@
 import { retry } from '../common/index';
-import { notFoundError } from '../common/errors';
+import { NotFoundError } from '../common/errors';
 
 const createJson = originalCreateFile => async (key, obj, retries = 5, delay = 500) => await retry(originalCreateFile, retries, delay, key, JSON.stringify(obj));
 
@@ -9,7 +9,7 @@ const loadJson = datastore => async (key, retries = 5, delay = 500) => {
   try {
     return await retry(JSON.parse, retries, delay, await datastore.loadFile(key));
   } catch (err) {
-    throw notFoundError(err.message);
+    throw new NotFoundError(err.message);
   }
 }
 
@@ -17,7 +17,7 @@ const updateJson = datastore => async (key, obj, retries = 5, delay = 500) => {
   try {
     return await retry(datastore.updateFile, retries, delay, key, JSON.stringify(obj));
   } catch (err) {
-    throw notFoundError(err.message);
+    throw new NotFoundError(err.message);
   }
 }
 

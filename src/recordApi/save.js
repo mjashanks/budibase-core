@@ -26,7 +26,7 @@ import {
 } from '../transactions/create';
 import { permission } from '../authApi/permissions';
 import { initialiseIndex } from '../indexing/initialiseIndex';
-import { badRequestError } from '../common/errors';
+import { BadRequestError } from '../common/errors';
 
 export const save = app => async (record, context) => apiWrapper(
   app,
@@ -44,7 +44,7 @@ export const _save = async (app, record, context, skipValidation = false) => {
     const validationResult = await validate(app)(recordClone, context);
     if (!validationResult.isValid) {
       await app.publish(events.recordApi.save.onInvalid, { record, validationResult });
-      throw badRequestError(`Save : Record Invalid : ${
+      throw new BadRequestError(`Save : Record Invalid : ${
         JSON.stringify(validationResult.errors)}`);
     }
   }

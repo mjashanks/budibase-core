@@ -11,7 +11,7 @@ import {
 import { getExactNodeForPath } from '../templateApi/hierarchy';
 import { permission } from '../authApi/permissions';
 import { isLegalFilename } from '../types/file';
-import { badRequestError, forbiddenError } from '../common/errors';
+import { BadRequestError, ForbiddenError } from '../common/errors';
 
 export const uploadFile = app => async (recordKey, readableStream, relativeFilePath) => apiWrapper(
   app,
@@ -22,9 +22,9 @@ export const uploadFile = app => async (recordKey, readableStream, relativeFileP
 );
 
 const _uploadFile = async (app, recordKey, readableStream, relativeFilePath) => {
-  if (isNothing(recordKey)) { throw badRequestError('Record Key not supplied'); }
-  if (isNothing(relativeFilePath)) { throw badRequestError('file path not supplied'); }
-  if (!isLegalFilename(relativeFilePath)) { throw badRequestError('Illegal filename'); }
+  if (isNothing(recordKey)) { throw new BadRequestError('Record Key not supplied'); }
+  if (isNothing(relativeFilePath)) { throw new BadRequestError('file path not supplied'); }
+  if (!isLegalFilename(relativeFilePath)) { throw new BadRequestError('Illegal filename'); }
 
   const record = await _load(app, recordKey);
 
@@ -48,7 +48,7 @@ const _uploadFile = async (app, recordKey, readableStream, relativeFilePath) => 
     const isExpectedFileSize = checkFileSizeAgainstFields(
       app, record, relativeFilePath, size
     );  
-    if (!isExpectedFileSize) { throw new badRequestError(`Fields for ${relativeFilePath} do not have expected size: ${join(',')(incorrectFields)}`); }  
+    if (!isExpectedFileSize) { throw new BadRequestError(`Fields for ${relativeFilePath} do not have expected size: ${join(',')(incorrectFields)}`); }  
 
   })
   .then(() => tryAwaitOrIgnore(app.datastore.deleteFile, fullFilePath))
@@ -108,7 +108,7 @@ const checkFileSizeAgainstFields = (app, record, relativeFilePath, expectedSize)
 };
 
 export const safeGetFullFilePath = (recordKey, relativeFilePath) => {
-  const naughtyUser = () => { throw new forbiddenError('naughty naughty'); };
+  const naughtyUser = () => { throw new ForbiddenError('naughty naughty'); };
 
   if (relativeFilePath.startsWith('..')) naughtyUser();
 
