@@ -11,13 +11,24 @@ const lodash_exports = ["toNumber", "flow", "isArray", "join", "replace", "trim"
 "constant", "tail", "includes", "startsWith", "findIndex", "isInteger", "isDate", "isString", "split", "clone", "keys", "isFunction", "merge", "has", "isBoolean", "isNumber", 
 "isObjectLike", "assign", "some", "each", "find", "orderBy", "union", "cloneDeep"];
 
+const globals = {
+    "lodash/fp": "fp",
+    lodash: "_",
+    lunr: "lunr",
+    "safe-buffer": "safe_buffer",
+    string_decoder: "string_decoder",
+    shortid:"shortid",
+    "@nx-js/compiler-util":"compiler_util"
+}
+
 module.exports = {
     input: 'src/index.js',
     output: [
         {
             file: 'dist/budibase-core.cjs.js',
             format: 'cjs',
-            sourcemap: 'inline'
+            sourcemap: 'inline',
+            globals
         },
         /*{
             file: 'dist/budibase-core.iife.js',
@@ -30,13 +41,15 @@ module.exports = {
         {
             file: 'dist/budibase-core.esm.mjs',
             format: 'esm',
-            sourcemap: 'inline'
+            sourcemap: 'inline',
+            globals
         },
         {
             file: 'dist/budibase-core.umd.js',
             format: 'umd',
             name: "budibase-core",
-            sourcemap: 'inline'
+            sourcemap: 'inline',
+            globals
         }
     ],
     plugins: [
@@ -48,6 +61,11 @@ module.exports = {
                 "shortid": ["generate"]
             }
         })
+    ],
+    external: [
+        "lodash", "lodash/fp", "date-fns",
+        "lunr", "safe-buffer", "shortid",
+        "string_decoder", "@nx-js/compiler-util"
     ]
   };
 

@@ -21,7 +21,7 @@ export const getAppApis = async (store, behaviourSources = null,
                                 appDefinition = null) => {
 
     store = setupDatastore(store);
-    
+
     if(!appDefinition)
         appDefinition = await getApplicationDefinition(store)();
 
