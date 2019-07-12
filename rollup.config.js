@@ -1,6 +1,7 @@
-import localResolve from "rollup-plugin-local-resolve";
+import builtins from 'rollup-plugin-node-builtins';
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
+import nodeglobals from 'rollup-plugin-node-builtins';
 
 const lodash_fp_exports = ["union", "reduce", "isUndefined", "cloneDeep", "split", "some", "map", "filter", "isEmpty", "countBy", "includes", "last", "find", "constant", 
 "take", "first", "intersection", "mapValues", "isNull", "has", "isNumber", "isString", "isBoolean", "isDate", "isArray", "isObject", "clone", "values", "keyBy", 
@@ -16,7 +17,6 @@ const globals = {
     lodash: "_",
     lunr: "lunr",
     "safe-buffer": "safe_buffer",
-    string_decoder: "string_decoder",
     shortid:"shortid",
     "@nx-js/compiler-util":"compiler_util"
 }
@@ -53,6 +53,7 @@ module.exports = {
         }
     ],
     plugins: [
+        nodeglobals(),
         resolve(),
         commonjs({
             namedExports: {
@@ -60,12 +61,13 @@ module.exports = {
                 "lodash":lodash_exports,
                 "shortid": ["generate"]
             }
-        })
+        }),
+        builtins()
     ],
     external: [
         "lodash", "lodash/fp", "date-fns",
         "lunr", "safe-buffer", "shortid",
-        "string_decoder", "@nx-js/compiler-util"
+        "@nx-js/compiler-util"
     ]
   };
 

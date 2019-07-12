@@ -15,7 +15,7 @@
   
       return new Promise((resolve, reject) => {
         if (_errored) {
-          const err = this._errored;
+          const err = _errored;
           _errored = undefined;
           return reject(err);
         }
@@ -96,7 +96,7 @@
         }
   
         const errorHandler = (err) => {
-          this._errored = undefined;
+          _errored = undefined;
           removeListeners();
           reject(err);
         }

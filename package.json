@@ -46,7 +46,9 @@
     "@babel/core": "^7.4.5",
     "@babel/plugin-transform-runtime": "^7.4.4",
     "@babel/preset-env": "^7.4.5",
+    "@babel/runtime": "^7.4.5",
     "argon2": "^0.20.1",
+    "babel-eslint": "^10.0.2",
     "babel-jest": "^23.6.0",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "cross-env": "^5.1.4",
@@ -61,10 +63,8 @@
     "rimraf": "^2.6.2",
     "rollup": "^1.12.0",
     "rollup-plugin-commonjs": "^10.0.0",
-    "rollup-plugin-local-resolve": "^1.0.7",
-    "rollup-plugin-node-resolve": "^5.0.0",
-    "@babel/runtime": "^7.4.5",
-    "babel-eslint": "^10.0.2"
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-node-resolve": "^5.0.0"
   },
   "dependencies": {
     "@nx-js/compiler-util": "^2.0.0",
@@ -72,8 +72,7 @@
     "lodash": "^4.17.11",
     "lunr": "^2.3.5",
     "safe-buffer": "^5.1.2",
-    "shortid": "^2.2.8",
-    "string_decoder": "^1.2.0"
+    "shortid": "^2.2.8"
   },
   "devEngines": {
     "node": ">=7.x",
