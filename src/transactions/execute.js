@@ -11,7 +11,7 @@ import {
 } from '../indexing/relevant';
 import { evaluate } from '../indexing/evaluate';
 import {
-  $$, $, isSomething,
+  $, isSomething,
   isNonEmptyArray, joinKey,
   isNonEmptyString,
 } from '../common';

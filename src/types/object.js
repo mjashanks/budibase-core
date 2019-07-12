@@ -3,15 +3,15 @@ import {
   clone, map, isNull, constant,
 } from 'lodash';
 import {
-  getSafeFieldParser, typeFunctions, getNewValue,
-  parsedFailed, parsedSuccess, getDefaultExport,
+  typeFunctions, parsedFailed, 
+  parsedSuccess, getDefaultExport,
 } from './typeHelpers';
 import { switchCase, defaultCase, $ } from '../common';
 
 const objectFunctions = (definition, allTypes) => typeFunctions({
   default: constant(null),
   initialise: () => $(keys(definition), [
-    map((k) => {
+    map(() => {
       const defClone = clone(definition);
       for (const k in defClone) {
         defClone[k] = allTypes[k].getNew();

@@ -77,7 +77,6 @@ const read = (readableStream, schema) => async (onGetItem, onGetText) => {
 
         if(status === READ_REMAINING_TEXT) {
             await onGetText(text);
-            hasContent = true;
             continue;
         }
 

@@ -10,6 +10,7 @@ import {
   getFlattenedHierarchy,
 } from './hierarchy';
 import { all } from '../types';
+import { BadRequestError } from '../common/errors';
 
 export const createNodeErrors = {
   indexCannotBeParent: 'Index template cannot be a parent',
@@ -18,7 +19,7 @@ export const createNodeErrors = {
   aggregateParentMustBeAnIndex: 'aggregateGroup parent must be an index',
 };
 
-const pathRegxMaker = node => () => node.nodeKey().replace(/{id}/g, '[a-zA-Z0-9_\-]+');
+const pathRegxMaker = node => () => node.nodeKey().replace(/{id}/g, '[a-zA-Z0-9_-]+');
 
 const nodeKeyMaker = node => () => switchCase(
 
@@ -43,16 +44,16 @@ const validate = parent => (node) => {
         && isSomething(parent)
         && !isRoot(parent)
         && !isRecord(parent)) {
-    throw new Error(createNodeErrors.indexParentMustBeRecordOrRoot);
+    throw new BadRequestError(createNodeErrors.indexParentMustBeRecordOrRoot);
   }
 
   if (isaggregateGroup(node)
         && isSomething(parent)
         && !isIndex(parent)) {
-    throw new Error(createNodeErrors.aggregateParentMustBeAnIndex);
+    throw new BadRequestError(createNodeErrors.aggregateParentMustBeAnIndex);
   }
 
-  if (isNothing(parent) && !isRoot(node)) { throw new Error(createNodeErrors.allNonRootNodesMustHaveParent); }
+  if (isNothing(parent) && !isRoot(node)) { throw new BadRequestError(createNodeErrors.allNonRootNodesMustHaveParent); }
 
   return node;
 };

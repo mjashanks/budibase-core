@@ -2,7 +2,7 @@ import {
   constant, isNumber, isString, isNull,
 } from 'lodash';
 import {
-  makerule, typeFunctions, getNewValue,
+  makerule, typeFunctions,
   parsedFailed, parsedSuccess, getDefaultExport,
 } from './typeHelpers';
 import {

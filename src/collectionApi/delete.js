@@ -6,7 +6,6 @@ import {
 } from '../common';
 import { _deleteRecord } from '../recordApi/delete';
 import { getAllIdsIterator, getAllIdsShardKey } from '../indexing/allIds';
-import { _deleteIndex } from '../indexApi/delete';
 import { permission } from '../authApi/permissions';
 
 export const deleteCollection = (app, disableCleanup = false) => async key => apiWrapper(

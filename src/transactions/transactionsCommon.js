@@ -1,6 +1,5 @@
-import { split } from 'lodash/fp';
 import {
-  joinKey, keySep, getHashCode, $, $$,
+  joinKey, keySep, getHashCode,
 } from '../common';
 import { getLastPartInKey } from '../templateApi/hierarchy';
 
@@ -10,7 +9,6 @@ export const LOCK_FILE_KEY = joinKey(
   TRANSACTIONS_FOLDER, LOCK_FILENAME,
 );
 export const idSep = '$';
-
 
 const isOfType = typ => trans => trans.transactionType === typ;
 
@@ -26,7 +24,8 @@ export const isBuildIndex = isOfType(BUILD_INDEX_TRANSACTION);
 
 export const keyToFolderName = nodeKey => getHashCode(nodeKey);
 
-export const getTransactionId = (recordId, transactionType, uniqueId) => `${recordId}${idSep}${transactionType}${idSep}${uniqueId}`;
+export const getTransactionId = (recordId, transactionType, uniqueId) => 
+  `${recordId}${idSep}${transactionType}${idSep}${uniqueId}`;
 
 export const buildIndexFolder = '.BUILD-';
 export const nodeKeyHashFromBuildFolder = folder => folder.replace(buildIndexFolder, '');
@@ -38,9 +37,11 @@ export const IndexNodeKeyFolder = indexNodeKey => joinKey(
   buildIndexFolder + keyToFolderName(indexNodeKey),
 );
 
-export const IndexNodeKeyBatchFolder = (indexNodeKey, count) => joinKey(IndexNodeKeyFolder(indexNodeKey), Math.floor(count / BUILDINDEX_BATCH_COUNT).toString());
+export const IndexNodeKeyBatchFolder = (indexNodeKey, count) => 
+  joinKey(IndexNodeKeyFolder(indexNodeKey), Math.floor(count / BUILDINDEX_BATCH_COUNT).toString());
 
-export const IndexShardKeyFolder = (indexNodeKey, indexShardKey) => joinKey(IndexNodeKeyFolder(indexNodeKey), indexShardKey);
+export const IndexShardKeyFolder = (indexNodeKey, indexShardKey) => 
+  joinKey(IndexNodeKeyFolder(indexNodeKey), indexShardKey);
 
 export const BUILDINDEX_BATCH_COUNT = 1000;
 export const timeoutMilliseconds = 30 * 1000; // 30 secs

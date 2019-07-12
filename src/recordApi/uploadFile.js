@@ -2,7 +2,6 @@ import {
   includes, filter,
   map, some,
 } from 'lodash/fp';
-import { join } from 'path';
 import { generate } from 'shortid';
 import { _load } from './load';
 import {
@@ -12,26 +11,25 @@ import {
 import { getExactNodeForPath } from '../templateApi/hierarchy';
 import { permission } from '../authApi/permissions';
 import { isLegalFilename } from '../types/file';
+import { BadRequestError, ForbiddenError } from '../common/errors';
 
-export const uploadFile = app => async (recordKey, readableStream, relativePath) => apiWrapper(
+export const uploadFile = app => async (recordKey, readableStream, relativeFilePath) => apiWrapper(
   app,
   events.recordApi.uploadFile,
   permission.updateRecord.isAuthorized(recordKey),
-  { recordKey, readableStream, relativePath },
-  _uploadFile, app, recordKey, readableStream, relativePath,
+  { recordKey, readableStream, relativeFilePath },
+  _uploadFile, app, recordKey, readableStream, relativeFilePath,
 );
 
-
-const _uploadFile = async (app, recordKey, readableStream, relativePath) => {
-  if (isNothing(recordKey)) { throw new Error('Record Key not supplied'); }
-  if (isNothing(relativePath)) { throw new Error('file path not supplied'); }
-  if (!isLegalFilename(relativePath)) { throw new Error('Illegal filename'); }
-
+const _uploadFile = async (app, recordKey, readableStream, relativeFilePath) => {
+  if (isNothing(recordKey)) { throw new BadRequestError('Record Key not supplied'); }
+  if (isNothing(relativeFilePath)) { throw new BadRequestError('file path not supplied'); }
+  if (!isLegalFilename(relativeFilePath)) { throw new BadRequestError('Illegal filename'); }
 
   const record = await _load(app, recordKey);
 
   const fullFilePath = safeGetFullFilePath(
-    recordKey, relativePath,
+    recordKey, relativeFilePath,
   );
 
   const tempFilePath = `${fullFilePath}_${generate()}.temp`;
@@ -48,9 +46,9 @@ const _uploadFile = async (app, recordKey, readableStream, relativePath) => {
   .then(() => app.datastore.getFileSize(tempFilePath))
   .then(size => {
     const isExpectedFileSize = checkFileSizeAgainstFields(
-      app, record, relativePath, size
+      app, record, relativeFilePath, size
     );  
-    if (!isExpectedFileSize) { throw new Error(`Fields for ${relativeFilePath} do not have expected size: ${join(',')(incorrectFields)}`); }  
+    if (!isExpectedFileSize) { throw new BadRequestError(`Fields for ${relativeFilePath} do not have expected size: ${join(',')(incorrectFields)}`); }  
 
   })
   .then(() => tryAwaitOrIgnore(app.datastore.deleteFile, fullFilePath))
@@ -63,11 +61,14 @@ const _uploadFile = async (app, recordKey, readableStream, relativePath) => {
 
   const isExpectedFileSize = checkFileSizeAgainstFields(
     app,
-    record, relativePath,
+    record, relativeFilePath,
     await app.datastore.getFileSize(tempFilePath),
   );
 
-  if (!isExpectedFileSize) { throw new Error(`Fields for ${relativeFilePath} do not have expected size: ${join(',')(incorrectFields)}`); }
+  if (!isExpectedFileSize) {
+    throw new Error(
+      `Fields for ${relativeFilePath} do not have expected size`);
+  }
 
   await tryAwaitOrIgnore(app.datastore.deleteFile, fullFilePath);
 
@@ -80,17 +81,17 @@ const checkFileSizeAgainstFields = (app, record, relativeFilePath, expectedSize)
 
   const incorrectFileFields = $(recordNode.fields, [
     filter(f => f.type === 'file'
-                    && record[f.name].relativePath === relativeFilePath
-                    && record[f.name].size !== expectedSize),
+      && record[f.name].relativePath === relativeFilePath
+      && record[f.name].size !== expectedSize),
     map(f => f.name),
   ]);
 
   const incorrectFileArrayFields = $(recordNode.fields, [
     filter(a => a.type === 'array<file>'
-                    && $(record[a.name], [
-                      some(f => record[f.name].relativePath === relativeFilePath
-                                  && record[f.name].size !== expectedSize),
-                    ])),
+      && $(record[a.name], [
+        some(f => record[f.name].relativePath === relativeFilePath
+          && record[f.name].size !== expectedSize),
+      ])),
     map(f => f.name),
   ]);
 
@@ -106,12 +107,12 @@ const checkFileSizeAgainstFields = (app, record, relativeFilePath, expectedSize)
   return true;
 };
 
-export const safeGetFullFilePath = (recordKey, relativePath) => {
-  const naughtyUser = () => { throw new Error('naughty naughty'); };
+export const safeGetFullFilePath = (recordKey, relativeFilePath) => {
+  const naughtyUser = () => { throw new ForbiddenError('naughty naughty'); };
 
-  if (relativePath.startsWith('..')) naughtyUser();
+  if (relativeFilePath.startsWith('..')) naughtyUser();
 
-  const pathParts = splitKey(relativePath);
+  const pathParts = splitKey(relativeFilePath);
 
   if (includes('..')(pathParts)) naughtyUser();
 

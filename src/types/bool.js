@@ -1,6 +1,6 @@
 import { constant, isBoolean, isNull } from 'lodash';
 import {
-  getSafeFieldParser, typeFunctions,
+  typeFunctions,
   makerule, parsedFailed, parsedSuccess,
   getDefaultExport,
 } from './typeHelpers';
@@ -15,8 +15,8 @@ const boolFunctions = typeFunctions({
 const boolTryParse = switchCase(
   [isBoolean, parsedSuccess],
   [isNull, parsedSuccess],
-  [isOneOf('true', '1', 'yes', 'on'), v => parsedSuccess(true)],
-  [isOneOf('false', '0', 'no', 'off'), v => parsedSuccess(false)],
+  [isOneOf('true', '1', 'yes', 'on'), () => parsedSuccess(true)],
+  [isOneOf('false', '0', 'no', 'off'), () => parsedSuccess(false)],
   [defaultCase, parsedFailed],
 );
 
@@ -31,7 +31,7 @@ const options = {
 
 const typeConstraints = [
   makerule(async (val, opts) => opts.allowNulls === true || val !== null,
-    (val, opts) => 'field cannot be null'),
+    () => 'field cannot be null'),
 ];
 
 export default getDefaultExport(

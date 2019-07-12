@@ -1,7 +1,6 @@
-import { map, flatten, filter } from 'lodash/fp';
 import {
-  safeKey, apiWrapper, isSomething,
-  events, joinKey, $,
+  safeKey, apiWrapper,
+  events, joinKey,
 } from '../common';
 import { _load, getRecordFileName } from './load';
 import { _deleteCollection } from '../collectionApi/delete';
@@ -31,14 +30,12 @@ export const _deleteRecord = async (app, key, disableCleanup) => {
   const record = await _load(app, key);
   await transactionForDeleteRecord(app, record);
 
-
   for (const collectionRecord of node.children) {
     const collectionKey = joinKey(
       key, collectionRecord.collectionName,
     );
     await _deleteCollection(app, collectionKey, true);
   }
-
 
   await app.datastore.deleteFile(
     getRecordFileName(key),
@@ -75,6 +72,7 @@ const deleteIndexes = async (app, key) => {
     for(let i of reverseIndexKeys) {
         await _deleteIndex(app, i, true);
     } */
+
 
   for (const index of node.indexes) {
     const indexKey = joinKey(key, index.name);

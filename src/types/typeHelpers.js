@@ -1,10 +1,9 @@
 import { merge, has } from 'lodash';
 import {
-  constant, isUndefined, keys,
-  map, filter, reduce, mapValues,
-  isNull, cloneDeep,
+  constant, isUndefined, 
+  mapValues, cloneDeep,
 } from 'lodash/fp';
-import { $, isNotEmpty } from '../common';
+import { isNotEmpty } from '../common';
 
 export const getSafeFieldParser = (tryParse, defaultValueFunctions) => (field, record) => {
   if (has(record, field.name)) {

@@ -27,7 +27,7 @@ export const commonRecordValidationRules = ({
     `record['${fieldName}'] >= ${getStaticValue(min)} &&  record['${fieldName}'] <= ${getStaticValue(max)} `,
   ),
 
-  fieldGreaterThan: (fieldName, min) => getNewRecordValidationRule(
+  fieldGreaterThan: (fieldName, min, max) => getNewRecordValidationRule(
     [fieldName],
     `${fieldName} must be greater than ${min.toString()} and ${max.toString()}`,
     `record['${fieldName}'] >= ${getStaticValue(min)}  `,
