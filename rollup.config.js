@@ -1,7 +1,7 @@
 import builtins from 'rollup-plugin-node-builtins';
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
-import nodeglobals from 'rollup-plugin-node-builtins';
+import nodeglobals from 'rollup-plugin-node-globals';
 
 const lodash_fp_exports = ["union", "reduce", "isUndefined", "cloneDeep", "split", "some", "map", "filter", "isEmpty", "countBy", "includes", "last", "find", "constant", 
 "take", "first", "intersection", "mapValues", "isNull", "has", "isNumber", "isString", "isBoolean", "isDate", "isArray", "isObject", "clone", "values", "keyBy", 
@@ -54,15 +54,17 @@ module.exports = {
     ],
     plugins: [
         nodeglobals(),
-        resolve(),
+        builtins(),
+        resolve({
+            preferBuiltins:true
+        }),
         commonjs({
             namedExports: {
                 "lodash/fp": lodash_fp_exports,
                 "lodash":lodash_exports,
                 "shortid": ["generate"]
             }
-        }),
-        builtins()
+        })
     ],
     external: [
         "lodash", "lodash/fp", "date-fns",
